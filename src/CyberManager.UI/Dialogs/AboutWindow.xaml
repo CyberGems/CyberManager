@@ -1,0 +1,109 @@
+<Window x:Class="CyberManager.UI.Dialogs.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About — CyberManager" Height="540" Width="680" MinHeight="480" MinWidth="580"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType" FontFamily="Segoe UI Variable Text, Segoe UI, sans-serif">
+    <Window.Resources>
+        <Style x:Key="AboutFooterIconButton" TargetType="Border">
+            <Setter Property="Width" Value="30"/><Setter Property="Height" Value="30"/><Setter Property="CornerRadius" Value="6"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="{DynamicResource CardSecondaryBrush}"/></Trigger></Style.Triggers>
+        </Style>
+        <Style x:Key="TitleCloseButton" TargetType="Button">
+            <Setter Property="Width" Value="38"/><Setter Property="Height" Value="32"/><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="#E81123"/><Setter Property="Foreground" Value="White"/></Trigger></ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource CardBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Padding" Value="14,6"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/><Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/></Trigger></ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Border Margin="5" CornerRadius="12">
+        <Border x:Name="OuterBorder" CornerRadius="12" ClipToBounds="True" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Background="{DynamicResource BgBrush}" RenderTransformOrigin="0.5,0.5">
+            <Border.RenderTransform><TransformGroup><ScaleTransform x:Name="WindowScale" ScaleX="1" ScaleY="1"/></TransformGroup></Border.RenderTransform>
+            <Border.Effect><DropShadowEffect x:Name="WindowGlow" Color="#00E5FF" Opacity="0" BlurRadius="20" ShadowDepth="0"/></Border.Effect>
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" CornerRadius="11,11,0,0" Padding="18,10" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="◈" Foreground="{DynamicResource AccentBrush}" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="Acerca de — CyberManager" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button Content="✕" Style="{StaticResource TitleCloseButton}" HorizontalAlignment="Right" Click="Close_Click"/>
+                    </Grid>
+                </Border>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,18">
+                    <StackPanel>
+                        <Grid Margin="0,4,0,22">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Width="52" Height="52" CornerRadius="12" Background="{DynamicResource AccentBrush}" Margin="0,0,16,0">
+                                    <TextBlock Text="◈" Foreground="{DynamicResource AccentFgBrush}" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock FontSize="28" FontWeight="Bold" FontFamily="Segoe UI Variable Display">
+                                        <Run Text="Cyber" Foreground="{DynamicResource TextBrush}"/><Run Text="Manager" Foreground="{DynamicResource AccentBrush}"/>
+                                    </TextBlock>
+                                    <TextBlock x:Name="VersionText" Text="Versión v1.0.0" FontSize="13" Foreground="{DynamicResource SubTextBrush}" Margin="0,3,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Border Grid.Column="1" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20,16" Margin="28,0,0,0" VerticalAlignment="Center">
+                                <TextBlock FontSize="12.5" Foreground="{DynamicResource TextBrush}" Opacity="0.85" LineHeight="22" TextWrapping="Wrap"
+                                           Text="CyberManager es un gestor de tareas ultra-ligero, virtualizado y sin lag para 3000+ procesos. Motor NT nativo, búsqueda instantánea y UI premium CyberGems — la alternativa fluida al Task Manager de Windows."/>
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="Actualizaciones y Mantenimiento" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" FontSize="13.5" Margin="0,0,0,8"/>
+                        <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="18,14">
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                    <TextBlock Text="⬢" Foreground="{DynamicResource AccentBrush}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Buscar actualizaciones" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
+                                    <TextBlock x:Name="UpdateStatusText" Text="Estás al día con la versión v1.0.0" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <Button x:Name="UpdateBtn" Grid.Column="2" Content="Comprobar ahora" Style="{StaticResource ModernButton}" MinWidth="130" Height="34" Click="UpdateCheck_Click"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+                <Border Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,11,11" Padding="20,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="© CyberGems • 2026" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Cursor="Hand" ToolTip="cybergems.org" MouseLeftButtonUp="Website_Click"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource AboutFooterIconButton}" ToolTip="cybergems.org" MouseLeftButtonUp="Website_Click">
+                                <TextBlock Text="◉" Foreground="{DynamicResource SubTextBrush}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Style="{StaticResource AboutFooterIconButton}" ToolTip="GitHub" MouseLeftButtonUp="Github_Click" Margin="4,0,0,0">
+                                <TextBlock Text="⬡" Foreground="{DynamicResource SubTextBrush}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Style="{StaticResource AboutFooterIconButton}" ToolTip="Issues" MouseLeftButtonUp="Issues_Click" Margin="4,0,0,0">
+                                <TextBlock Text="◎" Foreground="{DynamicResource SubTextBrush}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Border Style="{StaticResource AboutFooterIconButton}" ToolTip="Releases" MouseLeftButtonUp="Releases_Click" Margin="4,0,0,0">
+                                <TextBlock Text="⬔" Foreground="{DynamicResource SubTextBrush}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Border>
+</Window>

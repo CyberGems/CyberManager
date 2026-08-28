@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CyberManager.Common/CyberManager.Common.csproj" />
+    <Project Path="src/CyberManager.Core/CyberManager.Core.csproj" />
+    <Project Path="src/CyberManager.UI/CyberManager.UI.csproj" />
+  </Folder>
+</Solution>

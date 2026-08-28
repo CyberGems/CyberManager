@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Company>CyberGems</Company>
+    <Product>CyberManager</Product>
+    <NuGetAudit>false</NuGetAudit>
+    <SatelliteResourceLanguages>en;es</SatelliteResourceLanguages>
+  </PropertyGroup>
+</Project>
