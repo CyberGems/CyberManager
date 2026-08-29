@@ -12,6 +12,10 @@
         <conv:ParentFontWeightConverter x:Key="ParentFontWeightConverter"/>
         <conv:WorkerBadgeVisibilityConverter x:Key="WorkerBadgeVisibilityConverter"/>
         <conv:PathToIconConverter x:Key="PathToIconConverter"/>
+        <conv:CpuHeatmapBrushConverter x:Key="CpuHeatmapBrushConverter"/>
+        <conv:MemoryHeatmapBrushConverter x:Key="MemoryHeatmapBrushConverter"/>
+        <conv:HighCpuWeightConverter x:Key="HighCpuWeightConverter"/>
+        <conv:HighMemoryWeightConverter x:Key="HighMemoryWeightConverter"/>
 
         <Style x:Key="TitleBtn" TargetType="Button">
             <Setter Property="Width" Value="42"/><Setter Property="Height" Value="32"/>
@@ -326,8 +330,30 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80" SortMemberPath="Pid"/>
-                                <DataGridTextColumn Header="CPU %" Binding="{Binding CpuFormatted}" Width="80" SortMemberPath="CpuPercent" SortDirection="Descending"/>
-                                <DataGridTextColumn Header="Memory" Binding="{Binding MemoryFormatted}" Width="100" SortMemberPath="WorkingSetBytes"/>
+                                <DataGridTemplateColumn Header="CPU %" Width="85" SortMemberPath="CpuPercent" SortDirection="Descending">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{Binding CpuPercent, Converter={StaticResource CpuHeatmapBrushConverter}}"
+                                                    CornerRadius="4" Margin="1,1" Padding="8,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                <TextBlock Text="{Binding CpuFormatted}" Foreground="{DynamicResource TextBrush}"
+                                                           FontWeight="{Binding CpuPercent, Converter={StaticResource HighCpuWeightConverter}}"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Memory" Width="105" SortMemberPath="WorkingSetBytes">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{Binding WorkingSetBytes, Converter={StaticResource MemoryHeatmapBrushConverter}}"
+                                                    CornerRadius="4" Margin="1,1" Padding="8,2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                <TextBlock Text="{Binding MemoryFormatted}" Foreground="{DynamicResource TextBrush}"
+                                                           FontWeight="{Binding WorkingSetBytes, Converter={StaticResource HighMemoryWeightConverter}}"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="Threads" Binding="{Binding ThreadCount}" Width="70" SortMemberPath="ThreadCount"/>
                                 <DataGridTextColumn Header="Priority" Binding="{Binding PriorityFormatted}" Width="90" SortMemberPath="Priority"/>
                                 <DataGridTextColumn Header="Path" Binding="{Binding ExePath}" Width="*" SortMemberPath="ExePath"/>

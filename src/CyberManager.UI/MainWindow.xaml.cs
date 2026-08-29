@@ -20,6 +20,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _timer = new();
     private readonly DispatcherTimer _searchDebounceTimer = new();
     private readonly HashSet<string> _expandedGroups = new(StringComparer.OrdinalIgnoreCase);
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<int, DateTime> _terminatedPids = new();
     private List<ProcessInfo> _all = new();
     private List<ProcessInfo> _view = new();
     private string _pendingSearch = "";
@@ -111,8 +112,14 @@ public partial class MainWindow : Window
                 FooterText.Text = "Collecting...";
             }
 
+            var now = DateTime.UtcNow;
+            foreach (var kv in _terminatedPids)
+            {
+                if (kv.Value < now) _terminatedPids.TryRemove(kv.Key, out _);
+            }
+
             var data = await _collector.CollectAsync();
-            _all = data.ToList();
+            _all = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
             ApplySortingAndFilter();
 
             var totalCpu = _all.Sum(x => x.CpuPercent);
@@ -407,20 +414,40 @@ public partial class MainWindow : Window
             var msg = Strings.T("KillGroupConfirm", s.InstanceCount, s.Name);
             if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), msg, s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true))
             {
-                foreach (var c in s.Children)
+                var pidsToKill = s.Children.Select(c => c.Pid).ToList();
+                if (!pidsToKill.Contains(s.Pid)) pidsToKill.Add(s.Pid);
+                var exp = DateTime.UtcNow.AddSeconds(5);
+                foreach (var pid in pidsToKill) _terminatedPids[pid] = exp;
+
+                // Instant Optimistic UI Pruning (0ms latency visual feedback)
+                _all.RemoveAll(x => pidsToKill.Contains(x.Pid) || (x.Name.Equals(s.Name, StringComparison.OrdinalIgnoreCase) && x.IsGroupChild));
+                ApplySortingAndFilter();
+
+                Task.Run(() =>
                 {
-                    ProcessActions.Kill(c.Pid);
-                }
-                ProcessActions.KillTree(s.Pid);
-                _ = RefreshAsync();
+                    foreach (var pid in pidsToKill)
+                    {
+                        ProcessActions.Kill(pid);
+                    }
+                    ProcessActions.KillTree(s.Pid);
+                });
             }
             return;
         }
 
         if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), Strings.T("KillConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true))
         {
-            ProcessActions.Kill(s.Pid);
-            _ = RefreshAsync();
+            int pidToKill = s.Pid;
+            _terminatedPids[pidToKill] = DateTime.UtcNow.AddSeconds(5);
+
+            // Instant Optimistic UI Pruning
+            _all.RemoveAll(x => x.Pid == pidToKill);
+            ApplySortingAndFilter();
+
+            Task.Run(() =>
+            {
+                ProcessActions.Kill(pidToKill);
+            });
         }
     }
 
@@ -430,8 +457,20 @@ public partial class MainWindow : Window
         if (s == null) return;
         if (ConfirmDialog.ShowProcess(this, Strings.T("KillTree"), Strings.T("KillTreeConfirm", s.Name), s.ExePath, Strings.T("KillTree"), Strings.T("Cancel"), isDanger: true))
         {
-            ProcessActions.KillTree(s.Pid);
-            _ = RefreshAsync();
+            int rootPid = s.Pid;
+            var pidsToKill = s.IsGroupParent && s.Children.Count > 0 ? s.Children.Select(c => c.Pid).ToList() : new List<int> { rootPid };
+            if (!pidsToKill.Contains(rootPid)) pidsToKill.Add(rootPid);
+            var exp = DateTime.UtcNow.AddSeconds(5);
+            foreach (var pid in pidsToKill) _terminatedPids[pid] = exp;
+
+            // Instant Optimistic UI Pruning
+            _all.RemoveAll(x => pidsToKill.Contains(x.Pid) || (x.Name.Equals(s.Name, StringComparison.OrdinalIgnoreCase) && x.IsGroupChild));
+            ApplySortingAndFilter();
+
+            Task.Run(() =>
+            {
+                ProcessActions.KillTree(rootPid);
+            });
         }
     }
 

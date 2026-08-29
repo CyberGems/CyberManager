@@ -22,12 +22,40 @@ public static class ProcessActions
 
     public static bool Kill(int pid)
     {
-        try { using var p = Process.GetProcessById(pid); p.Kill(entireProcessTree: false); return true; } catch { return false; }
+        try
+        {
+            var h = OpenProcess(0x0001 /* PROCESS_TERMINATE */, false, pid);
+            if (h != IntPtr.Zero)
+            {
+                try
+                {
+                    if (TerminateProcess(h, 1)) return true;
+                }
+                finally
+                {
+                    CloseHandle(h);
+                }
+            }
+
+            using var p = Process.GetProcessById(pid);
+            p.Kill(entireProcessTree: false);
+            return true;
+        }
+        catch { return false; }
     }
 
     public static bool KillTree(int pid)
     {
-        try { using var p = Process.GetProcessById(pid); p.Kill(entireProcessTree: true); return true; } catch { return false; }
+        try
+        {
+            using var p = Process.GetProcessById(pid);
+            p.Kill(entireProcessTree: true);
+            return true;
+        }
+        catch
+        {
+            return Kill(pid);
+        }
     }
 
     public static bool Suspend(int pid)
@@ -91,6 +119,7 @@ public static class ProcessActions
     [DllImport("ntdll.dll")] private static extern int NtSuspendProcess(IntPtr h);
     [DllImport("ntdll.dll")] private static extern int NtResumeProcess(IntPtr h);
     [DllImport("kernel32.dll")] private static extern IntPtr OpenProcess(int acc, bool inh, int pid);
+    [DllImport("kernel32.dll", SetLastError = true)] private static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
     [DllImport("kernel32.dll", SetLastError = true)] private static extern bool SetPriorityClass(IntPtr handle, uint priorityClass);
     [DllImport("kernel32.dll")] private static extern bool CloseHandle(IntPtr h);
 }
