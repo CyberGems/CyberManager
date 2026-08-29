@@ -238,15 +238,18 @@
                                         <DataTemplate>
                                             <Grid VerticalAlignment="Center" Margin="{Binding IsGroupChild, Converter={StaticResource ChildIndentMarginConverter}}">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
+                                                    <!-- Fixed 20px Slot for Expander / Hierarchy -->
+                                                    <ColumnDefinition Width="20"/>
+                                                    <!-- Fixed 22px Slot for Process Icon -->
+                                                    <ColumnDefinition Width="22"/>
+                                                    <!-- Process Name -->
                                                     <ColumnDefinition Width="*"/>
+                                                    <!-- Badges -->
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Chevron button for Group Parents -->
-                                                <Border Grid.Column="0" Width="18" Height="18" VerticalAlignment="Center" Margin="0,0,2,0"
+                                                <Border Grid.Column="0" Width="18" Height="18" VerticalAlignment="Center" HorizontalAlignment="Center"
                                                         Visibility="{Binding IsGroupParent, Converter={StaticResource BoolToVisConverter}}"
                                                         Cursor="Hand" Background="Transparent" MouseLeftButtonDown="GroupChevron_MouseDown">
                                                     <TextBlock Text="{Binding IsExpanded, Converter={StaticResource ExpandedChevronConverter}}"
@@ -255,50 +258,47 @@
                                                 </Border>
 
                                                 <!-- Tree hierarchy indicator for Child -->
-                                                <TextBlock Grid.Column="0" Text="↳ " Foreground="{DynamicResource SubTextBrush}" FontSize="11" Margin="2,0,4,0" VerticalAlignment="Center"
+                                                <TextBlock Grid.Column="0" Text="↳" Foreground="{DynamicResource SubTextBrush}" FontSize="11"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
                                                            Visibility="{Binding IsGroupChild, Converter={StaticResource BoolToVisConverter}}"/>
 
-                                                <!-- Process Native Icon with high-quality scaling -->
-                                                <Image Grid.Column="1" Source="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"
-                                                       Width="16" Height="16" Margin="2,0,6,0" VerticalAlignment="Center"
-                                                       RenderOptions.BitmapScalingMode="HighQuality">
-                                                    <Image.Style>
-                                                        <Style TargetType="Image">
-                                                            <Style.Triggers>
-                                                                <Trigger Property="Source" Value="{x:Null}">
-                                                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Image.Style>
-                                                </Image>
-
-                                                <!-- Diamond icon fallback for standalone / system processes without native icon -->
-                                                <TextBlock Grid.Column="2" Text="◈ " Foreground="{DynamicResource SubTextBrush}" FontSize="10" Margin="2,0,4,0" VerticalAlignment="Center">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <MultiDataTrigger>
-                                                                    <MultiDataTrigger.Conditions>
-                                                                        <Condition Binding="{Binding IsGroupParent}" Value="False"/>
-                                                                        <Condition Binding="{Binding IsGroupChild}" Value="False"/>
-                                                                        <Condition Binding="{Binding ExePath}" Value=""/>
-                                                                    </MultiDataTrigger.Conditions>
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </MultiDataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                                <!-- Process Icon Slot with fallback to diamond -->
+                                                <Grid Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Image x:Name="ProcIcon" Source="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"
+                                                           Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           RenderOptions.BitmapScalingMode="HighQuality">
+                                                        <Image.Style>
+                                                            <Style TargetType="Image">
+                                                                <Style.Triggers>
+                                                                    <Trigger Property="Source" Value="{x:Null}">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </Trigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Image.Style>
+                                                    </Image>
+                                                    <TextBlock Text="◈" Foreground="{DynamicResource SubTextBrush}" FontSize="10"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ElementName=ProcIcon, Path=Visibility}" Value="Collapsed">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Grid>
 
                                                 <!-- Process Name -->
-                                                <TextBlock Grid.Column="3" Text="{Binding Name}" Foreground="{DynamicResource TextBrush}"
+                                                <TextBlock Grid.Column="2" Text="{Binding Name}" Foreground="{DynamicResource TextBrush}"
                                                            FontWeight="{Binding IsGroupParent, Converter={StaticResource ParentFontWeightConverter}}"
-                                                           VerticalAlignment="Center"/>
+                                                           VerticalAlignment="Center" Margin="3,0,0,0" TextTrimming="CharacterEllipsis"/>
 
                                                 <!-- Badges -->
-                                                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,8,0">
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,8,0">
                                                     <!-- Instance Count Badge for Group Parent -->
                                                     <Border Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                                             CornerRadius="4" Padding="5,1" Margin="0,0,4,0" VerticalAlignment="Center"

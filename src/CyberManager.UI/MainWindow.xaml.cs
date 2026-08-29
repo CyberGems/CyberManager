@@ -405,7 +405,7 @@ public partial class MainWindow : Window
         if (s.IsGroupParent && s.InstanceCount > 1)
         {
             var msg = Strings.T("KillGroupConfirm", s.InstanceCount, s.Name);
-            if (MessageBox.Show(msg, "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), msg, s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true))
             {
                 foreach (var c in s.Children)
                 {
@@ -417,7 +417,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (MessageBox.Show(Strings.T("KillConfirm", s.Name, s.Pid), "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), Strings.T("KillConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true))
         {
             ProcessActions.Kill(s.Pid);
             _ = RefreshAsync();
@@ -428,7 +428,7 @@ public partial class MainWindow : Window
     {
         var s = Selected;
         if (s == null) return;
-        if (MessageBox.Show(Strings.T("KillTreeConfirm", s.Name), "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (ConfirmDialog.ShowProcess(this, Strings.T("KillTree"), Strings.T("KillTreeConfirm", s.Name), s.ExePath, Strings.T("KillTree"), Strings.T("Cancel"), isDanger: true))
         {
             ProcessActions.KillTree(s.Pid);
             _ = RefreshAsync();
@@ -443,7 +443,7 @@ public partial class MainWindow : Window
         if (s.IsGroupParent && s.InstanceCount > 1)
         {
             var msg = Strings.T("SuspendGroupConfirm", s.InstanceCount, s.Name);
-            if (MessageBox.Show(msg, "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (ConfirmDialog.ShowProcess(this, Strings.T("Suspend"), msg, s.ExePath, Strings.T("Suspend"), Strings.T("Cancel"), isDanger: false))
             {
                 foreach (var c in s.Children)
                 {
@@ -456,7 +456,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (MessageBox.Show(Strings.T("SuspendConfirm", s.Name, s.Pid), "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (ConfirmDialog.ShowProcess(this, Strings.T("Suspend"), Strings.T("SuspendConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Suspend"), Strings.T("Cancel"), isDanger: false))
         {
             if (ProcessActions.Suspend(s.Pid))
             {
@@ -474,7 +474,7 @@ public partial class MainWindow : Window
         if (s.IsGroupParent && s.InstanceCount > 1)
         {
             var msg = Strings.T("ResumeGroupConfirm", s.InstanceCount, s.Name);
-            if (MessageBox.Show(msg, "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            if (ConfirmDialog.ShowProcess(this, Strings.T("Resume"), msg, s.ExePath, Strings.T("Resume"), Strings.T("Cancel"), isDanger: false))
             {
                 foreach (var c in s.Children)
                 {
@@ -487,7 +487,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (MessageBox.Show(Strings.T("ResumeConfirm", s.Name, s.Pid), "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (ConfirmDialog.ShowProcess(this, Strings.T("Resume"), Strings.T("ResumeConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Resume"), Strings.T("Cancel"), isDanger: false))
         {
             if (ProcessActions.Resume(s.Pid))
             {
@@ -539,7 +539,7 @@ public partial class MainWindow : Window
             ProcGrid.Items.Refresh();
             if (anyFailed)
             {
-                MessageBox.Show(Strings.T("ElevationRequired"), Strings.T("ConfirmAction"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                ConfirmDialog.Show(this, Strings.T("ConfirmAction"), Strings.T("ElevationRequired"), Strings.T("Ok"), null, ConfirmIconType.Warning);
             }
             return;
         }
@@ -553,7 +553,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            MessageBox.Show(Strings.T("ElevationRequired"), Strings.T("ConfirmAction"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            ConfirmDialog.Show(this, Strings.T("ConfirmAction"), Strings.T("ElevationRequired"), Strings.T("Ok"), null, ConfirmIconType.Warning);
         }
     }
 
