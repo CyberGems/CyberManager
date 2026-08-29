@@ -199,7 +199,8 @@
                                   EnableRowVirtualization="True" EnableColumnVirtualization="True"
                                   VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                                   VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.CanContentScroll="True"
-                                  SelectionMode="Single" SelectionUnit="FullRow">
+                                  SelectionMode="Single" SelectionUnit="FullRow"
+                                  Sorting="ProcGrid_Sorting">
                             <DataGrid.ContextMenu>
                                 <ContextMenu Style="{StaticResource ModernContextMenu}">
                                     <MenuItem Header="End Task" Style="{StaticResource ModernMenuItem}" Click="Kill_Click"/>
@@ -223,7 +224,7 @@
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Process" Binding="{Binding Name}" Width="220" SortMemberPath="Name"/>
                                 <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80" SortMemberPath="Pid"/>
-                                <DataGridTextColumn Header="CPU %" Binding="{Binding CpuFormatted}" Width="80" SortMemberPath="CpuPercent"/>
+                                <DataGridTextColumn Header="CPU %" Binding="{Binding CpuFormatted}" Width="80" SortMemberPath="CpuPercent" SortDirection="Descending"/>
                                 <DataGridTextColumn Header="Memory" Binding="{Binding MemoryFormatted}" Width="100" SortMemberPath="WorkingSetBytes"/>
                                 <DataGridTextColumn Header="Threads" Binding="{Binding ThreadCount}" Width="70" SortMemberPath="ThreadCount"/>
                                 <DataGridTextColumn Header="Priority" Binding="{Binding PriorityFormatted}" Width="90" SortMemberPath="Priority"/>

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,6 +24,9 @@ public partial class MainWindow : Window
     private bool _isRefreshing;
     private DateTime _lastSettingsSave = DateTime.MinValue;
 
+    private string _sortColumn = "CpuPercent";
+    private ListSortDirection _sortDirection = ListSortDirection.Descending;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -32,7 +36,7 @@ public partial class MainWindow : Window
         _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
         _timer.Tick += (_, _) => _ = RefreshAsync();
         _searchDebounceTimer.Interval = TimeSpan.FromMilliseconds(150);
-        _searchDebounceTimer.Tick += (_, _) => { _searchDebounceTimer.Stop(); ApplyFilter(); };
+        _searchDebounceTimer.Tick += (_, _) => { _searchDebounceTimer.Stop(); ApplySortingAndFilter(); };
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -102,23 +106,12 @@ public partial class MainWindow : Window
             }
 
             var data = await _collector.CollectAsync();
-
-            var sorted = data
-                .OrderByDescending(x => x.CpuPercent)
-                .ThenBy(x => x.Name)
-                .ToList();
-
-            _all = sorted;
-            ApplyFilter();
+            _all = data.ToList();
+            ApplySortingAndFilter();
 
             var totalCpu = _all.Sum(x => x.CpuPercent);
             var totalMem = _all.Sum(x => (double)x.WorkingSetBytes) / (1024.0 * 1024.0 * 1024.0);
             StatsText.Text = $"{_all.Count} {Strings.T("ProcessesCount", _all.Count).Split(' ')[0]}  •  {Strings.T("CpuTotal", totalCpu)}  •  {Strings.T("MemTotal", totalMem)}";
-            
-            if (string.IsNullOrEmpty(_pendingSearch))
-            {
-                FooterText.Text = $"{_view.Count} {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
-            }
         }
         catch (Exception ex)
         {
@@ -131,26 +124,81 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ApplyFilter()
+    private void ProcGrid_Sorting(object sender, DataGridSortingEventArgs e)
+    {
+        e.Handled = true;
+        var sortMember = e.Column.SortMemberPath;
+        if (string.IsNullOrEmpty(sortMember)) return;
+
+        ListSortDirection newDirection;
+        if (_sortColumn == sortMember)
+        {
+            newDirection = _sortDirection == ListSortDirection.Ascending
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+        }
+        else
+        {
+            newDirection = (sortMember is "CpuPercent" or "WorkingSetBytes" or "ThreadCount")
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+        }
+
+        _sortColumn = sortMember;
+        _sortDirection = newDirection;
+
+        foreach (var col in ProcGrid.Columns)
+        {
+            col.SortDirection = col.SortMemberPath == sortMember ? newDirection : null;
+        }
+
+        ApplySortingAndFilter();
+    }
+
+    private void ApplySortingAndFilter()
     {
         var q = _pendingSearch.Trim();
         SearchHint.Visibility = string.IsNullOrEmpty(q) ? Visibility.Visible : Visibility.Collapsed;
         ClearBtn.Visibility = string.IsNullOrEmpty(q) ? Visibility.Collapsed : Visibility.Visible;
 
+        IEnumerable<ProcessInfo> filtered;
         if (string.IsNullOrEmpty(q))
         {
-            _view = _all;
+            filtered = _all;
         }
         else
         {
             bool isPid = int.TryParse(q, out var pid);
-            _view = _all.Where(x =>
+            filtered = _all.Where(x =>
                 x.Name.Contains(q, StringComparison.OrdinalIgnoreCase) ||
                 x.ExePath.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                (isPid && x.Pid == pid)).ToList();
+                (isPid && x.Pid == pid));
         }
 
+        bool asc = _sortDirection == ListSortDirection.Ascending;
+        _view = (_sortColumn switch
+        {
+            "Name" => asc ? filtered.OrderBy(x => x.Name).ThenBy(x => x.Pid) : filtered.OrderByDescending(x => x.Name).ThenBy(x => x.Pid),
+            "Pid" => asc ? filtered.OrderBy(x => x.Pid) : filtered.OrderByDescending(x => x.Pid),
+            "CpuPercent" => asc ? filtered.OrderBy(x => x.CpuPercent).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.CpuPercent).ThenBy(x => x.Name),
+            "WorkingSetBytes" => asc ? filtered.OrderBy(x => x.WorkingSetBytes).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.WorkingSetBytes).ThenBy(x => x.Name),
+            "ThreadCount" => asc ? filtered.OrderBy(x => x.ThreadCount).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.ThreadCount).ThenBy(x => x.Name),
+            "Priority" => asc ? filtered.OrderBy(x => x.Priority).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.Priority).ThenBy(x => x.Name),
+            "ExePath" => asc ? filtered.OrderBy(x => x.ExePath).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.ExePath).ThenBy(x => x.Name),
+            _ => filtered.OrderByDescending(x => x.CpuPercent).ThenBy(x => x.Name)
+        }).ToList();
+
+        var prevSelectedPid = Selected?.Pid;
         ProcGrid.ItemsSource = _view;
+        if (prevSelectedPid.HasValue)
+        {
+            var matched = _view.FirstOrDefault(x => x.Pid == prevSelectedPid.Value);
+            if (matched != null)
+            {
+                ProcGrid.SelectedItem = matched;
+            }
+        }
+
         EmptyStateText.Visibility = _view.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ProcGrid.Visibility = _view.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
 
@@ -192,7 +240,7 @@ public partial class MainWindow : Window
     {
         SearchBox.Clear();
         _pendingSearch = "";
-        ApplyFilter();
+        ApplySortingAndFilter();
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => _ = RefreshAsync();
@@ -358,6 +406,11 @@ public partial class MainWindow : Window
                 ProcGrid.Columns[4].Header = Strings.T("Threads");
                 ProcGrid.Columns[5].Header = Strings.T("Priority");
                 ProcGrid.Columns[6].Header = Strings.T("Path");
+
+                foreach (var c in ProcGrid.Columns)
+                {
+                    c.SortDirection = c.SortMemberPath == _sortColumn ? _sortDirection : null;
+                }
             }
 
             if (ProcGrid.ContextMenu is { } cm && cm.Items.Count >= 10)
