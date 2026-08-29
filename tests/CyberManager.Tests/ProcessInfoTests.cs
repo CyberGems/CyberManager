@@ -63,4 +63,34 @@ public class ProcessInfoTests
         var info = new ProcessInfo();
         Assert.Equal("", info.Name);
     }
+
+    [Fact]
+    public void DisplayName_SingleInstance_ReturnsName()
+    {
+        var info = new ProcessInfo { Name = "Antigravity IDE", InstanceCount = 1, IsGroupParent = false };
+        Assert.Equal("Antigravity IDE", info.DisplayName);
+    }
+
+    [Fact]
+    public void DisplayName_GroupParent_ReturnsNameWithCount()
+    {
+        var info = new ProcessInfo { Name = "Antigravity IDE", InstanceCount = 12, IsGroupParent = true };
+        Assert.Equal("Antigravity IDE (12)", info.DisplayName);
+    }
+
+    [Fact]
+    public void RoleBadge_WithWindow_ReturnsUI()
+    {
+        var info = new ProcessInfo { MainWindowTitle = "Main Editor - CyberManager" };
+        Assert.True(info.HasWindow);
+        Assert.Equal("UI", info.RoleBadge);
+    }
+
+    [Fact]
+    public void RoleBadge_ChildWithoutWindow_ReturnsWorker()
+    {
+        var info = new ProcessInfo { MainWindowTitle = "", IsGroupChild = true };
+        Assert.False(info.HasWindow);
+        Assert.Equal("Worker", info.RoleBadge);
+    }
 }

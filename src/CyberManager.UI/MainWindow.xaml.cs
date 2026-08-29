@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
 using CyberManager.Common.Models;
@@ -18,6 +19,7 @@ public partial class MainWindow : Window
     private readonly ProcessCollector _collector = new();
     private readonly DispatcherTimer _timer = new();
     private readonly DispatcherTimer _searchDebounceTimer = new();
+    private readonly HashSet<string> _expandedGroups = new(StringComparer.OrdinalIgnoreCase);
     private List<ProcessInfo> _all = new();
     private List<ProcessInfo> _view = new();
     private string _pendingSearch = "";
@@ -60,6 +62,7 @@ public partial class MainWindow : Window
 
             ApplyLanguage();
             ApplyTheme();
+            UpdateGroupToggleButton();
             Topmost = App.Settings.AlwaysOnTop;
             TopmostCheck.IsChecked = Topmost;
             FooterText.Text = Strings.T("Ready");
@@ -124,6 +127,47 @@ public partial class MainWindow : Window
         }
     }
 
+    private void GroupToggle_Click(object sender, RoutedEventArgs e)
+    {
+        App.Settings.GroupProcesses = !App.Settings.GroupProcesses;
+        UpdateGroupToggleButton();
+        ApplySortingAndFilter();
+        ThrottledSaveSettings();
+    }
+
+    private void UpdateGroupToggleButton()
+    {
+        if (App.Settings.GroupProcesses)
+        {
+            GroupToggleText.Text = $"🗂️  {Strings.T("GroupByApp")}";
+            GroupToggleBtn.ToolTip = $"{Strings.T("GroupByApp")} (On)";
+            GroupToggleBtn.BorderBrush = TryFindResource("AccentBrush") as Brush ?? Brushes.Cyan;
+        }
+        else
+        {
+            GroupToggleText.Text = $"📄  {Strings.T("Ungroup")}";
+            GroupToggleBtn.ToolTip = $"{Strings.T("Ungroup")} (Off)";
+            GroupToggleBtn.BorderBrush = TryFindResource("BorderBrush") as Brush ?? Brushes.Gray;
+        }
+    }
+
+    private void GroupChevron_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is FrameworkElement fe && fe.DataContext is ProcessInfo p && p.IsGroupParent)
+        {
+            if (_expandedGroups.Contains(p.Name))
+            {
+                _expandedGroups.Remove(p.Name);
+            }
+            else
+            {
+                _expandedGroups.Add(p.Name);
+            }
+            ApplySortingAndFilter();
+        }
+    }
+
     private void ProcGrid_Sorting(object sender, DataGridSortingEventArgs e)
     {
         e.Handled = true;
@@ -175,18 +219,83 @@ public partial class MainWindow : Window
                 (isPid && x.Pid == pid));
         }
 
-        bool asc = _sortDirection == ListSortDirection.Ascending;
-        _view = (_sortColumn switch
+        if (App.Settings.GroupProcesses)
         {
-            "Name" => asc ? filtered.OrderBy(x => x.Name).ThenBy(x => x.Pid) : filtered.OrderByDescending(x => x.Name).ThenBy(x => x.Pid),
-            "Pid" => asc ? filtered.OrderBy(x => x.Pid) : filtered.OrderByDescending(x => x.Pid),
-            "CpuPercent" => asc ? filtered.OrderBy(x => x.CpuPercent).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.CpuPercent).ThenBy(x => x.Name),
-            "WorkingSetBytes" => asc ? filtered.OrderBy(x => x.WorkingSetBytes).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.WorkingSetBytes).ThenBy(x => x.Name),
-            "ThreadCount" => asc ? filtered.OrderBy(x => x.ThreadCount).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.ThreadCount).ThenBy(x => x.Name),
-            "Priority" => asc ? filtered.OrderBy(x => x.Priority).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.Priority).ThenBy(x => x.Name),
-            "ExePath" => asc ? filtered.OrderBy(x => x.ExePath).ThenBy(x => x.Name) : filtered.OrderByDescending(x => x.ExePath).ThenBy(x => x.Name),
-            _ => filtered.OrderByDescending(x => x.CpuPercent).ThenBy(x => x.Name)
-        }).ToList();
+            var topLevel = new List<ProcessInfo>();
+            var nameGroups = filtered.GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (var g in nameGroups)
+            {
+                var list = g.ToList();
+                if (list.Count == 1)
+                {
+                    var single = list[0];
+                    single.IsGroupParent = false;
+                    single.IsGroupChild = false;
+                    single.InstanceCount = 1;
+                    topLevel.Add(single);
+                }
+                else
+                {
+                    var mainProc = list.FirstOrDefault(x => x.HasWindow) ?? list.OrderBy(x => x.Pid).First();
+                    var isExp = _expandedGroups.Contains(g.Key);
+                    var parent = new ProcessInfo
+                    {
+                        Pid = mainProc.Pid,
+                        ParentPid = mainProc.ParentPid,
+                        Name = g.Key,
+                        ExePath = mainProc.ExePath,
+                        UserName = mainProc.UserName,
+                        Status = list.Any(x => x.Status == "Running") ? "Running" : "Suspended",
+                        CpuPercent = list.Sum(x => x.CpuPercent),
+                        WorkingSetBytes = list.Sum(x => x.WorkingSetBytes),
+                        PrivateBytes = list.Sum(x => x.PrivateBytes),
+                        ThreadCount = list.Sum(x => x.ThreadCount),
+                        StartTime = mainProc.StartTime,
+                        Priority = mainProc.Priority,
+                        MainWindowTitle = mainProc.MainWindowTitle,
+                        IsGroupParent = true,
+                        IsGroupChild = false,
+                        IsExpanded = isExp,
+                        InstanceCount = list.Count,
+                        Children = list.OrderByDescending(x => x.HasWindow)
+                                       .ThenByDescending(x => x.CpuPercent)
+                                       .ThenByDescending(x => x.WorkingSetBytes)
+                                       .ToList()
+                    };
+
+                    foreach (var c in parent.Children)
+                    {
+                        c.IsGroupChild = true;
+                        c.IsGroupParent = false;
+                    }
+
+                    topLevel.Add(parent);
+                }
+            }
+
+            var sortedTopLevel = ApplySorting(topLevel);
+            var resultView = new List<ProcessInfo>();
+            foreach (var item in sortedTopLevel)
+            {
+                resultView.Add(item);
+                if (item.IsGroupParent && item.IsExpanded)
+                {
+                    resultView.AddRange(item.Children);
+                }
+            }
+            _view = resultView;
+        }
+        else
+        {
+            foreach (var p in filtered)
+            {
+                p.IsGroupParent = false;
+                p.IsGroupChild = false;
+                p.InstanceCount = 1;
+            }
+            _view = ApplySorting(filtered).ToList();
+        }
 
         var prevSelectedPid = Selected?.Pid;
         ProcGrid.ItemsSource = _view;
@@ -210,6 +319,22 @@ public partial class MainWindow : Window
         {
             FooterText.Text = $"{_view.Count} {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
         }
+    }
+
+    private IEnumerable<ProcessInfo> ApplySorting(IEnumerable<ProcessInfo> list)
+    {
+        bool asc = _sortDirection == ListSortDirection.Ascending;
+        return _sortColumn switch
+        {
+            "Name" => asc ? list.OrderBy(x => x.Name).ThenBy(x => x.Pid) : list.OrderByDescending(x => x.Name).ThenBy(x => x.Pid),
+            "Pid" => asc ? list.OrderBy(x => x.Pid) : list.OrderByDescending(x => x.Pid),
+            "CpuPercent" => asc ? list.OrderBy(x => x.CpuPercent).ThenBy(x => x.Name) : list.OrderByDescending(x => x.CpuPercent).ThenBy(x => x.Name),
+            "WorkingSetBytes" => asc ? list.OrderBy(x => x.WorkingSetBytes).ThenBy(x => x.Name) : list.OrderByDescending(x => x.WorkingSetBytes).ThenBy(x => x.Name),
+            "ThreadCount" => asc ? list.OrderBy(x => x.ThreadCount).ThenBy(x => x.Name) : list.OrderByDescending(x => x.ThreadCount).ThenBy(x => x.Name),
+            "Priority" => asc ? list.OrderBy(x => x.Priority).ThenBy(x => x.Name) : list.OrderByDescending(x => x.Priority).ThenBy(x => x.Name),
+            "ExePath" => asc ? list.OrderBy(x => x.ExePath).ThenBy(x => x.Name) : list.OrderByDescending(x => x.ExePath).ThenBy(x => x.Name),
+            _ => list.OrderByDescending(x => x.CpuPercent).ThenBy(x => x.Name)
+        };
     }
 
     private ProcessInfo? Selected => ProcGrid.SelectedItem as ProcessInfo;
@@ -273,6 +398,22 @@ public partial class MainWindow : Window
     {
         var s = Selected;
         if (s == null) return;
+
+        if (s.IsGroupParent && s.InstanceCount > 1)
+        {
+            var msg = Strings.T("KillGroupConfirm", s.InstanceCount, s.Name);
+            if (MessageBox.Show(msg, "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                foreach (var c in s.Children)
+                {
+                    ProcessActions.Kill(c.Pid);
+                }
+                ProcessActions.KillTree(s.Pid);
+                _ = RefreshAsync();
+            }
+            return;
+        }
+
         if (MessageBox.Show(Strings.T("KillConfirm", s.Name, s.Pid), "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
         {
             ProcessActions.Kill(s.Pid);
@@ -295,6 +436,23 @@ public partial class MainWindow : Window
     {
         var s = Selected;
         if (s == null) return;
+
+        if (s.IsGroupParent && s.InstanceCount > 1)
+        {
+            var msg = Strings.T("SuspendGroupConfirm", s.InstanceCount, s.Name);
+            if (MessageBox.Show(msg, "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                foreach (var c in s.Children)
+                {
+                    ProcessActions.Suspend(c.Pid);
+                    c.Status = "Suspended";
+                }
+                s.Status = "Suspended";
+                ProcGrid.Items.Refresh();
+            }
+            return;
+        }
+
         if (MessageBox.Show(Strings.T("SuspendConfirm", s.Name, s.Pid), "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
         {
             if (ProcessActions.Suspend(s.Pid))
@@ -309,6 +467,23 @@ public partial class MainWindow : Window
     {
         var s = Selected;
         if (s == null) return;
+
+        if (s.IsGroupParent && s.InstanceCount > 1)
+        {
+            var msg = Strings.T("ResumeGroupConfirm", s.InstanceCount, s.Name);
+            if (MessageBox.Show(msg, "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+            {
+                foreach (var c in s.Children)
+                {
+                    ProcessActions.Resume(c.Pid);
+                    c.Status = "Running";
+                }
+                s.Status = "Running";
+                ProcGrid.Items.Refresh();
+            }
+            return;
+        }
+
         if (MessageBox.Show(Strings.T("ResumeConfirm", s.Name, s.Pid), "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
         {
             if (ProcessActions.Resume(s.Pid))
@@ -328,6 +503,30 @@ public partial class MainWindow : Window
     {
         var s = Selected;
         if (s == null) return;
+
+        if (s.IsGroupParent && s.InstanceCount > 1)
+        {
+            bool anyFailed = false;
+            foreach (var c in s.Children)
+            {
+                if (ProcessActions.SetPriority(c.Pid, priority))
+                {
+                    c.Priority = priority;
+                }
+                else
+                {
+                    anyFailed = true;
+                }
+            }
+            s.Priority = priority;
+            ProcGrid.Items.Refresh();
+            if (anyFailed)
+            {
+                MessageBox.Show(Strings.T("ElevationRequired"), Strings.T("ConfirmAction"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            return;
+        }
+
         if (ProcessActions.SetPriority(s.Pid, priority))
         {
             s.Priority = priority;
@@ -367,6 +566,7 @@ public partial class MainWindow : Window
         var next = themes[(Array.IndexOf(themes, current) + 1) % themes.Length];
         App.Settings.Theme = next;
         ApplyTheme();
+        UpdateGroupToggleButton();
         ThrottledSaveSettings();
     }
 
@@ -375,6 +575,7 @@ public partial class MainWindow : Window
         App.Settings.Language = App.Settings.Language == Lang.Es ? Lang.En : Lang.Es;
         Strings.Current = App.Settings.Language;
         ApplyLanguage();
+        UpdateGroupToggleButton();
         ThrottledSaveSettings();
     }
 
@@ -396,6 +597,7 @@ public partial class MainWindow : Window
             KillBtnText.Text = $"✕  {Strings.T("Kill")}";
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
             FooterText.Text = Strings.T("Ready");
+            UpdateGroupToggleButton();
 
             if (ProcGrid.Columns.Count >= 7)
             {

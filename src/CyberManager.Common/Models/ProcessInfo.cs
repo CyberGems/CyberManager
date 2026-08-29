@@ -19,6 +19,18 @@ public sealed class ProcessInfo
     public long CpuTimeTicks { get; set; }
     public ProcessPriorityClass Priority { get; set; }
 
+    public string MainWindowTitle { get; set; } = "";
+    public bool HasWindow => !string.IsNullOrWhiteSpace(MainWindowTitle);
+    public bool IsGroupParent { get; set; }
+    public bool IsGroupChild { get; set; }
+    public bool IsExpanded { get; set; }
+    public int InstanceCount { get; set; } = 1;
+    public List<ProcessInfo> Children { get; set; } = new();
+
+    public string DisplayName => InstanceCount > 1 && IsGroupParent ? $"{Name} ({InstanceCount})" : Name;
+
+    public string RoleBadge => HasWindow ? "UI" : (IsGroupChild ? "Worker" : "");
+
     public string MemoryFormatted
     {
         get

@@ -69,7 +69,9 @@ public class StringsTests
             "NoProcesses", "Refresh", "AlwaysOnTop", "KillConfirm", "KillTreeConfirm",
             "Settings", "About", "ThemeCyberManager", "ThemeDark", "ThemeLight",
             "Ok", "Cancel", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",
-            "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction"
+            "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction",
+            "GroupByApp", "Ungroup", "KillGroupConfirm", "SuspendGroupConfirm", "ResumeGroupConfirm",
+            "MainProcess", "WorkerProcess"
         };
         foreach (var key in keys)
         {

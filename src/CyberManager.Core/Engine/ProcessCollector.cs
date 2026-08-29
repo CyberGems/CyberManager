@@ -35,6 +35,7 @@ public sealed class ProcessCollector
                 info.StartTime = SafeStart(p);
                 info.ExePath = SafePath(p);
                 info.Priority = SafePriority(p);
+                info.MainWindowTitle = SafeMainWindowTitle(p);
                 try { info.ParentPid = GetParentPid(p.Id); } catch { }
 
                 result.Add(info);
@@ -121,6 +122,11 @@ public sealed class ProcessCollector
     private static string SafePath(Process p)
     {
         try { return p.MainModule?.FileName ?? ""; } catch { return ""; }
+    }
+
+    private static string SafeMainWindowTitle(Process p)
+    {
+        try { return p.MainWindowTitle ?? ""; } catch { return ""; }
     }
 
     private static int GetParentPid(int pid)

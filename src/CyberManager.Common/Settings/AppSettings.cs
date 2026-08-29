@@ -12,6 +12,7 @@ public sealed class AppSettings
     public AppTheme Theme { get; set; } = AppTheme.CyberManager;
     public double RefreshIntervalMs { get; set; } = 800;
     public bool AlwaysOnTop { get; set; } = false;
+    public bool GroupProcesses { get; set; } = true;
     public bool ShowSuspended { get; set; } = true;
     public string SearchText { get; set; } = "";
     public bool MainWindowBoundsSaved { get; set; } = false;
