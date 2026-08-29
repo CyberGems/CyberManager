@@ -66,6 +66,9 @@ jobs:
             Copy-Item src/CyberManager.UI/Assets/CyberManager.ico ./publish-win64/Assets/
             Copy-Item src/CyberManager.UI/Assets/CyberManager.ico ./publish-win64/
           }
+          if (Test-Path src/CyberManager.UI/Assets/CyberManager.png) {
+            Copy-Item src/CyberManager.UI/Assets/CyberManager.png ./publish-win64/Assets/
+          }
 
       - name: Zip Published Output (Portable)
         shell: powershell

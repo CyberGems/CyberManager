@@ -24,14 +24,14 @@ public static class AppIconHelper
         if (_trayIcon != null) return _trayIcon;
         try
         {
-            var uri = new Uri("pack://application:,,,/Assets/CyberWall.ico", UriKind.Absolute);
+            var uri = new Uri("pack://application:,,,/Assets/CyberManager.ico", UriKind.Absolute);
             var sri = System.Windows.Application.GetResourceStream(uri);
             if (sri != null) { using var s = sri.Stream; var ic = new Icon(s, size, size); _trayIcon = ic; return ic; }
         }
         catch { }
         try
         {
-            var p = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "CyberWall.ico");
+            var p = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "CyberManager.ico");
             if (File.Exists(p)) { var ic = new Icon(p, size, size); _trayIcon = ic; return ic; }
         }
         catch { }
@@ -50,12 +50,12 @@ public static class AppIconHelper
         if (_cached != null) return _cached;
         try
         {
-            var uri = new Uri("pack://application:,,,/Assets/CyberWall.ico", UriKind.Absolute);
+            var uri = new Uri("pack://application:,,,/Assets/CyberManager.ico", UriKind.Absolute);
             var sri = System.Windows.Application.GetResourceStream(uri);
             if (sri != null) { using var s = sri.Stream; var dec = new IconBitmapDecoder(s, BitmapCreateOptions.None, BitmapCacheOption.OnLoad); var best = dec.Frames.OrderByDescending(f => f.Width).FirstOrDefault(); if (best != null) { _cached = best; return best; } }
         }
         catch { }
-        try { var uri = new Uri("pack://application:,,,/Assets/CyberWall.png", UriKind.Absolute); var bi = BitmapFrame.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.OnLoad); _cached = bi; return bi; } catch { }
+        try { var uri = new Uri("pack://application:,,,/Assets/CyberManager.png", UriKind.Absolute); var bi = BitmapFrame.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.OnLoad); _cached = bi; return bi; } catch { }
         using var bmp2 = GenerateBitmap(size);
         using var ms = new MemoryStream();
         bmp2.Save(ms, ImageFormat.Png);
