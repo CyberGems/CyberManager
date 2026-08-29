@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using CyberManager.Common.I18n;
 
 namespace CyberManager.UI.Services;
 
@@ -60,12 +61,12 @@ public static class UpdateService
                 }
             }
             bool avail = latest != null && latest > cur;
-            var status = avail ? $"Actualización {tag} disponible" : $"Estás al día con la versión {curLabel}";
+            var status = avail ? Strings.T("UpdateAvailable", tag) : Strings.T("UpToDate", curLabel);
             return new(cur, latest, tag, url, dl, name, pub, avail, status);
         }
-        catch (HttpRequestException) { return new(cur, null, curLabel, "", null, null, null, false, "No se pudo comprobar actualizaciones. Verifica tu conexión."); }
-        catch (TaskCanceledException) { return new(cur, null, curLabel, "", null, null, null, false, "Tiempo agotado al comprobar actualizaciones."); }
-        catch { return new(cur, null, curLabel, "", null, null, null, false, "Respuesta inesperada del servidor."); }
+        catch (HttpRequestException) { return new(cur, null, curLabel, "", null, null, null, false, Strings.T("UpdateCheckFailed")); }
+        catch (TaskCanceledException) { return new(cur, null, curLabel, "", null, null, null, false, Strings.T("UpdateCheckTimeout")); }
+        catch { return new(cur, null, curLabel, "", null, null, null, false, Strings.T("UnexpectedResponse")); }
     }
 
     public static void LaunchReleasesPage(string url)

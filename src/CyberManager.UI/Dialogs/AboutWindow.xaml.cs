@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
+using CyberManager.Common.I18n;
 using CyberManager.UI.Services;
 
 namespace CyberManager.UI.Dialogs;
@@ -18,30 +19,41 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         InitializeComponent();
         Icon = AppIconHelper.CreateManagerImageSource(64) as System.Windows.Media.ImageSource;
         CyberManagerWindowChrome.Apply(this, 12);
-        VersionText.Text = $"Versión {UpdateService.GetCurrentVersionLabel()}";
-        UpdateStatusText.Text = $"Estás al día con la versión {UpdateService.GetCurrentVersionLabel()}";
+        ApplyLanguage();
+    }
+
+    private void ApplyLanguage()
+    {
+        TitleText.Text = $"{Strings.T("AboutSubtitle")} — CyberManager";
+        VersionText.Text = $"{Strings.T("Version")} {UpdateService.GetCurrentVersionLabel()}";
+        UpdateStatusText.Text = Strings.T("UpToDate", UpdateService.GetCurrentVersionLabel());
+        UpdateBtn.Content = Strings.T("CheckUpdates");
+        DescriptionText.Text = Strings.T("Description");
+        UpdatesTitle.Text = Strings.T("UpdatesAndMaintenance");
+        CheckUpdatesLabel.Text = Strings.T("CheckUpdatesAction");
+        CopyrightText.Text = Strings.T("Copyright");
     }
 
     private async void UpdateCheck_Click(object sender, RoutedEventArgs e)
     {
         UpdateBtn.IsEnabled = false;
-        UpdateBtn.Content = "Comprobando...";
+        UpdateBtn.Content = Strings.T("CheckingUpdates");
         try
         {
             var r = await UpdateService.CheckForUpdatesAsync();
             UpdateStatusText.Text = r.StatusMessage;
             if (r.IsUpdateAvailable)
             {
-                var res = System.Windows.MessageBox.Show($"{r.LatestVersionLabel} disponible.\n\n¿Abrir releases?", "Actualización", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                var res = MessageBox.Show($"{r.LatestVersionLabel} disponible.\n\n{Strings.T("OpenReleases")}", "CyberManager", MessageBoxButton.YesNo, MessageBoxImage.Information);
                 if (res == MessageBoxResult.Yes) OpenUrl(r.ReleaseUrl);
             }
             else
             {
-                System.Windows.MessageBox.Show(r.StatusMessage, "CyberManager", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(r.StatusMessage, "CyberManager", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
-        catch (Exception ex) { System.Windows.MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
-        finally { UpdateBtn.IsEnabled = true; UpdateBtn.Content = "Comprobar ahora"; }
+        catch (Exception ex) { MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error); }
+        finally { UpdateBtn.IsEnabled = true; UpdateBtn.Content = Strings.T("CheckUpdates"); }
     }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) { if (e.ButtonState == MouseButtonState.Pressed) DragMove(); }

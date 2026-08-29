@@ -43,6 +43,21 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="8,4"/><Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/></Trigger></ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource HeaderBgBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontWeight" Value="Bold"/><Setter Property="FontSize" Value="11"/><Setter Property="Height" Value="32"/>
@@ -75,6 +90,9 @@
                             <Trigger Property="AlternationIndex" Value="1"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource GridAltBrush}"/></Trigger>
                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/></Trigger>
                             <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionBgBrush}"/><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/><Setter TargetName="Bd" Property="BorderThickness" Value="3,0,0,0"/></Trigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Suspended">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.6"/>
+                            </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -113,6 +131,13 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="EmptyStateText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
     </Window.Resources>
     <Border Margin="5" CornerRadius="12">
         <Border x:Name="OuterBorder" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource BgBrush}" ClipToBounds="True">
@@ -133,15 +158,17 @@
                                     <TextBlock Text="NT ENGINE" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
                                 </Border>
                             </StackPanel>
-                            <TextBlock Text="Gestor de Tareas Ultra-Ligero • Virtualizado" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,1,0,0"/>
+                            <TextBlock x:Name="SubtitleText" Text="Premium • Virtualized • Zero-Lag for 3000+ processes" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,1,0,0"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock x:Name="StatsText" Text="—" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                        <Button Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="Acerca de"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimizar"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximizar"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Cerrar"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button Style="{StaticResource IconButton}" Click="ThemeToggle_Click" ToolTip="Theme"><TextBlock Text="🎨" FontSize="12"/></Button>
+                        <Button Style="{StaticResource IconButton}" Click="LangToggle_Click" ToolTip="Language"><TextBlock Text="🌐" FontSize="12"/></Button>
+                        <Button Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                     </StackPanel>
                 </Grid>
 
@@ -153,55 +180,65 @@
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <TextBlock Text="⌕" Foreground="{DynamicResource SubTextBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <TextBox x:Name="SearchBox" Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" CaretBrush="{DynamicResource AccentBrush}" FontSize="12" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged"/>
-                            <TextBlock x:Name="SearchHint" Grid.Column="1" Text="Buscar proceso, PID o ruta..." Foreground="{DynamicResource SubTextBrush}" FontSize="12" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,0,0"/>
+                            <TextBlock x:Name="SearchHint" Grid.Column="1" Text="Search process, PID or path..." Foreground="{DynamicResource SubTextBrush}" FontSize="12" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,0,0"/>
                             <Button Grid.Column="2" Content="✕" Foreground="{DynamicResource SubTextBrush}" Background="Transparent" BorderThickness="0" FontSize="10" Cursor="Hand" Padding="6,0" Click="ClearSearch_Click" Visibility="Collapsed" x:Name="ClearBtn"/>
                         </Grid>
                     </Border>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0,0,0">
-                        <Button Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Actualizar (F5)"><TextBlock Text="↻  Actualizar"/></Button>
-                        <Button Style="{StaticResource ModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="Finalizar tarea (Supr)"><TextBlock Text="✕  Finalizar"/></Button>
+                        <Button x:Name="RefreshBtn" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)"><TextBlock x:Name="RefreshBtnText" Text="↻  Refresh"/></Button>
+                        <Button x:Name="KillBtn" Style="{StaticResource ModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)"><TextBlock x:Name="KillBtnText" Text="✕  End Task"/></Button>
                     </StackPanel>
                 </Grid>
 
                 <!-- DataGrid -->
                 <Border Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
-                    <DataGrid x:Name="ProcGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="None"
-                              Background="{DynamicResource CardBrush}" BorderThickness="0" RowHeaderWidth="0"
-                              AlternationCount="2" CanUserSortColumns="True" CanUserResizeColumns="True"
-                              EnableRowVirtualization="True" EnableColumnVirtualization="True"
-                              VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
-                              VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.CanContentScroll="True"
-                              SelectionMode="Single" SelectionUnit="FullRow"
-                              MouseDoubleClick="ProcGrid_MouseDoubleClick">
-                        <DataGrid.ContextMenu>
-                            <ContextMenu Style="{StaticResource ModernContextMenu}">
-                                <MenuItem Header="Finalizar tarea" Style="{StaticResource ModernMenuItem}" Click="Kill_Click"/>
-                                <MenuItem Header="Finalizar árbol" Style="{StaticResource ModernMenuItem}" Click="KillTree_Click"/>
-                                <Separator/>
-                                <MenuItem Header="Suspender" Style="{StaticResource ModernMenuItem}" Click="Suspend_Click"/>
-                                <MenuItem Header="Reanudar" Style="{StaticResource ModernMenuItem}" Click="Resume_Click"/>
-                                <Separator/>
-                                <MenuItem Header="Copiar ruta" Style="{StaticResource ModernMenuItem}" Click="CopyPath_Click"/>
-                                <MenuItem Header="Abrir carpeta" Style="{StaticResource ModernMenuItem}" Click="OpenFolder_Click"/>
-                                <MenuItem Header="Buscar en línea" Style="{StaticResource ModernMenuItem}" Click="SearchOnline_Click"/>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Proceso" Binding="{Binding Name}" Width="220" SortMemberPath="Name"/>
-                            <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80" SortMemberPath="Pid"/>
-                            <DataGridTextColumn Header="CPU %" Binding="{Binding CpuPercent, StringFormat={}{0:F1}%}" Width="80" SortMemberPath="CpuPercent"/>
-                            <DataGridTextColumn Header="Memoria" Binding="{Binding MemoryFormatted}" Width="100" SortMemberPath="WorkingSetBytes"/>
-                            <DataGridTextColumn Header="Hilos" Binding="{Binding ThreadCount}" Width="70" SortMemberPath="ThreadCount"/>
-                            <DataGridTextColumn Header="Ruta" Binding="{Binding ExePath}" Width="*" SortMemberPath="ExePath"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Grid>
+                        <DataGrid x:Name="ProcGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="None"
+                                  Background="{DynamicResource CardBrush}" BorderThickness="0" RowHeaderWidth="0"
+                                  AlternationCount="2" CanUserSortColumns="True" CanUserResizeColumns="True"
+                                  EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                                  VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                                  VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.CanContentScroll="True"
+                                  SelectionMode="Single" SelectionUnit="FullRow">
+                            <DataGrid.ContextMenu>
+                                <ContextMenu Style="{StaticResource ModernContextMenu}">
+                                    <MenuItem Header="End Task" Style="{StaticResource ModernMenuItem}" Click="Kill_Click"/>
+                                    <MenuItem Header="End Process Tree" Style="{StaticResource ModernMenuItem}" Click="KillTree_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Suspend" Style="{StaticResource ModernMenuItem}" Click="Suspend_Click"/>
+                                    <MenuItem Header="Resume" Style="{StaticResource ModernMenuItem}" Click="Resume_Click"/>
+                                    <Separator/>
+                                    <MenuItem Header="Set Priority" Style="{StaticResource ModernMenuItem}">
+                                        <MenuItem Header="Normal" Click="PriorityNormal_Click"/>
+                                        <MenuItem Header="Above Normal" Click="PriorityAboveNormal_Click"/>
+                                        <MenuItem Header="High" Click="PriorityHigh_Click"/>
+                                        <MenuItem Header="Real Time" Click="PriorityRealTime_Click"/>
+                                    </MenuItem>
+                                    <Separator/>
+                                    <MenuItem Header="Copy Path" Style="{StaticResource ModernMenuItem}" Click="CopyPath_Click"/>
+                                    <MenuItem Header="Open Folder" Style="{StaticResource ModernMenuItem}" Click="OpenFolder_Click"/>
+                                    <MenuItem Header="Search Online" Style="{StaticResource ModernMenuItem}" Click="SearchOnline_Click"/>
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Process" Binding="{Binding Name}" Width="220" SortMemberPath="Name"/>
+                                <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80" SortMemberPath="Pid"/>
+                                <DataGridTextColumn Header="CPU %" Binding="{Binding CpuFormatted}" Width="80" SortMemberPath="CpuPercent"/>
+                                <DataGridTextColumn Header="Memory" Binding="{Binding MemoryFormatted}" Width="100" SortMemberPath="WorkingSetBytes"/>
+                                <DataGridTextColumn Header="Threads" Binding="{Binding ThreadCount}" Width="70" SortMemberPath="ThreadCount"/>
+                                <DataGridTextColumn Header="Priority" Binding="{Binding PriorityFormatted}" Width="90" SortMemberPath="Priority"/>
+                                <DataGridTextColumn Header="Path" Binding="{Binding ExePath}" Width="*" SortMemberPath="ExePath"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <TextBlock x:Name="EmptyStateText" Style="{StaticResource EmptyStateText}" Text="No processes found" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,40"/>
+                    </Grid>
                 </Border>
 
                 <!-- Footer -->
                 <Grid Grid.Row="3" Margin="0,10,0,0">
-                    <TextBlock x:Name="FooterText" Text="Listo" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="FooterText" Text="Ready" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <CheckBox x:Name="TopmostCheck" Content="Siempre visible" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center" Checked="Topmost_Checked" Unchecked="Topmost_Checked"/>
+                        <CheckBox x:Name="TopmostCheck" Content="Always on top" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center" Checked="Topmost_Checked" Unchecked="Topmost_Checked"/>
                     </StackPanel>
                 </Grid>
             </Grid>

@@ -42,7 +42,7 @@
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="◈" Foreground="{DynamicResource AccentBrush}" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBlock Text="Acerca de — CyberManager" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TitleText" Text="Acerca de — CyberManager" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <Button Content="✕" Style="{StaticResource TitleCloseButton}" HorizontalAlignment="Right" Click="Close_Click"/>
                     </Grid>
@@ -63,11 +63,11 @@
                                 </StackPanel>
                             </StackPanel>
                             <Border Grid.Column="1" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20,16" Margin="28,0,0,0" VerticalAlignment="Center">
-                                <TextBlock FontSize="12.5" Foreground="{DynamicResource TextBrush}" Opacity="0.85" LineHeight="22" TextWrapping="Wrap"
-                                           Text="CyberManager es un gestor de tareas ultra-ligero, virtualizado y sin lag para 3000+ procesos. Motor NT nativo, búsqueda instantánea y UI premium CyberGems — la alternativa fluida al Task Manager de Windows."/>
+                                 <TextBlock x:Name="DescriptionText" FontSize="12.5" Foreground="{DynamicResource TextBrush}" Opacity="0.85" LineHeight="22" TextWrapping="Wrap"
+                                            Text="CyberManager es un gestor de tareas ultra-ligero, virtualizado y sin lag para 3000+ procesos. Motor NT nativo, búsqueda instantánea y UI premium CyberGems — la alternativa fluida al Task Manager de Windows."/>
                             </Border>
                         </Grid>
-                        <TextBlock Text="Actualizaciones y Mantenimiento" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" FontSize="13.5" Margin="0,0,0,8"/>
+                        <TextBlock x:Name="UpdatesTitle" Text="Actualizaciones y Mantenimiento" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" FontSize="13.5" Margin="0,0,0,8"/>
                         <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="18,14">
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
@@ -75,7 +75,7 @@
                                     <TextBlock Text="⬢" Foreground="{DynamicResource AccentBrush}" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="Buscar actualizaciones" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
+                                    <TextBlock x:Name="CheckUpdatesLabel" Text="Buscar actualizaciones" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
                                     <TextBlock x:Name="UpdateStatusText" Text="Estás al día con la versión v1.0.0" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
                                 </StackPanel>
                                 <Button x:Name="UpdateBtn" Grid.Column="2" Content="Comprobar ahora" Style="{StaticResource ModernButton}" MinWidth="130" Height="34" Click="UpdateCheck_Click"/>
@@ -86,7 +86,7 @@
                 <Border Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,11,11" Padding="20,10">
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                        <TextBlock Text="© CyberGems • 2026" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Cursor="Hand" ToolTip="cybergems.org" MouseLeftButtonUp="Website_Click"/>
+                         <TextBlock x:Name="CopyrightText" Text="© CyberGems • 2026" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Cursor="Hand" ToolTip="cybergems.org" MouseLeftButtonUp="Website_Click"/>
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                             <Border Style="{StaticResource AboutFooterIconButton}" ToolTip="cybergems.org" MouseLeftButtonUp="Website_Click">
                                 <TextBlock Text="◉" Foreground="{DynamicResource SubTextBrush}" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/>

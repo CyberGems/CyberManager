@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using System.Globalization;
+
 namespace CyberManager.Common.Models;
 
 public sealed class ProcessInfo
@@ -14,6 +17,7 @@ public sealed class ProcessInfo
     public int ThreadCount { get; set; }
     public DateTime StartTime { get; set; }
     public long CpuTimeTicks { get; set; }
+    public ProcessPriorityClass Priority { get; set; }
 
     public string MemoryFormatted
     {
@@ -23,4 +27,8 @@ public sealed class ProcessInfo
             return mb >= 1024 ? $"{mb / 1024:F1} GB" : $"{mb:F0} MB";
         }
     }
+
+    public string CpuFormatted => CpuPercent.ToString("F1", CultureInfo.CurrentCulture) + "%";
+
+    public string PriorityFormatted => Priority.ToString();
 }

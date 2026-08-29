@@ -36,7 +36,13 @@ public static class AppIconHelper
         }
         catch { }
         using var bmp = GenerateBitmap(size);
-        var h = bmp.GetHicon(); var fb = (Icon)Icon.FromHandle(h).Clone(); DestroyIcon(h); _trayIcon = fb; return fb;
+        var h = bmp.GetHicon();
+        var fb = Icon.FromHandle(h);
+        var cloned = (Icon)fb.Clone();
+        DestroyIcon(h);
+        fb.Dispose();
+        _trayIcon = cloned;
+        return cloned;
     }
 
     public static WpfImageSource CreateManagerImageSource(int size = 256)
@@ -50,8 +56,18 @@ public static class AppIconHelper
         }
         catch { }
         try { var uri = new Uri("pack://application:,,,/Assets/CyberWall.png", UriKind.Absolute); var bi = BitmapFrame.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.OnLoad); _cached = bi; return bi; } catch { }
-        using var bmp2 = GenerateBitmap(size); using var ms = new MemoryStream(); bmp2.Save(ms, ImageFormat.Png); ms.Position = 0;
-        var fb2 = new BitmapImage(); fb2.BeginInit(); fb2.StreamSource = ms; fb2.CacheOption = BitmapCacheOption.OnLoad; fb2.EndInit(); fb2.Freeze(); _cached = fb2; return fb2;
+        using var bmp2 = GenerateBitmap(size);
+        using var ms = new MemoryStream();
+        bmp2.Save(ms, ImageFormat.Png);
+        ms.Position = 0;
+        var fb2 = new BitmapImage();
+        fb2.BeginInit();
+        fb2.StreamSource = ms;
+        fb2.CacheOption = BitmapCacheOption.OnLoad;
+        fb2.EndInit();
+        fb2.Freeze();
+        _cached = fb2;
+        return fb2;
     }
 
     private static Bitmap GenerateBitmap(int size)

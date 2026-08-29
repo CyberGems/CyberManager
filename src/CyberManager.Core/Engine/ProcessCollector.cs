@@ -7,18 +7,16 @@ namespace CyberManager.Core.Engine;
 public sealed class ProcessCollector
 {
     private readonly Dictionary<int, long> _prevCpu = new();
-    private readonly Dictionary<int, long> _prevTime = new();
-    private long _prevIdle;
-    private long _prevTotal;
+    private long _prevTimestamp;
 
     public IReadOnlyList<ProcessInfo> Collect()
     {
         var result = new List<ProcessInfo>(350);
-        var now = Environment.TickCount64;
-        var procs = Process.GetProcesses();
-        long totalCpu = 0;
-        long idleCpu = 0;
+        long curTimestamp = Stopwatch.GetTimestamp();
+        double elapsedSeconds = _prevTimestamp == 0 ? 0 : (double)(curTimestamp - _prevTimestamp) / Stopwatch.Frequency;
+        int processorCount = Math.Max(1, Environment.ProcessorCount);
 
+        var procs = Process.GetProcesses();
         foreach (var p in procs)
         {
             try
@@ -27,53 +25,92 @@ public sealed class ProcessCollector
                 {
                     Pid = p.Id,
                     Name = p.ProcessName,
-                    WorkingSetBytes = p.WorkingSet64,
-                    PrivateBytes = p.PrivateMemorySize64,
-                    ThreadCount = p.Threads.Count,
-                    StartTime = SafeStart(p),
-                    ExePath = SafePath(p),
-                    Status = "Running",
-                    CpuTimeTicks = p.TotalProcessorTime.Ticks
+                    Status = "Running"
                 };
+
+                info.CpuTimeTicks = SafeCpuTicks(p);
+                info.WorkingSetBytes = SafeWorkingSet(p);
+                info.PrivateBytes = SafePrivateBytes(p);
+                info.ThreadCount = SafeThreadCount(p);
+                info.StartTime = SafeStart(p);
+                info.ExePath = SafePath(p);
+                info.Priority = SafePriority(p);
                 try { info.ParentPid = GetParentPid(p.Id); } catch { }
+
                 result.Add(info);
-                totalCpu += info.CpuTimeTicks;
-                if (p.ProcessName.Equals("Idle", StringComparison.OrdinalIgnoreCase)) idleCpu = info.CpuTimeTicks;
             }
-            catch { }
-            finally { p.Dispose(); }
+            catch
+            {
+                // Ignore any completely unreadable or already exited process
+            }
+            finally
+            {
+                p.Dispose();
+            }
         }
 
-        long curTotal = totalCpu;
-        long curIdle = idleCpu;
-        long deltaTotal = curTotal - _prevTotal;
-        long deltaIdle = curIdle - _prevIdle;
-
-        if (deltaTotal > 0 && _prevTotal != 0)
+        if (elapsedSeconds > 0 && _prevCpu.Count > 0)
         {
             foreach (var r in result)
             {
-                if (_prevCpu.TryGetValue(r.Pid, out var prev))
+                if (_prevCpu.TryGetValue(r.Pid, out var prevTicks) && r.CpuTimeTicks >= prevTicks)
                 {
-                    long delta = r.CpuTimeTicks - prev;
-                    r.CpuPercent = Math.Max(0, (double)delta / deltaTotal * 100 * Environment.ProcessorCount);
-                    if (r.CpuPercent > 100) r.CpuPercent = 100;
+                    long delta = r.CpuTimeTicks - prevTicks;
+                    double cpuSecs = delta / 10_000_000.0;
+                    double pct = (cpuSecs / (elapsedSeconds * processorCount)) * 100.0;
+                    r.CpuPercent = Math.Clamp(pct, 0.0, 100.0);
                 }
                 _prevCpu[r.Pid] = r.CpuTimeTicks;
             }
         }
         else
         {
-            foreach (var r in result) _prevCpu[r.Pid] = r.CpuTimeTicks;
+            foreach (var r in result)
+            {
+                _prevCpu[r.Pid] = r.CpuTimeTicks;
+            }
         }
 
-        _prevTotal = curTotal;
-        _prevIdle = curIdle;
+        _prevTimestamp = curTimestamp;
 
-        var dead = _prevCpu.Keys.Except(result.Select(x => x.Pid)).ToList();
-        foreach (var d in dead) _prevCpu.Remove(d);
+        var currentPids = new HashSet<int>(result.Select(x => x.Pid));
+        var dead = _prevCpu.Keys.Where(pid => !currentPids.Contains(pid)).ToList();
+        foreach (var d in dead)
+        {
+            _prevCpu.Remove(d);
+        }
 
         return result;
+    }
+
+    public async Task<IReadOnlyList<ProcessInfo>> CollectAsync()
+    {
+        return await Task.Run(() => Collect()).ConfigureAwait(false);
+    }
+
+    private static long SafeCpuTicks(Process p)
+    {
+        try { return p.TotalProcessorTime.Ticks; } catch { return 0; }
+    }
+
+    private static long SafeWorkingSet(Process p)
+    {
+        try { return p.WorkingSet64; } catch { return 0; }
+    }
+
+    private static long SafePrivateBytes(Process p)
+    {
+        try { return p.PrivateMemorySize64; } catch { return 0; }
+    }
+
+    private static int SafeThreadCount(Process p)
+    {
+        try { return p.Threads.Count; } catch { return 0; }
+    }
+
+    private static ProcessPriorityClass SafePriority(Process p)
+    {
+        try { return p.PriorityClass; } catch { return ProcessPriorityClass.Normal; }
     }
 
     private static DateTime SafeStart(Process p)
