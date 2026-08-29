@@ -71,7 +71,7 @@ public class StringsTests
             "Ok", "Cancel", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",
             "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction",
             "GroupByApp", "Ungroup", "KillGroupConfirm", "SuspendGroupConfirm", "ResumeGroupConfirm",
-            "MainProcess", "WorkerProcess"
+            "MainProcess", "WorkerProcess", "PriorityIdle", "PriorityBelowNormal", "TextSize"
         };
         foreach (var key in keys)
         {

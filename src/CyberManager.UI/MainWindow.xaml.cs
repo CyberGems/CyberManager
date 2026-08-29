@@ -65,6 +65,9 @@ public partial class MainWindow : Window
             UpdateGroupToggleButton();
             Topmost = App.Settings.AlwaysOnTop;
             TopmostCheck.IsChecked = Topmost;
+            FontSizeSlider.Value = App.Settings.RowFontSize > 0 ? App.Settings.RowFontSize : 13;
+            ProcGrid.FontSize = FontSizeSlider.Value;
+            FontSizeLabel.Text = $"{FontSizeSlider.Value:F0}px";
             FooterText.Text = Strings.T("Ready");
             _ = RefreshAsync();
             _timer.Start();
@@ -494,10 +497,22 @@ public partial class MainWindow : Window
         }
     }
 
-    private void PriorityNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.Normal);
-    private void PriorityAboveNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.AboveNormal);
-    private void PriorityHigh_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.High);
+    private void FontSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (ProcGrid == null || FontSizeLabel == null) return;
+        double val = Math.Round(e.NewValue);
+        App.Settings.RowFontSize = val;
+        ProcGrid.FontSize = val;
+        FontSizeLabel.Text = $"{val:F0}px";
+        ThrottledSaveSettings();
+    }
+
     private void PriorityRealTime_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.RealTime);
+    private void PriorityHigh_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.High);
+    private void PriorityAboveNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.AboveNormal);
+    private void PriorityNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.Normal);
+    private void PriorityBelowNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.BelowNormal);
+    private void PriorityIdle_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.Idle);
 
     private void SetPriority(ProcessPriorityClass priority)
     {
@@ -512,6 +527,8 @@ public partial class MainWindow : Window
                 if (ProcessActions.SetPriority(c.Pid, priority))
                 {
                     c.Priority = priority;
+                    var inAll = _all.FirstOrDefault(x => x.Pid == c.Pid);
+                    if (inAll != null) inAll.Priority = priority;
                 }
                 else
                 {
@@ -530,6 +547,8 @@ public partial class MainWindow : Window
         if (ProcessActions.SetPriority(s.Pid, priority))
         {
             s.Priority = priority;
+            var inAll = _all.FirstOrDefault(x => x.Pid == s.Pid);
+            if (inAll != null) inAll.Priority = priority;
             ProcGrid.Items.Refresh();
         }
         else
@@ -592,6 +611,7 @@ public partial class MainWindow : Window
             SearchHint.Text = Strings.T("SearchPlaceholder");
             EmptyStateText.Text = Strings.T("NoProcesses");
             TopmostCheck.Content = Strings.T("AlwaysOnTop");
+            FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtnText.Text = $"↻  {Strings.T("Refresh")}";
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             KillBtnText.Text = $"✕  {Strings.T("Kill")}";
@@ -622,12 +642,14 @@ public partial class MainWindow : Window
                 ((MenuItem)cm.Items[3]).Header = Strings.T("Suspend");
                 ((MenuItem)cm.Items[4]).Header = Strings.T("Resume");
                 ((MenuItem)cm.Items[6]).Header = Strings.T("SetPriority");
-                if (((MenuItem)cm.Items[6]).Items.Count >= 4)
+                if (((MenuItem)cm.Items[6]).Items.Count >= 6)
                 {
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[0]).Header = Strings.T("PriorityNormal");
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[1]).Header = Strings.T("PriorityAboveNormal");
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[2]).Header = Strings.T("PriorityHigh");
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[3]).Header = Strings.T("PriorityRealTime");
+                    ((MenuItem)((MenuItem)cm.Items[6]).Items[0]).Header = Strings.T("PriorityRealTime");
+                    ((MenuItem)((MenuItem)cm.Items[6]).Items[1]).Header = Strings.T("PriorityHigh");
+                    ((MenuItem)((MenuItem)cm.Items[6]).Items[2]).Header = Strings.T("PriorityAboveNormal");
+                    ((MenuItem)((MenuItem)cm.Items[6]).Items[3]).Header = Strings.T("PriorityNormal");
+                    ((MenuItem)((MenuItem)cm.Items[6]).Items[4]).Header = Strings.T("PriorityBelowNormal");
+                    ((MenuItem)((MenuItem)cm.Items[6]).Items[5]).Header = Strings.T("PriorityIdle");
                 }
                 ((MenuItem)cm.Items[8]).Header = Strings.T("CopyPath");
                 ((MenuItem)cm.Items[9]).Header = Strings.T("OpenFolder");

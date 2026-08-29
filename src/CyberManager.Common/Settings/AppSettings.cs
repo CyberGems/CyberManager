@@ -13,6 +13,7 @@ public sealed class AppSettings
     public double RefreshIntervalMs { get; set; } = 800;
     public bool AlwaysOnTop { get; set; } = false;
     public bool GroupProcesses { get; set; } = true;
+    public double RowFontSize { get; set; } = 13.0;
     public bool ShowSuspended { get; set; } = true;
     public string SearchText { get; set; } = "";
     public bool MainWindowBoundsSaved { get; set; } = false;

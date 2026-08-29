@@ -56,6 +56,31 @@ public static class ProcessActions
     {
         try
         {
+            // PROCESS_SET_INFORMATION = 0x0200
+            var h = OpenProcess(0x0200, false, pid);
+            if (h != IntPtr.Zero)
+            {
+                try
+                {
+                    uint win32Priority = priority switch
+                    {
+                        ProcessPriorityClass.Idle => 0x00000040,
+                        ProcessPriorityClass.BelowNormal => 0x00004000,
+                        ProcessPriorityClass.Normal => 0x00000020,
+                        ProcessPriorityClass.AboveNormal => 0x00008000,
+                        ProcessPriorityClass.High => 0x00000080,
+                        ProcessPriorityClass.RealTime => 0x00000100,
+                        _ => 0x00000020
+                    };
+                    if (SetPriorityClass(h, win32Priority))
+                        return true;
+                }
+                finally
+                {
+                    CloseHandle(h);
+                }
+            }
+
             using var p = Process.GetProcessById(pid);
             p.PriorityClass = priority;
             return true;
@@ -66,5 +91,6 @@ public static class ProcessActions
     [DllImport("ntdll.dll")] private static extern int NtSuspendProcess(IntPtr h);
     [DllImport("ntdll.dll")] private static extern int NtResumeProcess(IntPtr h);
     [DllImport("kernel32.dll")] private static extern IntPtr OpenProcess(int acc, bool inh, int pid);
+    [DllImport("kernel32.dll", SetLastError = true)] private static extern bool SetPriorityClass(IntPtr handle, uint priorityClass);
     [DllImport("kernel32.dll")] private static extern bool CloseHandle(IntPtr h);
 }
