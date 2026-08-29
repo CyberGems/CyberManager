@@ -121,6 +121,29 @@ public sealed class ProcessCollector
 
     private static string SafePath(Process p)
     {
+        try
+        {
+            // 0x1000 = PROCESS_QUERY_LIMITED_INFORMATION
+            var handle = OpenProcess(0x1000, false, p.Id);
+            if (handle != IntPtr.Zero)
+            {
+                try
+                {
+                    var sb = new System.Text.StringBuilder(1024);
+                    int size = sb.Capacity;
+                    if (QueryFullProcessImageName(handle, 0, sb, ref size))
+                    {
+                        return sb.ToString();
+                    }
+                }
+                finally
+                {
+                    CloseHandle(handle);
+                }
+            }
+        }
+        catch { }
+
         try { return p.MainModule?.FileName ?? ""; } catch { return ""; }
     }
 
@@ -157,6 +180,9 @@ public sealed class ProcessCollector
 
     [DllImport("ntdll.dll")]
     private static extern int NtQueryInformationProcess(IntPtr h, int cls, ref PROCESS_BASIC_INFORMATION pbi, int len, ref int retLen);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    private static extern bool QueryFullProcessImageName(IntPtr hProcess, int flags, [Out] System.Text.StringBuilder lpExeName, ref int lpdwSize);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr OpenProcess(int access, bool inherit, int pid);

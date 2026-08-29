@@ -247,7 +247,7 @@ public partial class MainWindow : Window
                         Pid = mainProc.Pid,
                         ParentPid = mainProc.ParentPid,
                         Name = g.Key,
-                        ExePath = mainProc.ExePath,
+                        ExePath = !string.IsNullOrEmpty(mainProc.ExePath) ? mainProc.ExePath : (list.FirstOrDefault(x => !string.IsNullOrEmpty(x.ExePath))?.ExePath ?? ""),
                         UserName = mainProc.UserName,
                         Status = list.Any(x => x.Status == "Running") ? "Running" : "Suspended",
                         CpuPercent = list.Sum(x => x.CpuPercent),
