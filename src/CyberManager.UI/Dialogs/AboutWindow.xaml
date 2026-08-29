@@ -157,9 +157,7 @@
 
                             <!-- Brand Name + Version -->
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Width="52" Height="52" CornerRadius="14" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5" VerticalAlignment="Center" Margin="0,0,16,0">
-                                    <Image Source="pack://application:,,,/Assets/CyberManager.png" Width="36" Height="36" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
+                                <Image Source="pack://application:,,,/Assets/CyberManager.png" Width="52" Height="52" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" Margin="0,0,16,0"/>
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock FontSize="28" FontWeight="Bold" FontFamily="Segoe UI Variable Display">
                                         <Run Text="Cyber" Foreground="{DynamicResource TextBrush}"/><Run Text="Manager" Foreground="{DynamicResource AccentBrush}"/>
