@@ -91,6 +91,14 @@ public static class Strings
         ["TextSize"] = ("Text size", "Tamaño de texto"),
         ["ElevationRequired"] = ("Administrator privileges required for this operation.", "Se requieren privilegios de administrador para esta operación."),
         ["ConfirmAction"] = ("Confirm Action", "Confirmar Acción"),
+        ["CollectingProcesses"] = ("Collecting processes...", "Recopilando procesos..."),
+        ["InitializingNtEngine"] = ("Initializing NT Engine • Calculating CPU deltas", "Inicializando Motor NT • Calculando deltas de CPU"),
+        ["MemoryCompressionDesc"] = ("NT Kernel — RAM memory compression in background", "Kernel NT — Compresión de memoria RAM en segundo plano"),
+        ["RegistryDesc"] = ("Windows Registry Subsystem (Kernel Hive & Cache)", "Subsistema de Registro de Windows (Kernel Hive y Caché)"),
+        ["SystemDesc"] = ("Windows NT Operating System Kernel (ntoskrnl.exe)", "Núcleo del Sistema Operativo Windows NT (ntoskrnl.exe)"),
+        ["SecureSystemDesc"] = ("Virtualization-based Security isolated environment (VBS)", "Entorno aislado de seguridad basada en virtualización (VBS)"),
+        ["IdleDesc"] = ("Processors idle / sleep time", "Tiempo de inactividad de los procesadores del sistema"),
+        ["ProtectedSystemProcess"] = ("Protected Windows system process", "Proceso protegido del sistema de Windows"),
     };
 
     public static string T(string key, params object[] args)

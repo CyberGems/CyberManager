@@ -150,3 +150,26 @@ public sealed class SystemProcessIconConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
 }
+
+public sealed class ProcessDescriptionConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is string name)
+        {
+            if (name.Contains("Memory Compression", StringComparison.OrdinalIgnoreCase))
+                return $"⚡ {CyberManager.Common.I18n.Strings.T("MemoryCompressionDesc")}";
+            if (name.Equals("Registry", StringComparison.OrdinalIgnoreCase))
+                return $"🗃️ {CyberManager.Common.I18n.Strings.T("RegistryDesc")}";
+            if (name.Equals("Secure System", StringComparison.OrdinalIgnoreCase))
+                return $"🛡️ {CyberManager.Common.I18n.Strings.T("SecureSystemDesc")}";
+            if (name.Equals("System", StringComparison.OrdinalIgnoreCase))
+                return $"⚙️ {CyberManager.Common.I18n.Strings.T("SystemDesc")}";
+            if (name.Contains("Idle", StringComparison.OrdinalIgnoreCase))
+                return $"💤 {CyberManager.Common.I18n.Strings.T("IdleDesc")}";
+        }
+        return $"◈ {CyberManager.Common.I18n.Strings.T("ProtectedSystemProcess")}";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+}

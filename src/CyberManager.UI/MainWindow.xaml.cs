@@ -122,6 +122,11 @@ public partial class MainWindow : Window
             _all = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
             ApplySortingAndFilter();
 
+            if (LoaderOverlay.Visibility == Visibility.Visible)
+            {
+                LoaderOverlay.Visibility = Visibility.Collapsed;
+            }
+
             var totalCpu = _all.Sum(x => x.CpuPercent);
             var totalMem = _all.Sum(x => (double)x.WorkingSetBytes) / (1024.0 * 1024.0 * 1024.0);
             StatsText.Text = $"{_all.Count} {Strings.T("ProcessesCount", _all.Count).Split(' ')[0]}  •  {Strings.T("CpuTotal", totalCpu)}  •  {Strings.T("MemTotal", totalMem)}";
@@ -649,6 +654,8 @@ public partial class MainWindow : Window
             SubtitleText.Text = Strings.T("AppSubtitle");
             SearchHint.Text = Strings.T("SearchPlaceholder");
             EmptyStateText.Text = Strings.T("NoProcesses");
+            LoaderTitle.Text = Strings.T("CollectingProcesses");
+            LoaderSub.Text = Strings.T("InitializingNtEngine");
             TopmostCheck.Content = Strings.T("AlwaysOnTop");
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtnText.Text = $"↻  {Strings.T("Refresh")}";

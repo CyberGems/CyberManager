@@ -17,6 +17,7 @@
         <conv:HighCpuWeightConverter x:Key="HighCpuWeightConverter"/>
         <conv:HighMemoryWeightConverter x:Key="HighMemoryWeightConverter"/>
         <conv:SystemProcessIconConverter x:Key="SystemProcessIconConverter"/>
+        <conv:ProcessDescriptionConverter x:Key="ProcessDescriptionConverter"/>
 
         <Style x:Key="TitleBtn" TargetType="Button">
             <Setter Property="Width" Value="42"/><Setter Property="Height" Value="32"/>
@@ -475,10 +476,99 @@
                                 </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="Threads" Binding="{Binding ThreadCount}" Width="70" SortMemberPath="ThreadCount"/>
                                 <DataGridTextColumn Header="Priority" Binding="{Binding PriorityFormatted}" Width="90" SortMemberPath="Priority"/>
-                                <DataGridTextColumn Header="Path" Binding="{Binding ExePath}" Width="*" SortMemberPath="ExePath"/>
+                                <DataGridTemplateColumn Header="Path" Width="*" SortMemberPath="ExePath">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid VerticalAlignment="Center" Margin="6,0,10,0">
+                                                <!-- Real ExePath for applications on disk -->
+                                                <TextBlock Text="{Binding ExePath}" Foreground="{DynamicResource SubTextBrush}"
+                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ExePath}" Value="">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <!-- Enriched Descriptive Subtitle for Special Kernel / System Processes with empty path -->
+                                                <TextBlock Text="{Binding Name, Converter={StaticResource ProcessDescriptionConverter}}"
+                                                           Foreground="{DynamicResource AccentBrush}" Opacity="0.85" FontStyle="Italic" FontSize="11"
+                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ExePath}" Value="">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <TextBlock x:Name="EmptyStateText" Style="{StaticResource EmptyStateText}" Text="No processes found" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,40"/>
+
+                        <!-- Modern CyberGems Pulse & Spinner Initial Loader Overlay -->
+                        <Grid x:Name="LoaderOverlay" Background="{DynamicResource CardBrush}" Visibility="Visible">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!-- Rotating CyberGem -->
+                                <Border Width="48" Height="48" CornerRadius="14" Background="{DynamicResource CardSecondaryBrush}"
+                                        BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5" HorizontalAlignment="Center"
+                                        RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <RotateTransform x:Name="LoaderRotate" Angle="0"/>
+                                    </Border.RenderTransform>
+                                    <Border.Triggers>
+                                        <EventTrigger RoutedEvent="Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard RepeatBehavior="Forever">
+                                                    <DoubleAnimation Storyboard.TargetName="LoaderRotate"
+                                                                     Storyboard.TargetProperty="Angle"
+                                                                     From="0" To="360" Duration="0:0:1.8"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Border.Triggers>
+                                    <TextBlock Text="◈" Foreground="{DynamicResource AccentBrush}" FontSize="24" FontWeight="Bold"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Title & Status Subtitle -->
+                                <TextBlock x:Name="LoaderTitle" Text="Recopilando procesos..." FontSize="13.5" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center" Margin="0,14,0,3"/>
+                                <TextBlock x:Name="LoaderSub" Text="Inicializando Motor NT • Calculando deltas de CPU" FontSize="11"
+                                           Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
+
+                                <!-- Glowing Progress Track -->
+                                <Border Width="160" Height="3" CornerRadius="1.5" Background="{DynamicResource BorderBrush}" Margin="0,14,0,0" ClipToBounds="True">
+                                    <Border Width="50" Height="3" CornerRadius="1.5" Background="{DynamicResource AccentBrush}" HorizontalAlignment="Left">
+                                        <Border.RenderTransform>
+                                            <TranslateTransform x:Name="LoaderBarTrans" X="-50"/>
+                                        </Border.RenderTransform>
+                                        <Border.Triggers>
+                                            <EventTrigger RoutedEvent="Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <DoubleAnimation Storyboard.TargetName="LoaderBarTrans"
+                                                                         Storyboard.TargetProperty="X"
+                                                                         From="-50" To="160" Duration="0:0:1.2"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Border.Triggers>
+                                    </Border>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                 </Border>
 
