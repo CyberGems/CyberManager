@@ -16,6 +16,10 @@ public sealed class AppSettings
     public double RowFontSize { get; set; } = 13.0;
     public bool ShowSuspended { get; set; } = true;
     public string SearchText { get; set; } = "";
+    public bool MinimizeToTray { get; set; } = true;
+    public bool StartWithWindows { get; set; } = false;
+    public bool StartMinimized { get; set; } = false;
+    public string GlobalHotkey { get; set; } = "Ctrl+Alt+M";
     public bool MainWindowBoundsSaved { get; set; } = false;
     public string MainWindowMonitor { get; set; } = "";
     public double MainWindowLeft { get; set; }

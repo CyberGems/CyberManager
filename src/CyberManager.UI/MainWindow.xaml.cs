@@ -11,6 +11,9 @@ using CyberManager.Common.Settings;
 using CyberManager.Core.Engine;
 using CyberManager.UI.Dialogs;
 using CyberManager.UI.Services;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using Key = System.Windows.Input.Key;
+using ModifierKeys = System.Windows.Input.ModifierKeys;
 
 namespace CyberManager.UI;
 
@@ -21,6 +24,9 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _searchDebounceTimer = new();
     private readonly HashSet<string> _expandedGroups = new(StringComparer.OrdinalIgnoreCase);
     private readonly System.Collections.Concurrent.ConcurrentDictionary<int, DateTime> _terminatedPids = new();
+    private readonly GlobalHotkeyService _hotkeyService = new();
+    private readonly TrayIconService _trayService = new();
+    private bool _isExplicitExit;
     private List<ProcessInfo> _all = new();
     private List<ProcessInfo> _view = new();
     private string _pendingSearch = "";
@@ -70,6 +76,26 @@ public partial class MainWindow : Window
             ProcGrid.FontSize = FontSizeSlider.Value;
             FontSizeLabel.Text = $"{FontSizeSlider.Value:F0}px";
             FooterText.Text = Strings.T("Ready");
+
+            // Setup System Tray
+            _trayService.Initialize(
+                this,
+                ToggleWindowVisibility,
+                OnToggleStartWithWindows,
+                OnToggleMinimizeToTray,
+                ExitApplication);
+
+            // Register Global Hotkey
+            _hotkeyService.Register(this, App.Settings.GlobalHotkey);
+            _hotkeyService.HotkeyPressed += OnGlobalHotkeyPressed;
+
+            // Start Minimized Check
+            var args = Environment.GetCommandLineArgs();
+            if (App.Settings.StartMinimized || args.Any(a => a.Equals("--minimized", StringComparison.OrdinalIgnoreCase)))
+            {
+                Hide();
+            }
+
             _ = RefreshAsync();
             _timer.Start();
         }
@@ -97,6 +123,16 @@ public partial class MainWindow : Window
             }
             App.Settings.MainWindowBoundsSaved = true;
             App.Settings.Save();
+
+            if (App.Settings.MinimizeToTray && !_isExplicitExit)
+            {
+                e.Cancel = true;
+                Hide();
+                return;
+            }
+
+            _hotkeyService.Dispose();
+            _trayService.Dispose();
         }
         catch { }
     }
@@ -365,10 +401,6 @@ public partial class MainWindow : Window
         w.ShowDialog();
     }
 
-    private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
-    private void Maximize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-    private void Close_Click(object sender, RoutedEventArgs e) => Close();
-
     private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
         _pendingSearch = SearchBox.Text ?? "";
@@ -604,8 +636,14 @@ public partial class MainWindow : Window
     private void CopyPath_Click(object sender, RoutedEventArgs e)
     {
         var s = Selected;
-        if (s == null || string.IsNullOrEmpty(s.ExePath)) return;
-        try { Clipboard.SetText(s.ExePath); } catch { }
+        if (s == null) return;
+        var textToCopy = !string.IsNullOrEmpty(s.ExePath) ? s.ExePath : s.Name;
+        try
+        {
+            Clipboard.SetText(textToCopy);
+            FooterText.Text = Strings.T("PathCopied");
+        }
+        catch { }
     }
 
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
@@ -664,6 +702,7 @@ public partial class MainWindow : Window
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
             FooterText.Text = Strings.T("Ready");
             UpdateGroupToggleButton();
+            _trayService.UpdateLocalization();
 
             if (ProcGrid.Columns.Count >= 7)
             {
@@ -709,11 +748,251 @@ public partial class MainWindow : Window
         }
     }
 
-    protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
+    #region Keyboard Navigation & Shortcuts
+
+    public void FocusSearchBox()
     {
-        if (e.Key == System.Windows.Input.Key.F5) _ = RefreshAsync();
-        if (e.Key == System.Windows.Input.Key.Delete) Kill_Click(this, new RoutedEventArgs());
-        if (e.Key == System.Windows.Input.Key.Escape) Close();
-        base.OnKeyDown(e);
+        SearchBox.Focus();
+        SearchBox.SelectAll();
     }
+
+    private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.F)
+        {
+            e.Handled = true;
+            FocusSearchBox();
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.E)
+        {
+            e.Handled = true;
+            FocusSearchBox();
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.G)
+        {
+            e.Handled = true;
+            GroupToggle_Click(sender, e);
+            return;
+        }
+
+        if (e.Key == Key.F5 || (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.R))
+        {
+            e.Handled = true;
+            _ = RefreshAsync();
+            return;
+        }
+
+        if (e.Key == Key.OemQuestion || (e.Key == Key.Divide && Keyboard.Modifiers == ModifierKeys.None))
+        {
+            if (!SearchBox.IsFocused)
+            {
+                e.Handled = true;
+                FocusSearchBox();
+                return;
+            }
+        }
+    }
+
+    private void SearchBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Down || e.Key == Key.Enter)
+        {
+            if (ProcGrid.Items.Count > 0)
+            {
+                e.Handled = true;
+                ProcGrid.Focus();
+                if (ProcGrid.SelectedIndex < 0) ProcGrid.SelectedIndex = 0;
+                ProcGrid.ScrollIntoView(ProcGrid.SelectedItem);
+            }
+            return;
+        }
+
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            if (!string.IsNullOrEmpty(SearchBox.Text))
+            {
+                SearchBox.Text = "";
+            }
+            else
+            {
+                ProcGrid.Focus();
+            }
+        }
+    }
+
+    private void ProcGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Right)
+        {
+            if (Selected is { IsGroupParent: true, IsExpanded: false } p)
+            {
+                _expandedGroups.Add(p.Name);
+                ApplySortingAndFilter();
+                e.Handled = true;
+                return;
+            }
+        }
+        else if (e.Key == Key.Left)
+        {
+            if (Selected is { IsGroupParent: true, IsExpanded: true } p)
+            {
+                _expandedGroups.Remove(p.Name);
+                ApplySortingAndFilter();
+                e.Handled = true;
+                return;
+            }
+            else if (Selected is { IsGroupChild: true } c)
+            {
+                var parent = _view.FirstOrDefault(x => x.IsGroupParent && x.Name.Equals(c.Name, StringComparison.OrdinalIgnoreCase));
+                if (parent != null)
+                {
+                    ProcGrid.SelectedItem = parent;
+                    ProcGrid.ScrollIntoView(parent);
+                }
+                e.Handled = true;
+                return;
+            }
+        }
+        else if (e.Key == Key.Space || e.Key == Key.Enter)
+        {
+            if (Selected is { IsGroupParent: true } p)
+            {
+                if (_expandedGroups.Contains(p.Name)) _expandedGroups.Remove(p.Name);
+                else _expandedGroups.Add(p.Name);
+                ApplySortingAndFilter();
+                e.Handled = true;
+                return;
+            }
+        }
+        else if (e.Key == Key.Delete)
+        {
+            e.Handled = true;
+            if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            {
+                KillTree_Click(sender, e);
+            }
+            else
+            {
+                Kill_Click(sender, e);
+            }
+            return;
+        }
+        else if (e.Key == Key.Apps || (e.Key == Key.F10 && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)))
+        {
+            if (ProcGrid.ContextMenu != null && ProcGrid.SelectedItem != null)
+            {
+                ProcGrid.ContextMenu.PlacementTarget = ProcGrid;
+                ProcGrid.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+                ProcGrid.ContextMenu.IsOpen = true;
+                e.Handled = true;
+                return;
+            }
+        }
+        else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
+        {
+            if (Selected != null)
+            {
+                CopyPath_Click(sender, e);
+                e.Handled = true;
+                return;
+            }
+        }
+
+        // Type-to-Search auto-focus
+        if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && !Keyboard.Modifiers.HasFlag(ModifierKeys.Alt) && !Keyboard.Modifiers.HasFlag(ModifierKeys.Windows))
+        {
+            if ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
+            {
+                SearchBox.Focus();
+            }
+        }
+    }
+
+    #endregion
+
+    #region Tray & Hotkey Management
+
+    private void ToggleWindowVisibility()
+    {
+        if (IsVisible && WindowState != WindowState.Minimized && IsActive)
+        {
+            if (App.Settings.MinimizeToTray)
+            {
+                Hide();
+            }
+            else
+            {
+                WindowState = WindowState.Minimized;
+            }
+        }
+        else
+        {
+            Show();
+            if (WindowState == WindowState.Minimized)
+            {
+                WindowState = WindowState.Normal;
+            }
+            Activate();
+            Focus();
+            FocusSearchBox();
+        }
+    }
+
+    private void OnGlobalHotkeyPressed()
+    {
+        ToggleWindowVisibility();
+    }
+
+    private void OnToggleStartWithWindows(bool enable)
+    {
+        App.Settings.StartWithWindows = enable;
+        StartupManager.SetAutoStart(enable);
+        App.Settings.Save();
+        _trayService.UpdateLocalization();
+    }
+
+    private void OnToggleMinimizeToTray(bool enable)
+    {
+        App.Settings.MinimizeToTray = enable;
+        App.Settings.Save();
+        _trayService.UpdateLocalization();
+    }
+
+    private void ExitApplication()
+    {
+        _isExplicitExit = true;
+        _hotkeyService.Dispose();
+        _trayService.Dispose();
+        Close();
+        Application.Current.Shutdown();
+    }
+
+    private void Minimize_Click(object sender, RoutedEventArgs e)
+    {
+        if (App.Settings.MinimizeToTray)
+        {
+            Hide();
+        }
+        else
+        {
+            WindowState = WindowState.Minimized;
+        }
+    }
+
+    private void Maximize_Click(object sender, RoutedEventArgs e)
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+    }
+
+    private void Close_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    #endregion
 }

@@ -99,6 +99,13 @@ public static class Strings
         ["SecureSystemDesc"] = ("Virtualization-based Security isolated environment (VBS)", "Entorno aislado de seguridad basada en virtualización (VBS)"),
         ["IdleDesc"] = ("Processors idle / sleep time", "Tiempo de inactividad de los procesadores del sistema"),
         ["ProtectedSystemProcess"] = ("Protected Windows system process", "Proceso protegido del sistema de Windows"),
+        ["ShowCyberManager"] = ("Show CyberManager", "Mostrar CyberManager"),
+        ["MinimizeToTray"] = ("Minimize to tray", "Minimizar a la bandeja"),
+        ["StartWithWindows"] = ("Start with Windows", "Iniciar con Windows"),
+        ["Exit"] = ("Exit", "Salir"),
+        ["PathCopied"] = ("Path copied to clipboard", "Ruta copiada al portapapeles"),
+        ["GlobalHotkeyTip"] = ("Global Hotkey: {0}", "Atajo Global: {0}"),
+        ["KeyboardHelp"] = ("Keyboard shortcuts: Ctrl+F Search • ↓ Select • Space Expand • Del Kill • Shift+Del Tree • Ctrl+G Group • F5 Refresh", "Atajos de teclado: Ctrl+F Buscar • ↓ Seleccionar • Espacio Expandir • Supr Finalizar • Shift+Supr Árbol • Ctrl+G Agrupar • F5 Actualizar"),
     };
 
     public static string T(string key, params object[] args)

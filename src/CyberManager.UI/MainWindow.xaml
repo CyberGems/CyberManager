@@ -4,7 +4,8 @@
         xmlns:conv="clr-namespace:CyberManager.UI.Services"
         Title="CyberManager — Ultra-Light Task Manager" Height="700" Width="1100" MinHeight="520" MinWidth="900"
         WindowStartupLocation="CenterScreen" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        ResizeMode="CanResize">
+        ResizeMode="CanResize"
+        PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
         <conv:ChildIndentMarginConverter x:Key="ChildIndentMarginConverter"/>
@@ -295,7 +296,7 @@
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <TextBlock Text="⌕" Foreground="{DynamicResource SubTextBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBox x:Name="SearchBox" Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" CaretBrush="{DynamicResource AccentBrush}" FontSize="12" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged"/>
+                            <TextBox x:Name="SearchBox" Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" CaretBrush="{DynamicResource AccentBrush}" FontSize="12" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" PreviewKeyDown="SearchBox_PreviewKeyDown"/>
                             <TextBlock x:Name="SearchHint" Grid.Column="1" Text="Search process, PID or path..." Foreground="{DynamicResource SubTextBrush}" FontSize="12" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,0,0"/>
                             <Button Grid.Column="2" Content="✕" Foreground="{DynamicResource SubTextBrush}" Background="Transparent" BorderThickness="0" FontSize="10" Cursor="Hand" Padding="6,0" Click="ClearSearch_Click" Visibility="Collapsed" x:Name="ClearBtn"/>
                         </Grid>
@@ -317,7 +318,8 @@
                                   VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                                   VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.CanContentScroll="True"
                                   SelectionMode="Single" SelectionUnit="FullRow"
-                                  Sorting="ProcGrid_Sorting">
+                                  Sorting="ProcGrid_Sorting"
+                                  PreviewKeyDown="ProcGrid_PreviewKeyDown">
                             <DataGrid.ContextMenu>
                                 <ContextMenu Style="{StaticResource ModernContextMenu}">
                                     <MenuItem Header="End Task" Style="{StaticResource ModernMenuItem}" Click="Kill_Click"/>
