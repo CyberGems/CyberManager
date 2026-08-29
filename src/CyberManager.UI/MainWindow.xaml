@@ -583,10 +583,11 @@
                             <TextBlock Text="🗛" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <Slider x:Name="FontSizeSlider" Minimum="11" Maximum="17" Value="13" Width="75" VerticalAlignment="Center"
                                     SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1"
+                                    Focusable="False" IsTabStop="False"
                                     ValueChanged="FontSizeSlider_ValueChanged"/>
                             <TextBlock x:Name="FontSizeLabel" Text="13px" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
                         </StackPanel>
-                        <CheckBox x:Name="TopmostCheck" Content="Always on top" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center" Checked="Topmost_Checked" Unchecked="Topmost_Checked"/>
+                        <CheckBox x:Name="TopmostCheck" Content="Always on top" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center" Checked="Topmost_Checked" Unchecked="Topmost_Checked" Focusable="False" IsTabStop="False"/>
                     </StackPanel>
                 </Grid>
             </Grid>

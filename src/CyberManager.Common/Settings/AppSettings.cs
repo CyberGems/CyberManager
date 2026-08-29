@@ -19,6 +19,7 @@ public sealed class AppSettings
     public bool MinimizeToTray { get; set; } = true;
     public bool StartWithWindows { get; set; } = false;
     public bool StartMinimized { get; set; } = false;
+    public bool AutoCheckForUpdates { get; set; } = true;
     public string GlobalHotkey { get; set; } = "Ctrl+Alt+M";
     public bool MainWindowBoundsSaved { get; set; } = false;
     public string MainWindowMonitor { get; set; } = "";

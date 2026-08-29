@@ -106,6 +106,19 @@ public static class Strings
         ["PathCopied"] = ("Path copied to clipboard", "Ruta copiada al portapapeles"),
         ["GlobalHotkeyTip"] = ("Global Hotkey: {0}", "Atajo Global: {0}"),
         ["KeyboardHelp"] = ("Keyboard shortcuts: Ctrl+F Search • ↓ Select • Space Expand • Del Kill • Shift+Del Tree • Ctrl+G Group • F5 Refresh", "Atajos de teclado: Ctrl+F Buscar • ↓ Seleccionar • Espacio Expandir • Supr Finalizar • Shift+Supr Árbol • Ctrl+G Agrupar • F5 Actualizar"),
+        ["AutoUpdateTitle"] = ("Check for updates on startup", "Buscar actualizaciones al iniciar"),
+        ["AutoUpdateDesc"] = ("Automatically check for new versions when starting CyberManager.", "Comprobar automáticamente si hay nuevas versiones al iniciar CyberManager."),
+        ["CheckUpdatesDesc"] = ("Check the latest version and download updates directly.", "Comprobar la versión más reciente y descargar actualizaciones directamente."),
+        ["DownloadingUpdate"] = ("Downloading update... {0:F0}%", "Descargando actualización... {0:F0}%"),
+        ["DownloadComplete"] = ("Download Complete", "Descarga completada"),
+        ["DownloadCompleteDesc"] = ("The update was downloaded successfully. CyberManager will now restart to apply the update.", "La actualización se descargó correctamente. CyberManager se reiniciará para aplicar la actualización."),
+        ["DownloadFailed"] = ("Download Failed", "Error al descargar"),
+        ["Download"] = ("Download", "Descargar"),
+        ["Later"] = ("Later", "Más tarde"),
+        ["Current"] = ("Current:", "Actual:"),
+        ["Latest"] = ("Latest:", "Última:"),
+        ["UpdatePrompt"] = ("A new version is available. Would you like to download and install it now?", "Una nueva versión está disponible. ¿Deseas descargarla e instalarla ahora?"),
+        ["OpenBrowser"] = ("Open Browser", "Abrir navegador"),
     };
 
     public static string T(string key, params object[] args)

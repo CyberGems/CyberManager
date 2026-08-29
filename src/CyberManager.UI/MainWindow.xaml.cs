@@ -96,6 +96,27 @@ public partial class MainWindow : Window
                 Hide();
             }
 
+            // Background update check
+            if (App.Settings.AutoCheckForUpdates)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(3000);
+                        var r = await UpdateService.CheckForUpdatesAsync();
+                        if (r.IsUpdateAvailable)
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                FooterText.Text = $"⭐ {Strings.T("UpdateAvailable", r.LatestVersionLabel)}";
+                            });
+                        }
+                    }
+                    catch { }
+                });
+            }
+
             _ = RefreshAsync();
             _timer.Start();
         }
@@ -804,9 +825,18 @@ public partial class MainWindow : Window
             if (ProcGrid.Items.Count > 0)
             {
                 e.Handled = true;
-                ProcGrid.Focus();
                 if (ProcGrid.SelectedIndex < 0) ProcGrid.SelectedIndex = 0;
-                ProcGrid.ScrollIntoView(ProcGrid.SelectedItem);
+                ProcGrid.Focus();
+                var item = ProcGrid.SelectedItem;
+                if (item != null)
+                {
+                    ProcGrid.ScrollIntoView(item);
+                    ProcGrid.UpdateLayout();
+                    if (ProcGrid.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow row)
+                    {
+                        row.Focus();
+                    }
+                }
             }
             return;
         }
