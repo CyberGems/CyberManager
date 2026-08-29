@@ -132,3 +132,21 @@ public sealed class HighMemoryWeightConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
 }
+
+public sealed class SystemProcessIconConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is string name)
+        {
+            if (name.Contains("Memory Compression", StringComparison.OrdinalIgnoreCase)) return "⚡";
+            if (name.Equals("Registry", StringComparison.OrdinalIgnoreCase)) return "🗃️";
+            if (name.Equals("Secure System", StringComparison.OrdinalIgnoreCase)) return "🛡️";
+            if (name.Equals("System", StringComparison.OrdinalIgnoreCase)) return "⚙️";
+            if (name.Contains("Idle", StringComparison.OrdinalIgnoreCase)) return "💤";
+        }
+        return "◈";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+}

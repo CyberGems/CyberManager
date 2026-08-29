@@ -16,6 +16,7 @@
         <conv:MemoryHeatmapBrushConverter x:Key="MemoryHeatmapBrushConverter"/>
         <conv:HighCpuWeightConverter x:Key="HighCpuWeightConverter"/>
         <conv:HighMemoryWeightConverter x:Key="HighMemoryWeightConverter"/>
+        <conv:SystemProcessIconConverter x:Key="SystemProcessIconConverter"/>
 
         <Style x:Key="TitleBtn" TargetType="Button">
             <Setter Property="Width" Value="42"/><Setter Property="Height" Value="32"/>
@@ -24,8 +25,27 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
-                        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource HeaderBgBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/></Trigger></ControlTemplate.Triggers>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HeaderBgBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="1.06" ScaleY="1.06"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="0.92" ScaleY="0.92"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -34,8 +54,27 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
-                        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="#E81123"/><Setter Property="Foreground" Value="White"/></Trigger></ControlTemplate.Triggers>
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E81123"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="1.06" ScaleY="1.06"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="0.92" ScaleY="0.92"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -47,10 +86,57 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}" RenderTransformOrigin="0.5,0.5" SnapsToDevicePixels="True">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/><Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/></Trigger></ControlTemplate.Triggers>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="1.03" ScaleY="1.03"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="0.95" ScaleY="0.95"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="DangerModernButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}" RenderTransformOrigin="0.5,0.5" SnapsToDevicePixels="True">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#E81123"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#22E81123"/>
+                                <Setter Property="Foreground" Value="#FF6B6B"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="1.03" ScaleY="1.03"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="0.95" ScaleY="0.95"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -62,10 +148,27 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6" Padding="{TemplateBinding Padding}" RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/></Trigger></ControlTemplate.Triggers>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="1.10" ScaleY="1.10"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="Bd" Property="RenderTransform">
+                                    <Setter.Value><ScaleTransform ScaleX="0.90" ScaleY="0.90"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -199,7 +302,7 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0,0,0">
                         <Button x:Name="GroupToggleBtn" Style="{StaticResource ModernButton}" Click="GroupToggle_Click" ToolTip="Group by application"><TextBlock x:Name="GroupToggleText" Text="🗂️  Group"/></Button>
                         <Button x:Name="RefreshBtn" Style="{StaticResource ModernButton}" Margin="8,0,0,0" Click="Refresh_Click" ToolTip="Refresh (F5)"><TextBlock x:Name="RefreshBtnText" Text="↻  Refresh"/></Button>
-                        <Button x:Name="KillBtn" Style="{StaticResource ModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)"><TextBlock x:Name="KillBtnText" Text="✕  End Task"/></Button>
+                        <Button x:Name="KillBtn" Style="{StaticResource DangerModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)"><TextBlock x:Name="KillBtnText" Text="✕  End Task"/></Button>
                     </StackPanel>
                 </Grid>
 
@@ -255,7 +358,22 @@
                                                 <!-- Chevron button for Group Parents -->
                                                 <Border Grid.Column="0" Width="18" Height="18" VerticalAlignment="Center" HorizontalAlignment="Center"
                                                         Visibility="{Binding IsGroupParent, Converter={StaticResource BoolToVisConverter}}"
-                                                        Cursor="Hand" Background="Transparent" MouseLeftButtonDown="GroupChevron_MouseDown">
+                                                        Cursor="Hand" Background="Transparent" MouseLeftButtonDown="GroupChevron_MouseDown"
+                                                        RenderTransformOrigin="0.5,0.5">
+                                                    <Border.RenderTransform>
+                                                        <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                    </Border.RenderTransform>
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="RenderTransform">
+                                                                        <Setter.Value><ScaleTransform ScaleX="1.2" ScaleY="1.2"/></Setter.Value>
+                                                                    </Setter>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
                                                     <TextBlock Text="{Binding IsExpanded, Converter={StaticResource ExpandedChevronConverter}}"
                                                                Foreground="{DynamicResource AccentBrush}" FontSize="9" FontWeight="Bold"
                                                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -266,7 +384,7 @@
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
                                                            Visibility="{Binding IsGroupChild, Converter={StaticResource BoolToVisConverter}}"/>
 
-                                                <!-- Process Icon Slot with fallback to diamond -->
+                                                <!-- Process Icon Slot with fallback to system/diamond glyph -->
                                                 <Grid Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                     <Image x:Name="ProcIcon" Source="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"
                                                            Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -281,7 +399,8 @@
                                                             </Style>
                                                         </Image.Style>
                                                     </Image>
-                                                    <TextBlock Text="◈" Foreground="{DynamicResource SubTextBrush}" FontSize="10"
+                                                    <TextBlock Text="{Binding Name, Converter={StaticResource SystemProcessIconConverter}}"
+                                                               Foreground="{DynamicResource SubTextBrush}" FontSize="10"
                                                                HorizontalAlignment="Center" VerticalAlignment="Center">
                                                         <TextBlock.Style>
                                                             <Style TargetType="TextBlock">
