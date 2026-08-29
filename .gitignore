@@ -4,6 +4,10 @@
 [Ll]og/
 [Ll]ogs/
 publish/
+publish-win64/
+CyberManager-Setup-*.exe
+CyberManager-*-Portable-*.zip
+release_notes.md
 artifacts/
 TestResults/
 
