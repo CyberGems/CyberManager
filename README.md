@@ -64,7 +64,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 
 ## ❤️ Donate
 
-**CyberManager** is one of the gems in [CyberGems](https://github.com/CyberGems#-all-apps--repositories), a personal suite I've spent thousands of hours building and refining for my own use. I've decided to share the entire collection with the world — completely free and open-source.
+**CyberManager** is one of the gems in [CyberGems](https://github.com/CyberGems#-all-apps--repositories), a personal suite I've spent thousands of hours building and refining for my own use. I've decided to share the whole suite with the world — completely free and open-source.
 
 If you'd like to support this work, a donation would mean a lot. Thank you! 🙏
 
