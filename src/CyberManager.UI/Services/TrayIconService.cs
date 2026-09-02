@@ -95,6 +95,7 @@ public sealed class TrayIconService : IDisposable
     private MenuItem? _subDonateItem;
     private MenuItem? _subAboutItem;
     private MenuItem? _subCheckUpdateItem;
+    private MenuItem? _settingsMenuItem;
     private MenuItem? _exitMenuItem;
 
     private Window? _ownerWindow;
@@ -105,6 +106,7 @@ public sealed class TrayIconService : IDisposable
     private Action<bool>? _onToggleGroupByApp;
     private Action<bool>? _onToggleStartWithWindows;
     private Action<bool>? _onToggleMinimizeToTray;
+    private Action? _onOpenSettings;
     private Action<bool>? _onOpenAbout;
     private Action? _onExit;
 
@@ -117,6 +119,7 @@ public sealed class TrayIconService : IDisposable
         Action<bool> onToggleGroupByApp,
         Action<bool> onToggleStartWithWindows,
         Action<bool> onToggleMinimizeToTray,
+        Action onOpenSettings,
         Action<bool> onOpenAbout,
         Action onExit)
     {
@@ -128,6 +131,7 @@ public sealed class TrayIconService : IDisposable
         _onToggleGroupByApp = onToggleGroupByApp;
         _onToggleStartWithWindows = onToggleStartWithWindows;
         _onToggleMinimizeToTray = onToggleMinimizeToTray;
+        _onOpenSettings = onOpenSettings;
         _onOpenAbout = onOpenAbout;
         _onExit = onExit;
 
@@ -293,6 +297,15 @@ public sealed class TrayIconService : IDisposable
             }
         };
 
+        // 8b. Settings
+        _settingsMenuItem = new MenuItem
+        {
+            Header = $"{Strings.T("Settings")}...",
+            Icon = CreatePathIcon("M 12 15 C 10.3 15 9 13.7 9 12 C 9 10.3 10.3 9 12 9 C 13.7 9 15 10.3 15 12 C 15 13.7 13.7 15 12 15 Z M 19.4 13 C 19.5 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.5 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10.1 2 C 9.8 2 9.6 2.2 9.6 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.5 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.5 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.6 21.6 C 9.6 21.8 9.8 22 10.1 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z")
+        };
+        if (miStyle != null) _settingsMenuItem.Style = miStyle;
+        _settingsMenuItem.Click += (_, _) => _onOpenSettings?.Invoke();
+
         // 9. Help Submenu (Matching CyberFeeds standard)
         _helpMenuItem = new MenuItem
         {
@@ -395,6 +408,7 @@ public sealed class TrayIconService : IDisposable
         _contextMenu.Items.Add(_startWithWindowsMenuItem);
         _contextMenu.Items.Add(_minimizeToTrayMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
+        _contextMenu.Items.Add(_settingsMenuItem);
         _contextMenu.Items.Add(_helpMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
         _contextMenu.Items.Add(_exitMenuItem);
@@ -468,6 +482,7 @@ public sealed class TrayIconService : IDisposable
             _minimizeToTrayMenuItem.Header = Strings.T("MinimizeToTray");
             _minimizeToTrayMenuItem.IsChecked = App.Settings.MinimizeToTray;
         }
+        if (_settingsMenuItem != null) _settingsMenuItem.Header = $"{Strings.T("Settings")}...";
         if (_helpMenuItem != null) _helpMenuItem.Header = Strings.T("Help");
         if (_subHelpItem != null) _subHelpItem.Header = Strings.T("Help");
         if (_subFaqItem != null) _subFaqItem.Header = Strings.T("Faq");

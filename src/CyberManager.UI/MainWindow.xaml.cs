@@ -88,6 +88,7 @@ public partial class MainWindow : Window
                 OnToggleGroupByApp,
                 OnToggleStartWithWindows,
                 OnToggleMinimizeToTray,
+                OpenSettingsFromTray,
                 OpenAboutFromTray,
                 ExitApplication);
 
@@ -276,15 +277,16 @@ public partial class MainWindow : Window
         SearchHint.Visibility = string.IsNullOrEmpty(q) ? Visibility.Visible : Visibility.Collapsed;
         ClearBtn.Visibility = string.IsNullOrEmpty(q) ? Visibility.Collapsed : Visibility.Visible;
 
-        IEnumerable<ProcessInfo> filtered;
-        if (string.IsNullOrEmpty(q))
+        IEnumerable<ProcessInfo> filtered = _all;
+        if (!App.Settings.ShowIdleProcess)
         {
-            filtered = _all;
+            filtered = filtered.Where(x => x.Pid != 0);
         }
-        else
+
+        if (!string.IsNullOrEmpty(q))
         {
             bool isPid = int.TryParse(q, out var pid);
-            filtered = _all.Where(x =>
+            filtered = filtered.Where(x =>
                 x.Name.Contains(q, StringComparison.OrdinalIgnoreCase) ||
                 x.ExePath.Contains(q, StringComparison.OrdinalIgnoreCase) ||
                 (isPid && x.Pid == pid));
@@ -414,6 +416,28 @@ public partial class MainWindow : Window
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Left) DragMove();
+    }
+
+    private void Settings_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new SettingsWindow
+        {
+            Owner = this,
+            OnSettingsChanged = () =>
+            {
+                ApplySortingAndFilter();
+                ApplyTheme();
+                ApplyLanguage();
+                _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
+                Topmost = App.Settings.AlwaysOnTop;
+                TopmostCheck.IsChecked = Topmost;
+                GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
+                FontSizeSlider.Value = App.Settings.RowFontSize;
+                ProcGrid.FontSize = App.Settings.RowFontSize;
+                FontSizeLabel.Text = $"{App.Settings.RowFontSize:F0}px";
+            }
+        };
+        dlg.ShowDialog();
     }
 
     private void About_Click(object sender, RoutedEventArgs e)
@@ -742,6 +766,10 @@ public partial class MainWindow : Window
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             KillBtnText.Text = Strings.T("Kill");
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
+            ThemeBtn.ToolTip = Strings.T("Theme");
+            LangBtn.ToolTip = Strings.T("Language");
+            SettingsBtn.ToolTip = $"{Strings.T("Settings")} (Ctrl+,)";
+            AboutBtn.ToolTip = Strings.T("About");
             CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
             RamSparklineBorder.ToolTip = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
             FooterText.Text = Strings.T("Ready");
@@ -826,6 +854,13 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
             SystemInfo_Click(sender, e);
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.OemComma || e.Key == Key.OemPeriod))
+        {
+            e.Handled = true;
+            Settings_Click(sender, e);
             return;
         }
 
@@ -1017,6 +1052,17 @@ public partial class MainWindow : Window
         }
         var dlg = new SystemInfoWindow { Owner = this };
         dlg.ShowDialog();
+    }
+
+    private void OpenSettingsFromTray()
+    {
+        if (!IsVisible)
+        {
+            Show();
+            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+            Activate();
+        }
+        Settings_Click(this, new RoutedEventArgs());
     }
 
     private void OpenAboutFromTray(bool checkUpdatesNow)

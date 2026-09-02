@@ -71,7 +71,12 @@ public class StringsTests
             "Ok", "Cancel", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",
             "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction",
             "GroupByApp", "Ungroup", "KillGroupConfirm", "SuspendGroupConfirm", "ResumeGroupConfirm",
-            "MainProcess", "WorkerProcess", "PriorityIdle", "PriorityBelowNormal", "TextSize"
+            "MainProcess", "WorkerProcess", "PriorityIdle", "PriorityBelowNormal", "TextSize",
+            "SettingsTitle", "SettingsSubtitle", "ShowIdleProcessTitle", "ShowIdleProcessDesc",
+            "GroupByAppTitle", "GroupByAppDesc", "HighlightSuspendedTitle", "HighlightSuspendedDesc",
+            "RefreshIntervalTitle", "RefreshIntervalDesc", "RefreshFast", "RefreshNormal", "RefreshSlow",
+            "StartWithWindowsTitle", "MinimizeToTrayTitle", "AlwaysOnTopTitle", "AutoCheckUpdatesTitle",
+            "GlobalHotkeyTitle", "ResetDefaults", "SettingsSaved"
         };
         foreach (var key in keys)
         {

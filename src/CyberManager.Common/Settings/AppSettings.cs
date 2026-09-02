@@ -21,6 +21,7 @@ public sealed class AppSettings
     public bool StartMinimized { get; set; } = false;
     public bool AutoCheckForUpdates { get; set; } = true;
     public string GlobalHotkey { get; set; } = "Ctrl+Alt+M";
+    public bool ShowIdleProcess { get; set; } = false;
     public bool MainWindowBoundsSaved { get; set; } = false;
     public string MainWindowMonitor { get; set; } = "";
     public double MainWindowLeft { get; set; }

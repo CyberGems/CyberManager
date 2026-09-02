@@ -323,9 +323,10 @@
                         <Border Background="Transparent" CornerRadius="6" Padding="4,2" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="Click to open System Information" Margin="0,0,10,0">
                             <TextBlock x:Name="StatsText" Text="—" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
                         </Border>
-                        <Button Style="{StaticResource IconButton}" Click="ThemeToggle_Click" ToolTip="Theme"><TextBlock Text="🎨" FontSize="12"/></Button>
-                        <Button Style="{StaticResource IconButton}" Click="LangToggle_Click" ToolTip="Language"><TextBlock Text="🌐" FontSize="12"/></Button>
-                        <Button Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="ThemeBtn" Style="{StaticResource IconButton}" Click="ThemeToggle_Click" ToolTip="Theme"><TextBlock Text="🎨" FontSize="12"/></Button>
+                        <Button x:Name="LangBtn" Style="{StaticResource IconButton}" Click="LangToggle_Click" ToolTip="Language"><TextBlock Text="🌐" FontSize="12"/></Button>
+                        <Button x:Name="SettingsBtn" Style="{StaticResource TitleBtn}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)"><TextBlock Text="⚙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="AboutBtn" Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                         <Button Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                         <Button Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                         <Button Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
