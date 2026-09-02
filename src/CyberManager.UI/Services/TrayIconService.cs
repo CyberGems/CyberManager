@@ -359,7 +359,7 @@ public sealed class TrayIconService : IDisposable
         _subCheckUpdateItem = new MenuItem
         {
             Header = Strings.T("CheckForUpdates"),
-            Icon = CreatePathIcon("M 21.5 2 V 7 H 16.5 M 2.5 22 V 17 H 7.5 M 20.49 15 A 9 9 0 0 1 5.64 5.64 L 2.5 9 M 3.51 9 A 9 9 0 0 1 18.36 18.36 L 21.5 15")
+            Icon = CreatePathIcon("M 12 3 A 9 9 0 0 1 21 12 M 12 21 A 9 9 0 0 1 3 12 M 21 3 V 9 H 15 M 3 21 V 15 H 9")
         };
         if (miStyle != null) _subCheckUpdateItem.Style = miStyle;
         _subCheckUpdateItem.Click += (_, _) => _onOpenAbout?.Invoke(true);
