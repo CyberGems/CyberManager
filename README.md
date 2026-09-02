@@ -2,15 +2,7 @@
   <img src="src/CyberManager.UI/Assets/CyberManager.png" width="140" alt="CyberManager logo" />
 </p>
 
-# <p align="center">CyberManager — Ultra-Light Task Manager & Real-Time Process Control</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License" />
-  <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4.svg?logo=windows&logoColor=white" alt="Platform" />
-  <img src="https://img.shields.io/badge/.NET-10.0-512BD4.svg?logo=dotnet&logoColor=white" alt=".NET" />
-  <img src="https://img.shields.io/badge/version-1.0.0-00F0FF.svg" alt="Version" />
-  <a href="https://github.com/CyberGems/CyberManager/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222?style=flat-square&logo=github&logoColor=white" alt="Wiki" /></a>
-</p>
+<h1 align="center">CyberManager — Ultra-Light Task Manager & Real-Time Process Control</h1>
 
 <p align="center">
   <a href="https://github.com/CyberGems/CyberManager/releases/latest">
@@ -21,44 +13,163 @@
   </a>
 </p>
 
-CyberManager is a free and open-source task manager for Windows, optimized for systems with a large number of running processes. It uses virtualized rendering, integrates natively with the NT kernel, and stays responsive under heavy load — making it a solid replacement for the built-in Windows Task Manager.
+<p align="center">
+  <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License" />
+  <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4.svg?logo=windows&logoColor=white" alt="Platform" />
+  <img src="https://img.shields.io/badge/.NET-10.0-512BD4.svg?logo=dotnet&logoColor=white" alt=".NET" />
+  <img src="https://img.shields.io/badge/version-1.0.0-00F0FF.svg" alt="Version" />
+  <a href="https://github.com/CyberGems/CyberManager/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222?style=flat-square&logo=github&logoColor=white" alt="Wiki" /></a>
+</p>
 
-*Free and open source (GPLv3) — no ads, no tracking.*
+An ultra-lightweight, virtualized task manager for Windows, built as a premium, high-performance alternative to the Windows Task Manager. Handles machines with **3000+ processes at 144fps** with zero lag, using native Windows NT API calls for process enumeration and control. Features real-time CPU/RAM sparklines, a dedicated System Information window, and a cyberpunk glassmorphic interface.
+
+*Free and open source (GPLv3) — no ads, no tracking, and no data collection. Just enjoy it.*
+
+---
+
+## 🎯 Why CyberManager?
+
+Most task managers either freeze under heavy load or bury basic features behind complex UIs. CyberManager gives you **instant process control, real-time telemetry, and deep system insights** — all in a frameless, neon-styled interface that stays responsive no matter how many processes you run.
+
+| Need | Solution |
+|---|---|
+| Manage thousands of processes | UI virtualization — only visible rows rendered, 3000+ at 144fps |
+| Instant process refresh | NT-native engine — direct API calls, zero WMI overhead |
+| Identify resource hogs | Adaptive CPU/RAM heatmap with thermal tinting |
+| Monitor system health | Live sparklines + System Information window with 4 tabs |
+| Control processes | End, end tree, suspend, resume, set priority |
+| Stay out of the way | System tray + global hotkey (`Ctrl+Alt+M`) + auto-start |
+| Make it yours | 3 themes, bilingual EN/ES, always-on-top |
 
 ---
 
 ## ✨ Key Features
 
-- **Virtualized Process Grid**: Renders only visible rows — 3000+ processes at 144fps.
-- **NT-Native Engine**: `NtQueryInformationProcess` + differential snapshots for instant refresh.
-- **Real-Time CPU %**: Delta-based calculation per-process, accurate and lightweight.
-- **Instant Search & Filter**: By name, PID or path with zero blocking.
-- **Process Control**: End task, end tree, suspend/resume, copy path, open folder, search online.
-- **Premium CyberGems Chrome**: Frameless Mica/DWM 12px, CyberManager neon cyan theme + Dark/Light.
-- **Always on Top** + bilingual EN/ES.
+### 🖥️ Process Management
+- **Virtualized Grid** — Renders only visible rows for zero-lag scrolling with 3000+ processes
+- **NT-Native Engine** — Direct `NtQuerySystemInformation` + differential snapshots
+- **Real-Time CPU %** — Delta-based per-process calculation, accurate and lightweight
+- **Instant Search & Filter** — By name, PID, or path with zero blocking (150ms debounce)
+- **Process Grouping** — Group by application with expandable tree hierarchy
+- **Resource Heatmap** — Adaptive CPU/RAM thermal tinting (green → yellow → red)
+
+### 🎛️ Process Control
+- **End Task** — Terminate selected process
+- **End Process Tree** — Terminate process and all children
+- **Suspend / Resume** — Pause and resume process execution
+- **Set Priority** — Real Time, High, Above Normal, Normal, Below Normal, Idle
+- **Copy Path** — Copy executable path to clipboard
+- **Open Folder** — Open containing folder in Explorer
+- **Search Online** — Google search for process name
+
+### 📊 System Monitoring
+- **Live Sparklines** — Real-time CPU and RAM history graphs in the main window footer
+- **System Information Window** — Dedicated window with 4 tabs:
+  - **Summary** — Dual sparklines + system totals + hardware topology
+  - **CPU** — Full history graph + model name + core/thread counts
+  - **Memory** — Physical RAM, commit charge, kernel pools (paged/non-paged)
+  - **I/O History** — Process/thread/handle counts + kernel pool stats
+
+### 🖥️ Desktop Integration
+- **System Tray** — Minimize to tray, quick actions menu, version info
+- **Global Hotkey** — Configurable toggle shortcut (default: `Ctrl+Alt+M`)
+- **Always on Top** — Pin window above other applications
+- **Auto-Start** — Launch at Windows sign-in
+- **Auto-Updates** — Check GitHub Releases on startup with download progress
+
+### 🎨 Customization
+- **3 Themes** — CyberManager (Obsidian & Neon Cyan), Dark (Charcoal & Indigo), Light (Slate & Royal Blue)
+- **Row Font Size** — Adjustable 11–17px with live preview
+- **Bilingual UI** — Full English and Spanish interface
+- **Frameless Chrome** — DWM rounded corners, Mica/Acrylic background effects
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & Architecture
 
-- **Platform**: Windows 10/11 (x64/ARM64)
-- **Framework**: .NET 10 + WPF (Native UI)
+- **Platform:** Windows 10 / 11 (x64 / ARM64)
+- **Framework:** .NET 10 + WPF (Native UI)
+- **Architecture:** Native UI with async NT engine
 
 ```
 CyberManager.slnx
-├── src/CyberManager.Common/ -> Models, I18n, Settings (AppTheme.CyberManager)
-├── src/CyberManager.Core/   -> ProcessCollector, ProcessActions (NT API)
-└── src/CyberManager.UI/     -> Frameless WPF, ThemeManager, AboutWindow
+├── src/CyberManager.Common/   Models, I18n, Settings
+├── src/CyberManager.Core/     ProcessCollector, SystemMetricsCollector (NT API)
+└── src/CyberManager.UI/       Frameless WPF, Sparkline, SystemInfoWindow
+```
+
+### Architecture Highlights
+
+- **NT-Native Engine** — Direct `NtQuerySystemInformation`, `NtSuspendProcess`, `NtResumeProcess` calls
+- **Async Collection** — Process enumeration on thread pool with differential snapshots
+- **UI Virtualization** — Only visible rows rendered in the DataGrid
+- **System Metrics** — `GetSystemTimes` + `GlobalMemoryStatusEx` + `GetPerformanceInfo` for telemetry
+- **Icon Extraction** — `SHGetFileInfo` with path-based fallback and deduplicated cache
+
+---
+
+## 🚀 Getting Started
+
+### Install
+
+1. Download the [latest release](https://github.com/CyberGems/CyberManager/releases/latest)
+2. Run the installer or portable version
+3. Press `Ctrl+Alt+M` to toggle the window from any application
+
+### Build from Source
+
+```powershell
+git clone https://github.com/CyberGems/CyberManager.git
+cd CyberManager
+dotnet build
+dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 ```
 
 ---
 
-## 🚀 Building
+## ⌨️ Keyboard Shortcuts
 
-```powershell
-dotnet build
-dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
-```
+| Key | Action | Scope |
+|---|---|---|
+| `Ctrl+Alt+M` | Toggle CyberManager | Global |
+| `Ctrl+F` / `Ctrl+E` | Focus search box | Application |
+| `Ctrl+G` | Toggle process grouping | Application |
+| `Ctrl+I` | Open System Information | Application |
+| `F5` / `Ctrl+R` | Refresh process list | Application |
+| `Delete` | End selected task | Application |
+| `Shift+Delete` | End process tree | Application |
+| `Ctrl+C` | Copy process path | Application |
+| `Space` / `Enter` | Expand/collapse group | Application |
+| `Escape` | Clear search / focus grid | Application |
+| `Apps` / `Shift+F10` | Open context menu | Application |
+
+---
+
+## ❓ Frequently Asked Questions
+
+### Does CyberManager replace Windows Task Manager?
+
+No. CyberManager runs alongside Task Manager. Press `Ctrl+Shift+Esc` for Task Manager, `Ctrl+Alt+M` for CyberManager.
+
+### Why is CyberManager faster than Task Manager?
+
+CyberManager uses UI virtualization (only renders visible rows) and direct NT API calls, avoiding the overhead of WMI or Performance Counters.
+
+### How do I open the System Information window?
+
+Click the CPU or RAM sparkline in the toolbar, or press `Ctrl+I`. The window shows hardware topology, memory metrics, and I/O statistics across four tabs.
+
+### Can I suspend processes?
+
+Yes. Right-click a process → Suspend. Resume later with right-click → Resume. Useful for freezing unresponsive apps without terminating them.
+
+### How many processes can CyberManager handle?
+
+3000+ processes at 144fps with zero lag, thanks to UI virtualization and async NT-native collection.
+
+### Where is my data stored?
+
+All settings are stored locally in `%ProgramData%\CyberManager\settings.json`. No cloud sync, no accounts, no tracking.
 
 ---
 
@@ -93,8 +204,18 @@ If you'd like to support this work, a donation would mean a lot. Thank you! 🙏
 
 </div>
 
-## License
+---
 
-GPLv3 — see [LICENSE](LICENSE).
+## 📄 License
 
-<p align="center">Made by <a href="https://cybergems.org">CyberGems</a></p>
+CyberManager is distributed under the terms of the GNU General Public License v3.0. See [LICENSE](LICENSE) for the full license text.
+
+---
+
+<div align="center" style="background:#0D0F17; border:1px solid rgba(0,255,255,0.12); border-radius:12px; padding:28px 20px; margin-top:32px;">
+
+### Thanks for using CyberManager! 🎉
+
+Made by [**CyberGems**](https://cybergems.org)
+
+</div>
