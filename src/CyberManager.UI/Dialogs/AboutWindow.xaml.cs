@@ -21,12 +21,16 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         ModalAttentionHelper.Trigger(this, OuterBorder, WindowScale, WindowGlow, ref _lastAttentionTime);
     }
 
-    public AboutWindow()
+    public AboutWindow(bool checkUpdatesNow = false)
     {
         InitializeComponent();
         Icon = AppIconHelper.CreateManagerImageSource(64) as System.Windows.Media.ImageSource;
         CyberManagerWindowChrome.Apply(this, 12);
         LoadContent();
+        if (checkUpdatesNow)
+        {
+            Loaded += (_, _) => UpdateCheckButton_Click(this, new RoutedEventArgs());
+        }
     }
 
     private void LoadContent()

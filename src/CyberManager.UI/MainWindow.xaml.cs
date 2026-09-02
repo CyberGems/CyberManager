@@ -82,8 +82,13 @@ public partial class MainWindow : Window
             _trayService.Initialize(
                 this,
                 ToggleWindowVisibility,
+                OpenSystemInfoFromTray,
+                () => _ = RefreshAsync(),
+                OnToggleAlwaysOnTop,
+                OnToggleGroupByApp,
                 OnToggleStartWithWindows,
                 OnToggleMinimizeToTray,
+                OpenAboutFromTray,
                 ExitApplication);
 
             // Register Global Hotkey
@@ -1000,6 +1005,48 @@ public partial class MainWindow : Window
     private void OnGlobalHotkeyPressed()
     {
         ToggleWindowVisibility();
+    }
+
+    private void OpenSystemInfoFromTray()
+    {
+        if (!IsVisible)
+        {
+            Show();
+            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+            Activate();
+        }
+        var dlg = new SystemInfoWindow { Owner = this };
+        dlg.ShowDialog();
+    }
+
+    private void OpenAboutFromTray(bool checkUpdatesNow)
+    {
+        if (!IsVisible)
+        {
+            Show();
+            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+            Activate();
+        }
+        var dlg = new AboutWindow(checkUpdatesNow) { Owner = this };
+        dlg.ShowDialog();
+    }
+
+    private void OnToggleAlwaysOnTop(bool enable)
+    {
+        App.Settings.AlwaysOnTop = enable;
+        Topmost = enable;
+        TopmostCheck.IsChecked = enable;
+        App.Settings.Save();
+        _trayService.UpdateLocalization();
+    }
+
+    private void OnToggleGroupByApp(bool enable)
+    {
+        App.Settings.GroupProcesses = enable;
+        GroupToggleCheck.IsChecked = enable;
+        App.Settings.Save();
+        ApplySortingAndFilter();
+        _trayService.UpdateLocalization();
     }
 
     private void OnToggleStartWithWindows(bool enable)
