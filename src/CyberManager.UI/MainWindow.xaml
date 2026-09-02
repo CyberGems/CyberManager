@@ -189,12 +189,39 @@
             <Setter Property="Background" Value="{DynamicResource HeaderBgBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontWeight" Value="Bold"/><Setter Property="FontSize" Value="11"/><Setter Property="Height" Value="32"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DataGridColumnHeader">
-                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center"/>
+                        <Border x:Name="HeaderBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <!-- Hover highlight overlay -->
+                                <Border x:Name="HoverOverlay" Background="{DynamicResource BorderBrush}" Opacity="0" CornerRadius="0"/>
+                                <!-- Bottom accent line on hover -->
+                                <Border x:Name="AccentLine" Height="2" VerticalAlignment="Bottom" Background="{DynamicResource AccentBrush}" Opacity="0"/>
+                                <StackPanel Orientation="Horizontal" Margin="{TemplateBinding Padding}" VerticalAlignment="Center">
+                                    <ContentPresenter VerticalAlignment="Center"/>
+                                    <!-- Sort arrow indicator -->
+                                    <Path x:Name="SortArrow" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBrush}"
+                                          Data="M 0 0 L 4 5 L 8 0 Z" Width="8" Height="5" Stretch="Uniform" Visibility="Collapsed"/>
+                                </StackPanel>
+                            </Grid>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="HoverOverlay" Property="Opacity" Value="0.35"/>
+                                <Setter TargetName="AccentLine" Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="SortDirection" Value="Ascending">
+                                <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="SortArrow" Property="Data" Value="M 0 5 L 4 0 L 8 5 Z"/>
+                            </Trigger>
+                            <Trigger Property="SortDirection" Value="Descending">
+                                <Setter TargetName="SortArrow" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="SortArrow" Property="Data" Value="M 0 0 L 4 5 L 8 0 Z"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
