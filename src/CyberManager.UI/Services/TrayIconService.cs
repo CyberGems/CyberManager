@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using CyberManager.Common.I18n;
 
 namespace CyberManager.UI.Services;
@@ -59,6 +61,9 @@ public sealed class TrayIconService : IDisposable
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GetCursorPos(out POINT lpPoint);
 
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
     [StructLayout(LayoutKind.Sequential)]
     private struct POINT
     {
@@ -73,6 +78,7 @@ public sealed class TrayIconService : IDisposable
     private IntPtr _hIcon = IntPtr.Zero;
 
     private ContextMenu? _contextMenu;
+    private MenuItem? _headerMenuItem;
     private MenuItem? _showMenuItem;
     private MenuItem? _startWithWindowsMenuItem;
     private MenuItem? _minimizeToTrayMenuItem;
@@ -137,16 +143,36 @@ public sealed class TrayIconService : IDisposable
         }
 
         Style? miStyle = _ownerWindow?.TryFindResource("ModernMenuItem") as Style;
+        Style? sepStyle = _ownerWindow?.TryFindResource("ModernMenuSeparator") as Style;
 
-        _showMenuItem = new MenuItem { Header = Strings.T("ShowCyberManager") };
+        // Header Title Item (CyberViewer Card Style)
+        _headerMenuItem = new MenuItem
+        {
+            Header = $"◈  CyberManager {UpdateService.GetCurrentVersionLabel()}",
+            IsEnabled = false,
+            FontWeight = FontWeights.Bold,
+            Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(220, 0, 229, 255)),
+            Opacity = 0.95
+        };
+        if (miStyle != null) _headerMenuItem.Style = miStyle;
+
+        // Show CyberManager
+        _showMenuItem = new MenuItem
+        {
+            Header = Strings.T("ShowCyberManager"),
+            InputGestureText = "Ctrl+Alt+M",
+            Icon = CreatePathIcon("M 2 12 L 12 2 L 22 12 M 4 10 V 20 H 20 V 10")
+        };
         if (miStyle != null) _showMenuItem.Style = miStyle;
         _showMenuItem.Click += (_, _) => _onToggleShow?.Invoke();
 
+        // Start with Windows
         _startWithWindowsMenuItem = new MenuItem
         {
             Header = Strings.T("StartWithWindows"),
             IsCheckable = true,
-            IsChecked = App.Settings.StartWithWindows
+            IsChecked = App.Settings.StartWithWindows,
+            Icon = CreatePathIcon("M 3 3 H 10 V 10 H 3 Z M 14 3 H 21 V 10 H 14 Z M 3 14 H 10 V 21 H 3 Z M 14 14 H 21 V 21 H 14 Z")
         };
         if (miStyle != null) _startWithWindowsMenuItem.Style = miStyle;
         _startWithWindowsMenuItem.Click += (_, _) =>
@@ -157,11 +183,13 @@ public sealed class TrayIconService : IDisposable
             }
         };
 
+        // Minimize to Tray
         _minimizeToTrayMenuItem = new MenuItem
         {
             Header = Strings.T("MinimizeToTray"),
             IsCheckable = true,
-            IsChecked = App.Settings.MinimizeToTray
+            IsChecked = App.Settings.MinimizeToTray,
+            Icon = CreatePathIcon("M 4 14 L 12 22 L 20 14 M 12 2 V 20")
         };
         if (miStyle != null) _minimizeToTrayMenuItem.Style = miStyle;
         _minimizeToTrayMenuItem.Click += (_, _) =>
@@ -172,21 +200,55 @@ public sealed class TrayIconService : IDisposable
             }
         };
 
-        _exitMenuItem = new MenuItem { Header = Strings.T("Exit") };
+        // Exit Application
+        _exitMenuItem = new MenuItem
+        {
+            Header = Strings.T("Exit"),
+            Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(248, 113, 113)),
+            Icon = CreatePathIcon("M 18 6 L 6 18 M 6 6 L 18 18", System.Windows.Media.Color.FromRgb(248, 113, 113))
+        };
         if (miStyle != null) _exitMenuItem.Style = miStyle;
         _exitMenuItem.Click += (_, _) => _onExit?.Invoke();
 
+        _contextMenu.Items.Add(_headerMenuItem);
+        _contextMenu.Items.Add(new Separator { Style = sepStyle });
         _contextMenu.Items.Add(_showMenuItem);
-        _contextMenu.Items.Add(new Separator());
+        _contextMenu.Items.Add(new Separator { Style = sepStyle });
         _contextMenu.Items.Add(_startWithWindowsMenuItem);
         _contextMenu.Items.Add(_minimizeToTrayMenuItem);
-        _contextMenu.Items.Add(new Separator());
+        _contextMenu.Items.Add(new Separator { Style = sepStyle });
         _contextMenu.Items.Add(_exitMenuItem);
+    }
+
+    private static System.Windows.Shapes.Path CreatePathIcon(string data, System.Windows.Media.Color? strokeColor = null)
+    {
+        return new System.Windows.Shapes.Path
+        {
+            Data = Geometry.Parse(data),
+            Stroke = new SolidColorBrush(strokeColor ?? System.Windows.Media.Color.FromArgb(200, 0, 229, 255)),
+            StrokeThickness = 1.4,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
+            StrokeLineJoin = PenLineJoin.Round,
+            Width = 13,
+            Height = 13,
+            Stretch = Stretch.Uniform,
+            Fill = Brushes.Transparent,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
     }
 
     public void UpdateLocalization()
     {
-        if (_showMenuItem != null) _showMenuItem.Header = Strings.T("ShowCyberManager");
+        if (_headerMenuItem != null)
+        {
+            _headerMenuItem.Header = $"◈  CyberManager {UpdateService.GetCurrentVersionLabel()}";
+        }
+        if (_showMenuItem != null)
+        {
+            _showMenuItem.Header = Strings.T("ShowCyberManager");
+        }
         if (_startWithWindowsMenuItem != null)
         {
             _startWithWindowsMenuItem.Header = Strings.T("StartWithWindows");
@@ -197,7 +259,10 @@ public sealed class TrayIconService : IDisposable
             _minimizeToTrayMenuItem.Header = Strings.T("MinimizeToTray");
             _minimizeToTrayMenuItem.IsChecked = App.Settings.MinimizeToTray;
         }
-        if (_exitMenuItem != null) _exitMenuItem.Header = Strings.T("Exit");
+        if (_exitMenuItem != null)
+        {
+            _exitMenuItem.Header = Strings.T("Exit");
+        }
     }
 
     private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -225,14 +290,43 @@ public sealed class TrayIconService : IDisposable
         UpdateLocalization();
 
         GetCursorPos(out var pt);
+
+        // Convert physical screen pixels to WPF DIPs accurately across 100%, 125%, 150%, 200% scaling
+        double dipX = pt.X;
+        double dipY = pt.Y;
+
+        var targetVisual = _ownerWindow ?? System.Windows.Application.Current.MainWindow;
+        if (targetVisual != null)
+        {
+            var source = PresentationSource.FromVisual(targetVisual);
+            if (source?.CompositionTarget != null)
+            {
+                var matrix = source.CompositionTarget.TransformFromDevice;
+                var dipPoint = matrix.Transform(new Point(pt.X, pt.Y));
+                dipX = dipPoint.X;
+                dipY = dipPoint.Y;
+            }
+        }
+
+        SetForegroundWindow(_hwnd);
         _contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.AbsolutePoint;
-        _contextMenu.HorizontalOffset = pt.X;
-        _contextMenu.VerticalOffset = pt.Y;
+        _contextMenu.HorizontalOffset = dipX;
+        _contextMenu.VerticalOffset = dipY;
         _contextMenu.IsOpen = true;
     }
 
     private static IntPtr ExtractAppIcon()
     {
+        try
+        {
+            var icon = AppIconHelper.CreateManagerIcon(32);
+            if (icon != null && icon.Handle != IntPtr.Zero)
+            {
+                return icon.Handle;
+            }
+        }
+        catch { }
+
         try
         {
             var exePath = Environment.ProcessPath;

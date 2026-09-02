@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/CyberManager.UI/Assets/CyberWall.png" width="140" alt="CyberManager logo" />
+  <img src="src/CyberManager.UI/Assets/CyberManager.png" width="140" alt="CyberManager logo" />
 </p>
 
 # <p align="center">CyberManager — Ultra-Light Task Manager & Real-Time Process Control</p>
@@ -21,7 +21,7 @@
   </a>
 </p>
 
-A premium, high-performance and **ultra-lightweight task manager** for Windows, built for machines with thousands of processes. Virtualized, NT-native and zero-lag — the fluid alternative to Windows Task Manager.
+CyberManager is a free and open-source task manager for Windows, optimized for systems with a large number of running processes. It uses virtualized rendering, integrates natively with the NT kernel, and stays responsive under heavy load — making it a solid replacement for the built-in Windows Task Manager.
 
 *Free and open source (GPLv3) — no ads, no tracking.*
 

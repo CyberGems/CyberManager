@@ -35,14 +35,33 @@ public static class AppIconHelper
             if (File.Exists(p)) { var ic = new Icon(p, size, size); _trayIcon = ic; return ic; }
         }
         catch { }
+        try
+        {
+            var uri = new Uri("pack://application:,,,/Assets/CyberManager.png", UriKind.Absolute);
+            var sri = System.Windows.Application.GetResourceStream(uri);
+            if (sri != null)
+            {
+                using var s = sri.Stream;
+                using var origBmp = new Bitmap(s);
+                using var resizedBmp = new Bitmap(origBmp, new Size(size, size));
+                var h = resizedBmp.GetHicon();
+                var fb = Icon.FromHandle(h);
+                var cloned = (Icon)fb.Clone();
+                DestroyIcon(h);
+                fb.Dispose();
+                _trayIcon = cloned;
+                return cloned;
+            }
+        }
+        catch { }
         using var bmp = GenerateBitmap(size);
-        var h = bmp.GetHicon();
-        var fb = Icon.FromHandle(h);
-        var cloned = (Icon)fb.Clone();
-        DestroyIcon(h);
-        fb.Dispose();
-        _trayIcon = cloned;
-        return cloned;
+        var hFallback = bmp.GetHicon();
+        var fbFallback = Icon.FromHandle(hFallback);
+        var clonedFallback = (Icon)fbFallback.Clone();
+        DestroyIcon(hFallback);
+        fbFallback.Dispose();
+        _trayIcon = clonedFallback;
+        return clonedFallback;
     }
 
     public static WpfImageSource CreateManagerImageSource(int size = 256)
@@ -74,23 +93,39 @@ public static class AppIconHelper
     {
         var bmp = new Bitmap(size, size, PixelFormat.Format32bppArgb);
         using var g = Graphics.FromImage(bmp);
-        g.SmoothingMode = SmoothingMode.AntiAlias; g.PixelOffsetMode = PixelOffsetMode.HighQuality; g.Clear(Color.Transparent);
-        float r = size * 0.22f;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+        g.Clear(Color.Transparent);
+
+        float r = size * 0.18f;
         using var path = RoundedRect(new RectangleF(0.5f, 0.5f, size - 1f, size - 1f), r);
         using var bg = new SolidBrush(Color.FromArgb(255, 11, 19, 34));
         using var pen = new Pen(Color.FromArgb(255, 30, 48, 80), 1.2f);
-        g.FillPath(bg, path); g.DrawPath(pen, path);
-        using var sp = new GraphicsPath();
-        float cx = size / 2f, cy = size / 2f, sw = size * 0.52f, sh = size * 0.58f;
-        var pTop = new PointF(cx, cy - sh * 0.48f); var pLeft = new PointF(cx - sw * 0.48f, cy - sh * 0.32f);
-        var pLeftMid = new PointF(cx - sw * 0.48f, cy + sh * 0.05f); var pBottom = new PointF(cx, cy + sh * 0.48f);
-        var pRightMid = new PointF(cx + sw * 0.48f, cy + sh * 0.05f); var pRight = new PointF(cx + sw * 0.48f, cy - sh * 0.32f);
-        sp.AddLine(pTop, pLeft); sp.AddLine(pLeft, pLeftMid);
-        sp.AddBezier(pLeftMid, new PointF(cx - sw * 0.45f, cy + sh * 0.32f), new PointF(cx - sw * 0.2f, cy + sh * 0.45f), pBottom);
-        sp.AddBezier(pBottom, new PointF(cx + sw * 0.2f, cy + sh * 0.45f), new PointF(cx + sw * 0.45f, cy + sh * 0.32f), pRightMid);
-        sp.AddLine(pRightMid, pRight); sp.CloseFigure();
-        using var br = new LinearGradientBrush(new PointF(cx, cy - sh / 2f), new PointF(cx, cy + sh / 2f), Color.FromArgb(255, 0, 229, 255), Color.FromArgb(255, 0, 160, 220));
-        g.FillPath(br, sp);
+        g.FillPath(bg, path);
+        g.DrawPath(pen, path);
+
+        // Header bar
+        float headerH = size * 0.22f;
+        using var headerBrush = new SolidBrush(Color.FromArgb(255, 20, 140, 175));
+        g.FillRectangle(headerBrush, 0, 0, size, headerH);
+
+        // Pulse line
+        using var pulsePen = new Pen(Color.FromArgb(255, 0, 229, 255), Math.Max(2f, size * 0.08f))
+        {
+            StartCap = LineCap.Round,
+            EndCap = LineCap.Round,
+            LineJoin = LineJoin.Round
+        };
+        var points = new[]
+        {
+            new PointF(size * 0.12f, size * 0.58f),
+            new PointF(size * 0.35f, size * 0.58f),
+            new PointF(size * 0.44f, size * 0.40f),
+            new PointF(size * 0.56f, size * 0.78f),
+            new PointF(size * 0.68f, size * 0.58f),
+            new PointF(size * 0.88f, size * 0.58f)
+        };
+        g.DrawLines(pulsePen, points);
         return bmp;
     }
 

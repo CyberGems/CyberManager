@@ -69,9 +69,10 @@ public partial class MainWindow : Window
 
             ApplyLanguage();
             ApplyTheme();
-            UpdateGroupToggleButton();
+            GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
             Topmost = App.Settings.AlwaysOnTop;
             TopmostCheck.IsChecked = Topmost;
+            KillBtn.IsEnabled = Selected != null;
             FontSizeSlider.Value = App.Settings.RowFontSize > 0 ? App.Settings.RowFontSize : 13;
             ProcGrid.FontSize = FontSizeSlider.Value;
             FontSizeLabel.Text = $"{FontSizeSlider.Value:F0}px";
@@ -184,9 +185,18 @@ public partial class MainWindow : Window
                 LoaderOverlay.Visibility = Visibility.Collapsed;
             }
 
-            var totalCpu = _all.Sum(x => x.CpuPercent);
-            var totalMem = _all.Sum(x => (double)x.WorkingSetBytes) / (1024.0 * 1024.0 * 1024.0);
-            StatsText.Text = $"{_all.Count} {Strings.T("ProcessesCount", _all.Count).Split(' ')[0]}  •  {Strings.T("CpuTotal", totalCpu)}  •  {Strings.T("MemTotal", totalMem)}";
+            var sysMetrics = SystemMetricsCollector.Instance.Sample(_all.Count);
+            var (cpuHistory, cpuKernelHistory) = SystemMetricsCollector.Instance.GetCpuHistory();
+            var (ramGbHistory, ramPctHistory) = SystemMetricsCollector.Instance.GetRamHistory();
+
+            CpuSparkline.Values = cpuHistory;
+            CpuSparkline.SecondaryValues = cpuKernelHistory;
+            CpuSparklineText.Text = $"{sysMetrics.CpuTotalPercent:F1}%";
+
+            RamSparkline.Values = ramPctHistory;
+            RamSparklineText.Text = $"{sysMetrics.UsedRamGb:F1} GB";
+
+            StatsText.Text = $"{_all.Count} {Strings.T("ProcessesCount", _all.Count).Split(' ')[0]}  •  {Strings.T("CpuTotal", sysMetrics.CpuTotalPercent)}  •  {Strings.T("MemTotal", sysMetrics.UsedRamGb)}";
         }
         catch (Exception ex)
         {
@@ -199,29 +209,13 @@ public partial class MainWindow : Window
         }
     }
 
-    private void GroupToggle_Click(object sender, RoutedEventArgs e)
+    private void SystemInfo_Click(object sender, RoutedEventArgs e)
     {
-        App.Settings.GroupProcesses = !App.Settings.GroupProcesses;
-        UpdateGroupToggleButton();
-        ApplySortingAndFilter();
-        ThrottledSaveSettings();
+        var dlg = new SystemInfoWindow { Owner = this };
+        dlg.ShowDialog();
     }
 
-    private void UpdateGroupToggleButton()
-    {
-        if (App.Settings.GroupProcesses)
-        {
-            GroupToggleText.Text = $"🗂️  {Strings.T("GroupByApp")}";
-            GroupToggleBtn.ToolTip = $"{Strings.T("GroupByApp")} (On)";
-            GroupToggleBtn.BorderBrush = TryFindResource("AccentBrush") as Brush ?? Brushes.Cyan;
-        }
-        else
-        {
-            GroupToggleText.Text = $"📄  {Strings.T("Ungroup")}";
-            GroupToggleBtn.ToolTip = $"{Strings.T("Ungroup")} (Off)";
-            GroupToggleBtn.BorderBrush = TryFindResource("BorderBrush") as Brush ?? Brushes.Gray;
-        }
-    }
+
 
     private void GroupChevron_MouseDown(object sender, MouseButtonEventArgs e)
     {
@@ -382,6 +376,7 @@ public partial class MainWindow : Window
 
         EmptyStateText.Visibility = _view.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ProcGrid.Visibility = _view.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        KillBtn.IsEnabled = Selected != null;
 
         if (!string.IsNullOrEmpty(q))
         {
@@ -438,11 +433,33 @@ public partial class MainWindow : Window
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => _ = RefreshAsync();
 
+    private void GroupToggle_Checked(object sender, RoutedEventArgs e)
+    {
+        App.Settings.GroupProcesses = GroupToggleCheck.IsChecked == true;
+        ThrottledSaveSettings();
+        ApplySortingAndFilter();
+    }
+
+    private void GroupToggleLabel_Click(object sender, MouseButtonEventArgs e)
+    {
+        GroupToggleCheck.IsChecked = !GroupToggleCheck.IsChecked;
+    }
+
     private void Topmost_Checked(object sender, RoutedEventArgs e)
     {
         Topmost = TopmostCheck.IsChecked == true;
         App.Settings.AlwaysOnTop = Topmost;
         ThrottledSaveSettings();
+    }
+
+    private void TopmostLabel_Click(object sender, MouseButtonEventArgs e)
+    {
+        TopmostCheck.IsChecked = !TopmostCheck.IsChecked;
+    }
+
+    private void ProcGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        KillBtn.IsEnabled = Selected != null;
     }
 
     private void ThrottledSaveSettings()
@@ -688,7 +705,6 @@ public partial class MainWindow : Window
         var next = themes[(Array.IndexOf(themes, current) + 1) % themes.Length];
         App.Settings.Theme = next;
         ApplyTheme();
-        UpdateGroupToggleButton();
         ThrottledSaveSettings();
     }
 
@@ -697,7 +713,6 @@ public partial class MainWindow : Window
         App.Settings.Language = App.Settings.Language == Lang.Es ? Lang.En : Lang.Es;
         Strings.Current = App.Settings.Language;
         ApplyLanguage();
-        UpdateGroupToggleButton();
         ThrottledSaveSettings();
     }
 
@@ -715,14 +730,16 @@ public partial class MainWindow : Window
             EmptyStateText.Text = Strings.T("NoProcesses");
             LoaderTitle.Text = Strings.T("CollectingProcesses");
             LoaderSub.Text = Strings.T("InitializingNtEngine");
-            TopmostCheck.Content = Strings.T("AlwaysOnTop");
+            GroupToggleLabel.Text = Strings.T("GroupByApp");
+            TopmostLabel.Text = Strings.T("AlwaysOnTop");
             FontSizeSlider.ToolTip = Strings.T("TextSize");
-            RefreshBtnText.Text = $"↻  {Strings.T("Refresh")}";
+            RefreshBtnText.Text = Strings.T("Refresh");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
-            KillBtnText.Text = $"✕  {Strings.T("Kill")}";
+            KillBtnText.Text = Strings.T("Kill");
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
+            CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
+            RamSparklineBorder.ToolTip = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
             FooterText.Text = Strings.T("Ready");
-            UpdateGroupToggleButton();
             _trayService.UpdateLocalization();
 
             if (ProcGrid.Columns.Count >= 7)
@@ -796,7 +813,14 @@ public partial class MainWindow : Window
         if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.G)
         {
             e.Handled = true;
-            GroupToggle_Click(sender, e);
+            GroupToggleCheck.IsChecked = !GroupToggleCheck.IsChecked;
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.I)
+        {
+            e.Handled = true;
+            SystemInfo_Click(sender, e);
             return;
         }
 
