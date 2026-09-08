@@ -116,6 +116,15 @@ CyberManager.slnx
 2. Run the installer or portable version
 3. Press `Ctrl+Alt+M` to toggle the window from any application
 
+### 🛡️ Windows SmartScreen
+
+Windows may show a SmartScreen warning the first time you run the CyberManager installer — this is expected until Windows builds enough reputation for the file. The same can appear when launching the portable build.
+
+To continue:
+
+1. Click **More info**.
+2. Click **Run anyway**.
+
 ### Build from Source
 
 ```powershell
