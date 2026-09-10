@@ -16,7 +16,7 @@
   <a href="https://github.com/CyberGems/CyberManager/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222?style=flat-square&logo=github&logoColor=white" alt="Wiki" height="24" /></a>
 </p>
 
-An ultra-lightweight, virtualized task manager for Windows, built as a premium, high-performance alternative to the Windows Task Manager. Handles machines with **3000+ processes at 144fps** with zero lag, using native Windows NT API calls for process enumeration and control. Features real-time CPU/RAM sparklines, a dedicated System Information window, and a cyberpunk glassmorphic interface.
+An ultra-lightweight, virtualized task manager for Windows, built as a premium, high-performance alternative to the Windows Task Manager. Handles machines with **3000+ processes at 144fps** with zero lag, using native Windows NT API calls for process enumeration and control. Features real-time CPU/RAM sparklines, a dedicated System Information window, and a sleek glassmorphic interface with neon accents.
 
 *Free and open source (GPLv3) — no ads, no tracking, and no data collection. Just enjoy it.*
 
