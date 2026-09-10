@@ -192,6 +192,8 @@ If you're enjoying CyberManager, I'd be truly grateful for your support! You can
 
 CyberManager is distributed under the terms of the GNU General Public License v3.0. See [LICENSE](LICENSE) for the full license text.
 
+---
+
 ## ❓ FAQ
 
 For frequently asked questions, troubleshooting guides, and detailed configuration instructions, visit the [FAQ](https://github.com/CyberGems/CyberManager/wiki/FAQ) or the [online documentation](https://cybergems.org/docs/cybermanager/FAQ).
