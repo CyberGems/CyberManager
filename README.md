@@ -149,34 +149,6 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 
 ---
 
-## ❓ Frequently Asked Questions
-
-### Does CyberManager replace Windows Task Manager?
-
-No. CyberManager runs alongside Task Manager. Press `Ctrl+Shift+Esc` for Task Manager, `Ctrl+Alt+M` for CyberManager.
-
-### Why is CyberManager faster than Task Manager?
-
-CyberManager uses UI virtualization (only renders visible rows) and direct NT API calls, avoiding the overhead of WMI or Performance Counters.
-
-### How do I open the System Information window?
-
-Click the CPU or RAM sparkline in the toolbar, or press `Ctrl+I`. The window shows hardware topology, memory metrics, and I/O statistics across four tabs.
-
-### Can I suspend processes?
-
-Yes. Right-click a process → Suspend. Resume later with right-click → Resume. Useful for freezing unresponsive apps without terminating them.
-
-### How many processes can CyberManager handle?
-
-3000+ processes at 144fps with zero lag, thanks to UI virtualization and async NT-native collection.
-
-### Where is my data stored?
-
-All settings are stored locally in `%ProgramData%\CyberManager\settings.json`. No cloud sync, no accounts, no tracking.
-
----
-
 ## ❤️ Donate
 
 **CyberManager** is one of the projects in [CyberGems](https://github.com/CyberGems#-all-apps--repositories), a personal set of daily-use tools for Windows. I've spent countless hours building and refining it for my own use, and it will continue to be maintained by me. I recently decided to share the entire suite with the world, completely free and open-source.
@@ -219,6 +191,10 @@ If you're enjoying CyberManager, I'd be truly grateful for your support! You can
 ## 📄 License
 
 CyberManager is distributed under the terms of the GNU General Public License v3.0. See [LICENSE](LICENSE) for the full license text.
+
+## ❓ FAQ
+
+For frequently asked questions, troubleshooting guides, and detailed configuration instructions, visit the [FAQ](https://github.com/CyberGems/CyberManager/wiki/FAQ) or the [online documentation](https://cybergems.org/docs/cybermanager/FAQ).
 
 ---
 
