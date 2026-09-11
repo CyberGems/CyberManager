@@ -13,8 +13,8 @@ public partial class AboutWindow : Window, IModalAttentionWindow
 {
     private const string RepoUrl = "https://github.com/CyberGems/CyberManager";
     private const string WebsiteUrl = "https://cybergems.org";
-    private const string WikiUrl = "https://cybergems.org/apps/cybermanager";
-    private const string DonateUrl = "https://ko-fi.com/cybergems";
+    private const string WikiUrl = "https://github.com/CyberGems/CyberManager/wiki";
+    private const string DonateUrl = "https://github.com/CyberGems/CyberManager#%EF%B8%8F-donate";
 
     private bool _suppressAutoCheckUpdateChange;
     private DateTime _lastAttentionTime = DateTime.MinValue;

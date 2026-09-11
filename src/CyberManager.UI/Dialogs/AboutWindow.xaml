@@ -168,7 +168,7 @@
 
                             <!-- Description Box -->
                             <Border Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22,18" Margin="32,0,0,0">
-                                <TextBlock x:Name="AboutDescriptionText" FontSize="12.5" Foreground="{DynamicResource TextBrush}" Opacity="0.85" LineHeight="22" LineStackingStrategy="BlockLineHeight" TextWrapping="Wrap" Text="CyberManager es un gestor de tareas ultra-ligero, virtualizado y sin lag para 3000+ procesos. Motor NT nativo, búsqueda instantánea y UI premium CyberGems — la alternativa fluida al Task Manager de Windows."/>
+                                <TextBlock x:Name="AboutDescriptionText" FontSize="12.5" Foreground="{DynamicResource TextBrush}" Opacity="0.85" LineHeight="22" LineStackingStrategy="BlockLineHeight" TextWrapping="Wrap" Text="CyberManager es un gestor de tareas ligero y virtualizado de alta capacidad. Impulsado por el motor NT nativo, ofrece búsqueda instantánea y modo compacto. La alternativa definitiva al Administrador de tareas de Windows."/>
                             </Border>
                         </Grid>
 

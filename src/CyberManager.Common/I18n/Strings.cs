@@ -75,7 +75,7 @@ public static class Strings
         ["UpdatePackageUnavailable"] = ("A compatible update package is not available for this architecture.", "No hay un paquete de actualización compatible con esta arquitectura."),
         ["UnexpectedResponse"] = ("Unexpected server response.", "Respuesta inesperada del servidor."),
         ["Copyright"] = ("© CyberGems • 2026", "© CyberGems • 2026"),
-        ["Description"] = ("CyberManager is an ultra-lightweight, virtualized, zero-lag task manager for 3000+ processes. Native NT engine, instant search, and premium CyberGems UI — the fluid alternative to Windows Task Manager.", "CyberManager es un gestor de tareas ultra-ligero, virtualizado y sin lag para 3000+ procesos. Motor NT nativo, búsqueda instantánea y UI premium CyberGems — la alternativa fluida al Task Manager de Windows."),
+        ["Description"] = ("CyberManager is a lightweight, high‑capacity virtualized task manager. Powered by the native NT engine, it offers instant search and a compact mode. The ultimate alternative to Windows Task Manager.", "CyberManager es un gestor de tareas ligero y virtualizado de alta capacidad. Impulsado por el motor NT nativo, ofrece búsqueda instantánea y modo compacto. La alternativa definitiva al Administrador de tareas de Windows."),
         ["UpdatesAndMaintenance"] = ("Updates and Maintenance", "Actualizaciones y Mantenimiento"),
         ["SearchProcesses"] = ("Search processes", "Buscar procesos"),
         ["Clear"] = ("Clear", "Limpiar"),
