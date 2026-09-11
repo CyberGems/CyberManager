@@ -6,58 +6,29 @@ Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is an
 
 ### ✨ Key Features & Highlights
 
-- 🗂️ **GlassWire-Style Unified Navigation**:
-  - Integrated **Processes**, **Performance Telemetry**, and **Settings** views directly into the main window via a sleek central tab bar, eliminating disparate popup windows.
+- 🗂️ **GlassWire-Style Unified Navigation Tab Bar**:
+  - **Embedded Views**: Integrated **Processes**, **Performance Telemetry**, and **Settings** directly into the main window via a central header tab bar, removing multiple floating windows and delivering a unified, seamless workspace.
+  - **Fluid Transitions**: Retains full virtualization and live telemetry state without layout flicker or process reload lag.
 
 - ⋯ **Titlebar "More Options" (`···`) Dropdown Menu**:
-  - Suite-standard quick-action menu (inspired by CyberFeeds) with instant access to Donate, Refresh Processes, System Telemetry, Compact Mode, Wiki & Documentation, FAQ, Changelog, and Update Verification.
+  - **Suite-Standard Menu**: Added a CyberFeeds-inspired quick-access dropdown replacing the standalone `ⓘ` button in the titlebar.
+  - **Integrated Actions**: One-click access to *Donate to project*, *Refresh processes* (`F5`), *System Information* (`Ctrl+I`), *Compact mode* (`Ctrl+Shift+M`), *Documentation & Wiki*, *FAQ*, *Changelog*, *Website*, and in-app *Check for updates*.
+  - **Refined Toggle Logic**: Left-click and right-click toggle support with native backdrop styling and dynamic icon color highlighting.
 
-- 📌 **Compact Monitor with Instant Pinning**:
-  - Ultra-compact floating monitor mode featuring real-time CPU, RAM, and PID indicators with one-click Always-on-Top pinning.
+- 📌 **Compact Monitor with Pinning**:
+  - **Always-on-Top Toggle**: Pin button with active crimson/red badge glow keeps the compact process monitor floating cleanly above other applications and games.
+  - **Dense Telemetry**: Real-time CPU, RAM, and PID indicators with context-menu process control (End task, Priority, etc.).
 
-- 💬 **Rich Bilingual Refresh Tooltips & Telemetry**:
-  - Transparent row and process counts with hover tooltips clarifying application groups, total active processes, and search matches.
+- 💬 **Enriched Refresh Tooltips & Telemetry Display**:
+  - **Clean Status Line**: Streamlined footer text displaying exact update timestamp (`Updated HH:mm:ss`) without misleading row counts.
+  - **Detailed Bilingual Tooltips**: Hovering reveals distinct application group counts, total active processes in the system, and filtered search match counts in both English and Spanish.
+  - **Enlarged Metric Badges**: Expanded live CPU and RAM badges in the main toolbar for effortless at-a-glance monitoring.
 
-- ⚡ **Native NT Kernel Engine & Zero-Lag Virtualization**:
-  - High-performance process scanning with sub-millisecond collection overhead.
-  - Instant process termination with **0 ms visual pruning** and background `TerminateProcess` P/Invoke.
-  - High-precision CPU delta calculations across all physical and logical cores.
-
-- 🖼️ **High-Fidelity Shell Icon & Binary Path Resolution**:
-  - Native icon extraction with `QueryFullProcessImageName` (`PROCESS_QUERY_LIMITED_INFORMATION` / `0x1000`) and Win32 Shell API.
-  - Full path and original icon preview for elevated apps (`CyberWall`, `PowerToys`, `Taskmgr`, `VeraCrypt`).
-
-- ℹ️ **Enriched Virtual Kernel Process Descriptions**:
-  - Explanatory subtitles in the Path column for internal NT kernel components (`Memory Compression`, `Registry`, `System`, `Secure System`, `Idle`).
-  - Removes ambiguity for casual and advanced users alike with dedicated system badges (`⚡`, `🗃️`, `⚙️`, `🛡️`, `💤`).
-
-- 🔥 **Adaptive Resource Heatmap (CPU & RAM)**:
-  - Smart thermal tinting highlighting heavy resource consumers (identical to Windows Task Manager).
-  - Normal processes stay clean and dark; active applications glow with graduated amber/warm badges and bold metrics.
-
-- ⌨️ **Keyboard-First Navigation & Global Hotkey (`Ctrl + Alt + M`)**:
-  - **Global Launcher Hotkey**: Press `Ctrl + Alt + M` anywhere in Windows (including full-screen games) to bring CyberManager to the front and focus the search bar.
-  - **Type-to-Search**: Pressing alphanumeric keys in the list automatically redirects focus to the search bar.
-  - **Arrow Navigation**: `↓`/`Enter` jumps to results; `→`/`←` expands and collapses application groups; `Space` toggles tree nodes.
-  - **Quick Process Actions**: `Delete` terminates task; `Shift + Delete` terminates full process tree; `Ctrl + C` copies executable path; `AppsKey` / `Shift + F10` opens context menu.
-
-- 🛡️ **CyberGems Obsidian Modal Chrome (`ConfirmDialog`)**:
-  - Modern dark confirmation modals with vector alert/trash/checkmark icons, application icon preview, and theme styling.
-  - Replaces all legacy Windows message boxes across the entire application.
-
-- ⏳ **Modern CyberGems Pulse & Spinner Loader**:
-  - Lightweight animated skeleton/spinner overlay providing visual feedback during initial NT engine initialization.
-
-- 📦 **System Tray & Windows Autostart**:
-  - Minimize to tray on close/minimize with quick-access context menu.
-  - Optional autostart with Windows (`HKCU\...\Run`) with silent background check for updates.
-
-- 🔄 **Built-in Auto-Update System (CyberWall-Grade)**:
-  - Direct in-app GitHub releases check and background update notifications.
-  - In-app downloader with real-time neon progress bar and seamless installer launcher.
-
-- 🌐 **100% Bilingual Interface**:
-  - Full native support for **English** and **Spanish**.
+- 🎨 **Interface, Typography & Theme Refinements**:
+  - **Native Scale Typography**: Elevated SettingsView typography and removed redundant table font size slider.
+  - **Light Theme Contrast**: Enhanced RAM and accent color contrast in the Light theme for optimal readability on bright backgrounds.
+  - **Suite-Aligned About Window**: Aligned footer icons, donation links, and wiki documentation with the CyberSnap and CyberGems suite standard.
+  - **Streamlined Tray Menu**: Removed redundant toggles from the notification tray context menu for a clean, distraction-free desktop experience.
 
 ---
 
