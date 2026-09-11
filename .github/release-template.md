@@ -6,6 +6,18 @@ Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is an
 
 ### ✨ Key Features & Highlights
 
+- 🗂️ **GlassWire-Style Unified Navigation**:
+  - Integrated **Processes**, **Performance Telemetry**, and **Settings** views directly into the main window via a sleek central tab bar, eliminating disparate popup windows.
+
+- ⋯ **Titlebar "More Options" (`···`) Dropdown Menu**:
+  - Suite-standard quick-action menu (inspired by CyberFeeds) with instant access to Donate, Refresh Processes, System Telemetry, Compact Mode, Wiki & Documentation, FAQ, Changelog, and Update Verification.
+
+- 📌 **Compact Monitor with Instant Pinning**:
+  - Ultra-compact floating monitor mode featuring real-time CPU, RAM, and PID indicators with one-click Always-on-Top pinning.
+
+- 💬 **Rich Bilingual Refresh Tooltips & Telemetry**:
+  - Transparent row and process counts with hover tooltips clarifying application groups, total active processes, and search matches.
+
 - ⚡ **Native NT Kernel Engine & Zero-Lag Virtualization**:
   - High-performance process scanning with sub-millisecond collection overhead.
   - Instant process termination with **0 ms visual pruning** and background `TerminateProcess` P/Invoke.
