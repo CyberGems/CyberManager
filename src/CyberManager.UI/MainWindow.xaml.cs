@@ -1,10 +1,12 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
 using CyberManager.Common.Models;
@@ -22,6 +24,40 @@ namespace CyberManager.UI;
 [SuppressMessage("Design", "CA1001", Justification = "WPF window-owned services are released from the window lifecycle.")]
 public partial class MainWindow : Window
 {
+    private const uint MONITOR_DEFAULTTONEAREST = 0x00000002;
+    private const int WM_NCLBUTTONDOWN = 0x00A1;
+    private const int HTCAPTION = 0x0002;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MonitorInfo
+    {
+        public int Size;
+        public NativeRect Monitor;
+        public NativeRect Work;
+        public uint Flags;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool ReleaseCapture();
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SendMessage(IntPtr hWnd, int message, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr hWnd, uint flags);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MonitorInfo monitorInfo);
+
     private readonly ProcessCollector _collector = new();
     private readonly DispatcherTimer _timer = new();
     private readonly DispatcherTimer _searchDebounceTimer = new();
@@ -115,7 +151,7 @@ public partial class MainWindow : Window
             // Setup System Tray
             _trayService.Initialize(
                 this,
-                ToggleWindowVisibility,
+                ToggleTrayVisibility,
                 OpenSystemInfoFromTray,
                 () => _ = RefreshAsync(_lifetimeCts.Token),
                 OnToggleAlwaysOnTop,
@@ -276,14 +312,57 @@ public partial class MainWindow : Window
 
         CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
         CompactView.SelectedItem = Selected;
+        KeepWindowInWorkArea();
         if (_contextMenuOpen)
         {
             KeepContextTargetVisible();
         }
         if (!restoreBounds)
         {
+            SaveCurrentWindowBounds();
             ThrottledSaveSettings();
         }
+    }
+
+    private void KeepWindowInWorkArea()
+    {
+        if (WindowState != WindowState.Normal) return;
+
+        var workArea = GetCurrentWorkArea();
+        if (workArea.Width <= 0 || workArea.Height <= 0) return;
+
+        // A minimum size larger than the current monitor can make it impossible
+        // to keep the full window on-screen, so lower it for this monitor.
+        MinWidth = Math.Min(MinWidth, workArea.Width);
+        MinHeight = Math.Min(MinHeight, workArea.Height);
+        Width = Math.Min(Width, workArea.Width);
+        Height = Math.Min(Height, workArea.Height);
+
+        Left = Math.Clamp(Left, workArea.Left, workArea.Right - Width);
+        Top = Math.Clamp(Top, workArea.Top, workArea.Bottom - Height);
+    }
+
+    private Rect GetCurrentWorkArea()
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        var monitor = hwnd == IntPtr.Zero
+            ? IntPtr.Zero
+            : MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+        if (monitor != IntPtr.Zero)
+        {
+            var monitorInfo = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
+            if (GetMonitorInfo(monitor, ref monitorInfo))
+            {
+                var fromDevice = PresentationSource.FromVisual(this)?
+                    .CompositionTarget?.TransformFromDevice
+                    ?? Matrix.Identity;
+                var topLeft = fromDevice.Transform(new Point(monitorInfo.Work.Left, monitorInfo.Work.Top));
+                var bottomRight = fromDevice.Transform(new Point(monitorInfo.Work.Right, monitorInfo.Work.Bottom));
+                return new Rect(topLeft, bottomRight);
+            }
+        }
+
+        return SystemParameters.WorkArea;
     }
 
     private void RestoreWindowBounds(bool compact)
@@ -587,7 +666,8 @@ public partial class MainWindow : Window
             return;
         }
 
-        DragMove();
+        e.Handled = true;
+        DragWindow(e);
     }
 
     private void CompactView_SearchChanged(object? sender, EventArgs e)
@@ -793,6 +873,14 @@ public partial class MainWindow : Window
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton != MouseButton.Left) return;
+        var source = e.OriginalSource as DependencyObject;
+        if (FindVisualParent<Button>(source) != null ||
+            FindVisualParent<TextBox>(source) != null ||
+            FindVisualParent<Border>(source)?.Name == nameof(StatsBorder))
+        {
+            return;
+        }
+
         if (e.ClickCount == 2)
         {
             ApplyViewMode(!_isCompactMode, restoreBounds: false);
@@ -800,7 +888,32 @@ public partial class MainWindow : Window
             return;
         }
 
-        DragMove();
+        e.Handled = true;
+        DragWindow(e);
+    }
+
+    private void DragWindow(MouseButtonEventArgs e)
+    {
+        var previousCursor = Mouse.OverrideCursor;
+        try
+        {
+            Mouse.OverrideCursor = Cursors.SizeAll;
+            var hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero)
+            {
+                DragMove();
+                return;
+            }
+
+            // Let Windows perform the native caption drag immediately. This avoids
+            // the small WPF DragMove threshold that is noticeable on busy views.
+            ReleaseCapture();
+            _ = SendMessage(hwnd, WM_NCLBUTTONDOWN, (IntPtr)HTCAPTION, IntPtr.Zero);
+        }
+        finally
+        {
+            Mouse.OverrideCursor = previousCursor;
+        }
     }
 
     private void Settings_Click(object sender, RoutedEventArgs e)
@@ -829,6 +942,9 @@ public partial class MainWindow : Window
         };
         dlg.ShowDialog();
     }
+
+    private void FullModeToggle_Click(object sender, RoutedEventArgs e) =>
+        ApplyViewMode(!_isCompactMode, restoreBounds: false);
 
     private void About_Click(object sender, RoutedEventArgs e)
     {
@@ -1187,6 +1303,7 @@ public partial class MainWindow : Window
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             KillBtnText.Text = Strings.T("Kill");
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
+            FullModeToggleBtn.ToolTip = Strings.T("CompactMode");
             SettingsBtn.ToolTip = $"{Strings.T("Settings")} (Ctrl+,)";
             AboutBtn.ToolTip = Strings.T("About");
             MinimizeBtn.ToolTip = Strings.T("Minimize");
@@ -1480,6 +1597,24 @@ public partial class MainWindow : Window
             Focus();
             FocusSearchBox();
         }
+    }
+
+    private void ToggleTrayVisibility()
+    {
+        if (IsVisible && WindowState != WindowState.Minimized)
+        {
+            Hide();
+            return;
+        }
+
+        Show();
+        if (WindowState == WindowState.Minimized)
+        {
+            WindowState = WindowState.Normal;
+        }
+        Activate();
+        Focus();
+        FocusSearchBox();
     }
 
     private void OnGlobalHotkeyPressed()

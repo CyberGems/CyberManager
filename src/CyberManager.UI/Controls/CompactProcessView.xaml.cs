@@ -2,6 +2,7 @@ using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using CyberManager.Common.I18n;
 
 namespace CyberManager.UI.Controls;
@@ -119,6 +120,13 @@ public partial class CompactProcessView : UserControl
     public void SetPinned(bool pinned)
     {
         PinButton.Opacity = pinned ? 1.0 : 0.65;
+        PinButtonHost.Background = pinned
+            ? new SolidColorBrush(Color.FromArgb(0x42, 0xE8, 0x11, 0x23))
+            : Brushes.Transparent;
+        PinButtonHost.BorderBrush = pinned
+            ? new SolidColorBrush(Color.FromRgb(0xE8, 0x11, 0x23))
+            : Brushes.Transparent;
+        PinButtonHost.BorderThickness = pinned ? new Thickness(1) : new Thickness(0);
         PinButton.ToolTip = pinned
             ? $"{Strings.T("AlwaysOnTop")} ✓"
             : Strings.T("AlwaysOnTop");
@@ -193,6 +201,28 @@ public partial class CompactProcessView : UserControl
     private void CloseButton_Click(object sender, RoutedEventArgs e) =>
         CloseRequested?.Invoke(sender, e);
 
-    private void ModeTitle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) =>
-        DragRequested?.Invoke(sender, e);
+    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var source = e.OriginalSource as DependencyObject;
+        if (FindVisualParent<Button>(source) != null ||
+            FindVisualParent<TextBox>(source) != null ||
+            FindVisualParent<Border>(source)?.Name == nameof(PinButtonHost))
+        {
+            return;
+        }
+
+        DragRequested?.Invoke(this, e);
+    }
+
+    private static T? FindVisualParent<T>(DependencyObject? source)
+        where T : DependencyObject
+    {
+        while (source != null)
+        {
+            if (source is T match) return match;
+            source = System.Windows.Media.VisualTreeHelper.GetParent(source);
+        }
+
+        return null;
+    }
 }
