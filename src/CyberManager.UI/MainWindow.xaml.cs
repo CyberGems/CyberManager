@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Interop;
@@ -22,9 +23,77 @@ using ModifierKeys = System.Windows.Input.ModifierKeys;
 
 namespace CyberManager.UI;
 
+public enum MainTab
+{
+    Processes,
+    Performance,
+    Settings
+}
+
 [SuppressMessage("Design", "CA1001", Justification = "WPF window-owned services are released from the window lifecycle.")]
 public partial class MainWindow : Window
 {
+    public MainTab CurrentTab { get; private set; } = MainTab.Processes;
+
+    public void SelectTab(MainTab tab, string? subTab = null)
+    {
+        CurrentTab = tab;
+
+        TabProcessesBtn.IsChecked = tab == MainTab.Processes;
+        TabPerformanceBtn.IsChecked = tab == MainTab.Performance;
+        TabSettingsBtn.IsChecked = tab == MainTab.Settings;
+
+        ProcessesTabContent.Visibility = tab == MainTab.Processes ? Visibility.Visible : Visibility.Collapsed;
+        PerformanceTabContent.Visibility = tab == MainTab.Performance ? Visibility.Visible : Visibility.Collapsed;
+        SettingsTabContent.Visibility = tab == MainTab.Settings ? Visibility.Visible : Visibility.Collapsed;
+
+        var accentBrush = (Brush)FindResource("AccentBrush");
+        var subTextBrush = (Brush)FindResource("SubTextBrush");
+
+        TabProcessesIcon.Stroke = tab == MainTab.Processes ? accentBrush : subTextBrush;
+        TabPerformanceIcon.Stroke = tab == MainTab.Performance ? accentBrush : subTextBrush;
+        TabSettingsIcon.Stroke = tab == MainTab.Settings ? accentBrush : subTextBrush;
+
+        if (tab == MainTab.Performance)
+        {
+            PerformanceTabContent.Activate();
+            if (!string.IsNullOrEmpty(subTab))
+            {
+                PerformanceTabContent.SelectSubTab(subTab);
+            }
+        }
+        else
+        {
+            PerformanceTabContent.Deactivate();
+        }
+
+        if (tab == MainTab.Settings)
+        {
+            SettingsTabContent.Activate();
+        }
+        else
+        {
+            SettingsTabContent.Deactivate();
+        }
+    }
+
+    private void TabClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement elem && elem.Tag is string tag)
+        {
+            var targetTab = tag switch
+            {
+                "Processes" => MainTab.Processes,
+                "Performance" => MainTab.Performance,
+                "Settings" => MainTab.Settings,
+                _ => MainTab.Processes
+            };
+            if (CurrentTab != targetTab)
+            {
+                SelectTab(targetTab);
+            }
+        }
+    }
     private const uint MONITOR_DEFAULTTONEAREST = 0x00000002;
     private const int WM_NCLBUTTONDOWN = 0x00A1;
     private const int HTCAPTION = 0x0002;
@@ -129,6 +198,24 @@ public partial class MainWindow : Window
             await App.Settings.SaveAsync(_lifetimeCts.Token);
         };
         PathToIconConverter.IconReady += OnIconReady;
+        SettingsTabContent.SettingsChanged += () =>
+        {
+            ApplySortingAndFilter();
+            ApplyTheme();
+            ApplyLanguage();
+            if (_isCompactMode != App.Settings.CompactMode)
+            {
+                ApplyViewMode(App.Settings.CompactMode, restoreBounds: false);
+            }
+            _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
+            Topmost = App.Settings.AlwaysOnTop;
+            CompactView.SetPinned(Topmost);
+            GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
+            FontSizeSlider.Value = App.Settings.RowFontSize;
+            ProcGrid.FontSize = App.Settings.RowFontSize;
+            CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
+            FontSizeLabel.Text = $"{App.Settings.RowFontSize:F0}px";
+        };
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -285,9 +372,9 @@ public partial class MainWindow : Window
             }
 
             FullTitleBar.Visibility = Visibility.Collapsed;
-            FullToolbar.Visibility = Visibility.Collapsed;
-            FullProcessListBorder.Visibility = Visibility.Collapsed;
-            FullFooter.Visibility = Visibility.Collapsed;
+            ProcessesTabContent.Visibility = Visibility.Collapsed;
+            PerformanceTabContent.Visibility = Visibility.Collapsed;
+            SettingsTabContent.Visibility = Visibility.Collapsed;
             CompactViewHost.Visibility = Visibility.Visible;
         }
         else
@@ -305,10 +392,8 @@ public partial class MainWindow : Window
             }
 
             FullTitleBar.Visibility = Visibility.Visible;
-            FullToolbar.Visibility = Visibility.Visible;
-            FullProcessListBorder.Visibility = Visibility.Visible;
-            FullFooter.Visibility = Visibility.Visible;
             CompactViewHost.Visibility = Visibility.Collapsed;
+            SelectTab(CurrentTab);
         }
 
         CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
@@ -497,8 +582,10 @@ public partial class MainWindow : Window
 
     private void SystemInfo_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new SystemInfoWindow { Owner = this };
-        dlg.ShowDialog();
+        string? sub = null;
+        if (sender == CpuSparklineBorder || sender == CpuSparkline) sub = "Cpu";
+        else if (sender == RamSparklineBorder || sender == RamSparkline) sub = "Memory";
+        SelectTab(MainTab.Performance, sub);
     }
 
     private void SystemInfoBorder_KeyDown(object sender, KeyEventArgs e)
@@ -875,8 +962,9 @@ public partial class MainWindow : Window
     {
         if (e.ChangedButton != MouseButton.Left) return;
         var source = e.OriginalSource as DependencyObject;
-        if (FindVisualParent<Button>(source) != null ||
+        if (FindVisualParent<ButtonBase>(source) != null ||
             FindVisualParent<TextBox>(source) != null ||
+            FindVisualParent<Border>(source)?.Name == "NavTabBarBorder" ||
             FindVisualParent<Border>(source)?.Name == nameof(StatsBorder))
         {
             return;
@@ -919,29 +1007,7 @@ public partial class MainWindow : Window
 
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
-        var dlg = new SettingsWindow
-        {
-            Owner = this,
-            OnSettingsChanged = () =>
-            {
-                ApplySortingAndFilter();
-                ApplyTheme();
-                ApplyLanguage();
-                if (_isCompactMode != App.Settings.CompactMode)
-                {
-                    ApplyViewMode(App.Settings.CompactMode, restoreBounds: false);
-                }
-                _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
-                Topmost = App.Settings.AlwaysOnTop;
-                CompactView.SetPinned(Topmost);
-                GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
-                FontSizeSlider.Value = App.Settings.RowFontSize;
-                ProcGrid.FontSize = App.Settings.RowFontSize;
-                CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
-                FontSizeLabel.Text = $"{App.Settings.RowFontSize:F0}px";
-            }
-        };
-        dlg.ShowDialog();
+        SelectTab(MainTab.Settings);
     }
 
     private void FullModeToggle_Click(object sender, RoutedEventArgs e) =>
@@ -1288,12 +1354,32 @@ public partial class MainWindow : Window
     {
         ThemeManager.Apply(App.Settings.Theme);
         _trayService.UpdateTheme();
+
+        var accentBrush = (Brush)FindResource("AccentBrush");
+        var subTextBrush = (Brush)FindResource("SubTextBrush");
+
+        if (TabProcessesIcon != null)
+            TabProcessesIcon.Stroke = CurrentTab == MainTab.Processes ? accentBrush : subTextBrush;
+        if (TabPerformanceIcon != null)
+            TabPerformanceIcon.Stroke = CurrentTab == MainTab.Performance ? accentBrush : subTextBrush;
+        if (TabSettingsIcon != null)
+            TabSettingsIcon.Stroke = CurrentTab == MainTab.Settings ? accentBrush : subTextBrush;
     }
 
     private void ApplyLanguage()
     {
         try
         {
+            TabProcessesText.Text = Strings.T("NavProcesses");
+            TabPerformanceText.Text = Strings.T("NavPerformance");
+            TabSettingsText.Text = Strings.T("NavSettings");
+            TabProcessesBtn.ToolTip = Strings.T("NavProcessesTip");
+            TabPerformanceBtn.ToolTip = Strings.T("NavPerformanceTip");
+            TabSettingsBtn.ToolTip = Strings.T("NavSettingsTip");
+
+            PerformanceTabContent?.RefreshLocalization();
+            SettingsTabContent?.RefreshLocalization();
+
             SubtitleText.Text = Strings.T("AppSubtitle");
             SearchHint.Text = Strings.T("SearchPlaceholder");
             EmptyStateText.Text = Strings.T("NoProcesses");
@@ -1385,6 +1471,27 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
             ApplyViewMode(!_isCompactMode, restoreBounds: false);
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D1 || e.Key == Key.NumPad1))
+        {
+            e.Handled = true;
+            SelectTab(MainTab.Processes);
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D2 || e.Key == Key.NumPad2))
+        {
+            e.Handled = true;
+            SelectTab(MainTab.Performance);
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D3 || e.Key == Key.NumPad3))
+        {
+            e.Handled = true;
+            SelectTab(MainTab.Settings);
             return;
         }
 
@@ -1634,8 +1741,7 @@ public partial class MainWindow : Window
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
         }
-        var dlg = new SystemInfoWindow { Owner = this };
-        dlg.ShowDialog();
+        SelectTab(MainTab.Performance);
     }
 
     private void OpenSettingsFromTray()
@@ -1646,7 +1752,7 @@ public partial class MainWindow : Window
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
         }
-        Settings_Click(this, new RoutedEventArgs());
+        SelectTab(MainTab.Settings);
     }
 
     private void OpenAboutFromTray(bool checkUpdatesNow)

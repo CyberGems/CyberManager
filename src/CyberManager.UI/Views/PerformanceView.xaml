@@ -1,0 +1,318 @@
+<UserControl x:Class="CyberManager.UI.Views.PerformanceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:CyberManager.UI.Controls"
+             TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType" TextOptions.TextHintingMode="Fixed"
+             UseLayoutRounding="True" SnapsToDevicePixels="True"
+             FontFamily="Segoe UI Variable Text, Segoe UI, -apple-system, BlinkMacSystemFont, Roboto, sans-serif">
+
+    <UserControl.Resources>
+        <!-- Sub-Tab RadioButton Style -->
+        <Style x:Key="SubTabNavButton" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}" Margin="0,0,6,0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HeaderBgBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Stat Card Style -->
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="14,12"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="0,4,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Header Subtitle & Sub-Tabs -->
+            <RowDefinition Height="*"/>    <!-- Tab Content -->
+            <RowDefinition Height="Auto"/> <!-- Bottom Status Bar -->
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Subtitle & Sub-Tabs Navigation Bar -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Sub-Tab Navigation Bar -->
+            <Border Grid.Column="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="6,4">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="TabSummary" Content="Resumen" Style="{StaticResource SubTabNavButton}" IsChecked="True" Checked="SubTab_Checked"/>
+                    <RadioButton x:Name="TabCpu" Content="CPU" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked"/>
+                    <RadioButton x:Name="TabMemory" Content="Memoria" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked"/>
+                    <RadioButton x:Name="TabIo" Content="Actividad" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Hardware Overview Chip -->
+            <Border Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Path Data="M 4 4 H 20 V 20 H 4 Z M 9 2 V 4 M 15 2 V 4 M 9 20 V 22 M 15 20 V 22 M 2 9 H 4 M 20 9 H 22 M 2 15 H 4 M 20 15 H 22"
+                          Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.3" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="CpuModelSubtitle" Text="NT Kernel Engine • Telemetría en tiempo real" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Row 1: Dynamic Sub-Tab Content -->
+        <Grid Grid.Row="1">
+            <!-- SUB-TAB 1: SUMMARY (Dual Graphs + 4 Stat Cards) -->
+            <Grid x:Name="ViewSummary" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1.2*"/> <!-- Dual Graphs -->
+                    <RowDefinition Height="Auto"/> <!-- Stat Cards -->
+                </Grid.RowDefinitions>
+
+                <!-- Dual Graphs Area -->
+                <Grid Grid.Row="0" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Big CPU Graph -->
+                    <Border Grid.Column="0" Style="{StaticResource StatCard}" Padding="10,8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Margin="2,0,0,6">
+                                <TextBlock Text="📈" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="CpuHistoryTitle" Text="Historial de CPU" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="CpuLegend" Text="(Usuario / Kernel)" FontSize="10" Foreground="{DynamicResource SubTextBrush}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <controls:LargeHistoryGraphControl x:Name="SummaryCpuGraph" Grid.Row="1" Title="CPU" UnitSuffix="%" PrimaryColor="#10B981" SecondaryColor="#EF4444"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Right: Big Memory Graph -->
+                    <Border Grid.Column="2" Style="{StaticResource StatCard}" Padding="10,8">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Orientation="Horizontal" Margin="2,0,0,6">
+                                <TextBlock Text="🧠" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="MemHistoryTitle" Text="Historial de Memoria" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="MemLegend" Text="(En uso / Commit)" FontSize="10" Foreground="{DynamicResource SubTextBrush}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <controls:LargeHistoryGraphControl x:Name="SummaryMemGraph" Grid.Row="1" Title="RAM" UnitSuffix="%" PrimaryColor="#00E5FF" SecondaryColor="#A855F7"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- Bottom 4 Stat Cards -->
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: Totals -->
+                    <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="TotalsCardTitle" Text="Totales" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,2"><TextBlock x:Name="HandlesLbl" Text="Handles" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="HandlesVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="ThreadsLbl" Text="Hilos" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="ThreadsVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="ProcessesLbl" Text="Procesos" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="ProcessesVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: CPU Metrics -->
+                    <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="CpuCardTitle" Text="CPU" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,2"><TextBlock x:Name="CpuTotalLbl" Text="Total CPU" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="CpuTotalVal" Text="—" FontWeight="SemiBold" Foreground="#10B981" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="CpuKernelLbl" Text="CPU Kernel" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="CpuKernelVal" Text="—" FontWeight="SemiBold" Foreground="#EF4444" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="CpuUserLbl" Text="CPU Usuario" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="CpuUserVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Memory Metrics -->
+                    <Border Grid.Column="4" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="MemCardTitle" Text="Memoria (GB)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,2"><TextBlock x:Name="MemInUseLbl" Text="En uso" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="MemInUseVal" Text="—" FontWeight="SemiBold" Foreground="#00E5FF" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="MemAvailLbl" Text="Disponible" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="MemAvailVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="MemTotalLbl" Text="Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="MemTotalVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Processor Topology -->
+                    <Border Grid.Column="6" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="TopologyCardTitle" Text="Topología" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,2"><TextBlock x:Name="CoresLbl" Text="Núcleos" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="CoresVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="SocketsLbl" Text="Sockets" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="SocketsVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="LogProcLbl" Text="Procesadores Lógicos" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="LogProcVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- SUB-TAB 2: FULL CPU VIEW -->
+            <Grid x:Name="ViewCpu" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Style="{StaticResource StatCard}" Margin="0,0,0,12" Padding="12,10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="2,0,0,6">
+                            <TextBlock Text="📈" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="FullCpuHistoryTitle" Text="Historial de actividad de CPU (tiempo de usuario y kernel)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <controls:LargeHistoryGraphControl x:Name="FullCpuGraph" Grid.Row="1" Title="CPU %" UnitSuffix="%" PrimaryColor="#10B981" SecondaryColor="#EF4444"/>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="12"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="FullCpuMetricsTitle" Text="Métricas de CPU" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,3"><TextBlock Text="CPU Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuTotal" Text="—" FontWeight="Bold" Foreground="#10B981" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock Text="Kernel CPU" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuKernel" Text="—" FontWeight="SemiBold" Foreground="#EF4444" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock Text="User CPU" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuUser" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="ProcessorTopologyTitle" Text="Topología del Procesador" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,3"><TextBlock Text="Modelo" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuModel" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis"/></Grid>
+                            <Grid Margin="0,3"><TextBlock Text="Núcleos Físicos" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuCores" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock Text="Procesadores Lógicos" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuLogical" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- SUB-TAB 3: FULL MEMORY VIEW -->
+            <Grid x:Name="ViewMemory" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Style="{StaticResource StatCard}" Margin="0,0,0,12" Padding="12,10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="2,0,0,6">
+                            <TextBlock Text="🧠" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="FullMemHistoryTitle" Text="Historial de memoria física y Commit" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <controls:LargeHistoryGraphControl x:Name="FullMemGraph" Grid.Row="1" Title="RAM %" UnitSuffix="%" PrimaryColor="#00E5FF" SecondaryColor="#A855F7"/>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="PhysicalMemoryTitle" Text="Memoria Física (GB)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,3"><TextBlock Text="Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullMemTotal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock Text="En uso" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullMemInUse" Text="—" FontWeight="Bold" Foreground="#00E5FF" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock Text="Disponible" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullMemAvail" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="CommitChargeTitle" Text="Carga de Commit (GB)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,3"><TextBlock x:Name="CommitTotalLbl" Text="Total Confirmado" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCommitTotal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock x:Name="CommitLimitLbl" Text="Límite" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCommitLimit" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock x:Name="CommitPeakLbl" Text="Pico" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCommitPeak" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="4" Style="{StaticResource StatCard}">
+                        <StackPanel>
+                            <TextBlock x:Name="KernelPoolTitle" Text="Memoria del Kernel (MB)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                            <Grid Margin="0,3"><TextBlock x:Name="PagedPoolLbl" Text="Pool Paginado" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullPagedPool" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock x:Name="NonPagedPoolLbl" Text="Pool No Paginado" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullNonPagedPool" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock x:Name="FullHandlesLbl" Text="Total Handles" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullHandles" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+
+            <!-- SUB-TAB 4: I/O VIEW -->
+            <Grid x:Name="ViewIo" Visibility="Collapsed">
+                <Border Style="{StaticResource StatCard}" VerticalAlignment="Top" Padding="16,14">
+                    <StackPanel>
+                        <TextBlock x:Name="IoTitle" Text="Resumen de actividad del sistema" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,12"/>
+                        <Grid Margin="0,4"><TextBlock x:Name="IoProcessesLbl" Text="Total de procesos activos" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoProcessesVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        <Grid Margin="0,4"><TextBlock x:Name="IoThreadsLbl" Text="Total de hilos activos" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoThreadsVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        <Grid Margin="0,4"><TextBlock x:Name="IoHandlesLbl" Text="Total de handles del sistema" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoHandlesVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        <Separator Margin="0,8" Background="{DynamicResource BorderBrush}"/>
+                        <Grid Margin="0,4"><TextBlock x:Name="IoPagedLbl" Text="Pool paginado del sistema" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoPagedVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                        <Grid Margin="0,4"><TextBlock x:Name="IoNonPagedLbl" Text="Pool no paginado del sistema" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoNonPagedVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Row 2: Bottom Telemetry Status Bar -->
+        <Border Grid.Row="2" Margin="0,10,0,0">
+            <TextBlock x:Name="TelemetryFooter" Text="⚡ Real-time telemetry via NT Kernel Engine • 60s sample window" FontSize="11" Foreground="{DynamicResource SubTextBrush}"/>
+        </Border>
+    </Grid>
+</UserControl>

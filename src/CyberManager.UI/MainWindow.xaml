@@ -3,12 +3,58 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:conv="clr-namespace:CyberManager.UI.Services"
         xmlns:controls="clr-namespace:CyberManager.UI.Controls"
+        xmlns:views="clr-namespace:CyberManager.UI.Views"
         Title="CyberManager — Ultra-Light Task Manager" Height="700" Width="1100" MinHeight="520" MinWidth="900"
         Icon="pack://application:,,,/Assets/CyberManager.ico"
         WindowStartupLocation="CenterScreen" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="CanResize"
         PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
+        <!-- GlassWire Navigation Tab Button Style -->
+        <Style x:Key="GlassWireTabStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="ToolTipService.InitialShowDelay" Value="300"/>
+            <Setter Property="ToolTipService.BetweenShowDelay" Value="0"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="4000"/>
+            <Setter Property="ToolTipService.Placement" Value="Bottom"/>
+            <Setter Property="ToolTipService.VerticalOffset" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="TabBd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabBd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="TabBd" Property="Background" Value="{DynamicResource HeaderBgBrush}"/>
+                                <Setter TargetName="TabBd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
         <conv:ChildIndentMarginConverter x:Key="ChildIndentMarginConverter"/>
         <conv:ExpandedChevronConverter x:Key="ExpandedChevronConverter"/>
@@ -336,11 +382,18 @@
     <Border Margin="5" CornerRadius="12">
         <Border x:Name="OuterBorder" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource BgBrush}" ClipToBounds="True">
             <Grid Margin="20,14,20,16">
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/> <!-- Row 0: TitleBar -->
+                    <RowDefinition Height="*"/>    <!-- Row 1: Tab Content Host -->
+                </Grid.RowDefinitions>
 
                 <!-- TitleBar -->
                 <Grid x:Name="FullTitleBar" Grid.Row="0" Margin="0,0,0,16" Background="Transparent" PreviewMouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="pack://application:,,,/Assets/CyberManager.png" Width="30" Height="30" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" Margin="0,0,12,0"/>
                         <StackPanel VerticalAlignment="Center">
@@ -350,21 +403,46 @@
                                     <TextBlock Text="NT ENGINE" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
                                 </Border>
                             </StackPanel>
-                            <TextBlock x:Name="SubtitleText" Text="Ultraligero, potente y amigable • Rendimiento virtualizado" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
+                            <TextBlock x:Name="SubtitleText" Text="Ultraligero, potente y amigable • Rendimiento virtualizado" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" MaxWidth="280" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                     </StackPanel>
+
+                    <!-- Center: GlassWire-Style Navigation Tab Bar -->
+                    <Border x:Name="NavTabBarBorder" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Background="{DynamicResource HeaderBgBrush}" BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1" CornerRadius="10" Padding="3">
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton x:Name="TabProcessesBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" IsChecked="True" Click="TabClick" Checked="TabClick" Tag="Processes">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path x:Name="TabProcessesIcon" Data="M 4 4 H 10 V 10 H 4 Z M 14 4 H 20 V 10 H 14 Z M 4 14 H 10 V 20 H 4 Z M 14 14 H 20 V 20 H 14 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <TextBlock x:Name="TabProcessesText" Text="Procesos" FontSize="11.5" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton x:Name="TabPerformanceBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="Performance">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path x:Name="TabPerformanceIcon" Data="M 2 13 L 6 13 L 9 5 L 13 19 L 16 11 L 18 13 L 22 13" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <TextBlock x:Name="TabPerformanceText" Text="Rendimiento" FontSize="11.5" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton x:Name="TabSettingsBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="Settings">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path x:Name="TabSettingsIcon" Data="M 12 15 C 10.3 15 9 13.7 9 12 C 9 10.3 10.3 9 12 9 C 13.7 9 15 10.3 15 12 C 15 13.7 13.7 15 12 15 Z M 19.4 13 C 19.5 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.5 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10.1 2 C 9.8 2 9.6 2.2 9.6 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.5 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.5 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.6 21.6 C 9.6 21.8 9.8 22 10.1 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.2" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <TextBlock x:Name="TabSettingsText" Text="Ajustes" FontSize="11.5" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Right: Window Controls -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border x:Name="StatsBorder" Background="Transparent" CornerRadius="6" Padding="4,2" Cursor="Hand" Focusable="True" KeyboardNavigation.IsTabStop="True"
-                                AutomationProperties.Name="System Information" MouseLeftButtonUp="SystemInfo_Click" KeyDown="SystemInfoBorder_KeyDown"
-                                ToolTip="Clic para abrir Información del Sistema" Margin="0,0,10,0">
-                            <TextBlock x:Name="StatsText" Text="—" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
-                        </Border>
                         <Button x:Name="FullModeToggleBtn" Width="42" Margin="2,0,0,0" Style="{StaticResource ModeToggleButton}" Click="FullModeToggle_Click" ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto">
                             <Path Data="M 3,3 L 8,8 M 3,8 L 8,8 L 8,3 M 16,16 L 11,11 M 16,11 L 11,11 L 11,16"
                                   Width="16" Height="16" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.6"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                         </Button>
-                        <Button x:Name="SettingsBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)" AutomationProperties.Name="Settings"><TextBlock Text="⚙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="SettingsBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)" AutomationProperties.Name="Settings" Visibility="Collapsed"><TextBlock Text="⚙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                         <Button x:Name="AboutBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About" AutomationProperties.Name="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                         <Button x:Name="MinimizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                         <Button x:Name="MaximizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
@@ -372,8 +450,16 @@
                     </StackPanel>
                 </Grid>
 
-                <!-- Toolbar -->
-                <Grid x:Name="FullToolbar" Grid.Row="1" Margin="0,0,0,12">
+                <!-- Tab 1: Processes View (Toolbar + Virtualized DataGrid + Footer) -->
+                <Grid x:Name="ProcessesTabContent" Grid.Row="1" Visibility="Visible">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/> <!-- FullToolbar -->
+                        <RowDefinition Height="*"/>    <!-- FullProcessListBorder -->
+                        <RowDefinition Height="Auto"/> <!-- FullFooter -->
+                    </Grid.RowDefinitions>
+
+                    <!-- Toolbar -->
+                    <Grid x:Name="FullToolbar" Grid.Row="0" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
@@ -448,7 +534,7 @@
                 </Grid>
 
                 <!-- DataGrid -->
-                <Border x:Name="FullProcessListBorder" Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
+                <Border x:Name="FullProcessListBorder" Grid.Row="1" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
                     <Grid>
                         <DataGrid x:Name="ProcGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="None"
                                   Background="{DynamicResource CardBrush}" BorderThickness="0" RowHeaderWidth="0"
@@ -730,8 +816,19 @@
                 </Border>
 
                 <!-- Footer -->
-                <Grid x:Name="FullFooter" Grid.Row="3" Margin="0,12,0,0">
-                    <TextBlock x:Name="FooterText" Text="Ready" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
+                <Grid x:Name="FullFooter" Grid.Row="2" Margin="0,12,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <!-- Live System Metrics Pill (Clickable -> Opens Performance tab) -->
+                        <Border x:Name="StatsBorder" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="8,3" Cursor="Hand" Focusable="True" KeyboardNavigation.IsTabStop="True"
+                                AutomationProperties.Name="System Information" MouseLeftButtonUp="SystemInfo_Click" KeyDown="SystemInfoBorder_KeyDown"
+                                ToolTip="Clic para abrir Rendimiento" Margin="0,0,12,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Path Data="M 2 13 L 6 13 L 9 5 L 13 19 L 16 11 L 18 13 L 22 13" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.3" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="11" Height="11" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="StatsText" Text="—" Foreground="{DynamicResource TextBrush}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock x:Name="FooterText" Text="Ready" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <!-- Group by application toggle -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
@@ -751,10 +848,18 @@
 
                     </StackPanel>
                 </Grid>
+            </Grid>
 
-                <Grid x:Name="CompactViewHost" Grid.Row="0" Grid.RowSpan="4" Visibility="Collapsed" Panel.ZIndex="10">
-                    <controls:CompactProcessView x:Name="CompactView"/>
-                </Grid>
+            <!-- Tab 2: Performance View (System Info, Graphs, Topology, Metrics) -->
+            <views:PerformanceView x:Name="PerformanceTabContent" Grid.Row="1" Visibility="Collapsed"/>
+
+            <!-- Tab 3: Settings View (Preferences, Appearance, Behavior) -->
+            <views:SettingsView x:Name="SettingsTabContent" Grid.Row="1" Visibility="Collapsed"/>
+
+            <!-- Compact View Host -->
+            <Grid x:Name="CompactViewHost" Grid.Row="0" Grid.RowSpan="2" Visibility="Collapsed" Panel.ZIndex="10">
+                <controls:CompactProcessView x:Name="CompactView"/>
+            </Grid>
             </Grid>
         </Border>
     </Border>
