@@ -11,7 +11,7 @@ public static class Strings
     private static readonly Dictionary<string, (string En, string Es)> Map = new()
     {
         ["AppTitle"] = ("CyberManager — Ultra-Light Task Manager", "CyberManager — Gestor de Tareas Ultra-Ligero"),
-        ["AppSubtitle"] = ("Ultra-light, powerful and friendly • Virtualized performance", "Ultraligero, potente y amigable • Rendimiento virtualizado"),
+        ["AppSubtitle"] = ("Virtualized task manager", "Gestor de tareas virtualizado"),
         ["WfpEngineBadge"] = ("NT ENGINE", "MOTOR NT"),
         ["SearchPlaceholder"] = ("Search process, PID or path...", "Buscar proceso, PID o ruta..."),
         ["Process"] = ("Process", "Proceso"),

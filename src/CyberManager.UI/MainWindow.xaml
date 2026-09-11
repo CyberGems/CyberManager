@@ -403,7 +403,7 @@
                                     <TextBlock Text="NT ENGINE" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
                                 </Border>
                             </StackPanel>
-                            <TextBlock x:Name="SubtitleText" Text="Ultraligero, potente y amigable • Rendimiento virtualizado" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" MaxWidth="280" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock x:Name="SubtitleText" Text="Gestor de tareas virtualizado" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" MaxWidth="250" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -468,28 +468,28 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Search Box -->
-                    <Border Background="{DynamicResource SearchBgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,0" Height="34">
+                    <Border Background="{DynamicResource SearchBgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12,0" Height="38">
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <TextBlock Text="⌕" Foreground="{DynamicResource SubTextBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBox x:Name="SearchBox" Grid.Column="1" AutomationProperties.Name="Search processes" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" CaretBrush="{DynamicResource AccentBrush}" FontSize="12" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" PreviewKeyDown="SearchBox_PreviewKeyDown"/>
-                            <TextBlock x:Name="SearchHint" Grid.Column="1" Text="Search process, PID or path..." Foreground="{DynamicResource SubTextBrush}" FontSize="12" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,0,0"/>
+                            <TextBlock Text="⌕" Foreground="{DynamicResource SubTextBrush}" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox x:Name="SearchBox" Grid.Column="1" AutomationProperties.Name="Search processes" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" CaretBrush="{DynamicResource AccentBrush}" FontSize="12.5" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" PreviewKeyDown="SearchBox_PreviewKeyDown"/>
+                            <TextBlock x:Name="SearchHint" Grid.Column="1" Text="Search process, PID or path..." Foreground="{DynamicResource SubTextBrush}" FontSize="12.5" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,0,0"/>
                             <Button Grid.Column="2" Content="✕" Foreground="{DynamicResource SubTextBrush}" Background="Transparent" BorderThickness="0" FontSize="10" Cursor="Hand" Padding="6,0" Click="ClearSearch_Click" Visibility="Collapsed" x:Name="ClearBtn" AutomationProperties.Name="Clear search"/>
                         </Grid>
                     </Border>
 
                     <!-- CPU Sparkline Widget -->
-                    <Border Grid.Column="1" x:Name="CpuSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="34" Margin="10,0,0,0" Padding="8,3,8,3" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="CPU History (Click to open System Information)">
+                    <Border Grid.Column="1" x:Name="CpuSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="38" Margin="10,0,0,0" Padding="10,3,10,3" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="CPU History (Click to open System Information)">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,8,0">
-                                <TextBlock Text="CPU" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}"/>
-                                <TextBlock x:Name="CpuSparklineText" Text="0.0%" FontSize="11" FontWeight="Bold" Foreground="#10B981"/>
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
+                                <TextBlock Text="CPU" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}" Margin="0,0,0,1"/>
+                                <TextBlock x:Name="CpuSparklineText" Text="0.0%" FontSize="13.5" FontWeight="Bold" Foreground="#10B981"/>
                             </StackPanel>
-                            <controls:SparklineControl x:Name="CpuSparkline" Grid.Column="1" Width="85" Height="26"
+                            <controls:SparklineControl x:Name="CpuSparkline" Grid.Column="1" Width="100" Height="28"
                                                       StrokeBrush="#10B981"
                                                       FillBrush="#2010B981"
                                                       SecondaryStrokeBrush="#EF4444"
@@ -499,17 +499,17 @@
                     </Border>
 
                     <!-- RAM Sparkline Widget -->
-                    <Border Grid.Column="2" x:Name="RamSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="34" Margin="8,0,0,0" Padding="8,3,8,3" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="Memory History (Click to open System Information)">
+                    <Border Grid.Column="2" x:Name="RamSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="38" Margin="8,0,0,0" Padding="10,3,10,3" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="Memory History (Click to open System Information)">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,8,0">
-                                <TextBlock Text="RAM" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}"/>
-                                <TextBlock x:Name="RamSparklineText" Text="0.0 GB" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource RamBrush}"/>
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
+                                <TextBlock Text="RAM" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}" Margin="0,0,0,1"/>
+                                <TextBlock x:Name="RamSparklineText" Text="0.0 GB" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource RamBrush}"/>
                             </StackPanel>
-                            <controls:SparklineControl x:Name="RamSparkline" Grid.Column="1" Width="85" Height="26"
+                            <controls:SparklineControl x:Name="RamSparkline" Grid.Column="1" Width="100" Height="28"
                                                       StrokeBrush="{DynamicResource RamBrush}"
                                                       FillBrush="{DynamicResource RamFillBrush}"
                                                       Click="SystemInfo_Click"/>
@@ -518,13 +518,13 @@
 
                     <!-- Actions -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0,0,0">
-                        <Button x:Name="RefreshBtn" MinWidth="112" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)" AutomationProperties.Name="Refresh">
+                        <Button x:Name="RefreshBtn" Height="38" MinWidth="112" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)" AutomationProperties.Name="Refresh">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                 <TextBlock x:Name="RefreshBtnText" Text="Refresh" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        <Button x:Name="KillBtn" Style="{StaticResource DangerModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)" IsEnabled="False" AutomationProperties.Name="End task">
+                        <Button x:Name="KillBtn" Height="38" Style="{StaticResource DangerModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)" IsEnabled="False" AutomationProperties.Name="End task">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path Data="M 3 3 L 11 11 M 11 3 L 3 11" Stroke="#FF5252" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="10" Height="10" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                 <TextBlock x:Name="KillBtnText" Text="End Task" VerticalAlignment="Center"/>
