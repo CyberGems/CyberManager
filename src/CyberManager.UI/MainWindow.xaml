@@ -358,7 +358,7 @@
                                 <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                                 <Setter TargetName="Track" Property="Effect">
                                     <Setter.Value>
-                                        <DropShadowEffect Color="#00E5FF" BlurRadius="8" ShadowDepth="0" Opacity="0.85"/>
+                                        <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="8" ShadowDepth="0" Opacity="0.85"/>
                                     </Setter.Value>
                                 </Setter>
                                 <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
@@ -507,11 +507,11 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,8,0">
                                 <TextBlock Text="RAM" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}"/>
-                                <TextBlock x:Name="RamSparklineText" Text="0.0 GB" FontSize="11" FontWeight="Bold" Foreground="#00E5FF"/>
+                                <TextBlock x:Name="RamSparklineText" Text="0.0 GB" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource RamBrush}"/>
                             </StackPanel>
                             <controls:SparklineControl x:Name="RamSparkline" Grid.Column="1" Width="85" Height="26"
-                                                      StrokeBrush="#00E5FF"
-                                                      FillBrush="#2000E5FF"
+                                                      StrokeBrush="{DynamicResource RamBrush}"
+                                                      FillBrush="{DynamicResource RamFillBrush}"
                                                       Click="SystemInfo_Click"/>
                         </Grid>
                     </Border>

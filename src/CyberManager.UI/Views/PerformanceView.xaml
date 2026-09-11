@@ -128,7 +128,7 @@
                                 <TextBlock x:Name="MemHistoryTitle" Text="Historial de Memoria" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="MemLegend" Text="(En uso / Commit)" FontSize="10" Foreground="{DynamicResource SubTextBrush}" Margin="8,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
-                            <controls:LargeHistoryGraphControl x:Name="SummaryMemGraph" Grid.Row="1" Title="RAM" UnitSuffix="%" PrimaryColor="#00E5FF" SecondaryColor="#A855F7"/>
+                            <controls:LargeHistoryGraphControl x:Name="SummaryMemGraph" Grid.Row="1" Title="RAM" UnitSuffix="%" PrimaryColor="{DynamicResource RamColor}" SecondaryColor="#A855F7"/>
                         </Grid>
                     </Border>
                 </Grid>
@@ -169,7 +169,7 @@
                     <Border Grid.Column="4" Style="{StaticResource StatCard}">
                         <StackPanel>
                             <TextBlock x:Name="MemCardTitle" Text="Memoria (GB)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
-                            <Grid Margin="0,2"><TextBlock x:Name="MemInUseLbl" Text="En uso" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="MemInUseVal" Text="—" FontWeight="SemiBold" Foreground="#00E5FF" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,2"><TextBlock x:Name="MemInUseLbl" Text="En uso" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="MemInUseVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource RamBrush}" HorizontalAlignment="Right"/></Grid>
                             <Grid Margin="0,2"><TextBlock x:Name="MemAvailLbl" Text="Disponible" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="MemAvailVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
                             <Grid Margin="0,2"><TextBlock x:Name="MemTotalLbl" Text="Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="MemTotalVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
                         </StackPanel>
@@ -252,7 +252,7 @@
                             <TextBlock Text="🧠" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock x:Name="FullMemHistoryTitle" Text="Historial de memoria física y Commit" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <controls:LargeHistoryGraphControl x:Name="FullMemGraph" Grid.Row="1" Title="RAM %" UnitSuffix="%" PrimaryColor="#00E5FF" SecondaryColor="#A855F7"/>
+                        <controls:LargeHistoryGraphControl x:Name="FullMemGraph" Grid.Row="1" Title="RAM %" UnitSuffix="%" PrimaryColor="{DynamicResource RamColor}" SecondaryColor="#A855F7"/>
                     </Grid>
                 </Border>
 
@@ -269,7 +269,7 @@
                         <StackPanel>
                             <TextBlock x:Name="PhysicalMemoryTitle" Text="Memoria Física (GB)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
                             <Grid Margin="0,3"><TextBlock Text="Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullMemTotal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
-                            <Grid Margin="0,3"><TextBlock Text="En uso" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullMemInUse" Text="—" FontWeight="Bold" Foreground="#00E5FF" HorizontalAlignment="Right"/></Grid>
+                            <Grid Margin="0,3"><TextBlock Text="En uso" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullMemInUse" Text="—" FontWeight="Bold" Foreground="{DynamicResource RamBrush}" HorizontalAlignment="Right"/></Grid>
                             <Grid Margin="0,3"><TextBlock Text="Disponible" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullMemAvail" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
                         </StackPanel>
                     </Border>

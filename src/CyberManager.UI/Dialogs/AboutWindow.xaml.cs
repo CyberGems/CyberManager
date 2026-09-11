@@ -13,6 +13,8 @@ public partial class AboutWindow : Window, IModalAttentionWindow
 {
     private const string RepoUrl = "https://github.com/CyberGems/CyberManager";
     private const string WebsiteUrl = "https://cybergems.org";
+    private const string WikiUrl = "https://cybergems.org/apps/cybermanager";
+    private const string DonateUrl = "https://ko-fi.com/cybergems";
 
     private bool _suppressAutoCheckUpdateChange;
     private DateTime _lastAttentionTime = DateTime.MinValue;
@@ -65,9 +67,11 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         AboutFooterCopyright.Text = Strings.T("Copyright");
         AboutFooterCopyright.ToolTip = Strings.T("Website");
         AboutFooterWebsiteBtn.ToolTip = Strings.T("Website");
+        AboutFooterDocsBtn.ToolTip = Strings.T("OnlineDocs");
         AboutFooterGithubBtn.ToolTip = Strings.T("GitHub");
         AboutFooterIssuesBtn.ToolTip = Strings.T("Issues");
         AboutFooterReleasesBtn.ToolTip = Strings.T("OpenReleases");
+        AboutFooterDonateBtn.ToolTip = Strings.T("DonateProject");
     }
 
     private void AutoCheckUpdateCheck_Changed(object sender, RoutedEventArgs e)
@@ -208,6 +212,12 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         OpenUrl(WebsiteUrl);
     }
 
+    private void AboutFooterDocs_Click(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        OpenUrl(WikiUrl);
+    }
+
     private void AboutFooterGithub_Click(object sender, MouseButtonEventArgs e)
     {
         e.Handled = true;
@@ -224,6 +234,66 @@ public partial class AboutWindow : Window, IModalAttentionWindow
     {
         e.Handled = true;
         OpenUrl($"{RepoUrl}/releases");
+    }
+
+    private void AboutFooterDonate_Click(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        OpenUrl(DonateUrl);
+    }
+
+    private void AboutFooterCopyright_MouseEnter(object sender, MouseEventArgs e)
+    {
+        AboutFooterCopyright.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, "TextBrush");
+    }
+
+    private void AboutFooterCopyright_MouseLeave(object sender, MouseEventArgs e)
+    {
+        AboutFooterCopyright.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, "SubTextBrush");
+    }
+
+    private void AboutFooterIcon_MouseEnter(object sender, MouseEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Border border) return;
+        border.SetResourceReference(System.Windows.Controls.Border.BackgroundProperty, "CardSecondaryBrush");
+        SetFooterIconAccent(border, primary: true);
+    }
+
+    private void AboutFooterIcon_MouseLeave(object sender, MouseEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Border border) return;
+        border.Background = System.Windows.Media.Brushes.Transparent;
+        SetFooterIconAccent(border, primary: false);
+    }
+
+    private void SetFooterIconAccent(System.Windows.Controls.Border border, bool primary)
+    {
+        var brushKey = primary ? "TextBrush" : "SubTextBrush";
+        if (border == AboutFooterWebsiteBtn)
+        {
+            AboutFooterWebsiteIcon.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+        }
+        else if (border == AboutFooterDocsBtn)
+        {
+            AboutFooterDocsBody.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+        }
+        else if (border == AboutFooterGithubBtn)
+        {
+            AboutFooterGithubIcon.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, brushKey);
+        }
+        else if (border == AboutFooterIssuesBtn)
+        {
+            AboutFooterIssuesIcon1.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            AboutFooterIssuesIcon2.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            AboutFooterIssuesIcon3.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            AboutFooterIssuesIcon4.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            AboutFooterIssuesIcon5.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+        }
+        else if (border == AboutFooterReleasesBtn)
+        {
+            AboutFooterTagBody.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            AboutFooterTagDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, brushKey);
+        }
     }
 
     private static void OpenUrl(string url)
