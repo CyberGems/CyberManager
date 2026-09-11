@@ -34,6 +34,14 @@ CLAUDE.md
 .cursorrules
 .cursor/
 .github/copilot-instructions.md
+*_TODO.md
+
+## Local AI/runtime artifacts
+.claude/
+.qodo/
+.zcode/
+.gemini/
+.omx/
 
 ## GitHub Wiki (local copy — wiki lives on GitHub Wiki)
 docs/wiki/
