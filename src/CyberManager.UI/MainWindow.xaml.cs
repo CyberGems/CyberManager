@@ -1020,6 +1020,59 @@ public partial class MainWindow : Window
     private void FullModeToggle_Click(object sender, RoutedEventArgs e) =>
         ApplyViewMode(!_isCompactMode, restoreBounds: false);
 
+    private bool _moreMenuWasOpen;
+
+    private void MoreBtn_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        _moreMenuWasOpen = MoreBtn.ContextMenu?.IsOpen == true;
+    }
+
+    private void MoreBtn_Click(object sender, RoutedEventArgs e)
+    {
+        if (_moreMenuWasOpen)
+        {
+            _moreMenuWasOpen = false;
+            return;
+        }
+
+        if (MoreBtn.ContextMenu != null)
+        {
+            MoreBtn.ContextMenu.PlacementTarget = MoreBtn;
+            MoreBtn.ContextMenu.Placement = PlacementMode.Bottom;
+            MoreBtn.ContextMenu.IsOpen = true;
+        }
+    }
+
+    private static void OpenExternalUrl(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch { }
+    }
+
+    private void MoreDonate_Click(object sender, RoutedEventArgs e)
+        => OpenExternalUrl("https://github.com/CyberGems/CyberManager#%EF%B8%8F-donate");
+
+    private void MoreDocs_Click(object sender, RoutedEventArgs e)
+        => OpenExternalUrl("https://github.com/CyberGems/CyberManager/wiki");
+
+    private void MoreFaq_Click(object sender, RoutedEventArgs e)
+        => OpenExternalUrl("https://github.com/CyberGems/CyberManager/wiki/FAQ");
+
+    private void MoreChangelog_Click(object sender, RoutedEventArgs e)
+        => OpenExternalUrl("https://github.com/CyberGems/CyberManager/releases");
+
+    private void MoreWebsite_Click(object sender, RoutedEventArgs e)
+        => OpenExternalUrl("https://cybergems.org");
+
+    private void MoreCheckUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new AboutWindow(checkUpdatesNow: true) { Owner = this };
+        dlg.ShowDialog();
+    }
+
     private void About_Click(object sender, RoutedEventArgs e)
     {
         var w = new AboutWindow { Owner = this };
@@ -1400,8 +1453,21 @@ public partial class MainWindow : Window
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
             FullModeToggleBtn.ToolTip = Strings.T("CompactMode");
             AutomationProperties.SetName(FullModeToggleBtn, Strings.T("CompactMode"));
-            SettingsBtn.ToolTip = $"{Strings.T("Settings")} (Ctrl+,)";
-            AboutBtn.ToolTip = Strings.T("About");
+            MoreBtn.ToolTip = Strings.T("MoreOptions");
+            AutomationProperties.SetName(MoreBtn, Strings.T("MoreOptions"));
+            if (MoreOptionsMenu != null)
+            {
+                MoreDonateItem.Header = Strings.T("Donate");
+                MoreSysInfoItem.Header = $"{Strings.T("SystemInformation")}...";
+                MoreRefreshItem.Header = Strings.T("RefreshProcesses");
+                MoreCompactItem.Header = Strings.T("CompactMode");
+                MoreDocsItem.Header = Strings.T("DocumentationWiki");
+                MoreFaqItem.Header = Strings.T("Faq");
+                MoreChangelogItem.Header = Strings.T("Changelog");
+                MoreWebsiteItem.Header = Strings.T("Website");
+                MoreCheckUpdatesItem.Header = Strings.T("CheckForUpdates");
+                MoreAboutItem.Header = Strings.T("AboutCyberManager");
+            }
             MinimizeBtn.ToolTip = Strings.T("Minimize");
             MaximizeBtn.ToolTip = Strings.T("Maximize");
             CloseBtn.ToolTip = Strings.T("Close");

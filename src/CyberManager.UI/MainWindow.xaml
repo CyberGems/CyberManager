@@ -442,8 +442,102 @@
                                   Width="16" Height="16" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.6"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                         </Button>
-                        <Button x:Name="SettingsBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)" AutomationProperties.Name="Settings" Visibility="Collapsed"><TextBlock Text="⚙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="AboutBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About" AutomationProperties.Name="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="MoreBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}"
+                                PreviewMouseLeftButtonDown="MoreBtn_PreviewMouseLeftButtonDown"
+                                Click="MoreBtn_Click" ToolTip="More options" AutomationProperties.Name="More options">
+                            <Button.ContextMenu>
+                                <ContextMenu x:Name="MoreOptionsMenu" Style="{StaticResource ModernContextMenu}">
+                                    <MenuItem x:Name="MoreDonateItem" Header="Donate" Style="{StaticResource ModernMenuItem}" Click="MoreDonate_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 12 21.35 L 10.55 20.03 C 5.4 15.36 2 12.28 2 8.5 C 2 5.42 4.42 3 7.5 3 C 9.24 3 10.91 3.81 12 5.09 C 13.09 3.81 14.76 3 16.5 3 C 19.58 3 22 5.42 22 8.5 C 22 12.28 18.6 15.36 13.45 20.04 L 12 21.35 Z"
+                                                  Fill="#F43F5E" Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <Separator Style="{StaticResource ModernMenuSeparator}"/>
+
+                                    <MenuItem x:Name="MoreRefreshItem" Header="Refresh Processes" InputGestureText="F5" Style="{StaticResource ModernMenuItem}" Click="Refresh_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15"
+                                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <MenuItem x:Name="MoreSysInfoItem" Header="System Information..." InputGestureText="Ctrl+I" Style="{StaticResource ModernMenuItem}" Click="SystemInfo_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 2 12 L 6 12 L 9 5 L 14 19 L 17 12 L 22 12"
+                                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <MenuItem x:Name="MoreCompactItem" Header="Compact mode" InputGestureText="Ctrl+Shift+M" Style="{StaticResource ModernMenuItem}" Click="FullModeToggle_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 3,3 L 8,8 M 3,8 L 8,8 L 8,3 M 16,16 L 11,11 M 16,11 L 11,11 L 11,16"
+                                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <Separator Style="{StaticResource ModernMenuSeparator}"/>
+
+                                    <MenuItem x:Name="MoreDocsItem" Header="Documentation &amp; Wiki" Style="{StaticResource ModernMenuItem}" Click="MoreDocs_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 4 19.5 A 2.5 2.5 0 0 1 6.5 17 H 20 M 4 19.5 A 2.5 2.5 0 0 0 6.5 22 H 20 V 2 H 6.5 A 2.5 2.5 0 0 0 4 4.5 Z"
+                                                  Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <MenuItem x:Name="MoreFaqItem" Header="Frequently Asked Questions" Style="{StaticResource ModernMenuItem}" Click="MoreFaq_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 21 15 A 2 2 0 0 1 19 17 H 7 L 3 21 V 5 A 2 2 0 0 1 5 3 H 19 A 2 2 0 0 1 21 5 Z"
+                                                  Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <MenuItem x:Name="MoreChangelogItem" Header="Changelog" Style="{StaticResource ModernMenuItem}" Click="MoreChangelog_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 9 6 H 20 M 9 12 H 20 M 9 18 H 20 M 4 6 H 5 M 4 12 H 5 M 4 18 H 5"
+                                                  Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <MenuItem x:Name="MoreWebsiteItem" Header="Website" Style="{StaticResource ModernMenuItem}" Click="MoreWebsite_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 12 2 A 10 10 0 1 0 12 22 A 10 10 0 0 0 12 2 M 2 12 H 22 M 12 2 A 15 15 0 0 0 12 22 A 15 15 0 0 0 12 2"
+                                                  Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <Separator Style="{StaticResource ModernMenuSeparator}"/>
+
+                                    <MenuItem x:Name="MoreCheckUpdatesItem" Header="Check for Update..." Style="{StaticResource ModernMenuItem}" Click="MoreCheckUpdates_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 12 4 V 15 M 7 10 L 12 15 L 17 10 M 5 20 H 19"
+                                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <MenuItem x:Name="MoreAboutItem" Header="About CyberManager..." Style="{StaticResource ModernMenuItem}" Click="About_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 12 22 A 10 10 0 1 0 12 2 A 10 10 0 0 0 12 22 M 12 16 V 12 M 12 8 H 12.01"
+                                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                            <Path Data="M 5,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3 M 12,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3 M 19,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3"
+                                  Width="15" Height="15" Stretch="Uniform"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Button>
                         <Button x:Name="MinimizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                         <Button x:Name="MaximizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                         <Button x:Name="CloseBtn" Margin="2,0,0,0" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>

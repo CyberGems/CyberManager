@@ -77,7 +77,8 @@ public class StringsTests
             "GroupByAppTitle", "GroupByAppDesc", "HighlightSuspendedTitle", "HighlightSuspendedDesc",
             "RefreshIntervalTitle", "RefreshIntervalDesc", "RefreshFast", "RefreshNormal", "RefreshSlow",
             "StartWithWindowsTitle", "MinimizeToTrayTitle", "AlwaysOnTopTitle", "AutoCheckUpdatesTitle",
-            "GlobalHotkeyTitle", "ResetDefaults", "SettingsSaved"
+            "GlobalHotkeyTitle", "ResetDefaults", "SettingsSaved",
+            "MoreOptions", "DocumentationWiki", "AboutCyberManager"
         };
         foreach (var key in keys)
         {
