@@ -1,6 +1,6 @@
 ## ⚡ CyberManager {{VERSION}} — Release Notes
 
-Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is an ultra-lightweight, virtualized, zero-lag task manager for 3000+ processes powered by a native Windows NT kernel engine and the signature CyberGems Obsidian & Neon UI.
+Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is a lightweight, high-capacity virtualized task manager. Powered by the native NT engine, it offers instant search and a compact mode — the ultimate alternative to Windows Task Manager.
 
 ---
 

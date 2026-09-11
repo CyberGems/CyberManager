@@ -78,7 +78,7 @@ public class StringsTests
             "RefreshIntervalTitle", "RefreshIntervalDesc", "RefreshFast", "RefreshNormal", "RefreshSlow",
             "StartWithWindowsTitle", "MinimizeToTrayTitle", "AlwaysOnTopTitle", "AutoCheckUpdatesTitle",
             "GlobalHotkeyTitle", "ResetDefaults", "SettingsSaved",
-            "MoreOptions", "DocumentationWiki", "AboutCyberManager"
+            "MoreOptions", "DocumentationWiki", "AboutCyberManager", "Description"
         };
         foreach (var key in keys)
         {
