@@ -1284,9 +1284,10 @@ public partial class MainWindow : Window
     }
 
 
-    private static void ApplyTheme()
+    private void ApplyTheme()
     {
         ThemeManager.Apply(App.Settings.Theme);
+        _trayService.UpdateTheme();
     }
 
     private void ApplyLanguage()

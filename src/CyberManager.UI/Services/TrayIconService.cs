@@ -192,10 +192,10 @@ public sealed class TrayIconService : IDisposable
         {
             Header = $"CyberManager {UpdateService.GetCurrentVersionLabel()}",
             FontWeight = FontWeights.Bold,
-            Foreground = new SolidColorBrush(Color.FromRgb(0, 229, 255)),
             Icon = logoImg,
             Cursor = System.Windows.Input.Cursors.Hand
         };
+        _headerMenuItem.SetResourceReference(Control.ForegroundProperty, "AccentBrush");
         if (miStyle != null) _headerMenuItem.Style = miStyle;
         _headerMenuItem.Click += (_, _) => _onOpenAbout?.Invoke(false);
 
@@ -425,10 +425,10 @@ public sealed class TrayIconService : IDisposable
 
     private static System.Windows.Shapes.Path CreatePathIcon(string data, Color? strokeColor = null)
     {
-        return new System.Windows.Shapes.Path
+        var icon = new System.Windows.Shapes.Path
         {
             Data = Geometry.Parse(data),
-            Stroke = new SolidColorBrush(strokeColor ?? Color.FromArgb(200, 0, 229, 255)),
+            Stroke = strokeColor.HasValue ? new SolidColorBrush(strokeColor.Value) : null,
             StrokeThickness = 1.4,
             StrokeStartLineCap = PenLineCap.Round,
             StrokeEndLineCap = PenLineCap.Round,
@@ -440,6 +440,13 @@ public sealed class TrayIconService : IDisposable
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
+
+        if (!strokeColor.HasValue)
+        {
+            icon.SetResourceReference(Shape.StrokeProperty, "AccentBrush");
+        }
+
+        return icon;
     }
 
     public void UpdateLocalization()
@@ -492,6 +499,18 @@ public sealed class TrayIconService : IDisposable
         if (_subAboutItem != null) _subAboutItem.Header = $"{Strings.T("AboutSubtitle")}...";
         if (_subCheckUpdateItem != null) _subCheckUpdateItem.Header = Strings.T("CheckForUpdates");
         if (_exitMenuItem != null) _exitMenuItem.Header = Strings.T("Exit");
+    }
+
+    public void UpdateTheme()
+    {
+        if (_contextMenu?.IsOpen == true)
+        {
+            _contextMenu.IsOpen = false;
+        }
+
+        // Recreate the menu so every item, icon, popup and template resolves
+        // the complete current palette instead of retaining the previous one.
+        BuildContextMenu();
     }
 
     private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
