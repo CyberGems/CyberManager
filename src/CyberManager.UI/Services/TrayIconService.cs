@@ -83,8 +83,6 @@ public sealed class TrayIconService : IDisposable
     private MenuItem? _showMenuItem;
     private MenuItem? _sysInfoMenuItem;
     private MenuItem? _refreshMenuItem;
-    private MenuItem? _alwaysOnTopMenuItem;
-    private MenuItem? _groupByAppMenuItem;
     private MenuItem? _startWithWindowsMenuItem;
     private MenuItem? _minimizeToTrayMenuItem;
     private MenuItem? _helpMenuItem;
@@ -102,8 +100,6 @@ public sealed class TrayIconService : IDisposable
     private Action? _onToggleShow;
     private Action? _onOpenSystemInfo;
     private Action? _onRefresh;
-    private Action<bool>? _onToggleAlwaysOnTop;
-    private Action<bool>? _onToggleGroupByApp;
     private Action<bool>? _onToggleStartWithWindows;
     private Action<bool>? _onToggleMinimizeToTray;
     private Action? _onOpenSettings;
@@ -115,8 +111,6 @@ public sealed class TrayIconService : IDisposable
         Action onToggleShow,
         Action onOpenSystemInfo,
         Action onRefresh,
-        Action<bool> onToggleAlwaysOnTop,
-        Action<bool> onToggleGroupByApp,
         Action<bool> onToggleStartWithWindows,
         Action<bool> onToggleMinimizeToTray,
         Action onOpenSettings,
@@ -127,8 +121,6 @@ public sealed class TrayIconService : IDisposable
         _onToggleShow = onToggleShow;
         _onOpenSystemInfo = onOpenSystemInfo;
         _onRefresh = onRefresh;
-        _onToggleAlwaysOnTop = onToggleAlwaysOnTop;
-        _onToggleGroupByApp = onToggleGroupByApp;
         _onToggleStartWithWindows = onToggleStartWithWindows;
         _onToggleMinimizeToTray = onToggleMinimizeToTray;
         _onOpenSettings = onOpenSettings;
@@ -229,41 +221,7 @@ public sealed class TrayIconService : IDisposable
         if (miStyle != null) _refreshMenuItem.Style = miStyle;
         _refreshMenuItem.Click += (_, _) => _onRefresh?.Invoke();
 
-        // 5. Always on Top
-        _alwaysOnTopMenuItem = new MenuItem
-        {
-            Header = Strings.T("AlwaysOnTop"),
-            IsCheckable = true,
-            IsChecked = App.Settings.AlwaysOnTop,
-            Icon = CreatePathIcon("M 12 2 V 6 M 12 18 V 22 M 5 12 H 19 M 5 5 L 19 19")
-        };
-        if (miStyle != null) _alwaysOnTopMenuItem.Style = miStyle;
-        _alwaysOnTopMenuItem.Click += (_, _) =>
-        {
-            if (_alwaysOnTopMenuItem != null)
-            {
-                _onToggleAlwaysOnTop?.Invoke(_alwaysOnTopMenuItem.IsChecked);
-            }
-        };
-
-        // 6. Group by Application
-        _groupByAppMenuItem = new MenuItem
-        {
-            Header = Strings.T("GroupByApp"),
-            IsCheckable = true,
-            IsChecked = App.Settings.GroupProcesses,
-            Icon = CreatePathIcon("M 3 6 H 21 M 3 12 H 21 M 3 18 H 21")
-        };
-        if (miStyle != null) _groupByAppMenuItem.Style = miStyle;
-        _groupByAppMenuItem.Click += (_, _) =>
-        {
-            if (_groupByAppMenuItem != null)
-            {
-                _onToggleGroupByApp?.Invoke(_groupByAppMenuItem.IsChecked);
-            }
-        };
-
-        // 7. Start with Windows
+        // 5. Start with Windows
         _startWithWindowsMenuItem = new MenuItem
         {
             Header = Strings.T("StartWithWindows"),
@@ -403,8 +361,6 @@ public sealed class TrayIconService : IDisposable
         _contextMenu.Items.Add(_sysInfoMenuItem);
         _contextMenu.Items.Add(_refreshMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
-        _contextMenu.Items.Add(_alwaysOnTopMenuItem);
-        _contextMenu.Items.Add(_groupByAppMenuItem);
         _contextMenu.Items.Add(_startWithWindowsMenuItem);
         _contextMenu.Items.Add(_minimizeToTrayMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
@@ -468,16 +424,6 @@ public sealed class TrayIconService : IDisposable
         if (_refreshMenuItem != null)
         {
             _refreshMenuItem.Header = Strings.T("RefreshProcesses");
-        }
-        if (_alwaysOnTopMenuItem != null)
-        {
-            _alwaysOnTopMenuItem.Header = Strings.T("AlwaysOnTop");
-            _alwaysOnTopMenuItem.IsChecked = App.Settings.AlwaysOnTop;
-        }
-        if (_groupByAppMenuItem != null)
-        {
-            _groupByAppMenuItem.Header = Strings.T("GroupByApp");
-            _groupByAppMenuItem.IsChecked = App.Settings.GroupProcesses;
         }
         if (_startWithWindowsMenuItem != null)
         {

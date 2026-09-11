@@ -110,6 +110,7 @@ public partial class CompactProcessView : UserControl
     }
 
     public void SetStatus(string value) => StatusText.Text = value;
+    public void SetStatusToolTip(string value) => StatusText.ToolTip = value;
 
     public void SetEmptyState(bool empty)
     {

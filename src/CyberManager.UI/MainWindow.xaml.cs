@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Automation;
@@ -242,8 +243,6 @@ public partial class MainWindow : Window
                 ToggleTrayVisibility,
                 OpenSystemInfoFromTray,
                 () => _ = RefreshAsync(_lifetimeCts.Token),
-                OnToggleAlwaysOnTop,
-                OnToggleGroupByApp,
                 OnToggleStartWithWindows,
                 OnToggleMinimizeToTray,
                 OpenSettingsFromTray,
@@ -699,18 +698,26 @@ public partial class MainWindow : Window
         KillBtn.IsEnabled = Selected != null;
         CompactView.SetEndTaskEnabled(Selected != null);
 
+        string timeStr = DateTime.Now.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
         string status;
+        string toolTip;
         if (!string.IsNullOrEmpty(q))
         {
-            status = Strings.T("ProcessesShown", _view.Count, _all.Count) + $" • {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
+            status = Strings.T("ProcessesShown", _view.Count, _all.Count) + $" • {Strings.T("Updated")} {timeStr}";
+            toolTip = Strings.T("ProcessesFilterTip", _view.Count, _all.Count, timeStr);
         }
         else
         {
-            status = $"{_view.Count} {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
+            status = $"{Strings.T("Updated")} {timeStr}";
+            toolTip = App.Settings.GroupProcesses
+                ? Strings.T("GroupedProcessesTip", _view.Count, _all.Count, timeStr)
+                : Strings.T("NormalProcessesTip", _all.Count, timeStr);
         }
 
         FooterText.Text = status;
+        FooterText.ToolTip = toolTip;
         CompactView.SetStatus(status);
+        CompactView.SetStatusToolTip(toolTip);
     }
 
     private ProcessInfo? Selected => ProcGrid.SelectedItem as ProcessInfo;
@@ -1765,24 +1772,6 @@ public partial class MainWindow : Window
         }
         var dlg = new AboutWindow(checkUpdatesNow) { Owner = this };
         dlg.ShowDialog();
-    }
-
-    private void OnToggleAlwaysOnTop(bool enable)
-    {
-        App.Settings.AlwaysOnTop = enable;
-        Topmost = enable;
-        CompactView.SetPinned(enable);
-        App.Settings.Save();
-        _trayService.UpdateLocalization();
-    }
-
-    private void OnToggleGroupByApp(bool enable)
-    {
-        App.Settings.GroupProcesses = enable;
-        GroupToggleCheck.IsChecked = enable;
-        App.Settings.Save();
-        ApplySortingAndFilter();
-        _trayService.UpdateLocalization();
     }
 
     private void OnToggleStartWithWindows(bool enable)
