@@ -43,7 +43,8 @@ public static class UpdateService
     {
         Architecture.X64 => "win-x64",
         Architecture.X86 => "win-x86",
-        Architecture.Arm64 => "win-arm64",
+        // ARM64 devices use the supported x64 package through Windows emulation.
+        Architecture.Arm64 => "win-x64",
         _ => "win-x64"
     };
 

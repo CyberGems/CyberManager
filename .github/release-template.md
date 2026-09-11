@@ -55,7 +55,6 @@ Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is an
 | :--- | :--- | :--- |
 | **`CyberManager-Setup-{{VERSION}}.exe`** | 🚀 **Recommended Installer** (Inno Setup with Start Menu, Desktop & Auto-Startup options) | Windows 10 / 11 (x64) |
 | **`CyberManager-{{VERSION}}-Portable-win-x64.zip`** | 💼 **Portable Archive** (Extract and run with Administrator privileges) | Windows 10 / 11 (x64) |
-| **`CyberManager-{{VERSION}}-Portable-win-arm64.zip`** | 💼 **Portable Archive** (Extract and run with Administrator privileges) | Windows 10 / 11 (ARM64) |
 
 ---
 
@@ -65,8 +64,6 @@ Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is an
   *(SHA256: `{{INSTALLER_HASH}}`)*
 - 💼 **Portable Archive**: [View VirusTotal Inspection Report](https://www.virustotal.com/gui/file/{{PORTABLE_HASH}})  
   *(SHA256: `{{PORTABLE_HASH}}`)*
-- 💼 **Portable ARM64 Archive**: [View VirusTotal Inspection Report](https://www.virustotal.com/gui/file/{{PORTABLE_ARM64_HASH}})
-  *(SHA256: `{{PORTABLE_ARM64_HASH}}`)*
 
 ---
 

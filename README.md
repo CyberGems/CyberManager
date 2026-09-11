@@ -82,7 +82,7 @@ Most task managers either freeze under heavy load or bury basic features behind 
 
 ## 🛠️ Tech Stack & Architecture
 
-- **Platform:** Windows 10 / 11 (x64 / ARM64)
+- **Platform:** Windows 10 / 11 (x64)
 - **Framework:** .NET 10 + WPF (Native UI)
 - **Architecture:** Native UI with async NT engine
 
