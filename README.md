@@ -2,7 +2,7 @@
   <img src="src/CyberManager.UI/Assets/CyberManager.png" width="140" alt="CyberManager logo" />
 </p>
 
-<h1 align="center">CyberManager — Ultra-Light Task Manager & Real-Time Process Control</h1>
+<h1 align="center">CyberManager — Lightweight, High-Capacity Virtualized Task Manager</h1>
 
 <p align="center">
   <a href="https://github.com/CyberGems/CyberManager/releases/latest"><img src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberManager%2Fmain%2FDirectory.Build.props&query=%2FProject%2FPropertyGroup%2FVersion&prefix=%E2%9A%A1%20RELEASE%20v&style=for-the-badge&label=&labelColor=555555&color=555555" alt="Download Latest Release" /><img src="https://img.shields.io/badge/-(WINDOWS_64--BIT)-0047B3?style=for-the-badge&logo=windows&logoColor=white" alt="Windows 64-bit" /></a>
@@ -16,7 +16,7 @@
   <a href="https://github.com/CyberGems/CyberManager/wiki"><img src="https://img.shields.io/badge/%F0%9F%93%96_Wiki-Documentation-222222?style=flat-square&logo=github&logoColor=white" alt="Wiki" height="24" /></a>
 </p>
 
-An ultra-lightweight, virtualized task manager for Windows, built as a premium, high-performance alternative to the Windows Task Manager. Handles machines with **3000+ processes at 144fps** with zero lag, using native Windows NT API calls for process enumeration and control. Features real-time CPU/RAM sparklines, a dedicated System Information window, and a sleek glassmorphic interface with neon accents.
+CyberManager is a lightweight, high-capacity virtualized task manager. Powered by the native NT engine, it offers instant search and a compact mode. The ultimate alternative to Windows Task Manager.
 
 *Free and open source (GPLv3) — no ads, no tracking, and no data collection. Just enjoy it.*
 
