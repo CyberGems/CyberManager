@@ -118,6 +118,22 @@ public sealed class ProcessListViewModel
 
     public void Update(IReadOnlyList<ProcessInfo> next)
     {
+        Update(next, preserveOrder: false);
+    }
+
+    public void UpdatePreservingOrder(IReadOnlyList<ProcessInfo> next)
+    {
+        Update(next, preserveOrder: true);
+    }
+
+    private void Update(IReadOnlyList<ProcessInfo> next, bool preserveOrder)
+    {
+        if (preserveOrder)
+        {
+            UpdateWithoutReordering(next);
+            return;
+        }
+
         for (var index = 0; index < next.Count; index++)
         {
             if (index < Items.Count && HasSameIdentity(Items[index], next[index]))
@@ -140,11 +156,64 @@ public sealed class ProcessListViewModel
         }
     }
 
+    private void UpdateWithoutReordering(IReadOnlyList<ProcessInfo> next)
+    {
+        var pending = next.ToDictionary(GetIdentity);
+        var desired = new List<ProcessInfo>(Math.Max(Items.Count, next.Count));
+
+        foreach (var current in Items)
+        {
+            if (pending.Remove(GetIdentity(current), out var replacement))
+            {
+                CopyProcessInfo(current, replacement);
+                desired.Add(current);
+            }
+        }
+
+        foreach (var candidate in next)
+        {
+            if (pending.Remove(GetIdentity(candidate), out _))
+            {
+                desired.Add(candidate);
+            }
+        }
+
+        for (var index = 0; index < desired.Count; index++)
+        {
+            if (index < Items.Count && ReferenceEquals(Items[index], desired[index])) continue;
+
+            if (index < Items.Count)
+            {
+                Items[index] = desired[index];
+            }
+            else
+            {
+                Items.Add(desired[index]);
+            }
+        }
+
+        while (Items.Count > desired.Count)
+        {
+            Items.RemoveAt(Items.Count - 1);
+        }
+    }
+
     private static bool HasSameIdentity(ProcessInfo current, ProcessInfo next) =>
-        current.IsGroupParent == next.IsGroupParent &&
-        (current.IsGroupParent
-            ? current.Name.Equals(next.Name, StringComparison.OrdinalIgnoreCase)
-            : current.Pid == next.Pid);
+        GetIdentity(current).Equals(GetIdentity(next));
+
+    private static ProcessListIdentity GetIdentity(ProcessInfo process) =>
+        process.IsGroupParent
+            ? new ProcessListIdentity(true, 0, 0, process.Name.ToUpperInvariant())
+            : new ProcessListIdentity(false, process.Pid, GetStartTimeKey(process.StartTime), "");
+
+    private static long GetStartTimeKey(DateTime startTime) =>
+        startTime == default ? 0 : startTime.ToFileTimeUtc();
+
+    private readonly record struct ProcessListIdentity(
+        bool IsGroupParent,
+        int Pid,
+        long StartTimeFileTime,
+        string Name);
 
     private static IEnumerable<ProcessInfo> ApplySorting(
         IEnumerable<ProcessInfo> list,

@@ -25,4 +25,13 @@ public class AppSettingsTests
         var settings = new AppSettings();
         Assert.True(settings.AutoCheckForUpdates);
     }
+
+    [Fact]
+    public void AppSettings_DefaultCompactMode_IsFalse()
+    {
+        var settings = new AppSettings();
+        Assert.False(settings.CompactMode);
+        Assert.Equal(560, settings.CompactWindowWidth);
+        Assert.Equal(360, settings.CompactWindowHeight);
+    }
 }

@@ -41,14 +41,41 @@ public partial class MainWindow : Window
     private List<ProcessInfo> _view = new();
     private string _pendingSearch = "";
     private int _refreshInFlight;
+    private ContextMenuTarget? _contextMenuTarget;
+    private bool _contextMenuOpen;
+    private bool _refreshAfterContextMenu;
+    private bool _contextMenuClosePending;
+    private string? _pendingContextMenuMessage;
+    private bool _isCompactMode;
+    private bool _syncingSelection;
 
     private string _sortColumn = "CpuPercent";
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
+
+    private sealed record ContextMenuTarget(
+        ProcessInfo Item,
+        int Pid,
+        DateTime StartTime,
+        bool IsGroupParent,
+        string Name);
 
     public MainWindow()
     {
         InitializeComponent();
         ProcGrid.ItemsSource = _processList.Items;
+        CompactView.ItemsSource = _processList.Items;
+        CompactView.ToggleRequested += CompactView_ToggleRequested;
+        CompactView.EndTaskRequested += Kill_Click;
+        CompactView.RefreshRequested += Refresh_Click;
+        CompactView.PinRequested += CompactView_PinRequested;
+        CompactView.SettingsRequested += Settings_Click;
+        CompactView.CloseRequested += Close_Click;
+        CompactView.DragRequested += CompactView_DragRequested;
+        CompactView.SearchChanged += CompactView_SearchChanged;
+        CompactView.ProcessGrid.SelectionChanged += ProcGrid_SelectionChanged;
+        CompactView.ProcessGrid.Sorting += ProcGrid_Sorting;
+        CompactView.ProcessGrid.PreviewMouseRightButtonDown += CompactGrid_PreviewMouseRightButtonDown;
+        CompactView.ProcessGrid.PreviewKeyDown += ProcGrid_PreviewKeyDown;
         CyberManagerWindowChrome.Apply(this, 12);
         Loaded += OnLoaded;
         Closing += OnClosing;
@@ -72,31 +99,18 @@ public partial class MainWindow : Window
         _isLoaded = true;
         try
         {
-            if (App.Settings.MainWindowBoundsSaved)
-            {
-                if (App.Settings.MainWindowWidth >= MinWidth) Width = App.Settings.MainWindowWidth;
-                if (App.Settings.MainWindowHeight >= MinHeight) Height = App.Settings.MainWindowHeight;
-                if (App.Settings.MainWindowLeft > 0 && App.Settings.MainWindowTop > 0)
-                {
-                    Left = App.Settings.MainWindowLeft;
-                    Top = App.Settings.MainWindowTop;
-                }
-                if (App.Settings.MainWindowMaximized)
-                {
-                    WindowState = WindowState.Maximized;
-                }
-            }
-
             ApplyLanguage();
             ApplyTheme();
             GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
             Topmost = App.Settings.AlwaysOnTop;
-            TopmostCheck.IsChecked = Topmost;
+            CompactView.SetPinned(Topmost);
             KillBtn.IsEnabled = Selected != null;
             FontSizeSlider.Value = App.Settings.RowFontSize > 0 ? App.Settings.RowFontSize : 13;
             ProcGrid.FontSize = FontSizeSlider.Value;
+            CompactView.RowFontSize = Math.Min(FontSizeSlider.Value, 13);
             FontSizeLabel.Text = $"{FontSizeSlider.Value:F0}px";
             FooterText.Text = Strings.T("Ready");
+            ApplyViewMode(App.Settings.CompactMode, restoreBounds: true);
 
             // Setup System Tray
             _trayService.Initialize(
@@ -157,19 +171,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (WindowState == WindowState.Normal)
-            {
-                App.Settings.MainWindowLeft = Left;
-                App.Settings.MainWindowTop = Top;
-                App.Settings.MainWindowWidth = Width;
-                App.Settings.MainWindowHeight = Height;
-                App.Settings.MainWindowMaximized = false;
-            }
-            else if (WindowState == WindowState.Maximized)
-            {
-                App.Settings.MainWindowMaximized = true;
-            }
-            App.Settings.MainWindowBoundsSaved = true;
+            SaveCurrentWindowBounds();
             App.Settings.Save();
 
             if (App.Settings.MinimizeToTray && !_isExplicitExit)
@@ -220,13 +222,142 @@ public partial class MainWindow : Window
         _lifetimeCts.Dispose();
     }
 
+    private void ApplyViewMode(bool compact, bool restoreBounds)
+    {
+        if (!restoreBounds && _isCompactMode != compact)
+        {
+            SaveCurrentWindowBounds();
+        }
+
+        _isCompactMode = compact;
+        App.Settings.CompactMode = compact;
+
+        if (compact)
+        {
+            WindowState = WindowState.Normal;
+            MinWidth = 500;
+            MinHeight = 220;
+            if (restoreBounds || App.Settings.CompactWindowBoundsSaved)
+            {
+                RestoreWindowBounds(compact: true);
+            }
+            else
+            {
+                Width = App.Settings.CompactWindowWidth;
+                Height = App.Settings.CompactWindowHeight;
+            }
+
+            FullTitleBar.Visibility = Visibility.Collapsed;
+            FullToolbar.Visibility = Visibility.Collapsed;
+            FullProcessListBorder.Visibility = Visibility.Collapsed;
+            FullFooter.Visibility = Visibility.Collapsed;
+            CompactViewHost.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            MinWidth = 900;
+            MinHeight = 520;
+            if (restoreBounds || App.Settings.MainWindowBoundsSaved)
+            {
+                RestoreWindowBounds(compact: false);
+            }
+            else
+            {
+                Width = App.Settings.MainWindowWidth;
+                Height = App.Settings.MainWindowHeight;
+            }
+
+            FullTitleBar.Visibility = Visibility.Visible;
+            FullToolbar.Visibility = Visibility.Visible;
+            FullProcessListBorder.Visibility = Visibility.Visible;
+            FullFooter.Visibility = Visibility.Visible;
+            CompactViewHost.Visibility = Visibility.Collapsed;
+        }
+
+        CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
+        CompactView.SelectedItem = Selected;
+        if (_contextMenuOpen)
+        {
+            KeepContextTargetVisible();
+        }
+        if (!restoreBounds)
+        {
+            ThrottledSaveSettings();
+        }
+    }
+
+    private void RestoreWindowBounds(bool compact)
+    {
+        if (compact)
+        {
+            if (App.Settings.CompactWindowWidth >= MinWidth) Width = App.Settings.CompactWindowWidth;
+            if (App.Settings.CompactWindowHeight >= MinHeight) Height = App.Settings.CompactWindowHeight;
+            if (App.Settings.CompactWindowLeft >= 0 && App.Settings.CompactWindowTop >= 0)
+            {
+                Left = App.Settings.CompactWindowLeft;
+                Top = App.Settings.CompactWindowTop;
+            }
+
+            WindowState = WindowState.Normal;
+            return;
+        }
+
+        if (App.Settings.MainWindowWidth >= MinWidth) Width = App.Settings.MainWindowWidth;
+        if (App.Settings.MainWindowHeight >= MinHeight) Height = App.Settings.MainWindowHeight;
+        if (App.Settings.MainWindowLeft >= 0 && App.Settings.MainWindowTop >= 0)
+        {
+            Left = App.Settings.MainWindowLeft;
+            Top = App.Settings.MainWindowTop;
+        }
+
+        WindowState = App.Settings.MainWindowMaximized
+            ? WindowState.Maximized
+            : WindowState.Normal;
+    }
+
+    private void SaveCurrentWindowBounds()
+    {
+        if (_isCompactMode)
+        {
+            if (WindowState == WindowState.Normal)
+            {
+                App.Settings.CompactWindowLeft = Left;
+                App.Settings.CompactWindowTop = Top;
+                App.Settings.CompactWindowWidth = Width;
+                App.Settings.CompactWindowHeight = Height;
+            }
+
+            App.Settings.CompactWindowBoundsSaved = true;
+            return;
+        }
+
+        if (WindowState == WindowState.Normal)
+        {
+            App.Settings.MainWindowLeft = Left;
+            App.Settings.MainWindowTop = Top;
+            App.Settings.MainWindowWidth = Width;
+            App.Settings.MainWindowHeight = Height;
+            App.Settings.MainWindowMaximized = false;
+        }
+        else if (WindowState == WindowState.Maximized)
+        {
+            App.Settings.MainWindowMaximized = true;
+        }
+
+        App.Settings.MainWindowBoundsSaved = true;
+    }
+
     private void OnIconReady()
     {
         if (!_isLoaded || _isClosed || Interlocked.Exchange(ref _iconRefreshPending, 1) == 1) return;
         Dispatcher.BeginInvoke(() =>
         {
             Volatile.Write(ref _iconRefreshPending, 0);
-            if (!_isClosed) ProcGrid.Items.Refresh();
+            if (!_isClosed)
+            {
+                ProcGrid.Items.Refresh();
+                CompactView.RefreshItems();
+            }
         }, DispatcherPriority.Background);
     }
 
@@ -341,7 +472,7 @@ public partial class MainWindow : Window
         _sortColumn = sortMember;
         _sortDirection = newDirection;
 
-        foreach (var col in ProcGrid.Columns)
+        foreach (var col in ProcGrid.Columns.Concat(CompactView.ProcessGrid.Columns))
         {
             col.SortDirection = col.SortMemberPath == sortMember ? newDirection : null;
         }
@@ -367,35 +498,309 @@ public partial class MainWindow : Window
                 _expandedGroups));
 
         var prevSelectedPid = Selected?.Pid;
-        _processList.Update(_view);
+        if (_contextMenuOpen)
+        {
+            _processList.UpdatePreservingOrder(_view);
+            _refreshAfterContextMenu = true;
+
+            if (_contextMenuTarget is { } target && !_view.Any(process => MatchesContextTarget(process, target)))
+            {
+                CloseContextMenuForUnavailableProcess();
+            }
+            else
+            {
+                KeepContextTargetVisible();
+            }
+        }
+        else
+        {
+            _processList.Update(_view);
+        }
+
         if (prevSelectedPid.HasValue)
         {
             var matched = _processList.Items.FirstOrDefault(x => x.Pid == prevSelectedPid.Value);
             if (matched != null)
             {
-                ProcGrid.SelectedItem = matched;
+                SetSelectedProcess(matched);
             }
         }
 
         EmptyStateText.Visibility = _view.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ProcGrid.Visibility = _view.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        CompactView.SetEmptyState(_view.Count == 0);
         KillBtn.IsEnabled = Selected != null;
+        CompactView.SetEndTaskEnabled(Selected != null);
 
+        string status;
         if (!string.IsNullOrEmpty(q))
         {
-            FooterText.Text = Strings.T("ProcessesShown", _view.Count, _all.Count) + $" • {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
+            status = Strings.T("ProcessesShown", _view.Count, _all.Count) + $" • {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
         }
         else
         {
-            FooterText.Text = $"{_view.Count} {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
+            status = $"{_view.Count} {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
         }
+
+        FooterText.Text = status;
+        CompactView.SetStatus(status);
     }
 
     private ProcessInfo? Selected => ProcGrid.SelectedItem as ProcessInfo;
 
+    private void SetSelectedProcess(ProcessInfo? process)
+    {
+        _syncingSelection = true;
+        try
+        {
+            ProcGrid.SelectedItem = process;
+            CompactView.SelectedItem = process;
+        }
+        finally
+        {
+            _syncingSelection = false;
+        }
+
+        KillBtn.IsEnabled = process != null;
+        CompactView.SetEndTaskEnabled(process != null);
+    }
+
+    private void CompactView_ToggleRequested(object? sender, RoutedEventArgs e) =>
+        ApplyViewMode(!_isCompactMode, restoreBounds: false);
+
+    private void CompactView_PinRequested(object? sender, RoutedEventArgs e)
+    {
+        Topmost = !Topmost;
+        App.Settings.AlwaysOnTop = Topmost;
+        CompactView.SetPinned(Topmost);
+        ThrottledSaveSettings();
+        _trayService.UpdateLocalization();
+    }
+
+    private void CompactView_DragRequested(object? sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left) return;
+        if (e.ClickCount == 2)
+        {
+            ApplyViewMode(!_isCompactMode, restoreBounds: false);
+            e.Handled = true;
+            return;
+        }
+
+        DragMove();
+    }
+
+    private void CompactView_SearchChanged(object? sender, EventArgs e)
+    {
+        _pendingSearch = CompactView.SearchText;
+        _searchDebounceTimer.Stop();
+        _searchDebounceTimer.Start();
+    }
+
+    private ProcessInfo? GetActionTarget(object source)
+    {
+        if (source is not MenuItem || _contextMenuTarget is not { } target)
+        {
+            return Selected;
+        }
+
+        if (IsContextTargetVisible(target))
+        {
+            return target.Item;
+        }
+
+        CloseContextMenuForUnavailableProcess();
+        return null;
+    }
+
+    private bool IsContextTargetVisible(ContextMenuTarget target) =>
+        _view.Any(process => MatchesContextTarget(process, target));
+
+    private static bool MatchesContextTarget(ProcessInfo process, ContextMenuTarget target)
+    {
+        if (process.IsGroupParent != target.IsGroupParent) return false;
+        if (target.IsGroupParent)
+        {
+            return process.Name.Equals(target.Name, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return process.Pid == target.Pid && SameStartTime(process.StartTime, target.StartTime);
+    }
+
+    private static bool SameStartTime(DateTime left, DateTime right) =>
+        left == default || right == default || left.ToFileTimeUtc() == right.ToFileTimeUtc();
+
+    private void ProcGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
+        if (row?.DataContext is not ProcessInfo process)
+        {
+            if (ProcContextMenu.IsOpen) ProcContextMenu.IsOpen = false;
+            e.Handled = true;
+            return;
+        }
+
+        PrepareContextMenu(row, process, ProcGrid);
+    }
+
+    private void CompactGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
+        if (row?.DataContext is not ProcessInfo process)
+        {
+            if (ProcContextMenu.IsOpen) ProcContextMenu.IsOpen = false;
+            e.Handled = true;
+            return;
+        }
+
+        PrepareContextMenu(row, process, CompactView.ProcessGrid);
+        ProcContextMenu.IsOpen = true;
+        e.Handled = true;
+    }
+
+    private void ProcGrid_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject)
+                  ?? ProcContextMenu.PlacementTarget as DataGridRow;
+        if (row?.DataContext is not ProcessInfo process)
+        {
+            e.Handled = true;
+            return;
+        }
+
+        PrepareContextMenu(row, process);
+        _contextMenuOpen = true;
+    }
+
+    private void ProcContextMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        _contextMenuOpen = true;
+        KeepContextTargetVisible();
+    }
+
+    private void ProcContextMenu_Closed(object sender, RoutedEventArgs e)
+    {
+        _contextMenuOpen = false;
+        _contextMenuClosePending = false;
+        ClearContextMenuTarget();
+
+        if (_refreshAfterContextMenu)
+        {
+            _refreshAfterContextMenu = false;
+            ApplySortingAndFilter();
+        }
+
+        if (_pendingContextMenuMessage is { } message)
+        {
+            FooterText.Text = message;
+            _pendingContextMenuMessage = null;
+        }
+    }
+
+    private void PrepareContextMenu(DataGridRow row, ProcessInfo process, DataGrid? sourceGrid = null)
+    {
+        sourceGrid ??= ProcGrid;
+
+        if (_contextMenuTarget is { } previous && !ReferenceEquals(previous.Item, process))
+        {
+            previous.Item.IsContextTarget = false;
+        }
+
+        process.IsContextTarget = true;
+        _contextMenuTarget = new ContextMenuTarget(
+            process,
+            process.Pid,
+            process.StartTime,
+            process.IsGroupParent,
+            process.Name);
+
+        SetSelectedProcess(process);
+        sourceGrid.Focus();
+        sourceGrid.ScrollIntoView(process);
+        sourceGrid.UpdateLayout();
+
+        var realizedRow = GetRowForItem(sourceGrid, process) ?? row;
+        ProcContextMenu.PlacementTarget = realizedRow;
+        ProcContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        ProcContextMenu.DataContext = process;
+    }
+
+    private void ClearContextMenuTarget()
+    {
+        if (_contextMenuTarget is { } target)
+        {
+            target.Item.IsContextTarget = false;
+        }
+
+        _contextMenuTarget = null;
+        ProcContextMenu.DataContext = null;
+        ProcContextMenu.PlacementTarget = null;
+    }
+
+    private void CloseContextMenuForUnavailableProcess()
+    {
+        _pendingContextMenuMessage = Strings.T("ProcessUnavailable");
+        if (_contextMenuClosePending) return;
+
+        _contextMenuClosePending = true;
+        Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+        {
+            _contextMenuClosePending = false;
+            if (ProcContextMenu.IsOpen)
+            {
+                ProcContextMenu.IsOpen = false;
+            }
+            else if (_contextMenuTarget != null)
+            {
+                _contextMenuOpen = false;
+                ClearContextMenuTarget();
+            }
+        }));
+    }
+
+    private void KeepContextTargetVisible()
+    {
+        if (!_contextMenuOpen || _contextMenuTarget is not { } target) return;
+
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+        {
+            if (!_contextMenuOpen || !ReferenceEquals(_contextMenuTarget, target)) return;
+
+            var grid = _isCompactMode ? CompactView.ProcessGrid : ProcGrid;
+            grid.ScrollIntoView(target.Item);
+            if (GetRowForItem(grid, target.Item) is { } row)
+            {
+                ProcContextMenu.PlacementTarget = row;
+            }
+        }));
+    }
+
+    private static DataGridRow? GetRowForItem(DataGrid grid, ProcessInfo process) =>
+        grid.ItemContainerGenerator.ContainerFromItem(process) as DataGridRow;
+
+    private static T? FindVisualParent<T>(DependencyObject? source)
+        where T : DependencyObject
+    {
+        while (source != null)
+        {
+            if (source is T match) return match;
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        return null;
+    }
+
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ChangedButton == MouseButton.Left) DragMove();
+        if (e.ChangedButton != MouseButton.Left) return;
+        if (e.ClickCount == 2)
+        {
+            ApplyViewMode(!_isCompactMode, restoreBounds: false);
+            e.Handled = true;
+            return;
+        }
+
+        DragMove();
     }
 
     private void Settings_Click(object sender, RoutedEventArgs e)
@@ -408,12 +813,17 @@ public partial class MainWindow : Window
                 ApplySortingAndFilter();
                 ApplyTheme();
                 ApplyLanguage();
+                if (_isCompactMode != App.Settings.CompactMode)
+                {
+                    ApplyViewMode(App.Settings.CompactMode, restoreBounds: false);
+                }
                 _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
                 Topmost = App.Settings.AlwaysOnTop;
-                TopmostCheck.IsChecked = Topmost;
+                CompactView.SetPinned(Topmost);
                 GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
                 FontSizeSlider.Value = App.Settings.RowFontSize;
                 ProcGrid.FontSize = App.Settings.RowFontSize;
+                CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
                 FontSizeLabel.Text = $"{App.Settings.RowFontSize:F0}px";
             }
         };
@@ -429,6 +839,7 @@ public partial class MainWindow : Window
     private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
         _pendingSearch = SearchBox.Text ?? "";
+        CompactView.SetSearchText(_pendingSearch);
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
     }
@@ -437,6 +848,7 @@ public partial class MainWindow : Window
     {
         SearchBox.Clear();
         _pendingSearch = "";
+        CompactView.SetSearchText("");
         ApplySortingAndFilter();
     }
 
@@ -454,21 +866,32 @@ public partial class MainWindow : Window
         GroupToggleCheck.IsChecked = !GroupToggleCheck.IsChecked;
     }
 
-    private void Topmost_Checked(object sender, RoutedEventArgs e)
-    {
-        Topmost = TopmostCheck.IsChecked == true;
-        App.Settings.AlwaysOnTop = Topmost;
-        ThrottledSaveSettings();
-    }
-
-    private void TopmostLabel_Click(object sender, MouseButtonEventArgs e)
-    {
-        TopmostCheck.IsChecked = !TopmostCheck.IsChecked;
-    }
-
     private void ProcGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        KillBtn.IsEnabled = Selected != null;
+        var selected = (sender as DataGrid)?.SelectedItem as ProcessInfo ?? Selected;
+        if (!_syncingSelection)
+        {
+            _syncingSelection = true;
+            try
+            {
+                if (!ReferenceEquals(ProcGrid.SelectedItem, selected))
+                {
+                    ProcGrid.SelectedItem = selected;
+                }
+
+                if (!ReferenceEquals(CompactView.SelectedItem, selected))
+                {
+                    CompactView.SelectedItem = selected;
+                }
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
+        }
+
+        KillBtn.IsEnabled = selected != null;
+        CompactView.SetEndTaskEnabled(selected != null);
     }
 
     private void ThrottledSaveSettings()
@@ -479,7 +902,7 @@ public partial class MainWindow : Window
 
     private async void Kill_Click(object sender, RoutedEventArgs e)
     {
-        var s = Selected;
+        var s = GetActionTarget(sender);
         if (s == null) return;
 
         if (s.IsGroupParent && s.InstanceCount > 1)
@@ -504,7 +927,7 @@ public partial class MainWindow : Window
 
     private async void KillTree_Click(object sender, RoutedEventArgs e)
     {
-        var s = Selected;
+        var s = GetActionTarget(sender);
         if (s == null) return;
         if (ConfirmDialog.ShowProcess(this, Strings.T("KillTree"), Strings.T("KillTreeConfirm", s.Name), s.ExePath, Strings.T("KillTree"), Strings.T("Cancel"), isDanger: true))
         {
@@ -519,7 +942,7 @@ public partial class MainWindow : Window
 
     private async void Suspend_Click(object sender, RoutedEventArgs e)
     {
-        var s = Selected;
+        var s = GetActionTarget(sender);
         if (s == null) return;
 
         if (s.IsGroupParent && s.InstanceCount > 1)
@@ -557,7 +980,7 @@ public partial class MainWindow : Window
 
     private async void Resume_Click(object sender, RoutedEventArgs e)
     {
-        var s = Selected;
+        var s = GetActionTarget(sender);
         if (s == null) return;
 
         if (s.IsGroupParent && s.InstanceCount > 1)
@@ -604,16 +1027,16 @@ public partial class MainWindow : Window
         ThrottledSaveSettings();
     }
 
-    private void PriorityRealTime_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.RealTime);
-    private void PriorityHigh_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.High);
-    private void PriorityAboveNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.AboveNormal);
-    private void PriorityNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.Normal);
-    private void PriorityBelowNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.BelowNormal);
-    private void PriorityIdle_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.Idle);
+    private void PriorityRealTime_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.RealTime, sender);
+    private void PriorityHigh_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.High, sender);
+    private void PriorityAboveNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.AboveNormal, sender);
+    private void PriorityNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.Normal, sender);
+    private void PriorityBelowNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.BelowNormal, sender);
+    private void PriorityIdle_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.Idle, sender);
 
-    private async void SetPriority(ProcessPriorityClass priority)
+    private async void SetPriority(ProcessPriorityClass priority, object source)
     {
-        var s = Selected;
+        var s = GetActionTarget(source);
         if (s == null) return;
 
         if (s.IsGroupParent && s.InstanceCount > 1)
@@ -718,7 +1141,7 @@ public partial class MainWindow : Window
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
     {
-        var s = Selected;
+        var s = GetActionTarget(sender);
         if (s == null) return;
         var textToCopy = !string.IsNullOrEmpty(s.ExePath) ? s.ExePath : s.Name;
         try
@@ -731,14 +1154,14 @@ public partial class MainWindow : Window
 
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
     {
-        var s = Selected;
+        var s = GetActionTarget(sender);
         if (s == null || string.IsNullOrEmpty(s.ExePath)) return;
         try { Process.Start("explorer.exe", $"/select,\"{s.ExePath}\""); } catch { }
     }
 
     private void SearchOnline_Click(object sender, RoutedEventArgs e)
     {
-        var s = Selected;
+        var s = GetActionTarget(sender);
         if (s == null) return;
         try { Process.Start(new ProcessStartInfo($"https://www.google.com/search?q={Uri.EscapeDataString(s.Name)}") { UseShellExecute = true }); } catch { }
     }
@@ -759,7 +1182,6 @@ public partial class MainWindow : Window
             LoaderTitle.Text = Strings.T("CollectingProcesses");
             LoaderSub.Text = Strings.T("InitializingNtEngine");
             GroupToggleLabel.Text = Strings.T("GroupByApp");
-            TopmostLabel.Text = Strings.T("AlwaysOnTop");
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtnText.Text = Strings.T("Refresh");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
@@ -773,6 +1195,8 @@ public partial class MainWindow : Window
             CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
             RamSparklineBorder.ToolTip = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
             FooterText.Text = Strings.T("Ready");
+            CompactView.ApplyLanguage();
+            CompactView.SetPinned(Topmost);
             _trayService.UpdateLocalization();
 
             if (ProcGrid.Columns.Count >= 7)
@@ -790,27 +1214,27 @@ public partial class MainWindow : Window
                     c.SortDirection = c.SortMemberPath == _sortColumn ? _sortDirection : null;
                 }
             }
-
-            if (ProcGrid.ContextMenu is { } cm && cm.Items.Count >= 10)
+            foreach (var c in CompactView.ProcessGrid.Columns)
             {
-                ((MenuItem)cm.Items[0]).Header = Strings.T("Kill");
-                ((MenuItem)cm.Items[1]).Header = Strings.T("KillTree");
-                ((MenuItem)cm.Items[3]).Header = Strings.T("Suspend");
-                ((MenuItem)cm.Items[4]).Header = Strings.T("Resume");
-                ((MenuItem)cm.Items[6]).Header = Strings.T("SetPriority");
-                if (((MenuItem)cm.Items[6]).Items.Count >= 6)
-                {
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[0]).Header = Strings.T("PriorityRealTime");
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[1]).Header = Strings.T("PriorityHigh");
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[2]).Header = Strings.T("PriorityAboveNormal");
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[3]).Header = Strings.T("PriorityNormal");
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[4]).Header = Strings.T("PriorityBelowNormal");
-                    ((MenuItem)((MenuItem)cm.Items[6]).Items[5]).Header = Strings.T("PriorityIdle");
-                }
-                ((MenuItem)cm.Items[8]).Header = Strings.T("CopyPath");
-                ((MenuItem)cm.Items[9]).Header = Strings.T("OpenFolder");
-                if (cm.Items.Count > 10)
-                    ((MenuItem)cm.Items[10]).Header = Strings.T("SearchOnline");
+                c.SortDirection = c.SortMemberPath == _sortColumn ? _sortDirection : null;
+            }
+
+            if (ProcContextMenu != null)
+            {
+                ContextKillItem.Header = Strings.T("Kill");
+                ContextKillTreeItem.Header = Strings.T("KillTree");
+                ContextSuspendItem.Header = Strings.T("Suspend");
+                ContextResumeItem.Header = Strings.T("Resume");
+                ContextSetPriorityItem.Header = Strings.T("SetPriority");
+                ContextPriorityRealTimeItem.Header = Strings.T("PriorityRealTime");
+                ContextPriorityHighItem.Header = Strings.T("PriorityHigh");
+                ContextPriorityAboveNormalItem.Header = Strings.T("PriorityAboveNormal");
+                ContextPriorityNormalItem.Header = Strings.T("PriorityNormal");
+                ContextPriorityBelowNormalItem.Header = Strings.T("PriorityBelowNormal");
+                ContextPriorityIdleItem.Header = Strings.T("PriorityIdle");
+                ContextCopyPathItem.Header = Strings.T("CopyPath");
+                ContextOpenFolderItem.Header = Strings.T("OpenFolder");
+                ContextSearchOnlineItem.Header = Strings.T("SearchOnline");
             }
         }
         catch (Exception ex)
@@ -823,12 +1247,26 @@ public partial class MainWindow : Window
 
     public void FocusSearchBox()
     {
-        SearchBox.Focus();
-        SearchBox.SelectAll();
+        if (_isCompactMode)
+        {
+            CompactView.FocusSearchBox();
+        }
+        else
+        {
+            SearchBox.Focus();
+            SearchBox.SelectAll();
+        }
     }
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.M)
+        {
+            e.Handled = true;
+            ApplyViewMode(!_isCompactMode, restoreBounds: false);
+            return;
+        }
+
         if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.F)
         {
             e.Handled = true;
@@ -873,7 +1311,8 @@ public partial class MainWindow : Window
 
         if (e.Key == Key.OemQuestion || (e.Key == Key.Divide && Keyboard.Modifiers == ModifierKeys.None))
         {
-            if (!SearchBox.IsFocused)
+            if ((!_isCompactMode && !SearchBox.IsFocused) ||
+                (_isCompactMode && !CompactView.IsSearchFocused))
             {
                 e.Handled = true;
                 FocusSearchBox();
@@ -921,6 +1360,8 @@ public partial class MainWindow : Window
 
     private void ProcGrid_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        var grid = sender as DataGrid ?? ProcGrid;
+
         if (e.Key == Key.Right)
         {
             if (Selected is { IsGroupParent: true, IsExpanded: false } p)
@@ -945,8 +1386,8 @@ public partial class MainWindow : Window
                 var parent = _view.FirstOrDefault(x => x.IsGroupParent && x.Name.Equals(c.Name, StringComparison.OrdinalIgnoreCase));
                 if (parent != null)
                 {
-                    ProcGrid.SelectedItem = parent;
-                    ProcGrid.ScrollIntoView(parent);
+                    SetSelectedProcess(parent);
+                    grid.ScrollIntoView(parent);
                 }
                 e.Handled = true;
                 return;
@@ -978,13 +1419,17 @@ public partial class MainWindow : Window
         }
         else if (e.Key == Key.Apps || (e.Key == Key.F10 && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)))
         {
-            if (ProcGrid.ContextMenu != null && ProcGrid.SelectedItem != null)
+            if (Selected is { } selected)
             {
-                ProcGrid.ContextMenu.PlacementTarget = ProcGrid;
-                ProcGrid.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
-                ProcGrid.ContextMenu.IsOpen = true;
-                e.Handled = true;
-                return;
+                grid.ScrollIntoView(selected);
+                grid.UpdateLayout();
+                if (GetRowForItem(grid, selected) is { } row)
+                {
+                    PrepareContextMenu(row, selected, grid);
+                    ProcContextMenu.IsOpen = true;
+                    e.Handled = true;
+                    return;
+                }
             }
         }
         else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
@@ -1002,7 +1447,7 @@ public partial class MainWindow : Window
         {
             if ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
             {
-                SearchBox.Focus();
+                FocusSearchBox();
             }
         }
     }
@@ -1081,7 +1526,7 @@ public partial class MainWindow : Window
     {
         App.Settings.AlwaysOnTop = enable;
         Topmost = enable;
-        TopmostCheck.IsChecked = enable;
+        CompactView.SetPinned(enable);
         App.Settings.Save();
         _trayService.UpdateLocalization();
     }

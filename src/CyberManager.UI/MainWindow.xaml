@@ -244,6 +244,7 @@
                             <Trigger Property="AlternationIndex" Value="1"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource GridAltBrush}"/></Trigger>
                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/></Trigger>
                             <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionBgBrush}"/><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/><Setter TargetName="Bd" Property="BorderThickness" Value="3,0,0,0"/></Trigger>
+                            <DataTrigger Binding="{Binding IsContextTarget}" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionBgBrush}"/><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/><Setter TargetName="Bd" Property="BorderThickness" Value="3,0,0,0"/></DataTrigger>
                             <DataTrigger Binding="{Binding DimWhenSuspended}" Value="True">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.6"/>
                             </DataTrigger>
@@ -305,7 +306,7 @@
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
 
                 <!-- TitleBar -->
-                <Grid Grid.Row="0" Margin="0,0,0,16" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid x:Name="FullTitleBar" Grid.Row="0" Margin="0,0,0,16" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="pack://application:,,,/Assets/CyberManager.png" Width="30" Height="30" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" Margin="0,0,12,0"/>
@@ -334,7 +335,7 @@
                 </Grid>
 
                 <!-- Toolbar -->
-                <Grid Grid.Row="1" Margin="0,0,0,12">
+                <Grid x:Name="FullToolbar" Grid.Row="1" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
@@ -409,7 +410,7 @@
                 </Grid>
 
                 <!-- DataGrid -->
-                <Border Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
+                <Border x:Name="FullProcessListBorder" Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
                     <Grid>
                         <DataGrid x:Name="ProcGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="None"
                                   Background="{DynamicResource CardBrush}" BorderThickness="0" RowHeaderWidth="0"
@@ -419,28 +420,43 @@
                                   VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.CanContentScroll="True"
                                   SelectionMode="Single" SelectionUnit="FullRow" AutomationProperties.Name="Process list"
                                   Sorting="ProcGrid_Sorting"
+                                  PreviewMouseRightButtonDown="ProcGrid_PreviewMouseRightButtonDown"
+                                  ContextMenuOpening="ProcGrid_ContextMenuOpening"
                                   SelectionChanged="ProcGrid_SelectionChanged"
                                   PreviewKeyDown="ProcGrid_PreviewKeyDown">
                             <DataGrid.ContextMenu>
-                                <ContextMenu Style="{StaticResource ModernContextMenu}">
-                                    <MenuItem Header="End Task" Style="{StaticResource ModernMenuItem}" Click="Kill_Click"/>
-                                    <MenuItem Header="End Process Tree" Style="{StaticResource ModernMenuItem}" Click="KillTree_Click"/>
-                                    <Separator/>
-                                    <MenuItem Header="Suspend" Style="{StaticResource ModernMenuItem}" Click="Suspend_Click"/>
-                                    <MenuItem Header="Resume" Style="{StaticResource ModernMenuItem}" Click="Resume_Click"/>
-                                    <Separator/>
-                                    <MenuItem Header="Set Priority" Style="{StaticResource ModernMenuItem}">
-                                        <MenuItem Header="Real Time" Click="PriorityRealTime_Click"/>
-                                        <MenuItem Header="High" Click="PriorityHigh_Click"/>
-                                        <MenuItem Header="Above Normal" Click="PriorityAboveNormal_Click"/>
-                                        <MenuItem Header="Normal" Click="PriorityNormal_Click"/>
-                                        <MenuItem Header="Below Normal" Click="PriorityBelowNormal_Click"/>
-                                        <MenuItem Header="Idle / Low" Click="PriorityIdle_Click"/>
+                                <ContextMenu x:Name="ProcContextMenu" Style="{StaticResource ModernContextMenu}"
+                                             Opened="ProcContextMenu_Opened" Closed="ProcContextMenu_Closed">
+                                    <MenuItem x:Name="ContextTargetHeader" Style="{StaticResource ModernMenuItem}"
+                                              IsEnabled="False" IsHitTestVisible="False" Focusable="False">
+                                        <MenuItem.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding DisplayName}" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold"/>
+                                                <TextBlock Foreground="{DynamicResource SubTextBrush}" FontSize="10">
+                                                    <Run Text="PID "/><Run Text="{Binding Pid}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </MenuItem.Header>
                                     </MenuItem>
                                     <Separator/>
-                                    <MenuItem Header="Copy Path" Style="{StaticResource ModernMenuItem}" Click="CopyPath_Click"/>
-                                    <MenuItem Header="Open Folder" Style="{StaticResource ModernMenuItem}" Click="OpenFolder_Click"/>
-                                    <MenuItem Header="Search Online" Style="{StaticResource ModernMenuItem}" Click="SearchOnline_Click"/>
+                                    <MenuItem x:Name="ContextKillItem" Header="End Task" Style="{StaticResource ModernMenuItem}" Click="Kill_Click"/>
+                                    <MenuItem x:Name="ContextKillTreeItem" Header="End Process Tree" Style="{StaticResource ModernMenuItem}" Click="KillTree_Click"/>
+                                    <Separator/>
+                                    <MenuItem x:Name="ContextSuspendItem" Header="Suspend" Style="{StaticResource ModernMenuItem}" Click="Suspend_Click"/>
+                                    <MenuItem x:Name="ContextResumeItem" Header="Resume" Style="{StaticResource ModernMenuItem}" Click="Resume_Click"/>
+                                    <Separator/>
+                                    <MenuItem x:Name="ContextSetPriorityItem" Header="Set Priority" Style="{StaticResource ModernMenuItem}">
+                                        <MenuItem x:Name="ContextPriorityRealTimeItem" Header="Real Time" Click="PriorityRealTime_Click"/>
+                                        <MenuItem x:Name="ContextPriorityHighItem" Header="High" Click="PriorityHigh_Click"/>
+                                        <MenuItem x:Name="ContextPriorityAboveNormalItem" Header="Above Normal" Click="PriorityAboveNormal_Click"/>
+                                        <MenuItem x:Name="ContextPriorityNormalItem" Header="Normal" Click="PriorityNormal_Click"/>
+                                        <MenuItem x:Name="ContextPriorityBelowNormalItem" Header="Below Normal" Click="PriorityBelowNormal_Click"/>
+                                        <MenuItem x:Name="ContextPriorityIdleItem" Header="Idle / Low" Click="PriorityIdle_Click"/>
+                                    </MenuItem>
+                                    <Separator/>
+                                    <MenuItem x:Name="ContextCopyPathItem" Header="Copy Path" Style="{StaticResource ModernMenuItem}" Click="CopyPath_Click"/>
+                                    <MenuItem x:Name="ContextOpenFolderItem" Header="Open Folder" Style="{StaticResource ModernMenuItem}" Click="OpenFolder_Click"/>
+                                    <MenuItem x:Name="ContextSearchOnlineItem" Header="Search Online" Style="{StaticResource ModernMenuItem}" Click="SearchOnline_Click"/>
                                 </ContextMenu>
                             </DataGrid.ContextMenu>
                             <DataGrid.Columns>
@@ -676,7 +692,7 @@
                 </Border>
 
                 <!-- Footer -->
-                <Grid Grid.Row="3" Margin="0,12,0,0">
+                <Grid x:Name="FullFooter" Grid.Row="3" Margin="0,12,0,0">
                     <TextBlock x:Name="FooterText" Text="Ready" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <!-- Group by application toggle -->
@@ -695,12 +711,11 @@
                             <TextBlock x:Name="FontSizeLabel" Text="13px" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
                         </StackPanel>
 
-                        <!-- Always on top toggle -->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock x:Name="TopmostLabel" Text="Always on top" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="TopmostLabel_Click"/>
-                            <CheckBox x:Name="TopmostCheck" Style="{StaticResource CyberSnapToggleStyle}" AutomationProperties.Name="Always on top" VerticalAlignment="Center" Checked="Topmost_Checked" Unchecked="Topmost_Checked"/>
-                        </StackPanel>
                     </StackPanel>
+                </Grid>
+
+                <Grid x:Name="CompactViewHost" Grid.Row="0" Grid.RowSpan="4" Visibility="Collapsed" Panel.ZIndex="10">
+                    <controls:CompactProcessView x:Name="CompactView"/>
                 </Grid>
             </Grid>
         </Border>

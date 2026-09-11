@@ -27,6 +27,7 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     private int _instanceCount = 1;
     private List<ProcessInfo> _children = new();
     private bool _dimWhenSuspended;
+    private bool _isContextTarget;
 
     public int Pid { get => _pid; set => Set(ref _pid, value); }
     public int ParentPid { get => _parentPid; set => Set(ref _parentPid, value); }
@@ -126,6 +127,8 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     public List<ProcessInfo> Children { get => _children; set => Set(ref _children, value); }
 
     public bool DimWhenSuspended { get => _dimWhenSuspended; set => Set(ref _dimWhenSuspended, value); }
+
+    public bool IsContextTarget { get => _isContextTarget; set => Set(ref _isContextTarget, value); }
 
     public string DisplayName => InstanceCount > 1 && IsGroupParent ? $"{Name} ({InstanceCount})" : Name;
 

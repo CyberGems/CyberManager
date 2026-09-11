@@ -72,6 +72,7 @@ public class StringsTests
             "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction",
             "GroupByApp", "Ungroup", "KillGroupConfirm", "SuspendGroupConfirm", "ResumeGroupConfirm",
             "MainProcess", "WorkerProcess", "PriorityIdle", "PriorityBelowNormal", "TextSize",
+            "CompactModeTitle", "CompactModeDesc", "CompactMode", "MoreDetails", "CompactModeHeader", "CompactContextHint",
             "SettingsTitle", "SettingsSubtitle", "ShowIdleProcessTitle", "ShowIdleProcessDesc",
             "GroupByAppTitle", "GroupByAppDesc", "HighlightSuspendedTitle", "HighlightSuspendedDesc",
             "RefreshIntervalTitle", "RefreshIntervalDesc", "RefreshFast", "RefreshNormal", "RefreshSlow",

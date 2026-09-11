@@ -49,6 +49,7 @@ public partial class SettingsWindow : Window
 
         // Process View Settings
         ShowIdleSwitch.IsChecked = App.Settings.ShowIdleProcess;
+        CompactModeSwitch.IsChecked = App.Settings.CompactMode;
         GroupByAppSwitch.IsChecked = App.Settings.GroupProcesses;
         HighlightSuspendedSwitch.IsChecked = App.Settings.ShowSuspended;
 
@@ -104,6 +105,7 @@ public partial class SettingsWindow : Window
         if (_initializing) return;
 
         App.Settings.ShowIdleProcess = ShowIdleSwitch.IsChecked == true;
+        App.Settings.CompactMode = CompactModeSwitch.IsChecked == true;
         App.Settings.GroupProcesses = GroupByAppSwitch.IsChecked == true;
         App.Settings.ShowSuspended = HighlightSuspendedSwitch.IsChecked == true;
         App.Settings.StartWithWindows = StartWithWinSwitch.IsChecked == true;
@@ -196,6 +198,7 @@ public partial class SettingsWindow : Window
         _initializing = true;
 
         App.Settings.ShowIdleProcess = false;
+        App.Settings.CompactMode = false;
         App.Settings.GroupProcesses = true;
         App.Settings.ShowSuspended = true;
         App.Settings.RefreshIntervalMs = 800;
@@ -208,6 +211,7 @@ public partial class SettingsWindow : Window
         StartupManager.SetAutoStart(false);
 
         ShowIdleSwitch.IsChecked = false;
+        CompactModeSwitch.IsChecked = false;
         GroupByAppSwitch.IsChecked = true;
         HighlightSuspendedSwitch.IsChecked = true;
         AlwaysOnTopSwitch.IsChecked = false;
@@ -259,6 +263,8 @@ public partial class SettingsWindow : Window
         // Process View items
         ShowIdleTitleLbl.Text = Strings.T("ShowIdleProcessTitle");
         ShowIdleDescLbl.Text = Strings.T("ShowIdleProcessDesc");
+        CompactModeTitleLbl.Text = Strings.T("CompactModeTitle");
+        CompactModeDescLbl.Text = Strings.T("CompactModeDesc");
         GroupByAppTitleLbl.Text = Strings.T("GroupByAppTitle");
         GroupByAppDescLbl.Text = Strings.T("GroupByAppDesc");
         HighlightSuspendedTitleLbl.Text = Strings.T("HighlightSuspendedTitle");

@@ -24,6 +24,7 @@ public sealed class AppSettings
     public bool AutoCheckForUpdates { get; set; } = true;
     public string GlobalHotkey { get; set; } = "Ctrl+Alt+M";
     public bool ShowIdleProcess { get; set; }
+    public bool CompactMode { get; set; }
     public bool MainWindowBoundsSaved { get; set; }
     public string MainWindowMonitor { get; set; } = "";
     public double MainWindowLeft { get; set; }
@@ -31,6 +32,12 @@ public sealed class AppSettings
     public double MainWindowWidth { get; set; } = 1100;
     public double MainWindowHeight { get; set; } = 700;
     public bool MainWindowMaximized { get; set; }
+    public bool CompactWindowBoundsSaved { get; set; }
+    public string CompactWindowMonitor { get; set; } = "";
+    public double CompactWindowLeft { get; set; }
+    public double CompactWindowTop { get; set; }
+    public double CompactWindowWidth { get; set; } = 560;
+    public double CompactWindowHeight { get; set; } = 360;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -138,6 +145,8 @@ public sealed class AppSettings
         RowFontSize = Math.Clamp(RowFontSize, 11, 17);
         MainWindowWidth = Math.Max(MainWindowWidth, 900);
         MainWindowHeight = Math.Max(MainWindowHeight, 520);
+        CompactWindowWidth = Math.Max(CompactWindowWidth, 500);
+        CompactWindowHeight = Math.Max(CompactWindowHeight, 220);
         GlobalHotkey = string.IsNullOrWhiteSpace(GlobalHotkey) ? "Ctrl+Alt+M" : GlobalHotkey.Trim();
     }
 
