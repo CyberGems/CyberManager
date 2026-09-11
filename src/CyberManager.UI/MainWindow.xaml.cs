@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,27 +12,35 @@ using CyberManager.Common.Settings;
 using CyberManager.Core.Engine;
 using CyberManager.UI.Dialogs;
 using CyberManager.UI.Services;
+using CyberManager.UI.ViewModels;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using Key = System.Windows.Input.Key;
 using ModifierKeys = System.Windows.Input.ModifierKeys;
 
 namespace CyberManager.UI;
 
+[SuppressMessage("Design", "CA1001", Justification = "WPF window-owned services are released from the window lifecycle.")]
 public partial class MainWindow : Window
 {
     private readonly ProcessCollector _collector = new();
     private readonly DispatcherTimer _timer = new();
     private readonly DispatcherTimer _searchDebounceTimer = new();
+    private readonly DispatcherTimer _settingsSaveTimer = new();
+    private readonly CancellationTokenSource _lifetimeCts = new();
+    private readonly SemaphoreSlim _processActionGate = new(1, 1);
+    private readonly ProcessListViewModel _processList = new();
     private readonly HashSet<string> _expandedGroups = new(StringComparer.OrdinalIgnoreCase);
     private readonly System.Collections.Concurrent.ConcurrentDictionary<int, DateTime> _terminatedPids = new();
     private readonly GlobalHotkeyService _hotkeyService = new();
     private readonly TrayIconService _trayService = new();
     private bool _isExplicitExit;
+    private bool _isLoaded;
+    private bool _isClosed;
+    private int _iconRefreshPending;
     private List<ProcessInfo> _all = new();
     private List<ProcessInfo> _view = new();
     private string _pendingSearch = "";
-    private bool _isRefreshing;
-    private DateTime _lastSettingsSave = DateTime.MinValue;
+    private int _refreshInFlight;
 
     private string _sortColumn = "CpuPercent";
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
@@ -39,17 +48,28 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ProcGrid.ItemsSource = _processList.Items;
         CyberManagerWindowChrome.Apply(this, 12);
         Loaded += OnLoaded;
         Closing += OnClosing;
+        IsVisibleChanged += OnVisibilityChanged;
+        Closed += OnClosed;
         _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
-        _timer.Tick += (_, _) => _ = RefreshAsync();
+        _timer.Tick += (_, _) => _ = RefreshAsync(_lifetimeCts.Token);
         _searchDebounceTimer.Interval = TimeSpan.FromMilliseconds(150);
         _searchDebounceTimer.Tick += (_, _) => { _searchDebounceTimer.Stop(); ApplySortingAndFilter(); };
+        _settingsSaveTimer.Interval = TimeSpan.FromMilliseconds(350);
+        _settingsSaveTimer.Tick += async (_, _) =>
+        {
+            _settingsSaveTimer.Stop();
+            await App.Settings.SaveAsync(_lifetimeCts.Token);
+        };
+        PathToIconConverter.IconReady += OnIconReady;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        _isLoaded = true;
         try
         {
             if (App.Settings.MainWindowBoundsSaved)
@@ -83,7 +103,7 @@ public partial class MainWindow : Window
                 this,
                 ToggleWindowVisibility,
                 OpenSystemInfoFromTray,
-                () => _ = RefreshAsync(),
+                () => _ = RefreshAsync(_lifetimeCts.Token),
                 OnToggleAlwaysOnTop,
                 OnToggleGroupByApp,
                 OnToggleStartWithWindows,
@@ -124,8 +144,8 @@ public partial class MainWindow : Window
                 });
             }
 
-            _ = RefreshAsync();
-            _timer.Start();
+            _ = RefreshAsync(_lifetimeCts.Token);
+            if (IsVisible) _timer.Start();
         }
         catch (Exception ex)
         {
@@ -159,16 +179,60 @@ public partial class MainWindow : Window
                 return;
             }
 
+            _isClosed = true;
+            _timer.Stop();
+            _searchDebounceTimer.Stop();
+            _settingsSaveTimer.Stop();
+            _lifetimeCts.Cancel();
             _hotkeyService.Dispose();
             _trayService.Dispose();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Close error: {ex}");
+        }
     }
 
-    private async Task RefreshAsync()
+    private void OnVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
-        if (_isRefreshing) return;
-        _isRefreshing = true;
+        if (!_isLoaded || _isClosed) return;
+
+        if (IsVisible)
+        {
+            _timer.Start();
+            _ = RefreshAsync(_lifetimeCts.Token);
+        }
+        else
+        {
+            // There is no useful UI to update while the app is in the tray.
+            _timer.Stop();
+        }
+    }
+
+    private void OnClosed(object? sender, EventArgs e)
+    {
+        _isClosed = true;
+        _timer.Stop();
+        _searchDebounceTimer.Stop();
+        _settingsSaveTimer.Stop();
+        _lifetimeCts.Cancel();
+        PathToIconConverter.IconReady -= OnIconReady;
+        _lifetimeCts.Dispose();
+    }
+
+    private void OnIconReady()
+    {
+        if (!_isLoaded || _isClosed || Interlocked.Exchange(ref _iconRefreshPending, 1) == 1) return;
+        Dispatcher.BeginInvoke(() =>
+        {
+            Volatile.Write(ref _iconRefreshPending, 0);
+            if (!_isClosed) ProcGrid.Items.Refresh();
+        }, DispatcherPriority.Background);
+    }
+
+    private async Task RefreshAsync(CancellationToken cancellationToken = default)
+    {
+        if (_isClosed || Interlocked.Exchange(ref _refreshInFlight, 1) == 1) return;
         try
         {
             if (_all.Count == 0)
@@ -182,7 +246,7 @@ public partial class MainWindow : Window
                 if (kv.Value < now) _terminatedPids.TryRemove(kv.Key, out _);
             }
 
-            var data = await _collector.CollectAsync();
+            var data = await _collector.CollectAsync(cancellationToken);
             _all = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
             ApplySortingAndFilter();
 
@@ -202,16 +266,21 @@ public partial class MainWindow : Window
             RamSparkline.Values = ramPctHistory;
             RamSparklineText.Text = $"{sysMetrics.UsedRamGb:F1} GB";
 
-            StatsText.Text = $"{_all.Count} {Strings.T("ProcessesCount", _all.Count).Split(' ')[0]}  •  {Strings.T("CpuTotal", sysMetrics.CpuTotalPercent)}  •  {Strings.T("MemTotal", sysMetrics.UsedRamGb)}";
+            StatsText.Text = $"{Strings.T("ProcessesCount", _all.Count)}  •  {Strings.T("CpuTotal", sysMetrics.CpuTotalPercent)}  •  {Strings.T("MemTotal", sysMetrics.UsedRamGb)}";
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
         }
         catch (Exception ex)
         {
-            FooterText.Text = $"Error: {ex.Message}";
-            System.Diagnostics.Debug.WriteLine($"Refresh error: {ex}");
+            // Keep the last valid snapshot visible instead of showing a blank list
+            // when a transient NT query or permission error occurs.
+            FooterText.Text = $"{Strings.T("RefreshFailed")}: {ex.Message}";
+            Debug.WriteLine($"Refresh error: {ex}");
         }
         finally
         {
-            _isRefreshing = false;
+            Volatile.Write(ref _refreshInFlight, 0);
         }
     }
 
@@ -219,6 +288,15 @@ public partial class MainWindow : Window
     {
         var dlg = new SystemInfoWindow { Owner = this };
         dlg.ShowDialog();
+    }
+
+    private void SystemInfoBorder_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key is Key.Enter or Key.Space)
+        {
+            e.Handled = true;
+            SystemInfo_Click(sender, e);
+        }
     }
 
 
@@ -277,104 +355,22 @@ public partial class MainWindow : Window
         SearchHint.Visibility = string.IsNullOrEmpty(q) ? Visibility.Visible : Visibility.Collapsed;
         ClearBtn.Visibility = string.IsNullOrEmpty(q) ? Visibility.Collapsed : Visibility.Visible;
 
-        IEnumerable<ProcessInfo> filtered = _all;
-        if (!App.Settings.ShowIdleProcess)
-        {
-            filtered = filtered.Where(x => x.Pid != 0);
-        }
-
-        if (!string.IsNullOrEmpty(q))
-        {
-            bool isPid = int.TryParse(q, out var pid);
-            filtered = filtered.Where(x =>
-                x.Name.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                x.ExePath.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                (isPid && x.Pid == pid));
-        }
-
-        if (App.Settings.GroupProcesses)
-        {
-            var topLevel = new List<ProcessInfo>();
-            var nameGroups = filtered.GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase);
-
-            foreach (var g in nameGroups)
-            {
-                var list = g.ToList();
-                if (list.Count == 1)
-                {
-                    var single = list[0];
-                    single.IsGroupParent = false;
-                    single.IsGroupChild = false;
-                    single.InstanceCount = 1;
-                    topLevel.Add(single);
-                }
-                else
-                {
-                    var mainProc = list.FirstOrDefault(x => x.HasWindow) ?? list.OrderBy(x => x.Pid).First();
-                    var isExp = _expandedGroups.Contains(g.Key);
-                    var parent = new ProcessInfo
-                    {
-                        Pid = mainProc.Pid,
-                        ParentPid = mainProc.ParentPid,
-                        Name = g.Key,
-                        ExePath = !string.IsNullOrEmpty(mainProc.ExePath) ? mainProc.ExePath : (list.FirstOrDefault(x => !string.IsNullOrEmpty(x.ExePath))?.ExePath ?? ""),
-                        UserName = mainProc.UserName,
-                        Status = list.Any(x => x.Status == "Running") ? "Running" : "Suspended",
-                        CpuPercent = list.Sum(x => x.CpuPercent),
-                        WorkingSetBytes = list.Sum(x => x.WorkingSetBytes),
-                        PrivateBytes = list.Sum(x => x.PrivateBytes),
-                        ThreadCount = list.Sum(x => x.ThreadCount),
-                        StartTime = mainProc.StartTime,
-                        Priority = mainProc.Priority,
-                        MainWindowTitle = mainProc.MainWindowTitle,
-                        IsGroupParent = true,
-                        IsGroupChild = false,
-                        IsExpanded = isExp,
-                        InstanceCount = list.Count,
-                        Children = list.OrderByDescending(x => x.HasWindow)
-                                       .ThenByDescending(x => x.CpuPercent)
-                                       .ThenByDescending(x => x.WorkingSetBytes)
-                                       .ToList()
-                    };
-
-                    foreach (var c in parent.Children)
-                    {
-                        c.IsGroupChild = true;
-                        c.IsGroupParent = false;
-                    }
-
-                    topLevel.Add(parent);
-                }
-            }
-
-            var sortedTopLevel = ApplySorting(topLevel);
-            var resultView = new List<ProcessInfo>();
-            foreach (var item in sortedTopLevel)
-            {
-                resultView.Add(item);
-                if (item.IsGroupParent && item.IsExpanded)
-                {
-                    resultView.AddRange(item.Children);
-                }
-            }
-            _view = resultView;
-        }
-        else
-        {
-            foreach (var p in filtered)
-            {
-                p.IsGroupParent = false;
-                p.IsGroupChild = false;
-                p.InstanceCount = 1;
-            }
-            _view = ApplySorting(filtered).ToList();
-        }
+        _view = ProcessListViewModel.Build(
+            _all,
+            new ProcessListQuery(
+                q,
+                App.Settings.ShowIdleProcess,
+                App.Settings.GroupProcesses,
+                App.Settings.ShowSuspended,
+                _sortColumn,
+                _sortDirection,
+                _expandedGroups));
 
         var prevSelectedPid = Selected?.Pid;
-        ProcGrid.ItemsSource = _view;
+        _processList.Update(_view);
         if (prevSelectedPid.HasValue)
         {
-            var matched = _view.FirstOrDefault(x => x.Pid == prevSelectedPid.Value);
+            var matched = _processList.Items.FirstOrDefault(x => x.Pid == prevSelectedPid.Value);
             if (matched != null)
             {
                 ProcGrid.SelectedItem = matched;
@@ -393,22 +389,6 @@ public partial class MainWindow : Window
         {
             FooterText.Text = $"{_view.Count} {Strings.T("Updated")} {DateTime.Now:HH:mm:ss}";
         }
-    }
-
-    private IEnumerable<ProcessInfo> ApplySorting(IEnumerable<ProcessInfo> list)
-    {
-        bool asc = _sortDirection == ListSortDirection.Ascending;
-        return _sortColumn switch
-        {
-            "Name" => asc ? list.OrderBy(x => x.Name).ThenBy(x => x.Pid) : list.OrderByDescending(x => x.Name).ThenBy(x => x.Pid),
-            "Pid" => asc ? list.OrderBy(x => x.Pid) : list.OrderByDescending(x => x.Pid),
-            "CpuPercent" => asc ? list.OrderBy(x => x.CpuPercent).ThenBy(x => x.Name) : list.OrderByDescending(x => x.CpuPercent).ThenBy(x => x.Name),
-            "WorkingSetBytes" => asc ? list.OrderBy(x => x.WorkingSetBytes).ThenBy(x => x.Name) : list.OrderByDescending(x => x.WorkingSetBytes).ThenBy(x => x.Name),
-            "ThreadCount" => asc ? list.OrderBy(x => x.ThreadCount).ThenBy(x => x.Name) : list.OrderByDescending(x => x.ThreadCount).ThenBy(x => x.Name),
-            "Priority" => asc ? list.OrderBy(x => x.Priority).ThenBy(x => x.Name) : list.OrderByDescending(x => x.Priority).ThenBy(x => x.Name),
-            "ExePath" => asc ? list.OrderBy(x => x.ExePath).ThenBy(x => x.Name) : list.OrderByDescending(x => x.ExePath).ThenBy(x => x.Name),
-            _ => list.OrderByDescending(x => x.CpuPercent).ThenBy(x => x.Name)
-        };
     }
 
     private ProcessInfo? Selected => ProcGrid.SelectedItem as ProcessInfo;
@@ -493,22 +473,11 @@ public partial class MainWindow : Window
 
     private void ThrottledSaveSettings()
     {
-        var now = DateTime.UtcNow;
-        if ((now - _lastSettingsSave).TotalSeconds < 2)
-        {
-            Dispatcher.BeginInvoke(async () =>
-            {
-                await Task.Delay(2000);
-                App.Settings.Save();
-                _lastSettingsSave = DateTime.UtcNow;
-            }, DispatcherPriority.Background);
-            return;
-        }
-        App.Settings.Save();
-        _lastSettingsSave = now;
+        _settingsSaveTimer.Stop();
+        _settingsSaveTimer.Start();
     }
 
-    private void Kill_Click(object sender, RoutedEventArgs e)
+    private async void Kill_Click(object sender, RoutedEventArgs e)
     {
         var s = Selected;
         if (s == null) return;
@@ -520,42 +489,20 @@ public partial class MainWindow : Window
             {
                 var pidsToKill = s.Children.Select(c => c.Pid).ToList();
                 if (!pidsToKill.Contains(s.Pid)) pidsToKill.Add(s.Pid);
-                var exp = DateTime.UtcNow.AddSeconds(5);
-                foreach (var pid in pidsToKill) _terminatedPids[pid] = exp;
-
-                // Instant Optimistic UI Pruning (0ms latency visual feedback)
-                _all.RemoveAll(x => pidsToKill.Contains(x.Pid) || (x.Name.Equals(s.Name, StringComparison.OrdinalIgnoreCase) && x.IsGroupChild));
-                ApplySortingAndFilter();
-
-                Task.Run(() =>
-                {
-                    foreach (var pid in pidsToKill)
-                    {
-                        ProcessActions.Kill(pid);
-                    }
-                    ProcessActions.KillTree(s.Pid);
-                });
+                var results = await RunProcessActionsAsync(pidsToKill, ProcessActions.TryKill);
+                ApplyActionResults(results);
             }
             return;
         }
 
         if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), Strings.T("KillConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true))
         {
-            int pidToKill = s.Pid;
-            _terminatedPids[pidToKill] = DateTime.UtcNow.AddSeconds(5);
-
-            // Instant Optimistic UI Pruning
-            _all.RemoveAll(x => x.Pid == pidToKill);
-            ApplySortingAndFilter();
-
-            Task.Run(() =>
-            {
-                ProcessActions.Kill(pidToKill);
-            });
+            var result = await Task.Run(() => ProcessActions.TryKill(s.Pid), _lifetimeCts.Token);
+            ApplyActionResults(new Dictionary<int, ProcessActions.ActionResult> { [s.Pid] = result });
         }
     }
 
-    private void KillTree_Click(object sender, RoutedEventArgs e)
+    private async void KillTree_Click(object sender, RoutedEventArgs e)
     {
         var s = Selected;
         if (s == null) return;
@@ -564,21 +511,13 @@ public partial class MainWindow : Window
             int rootPid = s.Pid;
             var pidsToKill = s.IsGroupParent && s.Children.Count > 0 ? s.Children.Select(c => c.Pid).ToList() : new List<int> { rootPid };
             if (!pidsToKill.Contains(rootPid)) pidsToKill.Add(rootPid);
-            var exp = DateTime.UtcNow.AddSeconds(5);
-            foreach (var pid in pidsToKill) _terminatedPids[pid] = exp;
-
-            // Instant Optimistic UI Pruning
-            _all.RemoveAll(x => pidsToKill.Contains(x.Pid) || (x.Name.Equals(s.Name, StringComparison.OrdinalIgnoreCase) && x.IsGroupChild));
-            ApplySortingAndFilter();
-
-            Task.Run(() =>
-            {
-                ProcessActions.KillTree(rootPid);
-            });
+            var result = await Task.Run(() => ProcessActions.TryKillTree(rootPid), _lifetimeCts.Token);
+            var results = pidsToKill.ToDictionary(pid => pid, _ => result);
+            ApplyActionResults(results);
         }
     }
 
-    private void Suspend_Click(object sender, RoutedEventArgs e)
+    private async void Suspend_Click(object sender, RoutedEventArgs e)
     {
         var s = Selected;
         if (s == null) return;
@@ -588,28 +527,35 @@ public partial class MainWindow : Window
             var msg = Strings.T("SuspendGroupConfirm", s.InstanceCount, s.Name);
             if (ConfirmDialog.ShowProcess(this, Strings.T("Suspend"), msg, s.ExePath, Strings.T("Suspend"), Strings.T("Cancel"), isDanger: false))
             {
+                var results = await RunProcessActionsAsync(s.Children.Select(c => c.Pid), ProcessActions.TrySuspend);
                 foreach (var c in s.Children)
                 {
-                    ProcessActions.Suspend(c.Pid);
-                    c.Status = "Suspended";
+                    if (results.TryGetValue(c.Pid, out var result) && result.Succeeded)
+                    {
+                        c.Status = "Suspended";
+                    }
                 }
-                s.Status = "Suspended";
-                ProcGrid.Items.Refresh();
+                s.Status = s.Children.All(c => c.Status == "Suspended") ? "Suspended" : "Running";
+                s.DimWhenSuspended = App.Settings.ShowSuspended && s.Status == "Suspended";
+                ApplySortingAndFilter();
+                ShowActionFailures(results.Values);
             }
             return;
         }
 
         if (ConfirmDialog.ShowProcess(this, Strings.T("Suspend"), Strings.T("SuspendConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Suspend"), Strings.T("Cancel"), isDanger: false))
         {
-            if (ProcessActions.Suspend(s.Pid))
+            var result = await Task.Run(() => ProcessActions.TrySuspend(s.Pid), _lifetimeCts.Token);
+            if (result.Succeeded)
             {
                 s.Status = "Suspended";
-                ProcGrid.Items.Refresh();
+                s.DimWhenSuspended = App.Settings.ShowSuspended;
             }
+            else ShowActionFailures(new[] { result });
         }
     }
 
-    private void Resume_Click(object sender, RoutedEventArgs e)
+    private async void Resume_Click(object sender, RoutedEventArgs e)
     {
         var s = Selected;
         if (s == null) return;
@@ -619,24 +565,32 @@ public partial class MainWindow : Window
             var msg = Strings.T("ResumeGroupConfirm", s.InstanceCount, s.Name);
             if (ConfirmDialog.ShowProcess(this, Strings.T("Resume"), msg, s.ExePath, Strings.T("Resume"), Strings.T("Cancel"), isDanger: false))
             {
+                var results = await RunProcessActionsAsync(s.Children.Select(c => c.Pid), ProcessActions.TryResume);
                 foreach (var c in s.Children)
                 {
-                    ProcessActions.Resume(c.Pid);
-                    c.Status = "Running";
+                    if (results.TryGetValue(c.Pid, out var result) && result.Succeeded)
+                    {
+                        c.Status = "Running";
+                        c.DimWhenSuspended = false;
+                    }
                 }
                 s.Status = "Running";
-                ProcGrid.Items.Refresh();
+                s.DimWhenSuspended = false;
+                ApplySortingAndFilter();
+                ShowActionFailures(results.Values);
             }
             return;
         }
 
         if (ConfirmDialog.ShowProcess(this, Strings.T("Resume"), Strings.T("ResumeConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Resume"), Strings.T("Cancel"), isDanger: false))
         {
-            if (ProcessActions.Resume(s.Pid))
+            var result = await Task.Run(() => ProcessActions.TryResume(s.Pid), _lifetimeCts.Token);
+            if (result.Succeeded)
             {
                 s.Status = "Running";
-                ProcGrid.Items.Refresh();
+                s.DimWhenSuspended = false;
             }
+            else ShowActionFailures(new[] { result });
         }
     }
 
@@ -657,47 +611,109 @@ public partial class MainWindow : Window
     private void PriorityBelowNormal_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.BelowNormal);
     private void PriorityIdle_Click(object sender, RoutedEventArgs e) => SetPriority(ProcessPriorityClass.Idle);
 
-    private void SetPriority(ProcessPriorityClass priority)
+    private async void SetPriority(ProcessPriorityClass priority)
     {
         var s = Selected;
         if (s == null) return;
 
         if (s.IsGroupParent && s.InstanceCount > 1)
         {
-            bool anyFailed = false;
+            var results = await RunProcessActionsAsync(s.Children.Select(c => c.Pid), pid => ProcessActions.TrySetPriority(pid, priority));
             foreach (var c in s.Children)
             {
-                if (ProcessActions.SetPriority(c.Pid, priority))
+                if (results.TryGetValue(c.Pid, out var result) && result.Succeeded)
                 {
                     c.Priority = priority;
                     var inAll = _all.FirstOrDefault(x => x.Pid == c.Pid);
                     if (inAll != null) inAll.Priority = priority;
                 }
-                else
-                {
-                    anyFailed = true;
-                }
             }
-            s.Priority = priority;
-            ProcGrid.Items.Refresh();
-            if (anyFailed)
-            {
-                ConfirmDialog.Show(this, Strings.T("ConfirmAction"), Strings.T("ElevationRequired"), Strings.T("Ok"), null, ConfirmIconType.Warning);
-            }
+            ApplySortingAndFilter();
+            ShowActionFailures(results.Values);
             return;
         }
 
-        if (ProcessActions.SetPriority(s.Pid, priority))
+        var singleResult = await Task.Run(() => ProcessActions.TrySetPriority(s.Pid, priority), _lifetimeCts.Token);
+        if (singleResult.Succeeded)
         {
             s.Priority = priority;
             var inAll = _all.FirstOrDefault(x => x.Pid == s.Pid);
             if (inAll != null) inAll.Priority = priority;
-            ProcGrid.Items.Refresh();
         }
         else
         {
-            ConfirmDialog.Show(this, Strings.T("ConfirmAction"), Strings.T("ElevationRequired"), Strings.T("Ok"), null, ConfirmIconType.Warning);
+            ShowActionFailures(new[] { singleResult });
         }
+    }
+
+    private async Task<Dictionary<int, ProcessActions.ActionResult>> RunProcessActionsAsync(
+        IEnumerable<int> processIds,
+        Func<int, ProcessActions.ActionResult> action)
+    {
+        await _processActionGate.WaitAsync(_lifetimeCts.Token);
+        try
+        {
+            var results = new System.Collections.Concurrent.ConcurrentDictionary<int, ProcessActions.ActionResult>();
+            var ids = processIds.Distinct().ToArray();
+            await Task.Run(() =>
+            {
+                Parallel.ForEach(
+                    ids,
+                    new ParallelOptions
+                    {
+                        MaxDegreeOfParallelism = 4,
+                        CancellationToken = _lifetimeCts.Token
+                    },
+                    pid => results[pid] = action(pid));
+            }, _lifetimeCts.Token);
+            return results.ToDictionary(pair => pair.Key, pair => pair.Value);
+        }
+        finally
+        {
+            _processActionGate.Release();
+        }
+    }
+
+    private void ApplyActionResults(IReadOnlyDictionary<int, ProcessActions.ActionResult> results)
+    {
+        var successfulPids = results
+            .Where(pair => pair.Value.Succeeded)
+            .Select(pair => pair.Key)
+            .ToHashSet();
+
+        foreach (var pid in successfulPids)
+        {
+            _terminatedPids[pid] = DateTime.UtcNow.AddSeconds(2);
+        }
+
+        if (successfulPids.Count > 0)
+        {
+            _all.RemoveAll(process => successfulPids.Contains(process.Pid));
+            ApplySortingAndFilter();
+        }
+
+        ShowActionFailures(results.Values);
+    }
+
+    private void ShowActionFailures(IEnumerable<ProcessActions.ActionResult> results)
+    {
+        var issues = results
+            .Where(result => !result.Succeeded || result.UsedFallback)
+            .Select(result => result.ErrorMessage)
+            .Where(message => !string.IsNullOrWhiteSpace(message))
+            .Distinct()
+            .ToList();
+
+        if (issues.Count == 0) return;
+
+        FooterText.Text = issues[0]!;
+        ConfirmDialog.Show(
+            this,
+            Strings.T("ProcessActionFailed"),
+            string.Join(Environment.NewLine, issues.Take(3)),
+            Strings.T("Ok"),
+            null,
+            ConfirmIconType.Warning);
     }
 
     private void CopyPath_Click(object sender, RoutedEventArgs e)
@@ -727,25 +743,8 @@ public partial class MainWindow : Window
         try { Process.Start(new ProcessStartInfo($"https://www.google.com/search?q={Uri.EscapeDataString(s.Name)}") { UseShellExecute = true }); } catch { }
     }
 
-    private void ThemeToggle_Click(object sender, RoutedEventArgs e)
-    {
-        var themes = new[] { AppTheme.CyberManager, AppTheme.Dark, AppTheme.Light };
-        var current = App.Settings.Theme;
-        var next = themes[(Array.IndexOf(themes, current) + 1) % themes.Length];
-        App.Settings.Theme = next;
-        ApplyTheme();
-        ThrottledSaveSettings();
-    }
 
-    private void LangToggle_Click(object sender, RoutedEventArgs e)
-    {
-        App.Settings.Language = App.Settings.Language == Lang.Es ? Lang.En : Lang.Es;
-        Strings.Current = App.Settings.Language;
-        ApplyLanguage();
-        ThrottledSaveSettings();
-    }
-
-    private void ApplyTheme()
+    private static void ApplyTheme()
     {
         ThemeManager.Apply(App.Settings.Theme);
     }
@@ -766,10 +765,11 @@ public partial class MainWindow : Window
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             KillBtnText.Text = Strings.T("Kill");
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
-            ThemeBtn.ToolTip = Strings.T("Theme");
-            LangBtn.ToolTip = Strings.T("Language");
             SettingsBtn.ToolTip = $"{Strings.T("Settings")} (Ctrl+,)";
             AboutBtn.ToolTip = Strings.T("About");
+            MinimizeBtn.ToolTip = Strings.T("Minimize");
+            MaximizeBtn.ToolTip = Strings.T("Maximize");
+            CloseBtn.ToolTip = Strings.T("Close");
             CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
             RamSparklineBorder.ToolTip = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
             FooterText.Text = Strings.T("Ready");
@@ -1098,7 +1098,11 @@ public partial class MainWindow : Window
     private void OnToggleStartWithWindows(bool enable)
     {
         App.Settings.StartWithWindows = enable;
-        StartupManager.SetAutoStart(enable);
+        if (!StartupManager.SetAutoStart(enable))
+        {
+            App.Settings.StartWithWindows = StartupManager.IsAutoStartEnabled();
+            FooterText.Text = Strings.T("AutoStartFailed");
+        }
         App.Settings.Save();
         _trayService.UpdateLocalization();
     }

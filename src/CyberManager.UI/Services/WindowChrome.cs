@@ -32,7 +32,7 @@ public static class CyberManagerWindowChrome
             if (OperatingSystem.IsWindowsVersionAtLeast(10,0,22000))
             {
                 int pref = DWMWCP_ROUND;
-                DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref pref, sizeof(int));
+                _ = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref pref, sizeof(int));
                 return;
             }
             if (w.ActualWidth <= 0 || w.ActualHeight <= 0) return;

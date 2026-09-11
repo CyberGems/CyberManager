@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
@@ -127,6 +129,21 @@ public class LargeHistoryGraphControl : FrameworkElement
     public int MaxSamples { get; set; } = 60;
 
     private Point? _hoverPos;
+    private long _lastHoverRenderTimestamp;
+
+    private static readonly Typeface GraphTypeface = new(
+        new FontFamily("Segoe UI, Arial"),
+        FontStyles.Normal,
+        FontWeights.SemiBold,
+        FontStretches.Normal);
+    private static readonly SolidColorBrush GraphBackgroundBrush = CreateBrush(Color.FromArgb(90, 8, 14, 26));
+    private static readonly SolidColorBrush GraphBorderBrush = CreateBrush(Color.FromArgb(60, 255, 255, 255));
+    private static readonly Pen GraphBorderPen = CreatePen(GraphBorderBrush, 1.0);
+    private static readonly SolidColorBrush GridBrush = CreateBrush(Color.FromArgb(25, 255, 255, 255));
+    private static readonly Pen GridPen = CreatePen(GridBrush, 1.0);
+    private static readonly SolidColorBrush MeterTitleBrush = CreateBrush(Color.FromArgb(200, 255, 255, 255));
+    private static readonly SolidColorBrush MeterValueBrush = CreateBrush(Color.FromRgb(240, 240, 240));
+    private static readonly SolidColorBrush TooltipBackgroundBrush = CreateBrush(Color.FromArgb(220, 10, 16, 28));
 
     public LargeHistoryGraphControl()
     {
@@ -138,6 +155,13 @@ public class LargeHistoryGraphControl : FrameworkElement
     {
         base.OnMouseMove(e);
         _hoverPos = e.GetPosition(this);
+        var now = Stopwatch.GetTimestamp();
+        if ((now - _lastHoverRenderTimestamp) * 60 < Stopwatch.Frequency)
+        {
+            return;
+        }
+
+        _lastHoverRenderTimestamp = now;
         InvalidateVisual();
     }
 
@@ -148,6 +172,7 @@ public class LargeHistoryGraphControl : FrameworkElement
         InvalidateVisual();
     }
 
+    [SuppressMessage("Naming", "CA1725", Justification = "The parameter name is part of the WPF override contract.")]
     protected override void OnRender(DrawingContext dc)
     {
         base.OnRender(dc);
@@ -164,13 +189,9 @@ public class LargeHistoryGraphControl : FrameworkElement
         double graphTop = 8;
         double graphBottom = graphTop + graphHeight;
 
-        var bgBrush = new SolidColorBrush(Color.FromArgb(90, 8, 14, 26));
-        var borderPen = new Pen(new SolidColorBrush(Color.FromArgb(60, 255, 255, 255)), 1.0);
-        borderPen.Freeze();
-
         // 1. Draw Left Vertical Meter Box
         var meterRect = new Rect(0, graphTop, meterWidth, graphHeight);
-        dc.DrawRoundedRectangle(bgBrush, borderPen, meterRect, 4, 4);
+        dc.DrawRoundedRectangle(GraphBackgroundBrush, GraphBorderPen, meterRect, 4, 4);
 
         double max = MaxValue > 0 ? MaxValue : 100.0;
         double curVal = Math.Clamp(CurrentValue, 0.0, max);
@@ -201,14 +222,13 @@ public class LargeHistoryGraphControl : FrameworkElement
         }
 
         // Meter Title & Value
-        var typeFace = new Typeface(new FontFamily("Segoe UI, Arial"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
         var titleFt = new FormattedText(
             Title,
             CultureInfo.CurrentCulture,
             FlowDirection.LeftToRight,
-            typeFace,
+            GraphTypeface,
             10.5,
-            new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)),
+            MeterTitleBrush,
             VisualTreeHelper.GetDpi(this).PixelsPerDip);
         dc.DrawText(titleFt, new Point(meterWidth / 2.0 - titleFt.Width / 2.0, graphTop + 4));
 
@@ -217,23 +237,21 @@ public class LargeHistoryGraphControl : FrameworkElement
             curValStr,
             CultureInfo.CurrentCulture,
             FlowDirection.LeftToRight,
-            typeFace,
+            GraphTypeface,
             9.5,
-            new SolidColorBrush(Color.FromRgb(240, 240, 240)),
+            MeterValueBrush,
             VisualTreeHelper.GetDpi(this).PixelsPerDip);
         dc.DrawText(valFt, new Point(meterWidth / 2.0 - valFt.Width / 2.0, graphBottom - valFt.Height - 4));
 
         // 2. Draw Main Graph Box
         var graphRect = new Rect(graphLeft, graphTop, graphWidth, graphHeight);
-        dc.DrawRoundedRectangle(bgBrush, borderPen, graphRect, 4, 4);
+        dc.DrawRoundedRectangle(GraphBackgroundBrush, GraphBorderPen, graphRect, 4, 4);
 
         // Grid Lines (25%, 50%, 75%)
-        var gridPen = new Pen(new SolidColorBrush(Color.FromArgb(25, 255, 255, 255)), 1.0);
-        gridPen.Freeze();
         for (int step = 1; step <= 3; step++)
         {
             double gy = graphBottom - (step * 0.25 * graphHeight);
-            dc.DrawLine(gridPen, new Point(graphLeft + 1, gy), new Point(graphLeft + graphWidth - 1, gy));
+            dc.DrawLine(GridPen, new Point(graphLeft + 1, gy), new Point(graphLeft + graphWidth - 1, gy));
         }
 
         // Clip data to graph box
@@ -299,7 +317,7 @@ public class LargeHistoryGraphControl : FrameworkElement
                         tipText,
                         CultureInfo.CurrentCulture,
                         FlowDirection.LeftToRight,
-                        typeFace,
+                        GraphTypeface,
                         10.0,
                         Brushes.White,
                         VisualTreeHelper.GetDpi(this).PixelsPerDip);
@@ -307,13 +325,27 @@ public class LargeHistoryGraphControl : FrameworkElement
                     double tipX = Math.Min(ptX + 8, graphLeft + graphWidth - tipFt.Width - 12);
                     double tipY = graphTop + 8;
                     var tipBg = new Rect(tipX - 4, tipY - 2, tipFt.Width + 8, tipFt.Height + 4);
-                    dc.DrawRoundedRectangle(new SolidColorBrush(Color.FromArgb(220, 10, 16, 28)), borderPen, tipBg, 4, 4);
+                    dc.DrawRoundedRectangle(TooltipBackgroundBrush, GraphBorderPen, tipBg, 4, 4);
                     dc.DrawText(tipFt, new Point(tipX, tipY));
                 }
             }
         }
 
         dc.Pop(); // pop clip
+    }
+
+    private static SolidColorBrush CreateBrush(Color color)
+    {
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        return brush;
+    }
+
+    private static Pen CreatePen(Brush brush, double thickness)
+    {
+        var pen = new Pen(brush, thickness);
+        pen.Freeze();
+        return pen;
     }
 
     private static void DrawArea(

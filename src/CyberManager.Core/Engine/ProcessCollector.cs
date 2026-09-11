@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -6,159 +7,190 @@ using CyberManager.Common.Models;
 
 namespace CyberManager.Core.Engine;
 
+[SuppressMessage("Design", "CA1001", Justification = "The collector gate is a process-lifetime synchronization primitive.")]
 public sealed class ProcessCollector
 {
-    private readonly Dictionary<int, long> _prevCpu = new();
-    private readonly ConcurrentDictionary<int, string> _pathCache = new();
-    private long _prevTimestamp;
+    private const int InitialBufferSize = 1024 * 1024;
+    private const int MaxBufferAttempts = 6;
+    private const int MaxPathCacheEntries = 4096;
+    private const int StatusInfoLengthMismatch = unchecked((int)0xC0000004);
+
+    private readonly ProcessCpuTracker _cpuTracker = new();
+    private readonly ConcurrentDictionary<ProcessCacheKey, string> _pathCache = new();
+    private readonly SemaphoreSlim _collectGate = new(1, 1);
 
     public IReadOnlyList<ProcessInfo> Collect()
     {
-        long curTimestamp = Stopwatch.GetTimestamp();
-        double elapsedSeconds = _prevTimestamp == 0 ? 0 : (double)(curTimestamp - _prevTimestamp) / Stopwatch.Frequency;
-        int processorCount = Math.Max(1, Environment.ProcessorCount);
+        _collectGate.Wait();
+        try
+        {
+            return CollectCore(CancellationToken.None);
+        }
+        finally
+        {
+            _collectGate.Release();
+        }
+    }
 
+    public async Task<IReadOnlyList<ProcessInfo>> CollectAsync(CancellationToken cancellationToken = default)
+    {
+        await _collectGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return await Task.Run(() => CollectCore(cancellationToken), cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _collectGate.Release();
+        }
+    }
+
+    private List<ProcessInfo> CollectCore(CancellationToken cancellationToken)
+    {
+        long curTimestamp = Stopwatch.GetTimestamp();
         // 1. Get All Window Titles in one fast scan (~1ms)
         var windowTitles = GetTopLevelWindowTitles();
 
         // 2. Query NT Kernel for all processes in 1 single call (~5ms)
-        var result = QueryNtProcesses(windowTitles);
+        var result = QueryNtProcesses(windowTitles, cancellationToken);
 
         // 3. Compute Delta CPU % for all processes
-        if (elapsedSeconds > 0 && _prevCpu.Count > 0)
-        {
-            foreach (var r in result)
-            {
-                if (_prevCpu.TryGetValue(r.Pid, out var prevTicks) && r.CpuTimeTicks >= prevTicks)
-                {
-                    long delta = r.CpuTimeTicks - prevTicks;
-                    double cpuSecs = delta / 10_000_000.0;
-                    double pct = (cpuSecs / (elapsedSeconds * processorCount)) * 100.0;
-                    r.CpuPercent = Math.Clamp(pct, 0.0, 100.0);
-                }
-                _prevCpu[r.Pid] = r.CpuTimeTicks;
-            }
-        }
-        else
-        {
-            foreach (var r in result)
-            {
-                _prevCpu[r.Pid] = r.CpuTimeTicks;
-            }
-        }
-
-        _prevTimestamp = curTimestamp;
+        _cpuTracker.Update(result, curTimestamp, Stopwatch.Frequency, Environment.ProcessorCount);
 
         // Clean dead PIDs from cache
-        var currentPids = new HashSet<int>(result.Select(x => x.Pid));
-        var dead = _prevCpu.Keys.Where(pid => !currentPids.Contains(pid)).ToList();
-        foreach (var d in dead)
+        var currentProcesses = result
+            .Select(x => new ProcessCacheKey(x.Pid, GetStartTimeKey(x.StartTime)))
+            .ToHashSet();
+        foreach (var key in _pathCache.Keys)
         {
-            _prevCpu.Remove(d);
-            _pathCache.TryRemove(d, out _);
+            if (!currentProcesses.Contains(key))
+            {
+                _pathCache.TryRemove(key, out _);
+            }
         }
 
         return result;
     }
 
-    public async Task<IReadOnlyList<ProcessInfo>> CollectAsync()
-    {
-        return await Task.Run(() => Collect()).ConfigureAwait(false);
-    }
-
-    private List<ProcessInfo> QueryNtProcesses(Dictionary<int, string> windowTitles)
+    private List<ProcessInfo> QueryNtProcesses(
+        Dictionary<int, string> windowTitles,
+        CancellationToken cancellationToken)
     {
         var result = new List<ProcessInfo>(500);
 
-        int size = 1024 * 1024; // 1 MB initial buffer
-        IntPtr buffer = Marshal.AllocHGlobal(size);
+        int size = InitialBufferSize;
+        IntPtr buffer = IntPtr.Zero;
         try
         {
-            int returnLength;
-            int status = NtQuerySystemInformation(5, buffer, size, out returnLength); // 5 = SystemProcessInformation
-            if (status == -1073741820) // STATUS_INFO_LENGTH_MISMATCH
+            int status = 0;
+            int returnLength = 0;
+            for (var attempt = 0; attempt < MaxBufferAttempts; attempt++)
             {
-                Marshal.FreeHGlobal(buffer);
-                size = returnLength + 128 * 1024;
+                cancellationToken.ThrowIfCancellationRequested();
                 buffer = Marshal.AllocHGlobal(size);
                 status = NtQuerySystemInformation(5, buffer, size, out returnLength);
+                if (status == 0) break;
+
+                Marshal.FreeHGlobal(buffer);
+                buffer = IntPtr.Zero;
+
+                if (status != StatusInfoLengthMismatch)
+                {
+                    throw new InvalidOperationException(
+                        $"NtQuerySystemInformation failed with NTSTATUS 0x{status:X8}.");
+                }
+
+                var requestedSize = returnLength > 0 ? returnLength + 128 * 1024 : size * 2;
+                size = Math.Max(size * 2, requestedSize);
             }
 
-            if (status == 0)
+            if (status != 0 || buffer == IntPtr.Zero)
             {
-                IntPtr current = buffer;
-                while (true)
+                throw new InvalidOperationException(
+                    $"NtQuerySystemInformation did not provide a large enough buffer after {MaxBufferAttempts} attempts.");
+            }
+
+            IntPtr current = buffer;
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var spi = Marshal.PtrToStructure<SYSTEM_PROCESS_INFORMATION>(current);
+                int pid = spi.UniqueProcessId.ToInt32();
+                int ppid = spi.InheritedFromUniqueProcessId.ToInt32();
+
+                string name = "";
+                if (spi.ImageName.Buffer != IntPtr.Zero && spi.ImageName.Length > 0)
                 {
-                    var spi = Marshal.PtrToStructure<SYSTEM_PROCESS_INFORMATION>(current);
-                    int pid = spi.UniqueProcessId.ToInt32();
-                    int ppid = spi.InheritedFromUniqueProcessId.ToInt32();
-
-                    string name = "";
-                    if (spi.ImageName.Buffer != IntPtr.Zero && spi.ImageName.Length > 0)
-                    {
-                        name = Marshal.PtrToStringUni(spi.ImageName.Buffer, spi.ImageName.Length / 2) ?? "";
-                    }
-                    else if (pid == 0)
-                    {
-                        name = "System Idle Process";
-                    }
-                    else if (pid == 4)
-                    {
-                        name = "System";
-                    }
-
-                    if (string.IsNullOrEmpty(name))
-                    {
-                        name = $"PID_{pid}";
-                    }
-
-                    var info = new ProcessInfo
-                    {
-                        Pid = pid,
-                        ParentPid = ppid,
-                        Name = name,
-                        Status = "Running",
-                        ThreadCount = (int)spi.NumberOfThreads,
-                        WorkingSetBytes = (long)spi.WorkingSetSize,
-                        PrivateBytes = (long)spi.PrivatePageCount,
-                        CpuTimeTicks = spi.UserTime + spi.KernelTime,
-                        Priority = MapBasePriority(spi.BasePriority)
-                    };
-
-                    // Safe Start Time from NT CreateTime without throwing Win32Exception
-                    if (spi.CreateTime > 0)
-                    {
-                        try { info.StartTime = DateTime.FromFileTimeUtc(spi.CreateTime); } catch { }
-                    }
-
-                    // Window Title from fast 1ms cache
-                    if (windowTitles.TryGetValue(pid, out var title) && !string.IsNullOrWhiteSpace(title))
-                    {
-                        info.MainWindowTitle = title;
-                    }
-
-                    // Exe Path with zero-allocation caching
-                    info.ExePath = GetOrResolveExePath(pid, name);
-
-                    result.Add(info);
-
-                    if (spi.NextEntryOffset == 0) break;
-                    current = IntPtr.Add(current, (int)spi.NextEntryOffset);
+                    name = Marshal.PtrToStringUni(spi.ImageName.Buffer, spi.ImageName.Length / 2) ?? "";
                 }
+                else if (pid == 0)
+                {
+                    name = "System Idle Process";
+                }
+                else if (pid == 4)
+                {
+                    name = "System";
+                }
+
+                if (string.IsNullOrEmpty(name))
+                {
+                    name = $"PID_{pid}";
+                }
+
+                var info = new ProcessInfo
+                {
+                    Pid = pid,
+                    ParentPid = ppid,
+                    Name = name,
+                    Status = "Running",
+                    ThreadCount = (int)spi.NumberOfThreads,
+                    WorkingSetBytes = (long)spi.WorkingSetSize,
+                    PrivateBytes = (long)spi.PrivatePageCount,
+                    CpuTimeTicks = spi.UserTime + spi.KernelTime,
+                    Priority = MapBasePriority(spi.BasePriority)
+                };
+
+                // Safe Start Time from NT CreateTime without throwing Win32Exception
+                if (spi.CreateTime > 0)
+                {
+                    try
+                    {
+                        info.StartTime = DateTime.FromFileTimeUtc(spi.CreateTime);
+                    }
+                    catch (ArgumentOutOfRangeException ex)
+                    {
+                        Trace.WriteLine($"Invalid process start time for PID {pid}: {ex.Message}");
+                    }
+                }
+
+                // Window Title from fast 1ms cache
+                if (windowTitles.TryGetValue(pid, out var title) && !string.IsNullOrWhiteSpace(title))
+                {
+                    info.MainWindowTitle = title;
+                }
+
+                // Exe Path with bounded identity-aware caching
+                info.ExePath = GetOrResolveExePath(pid, name, info.StartTime);
+
+                result.Add(info);
+
+                if (spi.NextEntryOffset == 0) break;
+                current = IntPtr.Add(current, (int)spi.NextEntryOffset);
             }
         }
         finally
         {
-            Marshal.FreeHGlobal(buffer);
+            if (buffer != IntPtr.Zero) Marshal.FreeHGlobal(buffer);
         }
 
         return result;
     }
 
-    private string GetOrResolveExePath(int pid, string processName)
+    private string GetOrResolveExePath(int pid, string processName, DateTime startTime)
     {
         if (pid <= 4) return "";
-        if (_pathCache.TryGetValue(pid, out var cachedPath))
+        var key = new ProcessCacheKey(pid, GetStartTimeKey(startTime));
+        if (_pathCache.TryGetValue(key, out var cachedPath))
         {
             return cachedPath;
         }
@@ -185,7 +217,10 @@ public sealed class ProcessCollector
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Trace.WriteLine($"Unable to resolve executable path for PID {pid}: {ex.Message}");
+        }
 
         if (string.IsNullOrEmpty(path) && processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
         {
@@ -194,9 +229,22 @@ public sealed class ProcessCollector
             if (File.Exists(sysPath)) path = sysPath;
         }
 
-        _pathCache[pid] = path;
+        if (_pathCache.Count >= MaxPathCacheEntries)
+        {
+            foreach (var oldKey in _pathCache.Keys.Take(64))
+            {
+                _pathCache.TryRemove(oldKey, out _);
+            }
+        }
+
+        _pathCache[key] = path;
         return path;
     }
+
+    private static long GetStartTimeKey(DateTime startTime) =>
+        startTime == default ? 0 : startTime.ToFileTimeUtc();
+
+    private readonly record struct ProcessCacheKey(int Pid, long StartTimeFileTime);
 
     private static ProcessPriorityClass MapBasePriority(int basePriority)
     {
@@ -226,7 +274,7 @@ public sealed class ProcessCollector
                     var sb = new StringBuilder(len + 1);
                     if (GetWindowText(hWnd, sb, sb.Capacity) > 0)
                     {
-                        GetWindowThreadProcessId(hWnd, out uint pid);
+                        if (GetWindowThreadProcessId(hWnd, out uint pid) == 0) return true;
                         if (pid > 0 && !dict.ContainsKey((int)pid))
                         {
                             var title = sb.ToString();
@@ -253,6 +301,7 @@ public sealed class ProcessCollector
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsWindowVisible(IntPtr hWnd);
 
+    [SuppressMessage("Performance", "CA1838", Justification = "StringBuilder is required by this Win32 API.")]
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
@@ -310,6 +359,7 @@ public sealed class ProcessCollector
     [DllImport("ntdll.dll")]
     private static extern int NtQuerySystemInformation(int SystemInformationClass, IntPtr SystemInformation, int SystemInformationLength, out int ReturnLength);
 
+    [SuppressMessage("Performance", "CA1838", Justification = "StringBuilder is required by this Win32 API.")]
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern bool QueryFullProcessImageName(IntPtr hProcess, int flags, [Out] StringBuilder lpExeName, ref int lpdwSize);
 
@@ -320,4 +370,5 @@ public sealed class ProcessCollector
     private static extern bool CloseHandle(IntPtr h);
 
     #endregion
+
 }

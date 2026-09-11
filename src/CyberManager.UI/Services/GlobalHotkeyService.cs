@@ -14,6 +14,7 @@ public sealed class GlobalHotkeyService : IDisposable
     private const uint MOD_SHIFT = 0x0004;
     private const uint MOD_WIN = 0x0008;
     private const uint MOD_NOREPEAT = 0x4000;
+    private static readonly char[] HotkeySeparators = ['+', ' '];
 
     private IntPtr _hwnd;
     private HwndSource? _source;
@@ -89,7 +90,7 @@ public sealed class GlobalHotkeyService : IDisposable
             return (MOD_CONTROL | MOD_ALT, 0x4D);
         }
 
-        var parts = str.Split(new[] { '+', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        var parts = str.Split(HotkeySeparators, StringSplitOptions.RemoveEmptyEntries);
         foreach (var p in parts)
         {
             var trimmed = p.Trim();

@@ -93,4 +93,27 @@ public class ProcessInfoTests
         Assert.False(info.HasWindow);
         Assert.Equal("Worker", info.RoleBadge);
     }
+
+    [Fact]
+    public void ExePathSorting_Ascending_PlacesSpecialProcessesLast()
+    {
+        var list = new List<ProcessInfo>
+        {
+            new() { Name = "System", ExePath = "" },
+            new() { Name = "Registry", ExePath = "" },
+            new() { Name = "notepad.exe", ExePath = @"C:\Windows\System32\notepad.exe" },
+            new() { Name = "app.exe", ExePath = @"C:\Program Files\App\app.exe" }
+        };
+
+        var sorted = list
+            .OrderBy(x => string.IsNullOrWhiteSpace(x.ExePath) ? 1 : 0)
+            .ThenBy(x => x.ExePath)
+            .ThenBy(x => x.Name)
+            .ToList();
+
+        Assert.Equal(@"C:\Program Files\App\app.exe", sorted[0].ExePath);
+        Assert.Equal(@"C:\Windows\System32\notepad.exe", sorted[1].ExePath);
+        Assert.Equal("Registry", sorted[2].Name);
+        Assert.Equal("System", sorted[3].Name);
+    }
 }

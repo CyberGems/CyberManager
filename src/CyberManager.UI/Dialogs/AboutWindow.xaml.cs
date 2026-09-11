@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -146,18 +147,18 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         var progress = new Progress<double>(val =>
         {
             UpdateProgressBar.Value = val;
-            UpdateProgressText.Text = string.Format(Strings.T("DownloadingUpdate"), val);
+            UpdateProgressText.Text = string.Format(CultureInfo.CurrentCulture, Strings.T("DownloadingUpdate"), val);
         });
 
         try
         {
             UpdateProgressBar.Value = 0;
-            UpdateProgressText.Text = string.Format(Strings.T("DownloadingUpdate"), 0.0);
+            UpdateProgressText.Text = string.Format(CultureInfo.CurrentCulture, Strings.T("DownloadingUpdate"), 0.0);
 
             if (string.IsNullOrEmpty(result.DownloadUrl))
-                throw new Exception("Direct download link is not available for this release.");
+                throw new InvalidOperationException("Direct download link is not available for this release.");
 
-            await UpdateService.DownloadUpdateAsync(result.DownloadUrl, installerPath, progress);
+            await UpdateService.DownloadUpdateAsync(result.DownloadUrl, installerPath, progress, result.Sha256);
 
             UpdateProgressText.Text = Strings.T("DownloadComplete");
 

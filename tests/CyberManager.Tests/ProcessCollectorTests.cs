@@ -40,12 +40,38 @@ public class ProcessCollectorTests
     [Fact]
     public void Collect_CpuPercent_NoInflation()
     {
-        var collector = new ProcessCollector();
-        var first = collector.Collect();
-        Thread.Sleep(200);
-        var second = collector.Collect();
-        var totalCpu = second.Sum(p => p.CpuPercent);
-        Assert.InRange(totalCpu, 0, 100.01);
+        var tracker = new ProcessCpuTracker();
+        var processes = new List<ProcessInfo>
+        {
+            new() { Pid = 10, StartTime = DateTime.FromFileTimeUtc(1_000_000), CpuTimeTicks = 0 },
+            new() { Pid = 11, StartTime = DateTime.FromFileTimeUtc(2_000_000), CpuTimeTicks = 0 }
+        };
+
+        tracker.Update(processes, timestamp: 1, timestampFrequency: 10, processorCount: 1);
+        processes[0].CpuTimeTicks = 6_000_000;
+        processes[1].CpuTimeTicks = 4_000_000;
+        tracker.Update(processes, timestamp: 11, timestampFrequency: 10, processorCount: 1);
+
+        Assert.Equal(100, processes.Sum(p => p.CpuPercent), precision: 6);
+    }
+
+    [Fact]
+    public void ProcessCpuTracker_DoesNotReuseCpuDeltaAcrossPidReuse()
+    {
+        var tracker = new ProcessCpuTracker();
+        var first = new List<ProcessInfo>
+        {
+            new() { Pid = 42, StartTime = DateTime.FromFileTimeUtc(1_000_000), CpuTimeTicks = 10_000_000 }
+        };
+        tracker.Update(first, timestamp: 1, timestampFrequency: 10, processorCount: 1);
+
+        var replacement = new List<ProcessInfo>
+        {
+            new() { Pid = 42, StartTime = DateTime.FromFileTimeUtc(2_000_000), CpuTimeTicks = 20_000_000 }
+        };
+        tracker.Update(replacement, timestamp: 11, timestampFrequency: 10, processorCount: 1);
+
+        Assert.Equal(0, replacement[0].CpuPercent);
     }
 
     [Fact]

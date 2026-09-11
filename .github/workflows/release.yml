@@ -1,6 +1,7 @@
 name: Build and Release CyberManager
 
 on:
+  pull_request:
   push:
     tags:
       - 'v*'
@@ -15,9 +16,39 @@ permissions:
   contents: write
 
 jobs:
+  tests:
+    name: Test and Analyze
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.0.x
+            9.0.x
+
+      - name: Restore Dependencies
+        run: dotnet restore CyberManager.slnx
+
+      - name: Run Tests
+        run: dotnet test tests/CyberManager.Tests/CyberManager.Tests.csproj --configuration Release --no-restore -p:TreatWarningsAsErrors=true -p:CollectCoverage=true -p:CoverletOutput=TestResults/coverage/ -p:CoverletOutputFormat=cobertura -p:Threshold=20 -p:ThresholdType=line
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage
+          path: tests/CyberManager.Tests/TestResults/coverage/
+
   build:
     name: Build & Publish Release
     runs-on: windows-latest
+    needs: tests
+    if: github.event_name != 'pull_request'
 
     steps:
       - name: Checkout Code
@@ -50,11 +81,15 @@ jobs:
         run: dotnet restore CyberManager.slnx
 
       - name: Build Solution
-        run: dotnet build CyberManager.slnx --configuration Release --no-restore
+        run: dotnet build CyberManager.slnx --configuration Release --no-restore -p:TreatWarningsAsErrors=true
 
       - name: Publish Win-x64 Application
         run: |
           dotnet publish src/CyberManager.UI/CyberManager.UI.csproj -c Release -r win-x64 --self-contained true -o ./publish-win64
+
+      - name: Publish Win-arm64 Application
+        run: |
+          dotnet publish src/CyberManager.UI/CyberManager.UI.csproj -c Release -r win-arm64 --self-contained true -o ./publish-winarm64
 
       - name: Copy Extra Assets
         shell: powershell
@@ -69,11 +104,22 @@ jobs:
           if (Test-Path src/CyberManager.UI/Assets/CyberManager.png) {
             Copy-Item src/CyberManager.UI/Assets/CyberManager.png ./publish-win64/Assets/
           }
+          if (-not (Test-Path ./publish-winarm64/Assets)) {
+            New-Item -ItemType Directory -Force -Path ./publish-winarm64/Assets | Out-Null
+          }
+          if (Test-Path src/CyberManager.UI/Assets/CyberManager.ico) {
+            Copy-Item src/CyberManager.UI/Assets/CyberManager.ico ./publish-winarm64/Assets/
+            Copy-Item src/CyberManager.UI/Assets/CyberManager.ico ./publish-winarm64/
+          }
+          if (Test-Path src/CyberManager.UI/Assets/CyberManager.png) {
+            Copy-Item src/CyberManager.UI/Assets/CyberManager.png ./publish-winarm64/Assets/
+          }
 
       - name: Zip Published Output (Portable)
         shell: powershell
         run: |
           Compress-Archive -Path ./publish-win64/* -DestinationPath ./CyberManager-${{ env.VERSION }}-Portable-win-x64.zip
+          Compress-Archive -Path ./publish-winarm64/* -DestinationPath ./CyberManager-${{ env.VERSION }}-Portable-win-arm64.zip
 
       - name: Compile Inno Setup Installer
         shell: powershell
@@ -88,12 +134,15 @@ jobs:
         run: |
           $installerPath = "./CyberManager-Setup-${{ env.VERSION }}.exe"
           $portablePath = "./CyberManager-${{ env.VERSION }}-Portable-win-x64.zip"
+          $portableArm64Path = "./CyberManager-${{ env.VERSION }}-Portable-win-arm64.zip"
 
           $installerHash = (Get-FileHash $installerPath -Algorithm SHA256).Hash.ToLower()
           $portableHash = (Get-FileHash $portablePath -Algorithm SHA256).Hash.ToLower()
+          $portableArm64Hash = (Get-FileHash $portableArm64Path -Algorithm SHA256).Hash.ToLower()
 
           Write-Host "Installer SHA256: $installerHash"
           Write-Host "Portable SHA256: $portableHash"
+          Write-Host "Portable ARM64 SHA256: $portableArm64Hash"
 
           if ($env:VIRUSTOTAL_API_KEY) {
             function Upload-VirusTotal($filePath, $apiKey) {
@@ -125,12 +174,18 @@ jobs:
             } catch {
               Write-Warning "VirusTotal portable upload warning: $_"
             }
+
+            try {
+              Upload-VirusTotal $portableArm64Path $env:VIRUSTOTAL_API_KEY
+            } catch {
+              Write-Warning "VirusTotal ARM64 portable upload warning: $_"
+            }
           } else {
             Write-Host "VIRUSTOTAL_API_KEY secret not found; skipping direct upload and using computed SHA256 hashes for reports."
           }
 
           $template = [System.IO.File]::ReadAllText(".github/release-template.md", [System.Text.Encoding]::UTF8)
-          $notes = $template.Replace("{{VERSION}}", "${{ env.VERSION }}").Replace("{{INSTALLER_HASH}}", $installerHash).Replace("{{PORTABLE_HASH}}", $portableHash)
+          $notes = $template.Replace("{{VERSION}}", "${{ env.VERSION }}").Replace("{{INSTALLER_HASH}}", $installerHash).Replace("{{PORTABLE_HASH}}", $portableHash).Replace("{{PORTABLE_ARM64_HASH}}", $portableArm64Hash)
           [System.IO.File]::WriteAllText("release_notes.md", $notes, [System.Text.Encoding]::UTF8)
 
       - name: Create GitHub Release
@@ -140,6 +195,7 @@ jobs:
           name: "CyberManager ${{ env.VERSION }}"
           files: |
             ./CyberManager-${{ env.VERSION }}-Portable-win-x64.zip
+            ./CyberManager-${{ env.VERSION }}-Portable-win-arm64.zip
             ./CyberManager-Setup-${{ env.VERSION }}.exe
           draft: true
           prerelease: false

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -14,7 +15,18 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
 
     public void TriggerAttention()
     {
-        // Smooth glow effect when attention is requested
+        if ((DateTime.UtcNow - _lastAttentionTime).TotalMilliseconds < 250) return;
+        _lastAttentionTime = DateTime.UtcNow;
+
+        var animation = new System.Windows.Media.Animation.DoubleAnimation
+        {
+            From = 1,
+            To = 0.72,
+            Duration = TimeSpan.FromMilliseconds(140),
+            AutoReverse = true
+        };
+        OuterBorder.BeginAnimation(OpacityProperty, animation);
+        Activate();
     }
 
     public SystemInfoWindow()
@@ -43,14 +55,16 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         TabIo.Content = Strings.T("IoHistory");
 
         CpuHistoryTitle.Text = Strings.T("CpuHistory");
+        CpuLegend.Text = Strings.T("CpuLegend");
         MemHistoryTitle.Text = Strings.T("MemoryHistory");
+        MemLegend.Text = Strings.T("MemoryLegend");
         TotalsCardTitle.Text = Strings.T("Totals");
         HandlesLbl.Text = Strings.T("Handles");
         ThreadsLbl.Text = Strings.T("Threads");
         ProcessesLbl.Text = Strings.T("Processes");
 
         CpuCardTitle.Text = Strings.T("Cpu");
-        CpuTotalLbl.Text = Strings.T("TotalMemory");
+        CpuTotalLbl.Text = Strings.T("CpuTotalLabel");
         CpuKernelLbl.Text = Strings.T("CpuKernelLabel");
         CpuUserLbl.Text = Strings.T("CpuUserLabel");
 
@@ -69,8 +83,14 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
     {
         var snap = SystemMetricsCollector.Instance.Latest;
         var (cpuTotal, cpuKernel) = SystemMetricsCollector.Instance.GetCpuHistory();
-        var (ramGb, ramPct) = SystemMetricsCollector.Instance.GetRamHistory();
+        var (_, ramPct) = SystemMetricsCollector.Instance.GetRamHistory();
         var commitGb = SystemMetricsCollector.Instance.GetCommitHistory();
+        var commitPct = snap.CommitLimitGb > 0
+            ? commitGb.Select(value => (float)(value / snap.CommitLimitGb * 100.0)).ToArray()
+            : Array.Empty<float>();
+
+        var refreshInterval = TimeSpan.FromMilliseconds(Math.Max(500, App.Settings.RefreshIntervalMs));
+        if (_timer.Interval != refreshInterval) _timer.Interval = refreshInterval;
 
         // 1. Header Subtitle
         CpuModelSubtitle.Text = $"{snap.CpuModelName} • {snap.PhysicalCores} Cores / {snap.LogicalProcessors} Threads • {snap.TotalRamGb:F1} GB RAM";
@@ -84,7 +104,7 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         SummaryMemGraph.CurrentValue = snap.MemoryLoadPercent;
         SummaryMemGraph.SecondaryCurrentValue = snap.CommitLimitGb > 0 ? (snap.CommitTotalGb / snap.CommitLimitGb) * 100.0 : 0.0;
         SummaryMemGraph.PrimaryValues = ramPct;
-        SummaryMemGraph.SecondaryValues = null;
+        SummaryMemGraph.SecondaryValues = commitPct;
 
         // 3. Summary Tab Cards
         HandlesVal.Text = $"{snap.HandleCount:N0}";
@@ -99,9 +119,9 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         MemAvailVal.Text = $"{snap.AvailableRamGb:F1} GB";
         MemTotalVal.Text = $"{snap.TotalRamGb:F1} GB";
 
-        CoresVal.Text = snap.PhysicalCores.ToString();
-        SocketsVal.Text = snap.Sockets.ToString();
-        LogProcVal.Text = snap.LogicalProcessors.ToString();
+        CoresVal.Text = snap.PhysicalCores.ToString(CultureInfo.CurrentCulture);
+        SocketsVal.Text = snap.Sockets.ToString(CultureInfo.CurrentCulture);
+        LogProcVal.Text = snap.LogicalProcessors.ToString(CultureInfo.CurrentCulture);
 
         // 4. Full CPU Tab
         FullCpuGraph.CurrentValue = snap.CpuTotalPercent;
@@ -113,14 +133,36 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         FullCpuKernel.Text = $"{snap.CpuKernelPercent:F1}%";
         FullCpuUser.Text = $"{snap.CpuUserPercent:F1}%";
         FullCpuModel.Text = snap.CpuModelName;
-        FullCpuCores.Text = snap.PhysicalCores.ToString();
-        FullCpuLogical.Text = snap.LogicalProcessors.ToString();
+        FullCpuCores.Text = snap.PhysicalCores.ToString(CultureInfo.CurrentCulture);
+        FullCpuLogical.Text = snap.LogicalProcessors.ToString(CultureInfo.CurrentCulture);
+
+        FullCpuHistoryTitle.Text = Strings.T("CpuActivityHistory");
+        FullCpuMetricsTitle.Text = Strings.T("CpuMetrics");
+        ProcessorTopologyTitle.Text = Strings.T("ProcessorTopology");
+        FullMemHistoryTitle.Text = Strings.T("PhysicalMemoryCommitHistory");
+        PhysicalMemoryTitle.Text = Strings.T("PhysicalMemoryGb");
+        CommitChargeTitle.Text = Strings.T("CommitCharge");
+        CommitTotalLbl.Text = Strings.T("CommittedTotal");
+        CommitLimitLbl.Text = Strings.T("CommitLimit");
+        CommitPeakLbl.Text = Strings.T("CommitPeak");
+        KernelPoolTitle.Text = Strings.T("KernelPool");
+        PagedPoolLbl.Text = Strings.T("PagedPool");
+        NonPagedPoolLbl.Text = Strings.T("NonPagedPool");
+        FullHandlesLbl.Text = Strings.T("TotalHandles");
+
+        IoTitle.Text = Strings.T("SystemActivityOverview");
+        IoProcessesLbl.Text = Strings.T("TotalActiveProcesses");
+        IoThreadsLbl.Text = Strings.T("TotalActiveThreads");
+        IoHandlesLbl.Text = Strings.T("TotalSystemHandles");
+        IoPagedLbl.Text = Strings.T("SystemPagedPool");
+        IoNonPagedLbl.Text = Strings.T("SystemNonPagedPool");
+        TelemetryFooter.Text = Strings.T("TelemetryFooter");
 
         // 5. Full Memory Tab
         FullMemGraph.CurrentValue = snap.MemoryLoadPercent;
         FullMemGraph.SecondaryCurrentValue = snap.CommitLimitGb > 0 ? (snap.CommitTotalGb / snap.CommitLimitGb) * 100.0 : 0.0;
         FullMemGraph.PrimaryValues = ramPct;
-        FullMemGraph.SecondaryValues = null;
+        FullMemGraph.SecondaryValues = commitPct;
 
         FullMemTotal.Text = $"{snap.TotalRamGb:F1} GB";
         FullMemInUse.Text = $"{snap.UsedRamGb:F1} GB ({snap.MemoryLoadPercent:F0}%)";

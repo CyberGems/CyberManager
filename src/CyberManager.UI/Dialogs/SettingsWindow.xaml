@@ -292,71 +292,9 @@
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="20,16">
                     <StackPanel>
 
-                        <!-- SECTION 1: PROCESS LIST & DISPLAY (PROCESOS) -->
-                        <TextBlock x:Name="SecProcessViewLbl" Text="Process List &amp; Display" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
-                        
-                        <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
-                            <StackPanel>
-                                <!-- SHOW SYSTEM IDLE PROCESS TOGGLE (FEATURE REQUESTED) -->
-                                <Grid Margin="0,4,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                        <Path Data="M 12 2 A 10 10 0 1 0 12 22 A 10 10 0 0 0 12 2 M 12 6 V 12 L 16 14" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                        <TextBlock x:Name="ShowIdleTitleLbl" Text="Show System Idle Process (PID 0)" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                        <TextBlock x:Name="ShowIdleDescLbl" Text="Displays CPU idle time as a process row. Disable to hide it like Windows Task Manager does." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                    <CheckBox x:Name="ShowIdleSwitch" Grid.Column="2" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
-                                </Grid>
-
-                                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,8"/>
-
-                                <!-- GROUP BY APPLICATION TOGGLE -->
-                                <Grid Margin="0,4,0,8">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                        <Path Data="M 3 6 H 21 M 3 12 H 21 M 3 18 H 21" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                        <TextBlock x:Name="GroupByAppTitleLbl" Text="Group processes by application" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                        <TextBlock x:Name="GroupByAppDescLbl" Text="Combines multiple instances of the same app under an expandable hierarchy." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                    <CheckBox x:Name="GroupByAppSwitch" Grid.Column="2" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
-                                </Grid>
-
-                                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,8"/>
-
-                                <!-- DIM SUSPENDED PROCESSES -->
-                                <Grid Margin="0,4,0,4">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                        <Path Data="M 10 4 H 6 V 20 H 10 M 18 4 H 14 V 20 H 18" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
-                                    </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                        <TextBlock x:Name="HighlightSuspendedTitleLbl" Text="Dim suspended processes" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                        <TextBlock x:Name="HighlightSuspendedDescLbl" Text="Visually dims suspended or energy-saving background processes." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                    <CheckBox x:Name="HighlightSuspendedSwitch" Grid.Column="2" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- SECTION 2: GENERAL & APPEARANCE (ASPECTO E IDIOMA) -->
+                        <!-- SECTION 1: GENERAL & APPEARANCE (ASPECTO E IDIOMA) -->
                         <TextBlock x:Name="SecGeneralLbl" Text="General &amp; Appearance" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
-                        
+
                         <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
                             <StackPanel>
                                 <!-- LANGUAGE -->
@@ -369,7 +307,7 @@
                                         <TextBlock x:Name="LanguageTitleLbl" Text="Language / Idioma" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
                                         <TextBlock x:Name="LanguageDescLbl" Text="Language used across menus, dialogs, and metrics." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
                                     </StackPanel>
-                                    <ComboBox x:Name="LangComboBox" Grid.Column="1" Height="34" Style="{StaticResource ModernComboBox}" SelectionChanged="LangComboBox_SelectionChanged">
+                                    <ComboBox x:Name="LangComboBox" Grid.Column="1" Height="34" AutomationProperties.Name="Language" Style="{StaticResource ModernComboBox}" SelectionChanged="LangComboBox_SelectionChanged">
                                         <ComboBoxItem Content="Español (Spanish)"/>
                                         <ComboBoxItem Content="English"/>
                                     </ComboBox>
@@ -433,7 +371,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
                                         <TextBlock Text="11px" FontSize="10" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                        <Slider x:Name="FontSizeSlider" Minimum="11" Maximum="17" Value="13" Width="90" VerticalAlignment="Center"
+                                        <Slider x:Name="FontSizeSlider" Minimum="11" Maximum="17" Value="13" Width="90" AutomationProperties.Name="Text size" VerticalAlignment="Center"
                                                 SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1"
                                                 ValueChanged="FontSizeSlider_ValueChanged"/>
                                         <TextBlock x:Name="FontSizeValLbl" Text="13px" FontWeight="Bold" FontSize="11.5" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="6,0,0,0" Width="30"/>
@@ -441,10 +379,69 @@
                                 </Grid>
                             </StackPanel>
                         </Border>
+                        <!-- SECTION 2: PROCESS LIST & DISPLAY (PROCESOS) -->
+                        <TextBlock x:Name="SecProcessViewLbl" Text="Process List &amp; Display" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                        <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
+                            <StackPanel>
+                                <!-- SHOW SYSTEM IDLE PROCESS TOGGLE (FEATURE REQUESTED) -->
+                                <Grid Margin="0,4,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                        <Path Data="M 12 2 A 10 10 0 1 0 12 22 A 10 10 0 0 0 12 2 M 12 6 V 12 L 16 14" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                        <TextBlock x:Name="ShowIdleTitleLbl" Text="Show System Idle Process (PID 0)" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
+                                        <TextBlock x:Name="ShowIdleDescLbl" Text="Displays CPU idle time as a process row. Disable to hide it like Windows Task Manager does." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox x:Name="ShowIdleSwitch" Grid.Column="2" AutomationProperties.Name="Show system idle process" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                                </Grid>
+
+                                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,8"/>
+
+                                <!-- GROUP BY APPLICATION TOGGLE -->
+                                <Grid Margin="0,4,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                        <Path Data="M 3 6 H 21 M 3 12 H 21 M 3 18 H 21" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                        <TextBlock x:Name="GroupByAppTitleLbl" Text="Group processes by application" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
+                                        <TextBlock x:Name="GroupByAppDescLbl" Text="Combines multiple instances of the same app under an expandable hierarchy." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox x:Name="GroupByAppSwitch" Grid.Column="2" AutomationProperties.Name="Group processes by application" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                                </Grid>
+
+                                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,8"/>
+
+                                <!-- DIM SUSPENDED PROCESSES -->
+                                <Grid Margin="0,4,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                        <Path Data="M 10 4 H 6 V 20 H 10 M 18 4 H 14 V 20 H 18" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                        <TextBlock x:Name="HighlightSuspendedTitleLbl" Text="Dim suspended processes" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
+                                        <TextBlock x:Name="HighlightSuspendedDescLbl" Text="Visually dims suspended or energy-saving background processes." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <CheckBox x:Name="HighlightSuspendedSwitch" Grid.Column="2" AutomationProperties.Name="Dim suspended processes" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
 
                         <!-- SECTION 3: PERFORMANCE & REFRESH (RENDIMIENTO) -->
                         <TextBlock x:Name="SecPerfLbl" Text="Performance &amp; Engine" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
-                        
                         <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
                             <StackPanel>
                                 <!-- REFRESH INTERVAL -->
@@ -457,7 +454,7 @@
                                         <TextBlock x:Name="RefreshRateTitleLbl" Text="Refresh Rate" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
                                         <TextBlock x:Name="RefreshRateDescLbl" Text="Determines how frequently NT metrics and graphs are sampled." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                                     </StackPanel>
-                                    <ComboBox x:Name="RefreshIntervalComboBox" Grid.Column="1" Height="34" Style="{StaticResource ModernComboBox}" SelectionChanged="RefreshIntervalComboBox_SelectionChanged">
+                                    <ComboBox x:Name="RefreshIntervalComboBox" Grid.Column="1" Height="34" AutomationProperties.Name="Refresh rate" Style="{StaticResource ModernComboBox}" SelectionChanged="RefreshIntervalComboBox_SelectionChanged">
                                         <ComboBoxItem Content="Fast (500 ms)"/>
                                         <ComboBoxItem Content="Normal (800 ms — Default)"/>
                                         <ComboBoxItem Content="Slow (2000 ms)"/>
@@ -468,7 +465,6 @@
 
                         <!-- SECTION 4: SYSTEM & INTEGRATION (SISTEMA) -->
                         <TextBlock x:Name="SecSystemLbl" Text="System &amp; Integration" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
-                        
                         <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,8">
                             <StackPanel>
                                 <!-- START WITH WINDOWS -->
@@ -485,7 +481,7 @@
                                         <TextBlock x:Name="StartWithWinTitleLbl" Text="Start with Windows" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
                                         <TextBlock x:Name="StartWithWinDescLbl" Text="Automatically launch CyberManager when you log into Windows." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                                     </StackPanel>
-                                    <CheckBox x:Name="StartWithWinSwitch" Grid.Column="2" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                                    <CheckBox x:Name="StartWithWinSwitch" Grid.Column="2" AutomationProperties.Name="Start with Windows" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                                 </Grid>
 
                                 <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,8"/>
@@ -504,7 +500,7 @@
                                         <TextBlock x:Name="MinimizeToTrayTitleLbl" Text="Minimize to tray" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
                                         <TextBlock x:Name="MinimizeToTrayDescLbl" Text="Closing the window minimizes to notification area instead of quitting." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                                     </StackPanel>
-                                    <CheckBox x:Name="MinimizeToTraySwitch" Grid.Column="2" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                                    <CheckBox x:Name="MinimizeToTraySwitch" Grid.Column="2" AutomationProperties.Name="Minimize to tray" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                                 </Grid>
 
                                 <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,8"/>
@@ -523,7 +519,7 @@
                                         <TextBlock x:Name="AlwaysOnTopTitleLbl" Text="Always on top" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
                                         <TextBlock x:Name="AlwaysOnTopDescLbl" Text="Keeps the CyberManager window floating above other applications." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                                     </StackPanel>
-                                    <CheckBox x:Name="AlwaysOnTopSwitch" Grid.Column="2" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                                    <CheckBox x:Name="AlwaysOnTopSwitch" Grid.Column="2" AutomationProperties.Name="Always on top" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                                 </Grid>
 
                                 <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,8"/>
@@ -542,7 +538,7 @@
                                         <TextBlock x:Name="AutoUpdatesTitleLbl" Text="Check updates on startup" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
                                         <TextBlock x:Name="AutoUpdatesDescLbl" Text="Check for newer versions automatically in background." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                                     </StackPanel>
-                                    <CheckBox x:Name="AutoUpdatesSwitch" Grid.Column="2" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                                    <CheckBox x:Name="AutoUpdatesSwitch" Grid.Column="2" AutomationProperties.Name="Check for updates on startup" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                                 </Grid>
 
                                 <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,8"/>
@@ -574,11 +570,11 @@
                 <!-- 3. Footer Bar -->
                 <Border Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="20,12">
                     <Grid>
-                        <Button x:Name="ResetBtn" Style="{StaticResource SecondaryActionBtn}" HorizontalAlignment="Left" Content="Reset Defaults" Click="ResetBtn_Click"/>
+                        <Button x:Name="ResetBtn" Style="{StaticResource SecondaryActionBtn}" AutomationProperties.Name="Reset defaults" HorizontalAlignment="Left" Content="Reset Defaults" Click="ResetBtn_Click"/>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                             <TextBlock x:Name="ToastText" Text="" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" FontSize="11.5" VerticalAlignment="Center" Margin="0,0,16,0" Opacity="0"/>
-                            <Button x:Name="CloseBtn" Style="{StaticResource PrimaryActionBtn}" Content="Close" Click="Close_Click"/>
+                            <Button x:Name="CloseBtn" Style="{StaticResource PrimaryActionBtn}" AutomationProperties.Name="Close settings" Content="Close" Click="Close_Click"/>
                         </StackPanel>
                     </Grid>
                 </Border>

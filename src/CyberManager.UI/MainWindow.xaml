@@ -25,7 +25,7 @@
         <Style x:Key="TitleBtn" TargetType="Button">
             <Setter Property="Width" Value="42"/><Setter Property="Height" Value="32"/>
             <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
-            <Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="False"/>
+            <Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -86,7 +86,7 @@
         <Style x:Key="ModernButton" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource CardBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/><Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Padding" Value="12,6"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="False"/>
+            <Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Padding" Value="12,6"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -156,7 +156,7 @@
         <Style x:Key="IconButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
             <Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/><Setter Property="FontSize" Value="11"/>
-            <Setter Property="Padding" Value="8,4"/><Setter Property="Focusable" Value="False"/>
+            <Setter Property="Padding" Value="8,4"/><Setter Property="Focusable" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -244,7 +244,7 @@
                             <Trigger Property="AlternationIndex" Value="1"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource GridAltBrush}"/></Trigger>
                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/></Trigger>
                             <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionBgBrush}"/><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/><Setter TargetName="Bd" Property="BorderThickness" Value="3,0,0,0"/></Trigger>
-                            <DataTrigger Binding="{Binding Status}" Value="Suspended">
+                            <DataTrigger Binding="{Binding DimWhenSuspended}" Value="True">
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.6"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -259,8 +259,8 @@
         <!-- CyberSnap Neon Glowing Toggle Switch Style -->
         <Style x:Key="CyberSnapToggleStyle" TargetType="CheckBox">
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Focusable" Value="True"/>
+            <Setter Property="IsTabStop" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
@@ -316,20 +316,20 @@
                                     <TextBlock Text="NT ENGINE" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
                                 </Border>
                             </StackPanel>
-                            <TextBlock x:Name="SubtitleText" Text="Premium • Virtualized • Zero-Lag for 3000+ processes" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
+                            <TextBlock x:Name="SubtitleText" Text="Ultraligero, potente y amigable • Rendimiento virtualizado" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Background="Transparent" CornerRadius="6" Padding="4,2" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="Click to open System Information" Margin="0,0,10,0">
+                        <Border Background="Transparent" CornerRadius="6" Padding="4,2" Cursor="Hand" Focusable="True" KeyboardNavigation.IsTabStop="True"
+                                AutomationProperties.Name="System Information" MouseLeftButtonUp="SystemInfo_Click" KeyDown="SystemInfoBorder_KeyDown"
+                                ToolTip="Click to open System Information" Margin="0,0,10,0">
                             <TextBlock x:Name="StatsText" Text="—" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
                         </Border>
-                        <Button x:Name="ThemeBtn" Style="{StaticResource IconButton}" Click="ThemeToggle_Click" ToolTip="Theme"><TextBlock Text="🎨" FontSize="12"/></Button>
-                        <Button x:Name="LangBtn" Style="{StaticResource IconButton}" Click="LangToggle_Click" ToolTip="Language"><TextBlock Text="🌐" FontSize="12"/></Button>
-                        <Button x:Name="SettingsBtn" Style="{StaticResource TitleBtn}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)"><TextBlock Text="⚙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="AboutBtn" Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="SettingsBtn" Style="{StaticResource TitleBtn}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)" AutomationProperties.Name="Settings"><TextBlock Text="⚙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="AboutBtn" Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About" AutomationProperties.Name="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="MinimizeBtn" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="MaximizeBtn" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="CloseBtn" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                     </StackPanel>
                 </Grid>
 
@@ -347,9 +347,9 @@
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <TextBlock Text="⌕" Foreground="{DynamicResource SubTextBrush}" FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBox x:Name="SearchBox" Grid.Column="1" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" CaretBrush="{DynamicResource AccentBrush}" FontSize="12" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" PreviewKeyDown="SearchBox_PreviewKeyDown"/>
+                            <TextBox x:Name="SearchBox" Grid.Column="1" AutomationProperties.Name="Search processes" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" CaretBrush="{DynamicResource AccentBrush}" FontSize="12" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" PreviewKeyDown="SearchBox_PreviewKeyDown"/>
                             <TextBlock x:Name="SearchHint" Grid.Column="1" Text="Search process, PID or path..." Foreground="{DynamicResource SubTextBrush}" FontSize="12" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,0,0"/>
-                            <Button Grid.Column="2" Content="✕" Foreground="{DynamicResource SubTextBrush}" Background="Transparent" BorderThickness="0" FontSize="10" Cursor="Hand" Padding="6,0" Click="ClearSearch_Click" Visibility="Collapsed" x:Name="ClearBtn"/>
+                            <Button Grid.Column="2" Content="✕" Foreground="{DynamicResource SubTextBrush}" Background="Transparent" BorderThickness="0" FontSize="10" Cursor="Hand" Padding="6,0" Click="ClearSearch_Click" Visibility="Collapsed" x:Name="ClearBtn" AutomationProperties.Name="Clear search"/>
                         </Grid>
                     </Border>
 
@@ -393,13 +393,13 @@
 
                     <!-- Actions -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0,0,0">
-                        <Button x:Name="RefreshBtn" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)">
+                        <Button x:Name="RefreshBtn" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)" AutomationProperties.Name="Refresh">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                 <TextBlock x:Name="RefreshBtnText" Text="Refresh" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        <Button x:Name="KillBtn" Style="{StaticResource DangerModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)" IsEnabled="False">
+                        <Button x:Name="KillBtn" Style="{StaticResource DangerModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)" IsEnabled="False" AutomationProperties.Name="End task">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path Data="M 3 3 L 11 11 M 11 3 L 3 11" Stroke="#FF5252" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="10" Height="10" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                 <TextBlock x:Name="KillBtnText" Text="End Task" VerticalAlignment="Center"/>
@@ -417,7 +417,7 @@
                                   EnableRowVirtualization="True" EnableColumnVirtualization="True"
                                   VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                                   VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.CanContentScroll="True"
-                                  SelectionMode="Single" SelectionUnit="FullRow"
+                                  SelectionMode="Single" SelectionUnit="FullRow" AutomationProperties.Name="Process list"
                                   Sorting="ProcGrid_Sorting"
                                   SelectionChanged="ProcGrid_SelectionChanged"
                                   PreviewKeyDown="ProcGrid_PreviewKeyDown">
@@ -682,7 +682,7 @@
                         <!-- Group by application toggle -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
                             <TextBlock x:Name="GroupToggleLabel" Text="Group by application" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="GroupToggleLabel_Click"/>
-                            <CheckBox x:Name="GroupToggleCheck" Style="{StaticResource CyberSnapToggleStyle}" VerticalAlignment="Center" Checked="GroupToggle_Checked" Unchecked="GroupToggle_Checked"/>
+                            <CheckBox x:Name="GroupToggleCheck" Style="{StaticResource CyberSnapToggleStyle}" AutomationProperties.Name="Group by application" VerticalAlignment="Center" Checked="GroupToggle_Checked" Unchecked="GroupToggle_Checked"/>
                         </StackPanel>
 
                         <!-- Text Size Slider -->
@@ -690,7 +690,7 @@
                             <TextBlock Text="🗛" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <Slider x:Name="FontSizeSlider" Minimum="11" Maximum="17" Value="13" Width="70" VerticalAlignment="Center"
                                     SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1"
-                                    Focusable="False" IsTabStop="False"
+                                    Focusable="True" IsTabStop="True" AutomationProperties.Name="Text size"
                                     ValueChanged="FontSizeSlider_ValueChanged"/>
                             <TextBlock x:Name="FontSizeLabel" Text="13px" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center" Margin="6,0,0,0"/>
                         </StackPanel>
@@ -698,7 +698,7 @@
                         <!-- Always on top toggle -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock x:Name="TopmostLabel" Text="Always on top" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="TopmostLabel_Click"/>
-                            <CheckBox x:Name="TopmostCheck" Style="{StaticResource CyberSnapToggleStyle}" VerticalAlignment="Center" Checked="Topmost_Checked" Unchecked="Topmost_Checked"/>
+                            <CheckBox x:Name="TopmostCheck" Style="{StaticResource CyberSnapToggleStyle}" AutomationProperties.Name="Always on top" VerticalAlignment="Center" Checked="Topmost_Checked" Unchecked="Topmost_Checked"/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>

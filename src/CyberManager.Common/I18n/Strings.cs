@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace CyberManager.Common.I18n;
 
 public enum Lang { Es, En }
@@ -9,7 +11,7 @@ public static class Strings
     private static readonly Dictionary<string, (string En, string Es)> Map = new()
     {
         ["AppTitle"] = ("CyberManager — Ultra-Light Task Manager", "CyberManager — Gestor de Tareas Ultra-Ligero"),
-        ["AppSubtitle"] = ("Premium • Virtualized • Zero-Lag for 3000+ processes", "Premium • Virtualizado • Cero Lag para 3000+ procesos"),
+        ["AppSubtitle"] = ("Ultra-light, powerful and friendly • Virtualized performance", "Ultraligero, potente y amigable • Rendimiento virtualizado"),
         ["WfpEngineBadge"] = ("NT ENGINE", "MOTOR NT"),
         ["SearchPlaceholder"] = ("Search process, PID or path...", "Buscar proceso, PID o ruta..."),
         ["Process"] = ("Process", "Proceso"),
@@ -70,6 +72,7 @@ public static class Strings
         ["OpenReleases"] = ("Open releases", "Abrir releases"),
         ["UpdateCheckFailed"] = ("Could not check updates. Check your connection.", "No se pudo comprobar actualizaciones. Verifica tu conexión."),
         ["UpdateCheckTimeout"] = ("Timeout while checking updates.", "Tiempo agotado al comprobar actualizaciones."),
+        ["UpdatePackageUnavailable"] = ("A compatible update package is not available for this architecture.", "No hay un paquete de actualización compatible con esta arquitectura."),
         ["UnexpectedResponse"] = ("Unexpected server response.", "Respuesta inesperada del servidor."),
         ["Copyright"] = ("© CyberGems • 2026", "© CyberGems • 2026"),
         ["Description"] = ("CyberManager is an ultra-lightweight, virtualized, zero-lag task manager for 3000+ processes. Native NT engine, instant search, and premium CyberGems UI — the fluid alternative to Windows Task Manager.", "CyberManager es un gestor de tareas ultra-ligero, virtualizado y sin lag para 3000+ procesos. Motor NT nativo, búsqueda instantánea y UI premium CyberGems — la alternativa fluida al Task Manager de Windows."),
@@ -78,6 +81,8 @@ public static class Strings
         ["Clear"] = ("Clear", "Limpiar"),
         ["Minimize"] = ("Minimize", "Minimizar"),
         ["Maximize"] = ("Maximize", "Maximizar"),
+        ["RefreshFailed"] = ("Refresh failed", "Falló la actualización"),
+        ["ProcessActionFailed"] = ("Process action failed", "Falló la acción sobre el proceso"),
         ["Website"] = ("Website", "Sitio web"),
         ["GitHub"] = ("GitHub", "GitHub"),
         ["Issues"] = ("Issues", "Problemas"),
@@ -107,7 +112,6 @@ public static class Strings
         ["Help"] = ("Help", "Ayuda"),
         ["Faq"] = ("Frequently Asked Questions", "Preguntas Frecuentes"),
         ["Changelog"] = ("Changelog", "Historial de cambios"),
-        ["Website"] = ("Website", "Sitio web"),
         ["Donate"] = ("Donate", "Donar"),
         ["CheckForUpdates"] = ("Check for Update...", "Buscar actualizaciones..."),
         ["RefreshProcesses"] = ("Refresh Processes", "Actualizar procesos"),
@@ -131,7 +135,24 @@ public static class Strings
         ["Summary"] = ("Summary", "Resumen"),
         ["CpuHistory"] = ("CPU History", "Historial de CPU"),
         ["MemoryHistory"] = ("Memory History", "Historial de Memoria"),
-        ["IoHistory"] = ("I/O Activity", "Actividad de E/S"),
+        ["CpuLegend"] = ("(User / Kernel)", "(Usuario / Kernel)"),
+        ["MemoryLegend"] = ("(In Use / Commit)", "(En uso / Commit)"),
+        ["CpuActivityHistory"] = ("CPU Activity History (User & Kernel Time)", "Historial de actividad de CPU (tiempo de usuario y kernel)"),
+        ["ProcessorTopology"] = ("Processor Topology", "Topología del procesador"),
+        ["PhysicalMemoryCommitHistory"] = ("Physical Memory & Commit History", "Historial de memoria física y Commit"),
+        ["PhysicalMemoryGb"] = ("Physical Memory (GB)", "Memoria física (GB)"),
+        ["CommittedTotal"] = ("Committed Total", "Total confirmado"),
+        ["CommitLimit"] = ("Commit Limit", "Límite de Commit"),
+        ["CommitPeak"] = ("Commit Peak", "Pico de Commit"),
+        ["TotalHandles"] = ("Total Handles", "Total de handles"),
+        ["SystemActivityOverview"] = ("System Activity Overview", "Resumen de actividad del sistema"),
+        ["TotalActiveProcesses"] = ("Total Active System Processes", "Total de procesos activos"),
+        ["TotalActiveThreads"] = ("Total Active System Threads", "Total de hilos activos"),
+        ["TotalSystemHandles"] = ("Total System Handles", "Total de handles del sistema"),
+        ["SystemPagedPool"] = ("System Paged Memory Pool", "Pool paginado del sistema"),
+        ["SystemNonPagedPool"] = ("System Non-Paged Memory Pool", "Pool no paginado del sistema"),
+        ["TelemetryFooter"] = ("⚡ Real-time telemetry via NT Kernel Engine • 60s sample window", "⚡ Telemetría en tiempo real mediante el motor NT • ventana de 60 s"),
+        ["IoHistory"] = ("System Activity", "Actividad del sistema"),
         ["Totals"] = ("Totals", "Totales"),
         ["Handles"] = ("Handles", "Handles"),
         ["Processes"] = ("Processes", "Procesos"),
@@ -185,12 +206,13 @@ public static class Strings
         ["GlobalHotkeyDesc"] = ("Press anywhere in Windows to show or hide CyberManager.", "Presiónalo desde cualquier lugar de Windows para mostrar u ocultar CyberManager."),
         ["ResetDefaults"] = ("Reset Defaults", "Restablecer"),
         ["SettingsSaved"] = ("Settings saved", "Configuración guardada"),
+        ["AutoStartFailed"] = ("Could not update Windows startup settings.", "No se pudo actualizar el inicio automático de Windows."),
     };
 
     public static string T(string key, params object[] args)
     {
         if (!Map.TryGetValue(key, out var v)) return key;
         var s = Current == Lang.Es ? v.Es : v.En;
-        return args.Length == 0 ? s : string.Format(s, args);
+        return args.Length == 0 ? s : string.Format(CultureInfo.CurrentCulture, s, args);
     }
 }

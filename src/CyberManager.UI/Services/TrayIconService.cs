@@ -574,8 +574,11 @@ public sealed class TrayIconService : IDisposable
         return LoadIcon(IntPtr.Zero, (IntPtr)32512); // IDI_APPLICATION
     }
 
-    [DllImport("shell32.dll", CharSet = CharSet.Auto)]
-    private static extern IntPtr ExtractIcon(IntPtr hInst, string lpszExeFileName, int nIconIndex);
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr ExtractIcon(
+        IntPtr hInst,
+        [MarshalAs(UnmanagedType.LPWStr)] string lpszExeFileName,
+        int nIconIndex);
 
     private static IntPtr ExtractAssociatedIconHandle(string path)
     {

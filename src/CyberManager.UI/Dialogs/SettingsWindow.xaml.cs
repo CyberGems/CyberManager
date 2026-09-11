@@ -13,6 +13,7 @@ public partial class SettingsWindow : Window
 {
     public Action? OnSettingsChanged { get; set; }
     private bool _initializing = true;
+    private bool _syncingStartup;
     private readonly DispatcherTimer _saveDebounceTimer = new();
 
     public SettingsWindow()
@@ -21,13 +22,18 @@ public partial class SettingsWindow : Window
         CyberManagerWindowChrome.Apply(this, 12);
 
         _saveDebounceTimer.Interval = TimeSpan.FromMilliseconds(200);
-        _saveDebounceTimer.Tick += (_, _) =>
+        _saveDebounceTimer.Tick += async (_, _) =>
+        {
+            _saveDebounceTimer.Stop();
+            await App.Settings.SaveAsync();
+        };
+
+        Loaded += OnLoaded;
+        Closed += (_, _) =>
         {
             _saveDebounceTimer.Stop();
             App.Settings.Save();
         };
-
-        Loaded += OnLoaded;
         PreviewKeyDown += (_, e) =>
         {
             if (e.Key == Key.Escape)
@@ -108,7 +114,20 @@ public partial class SettingsWindow : Window
         // Sync Start with Windows Registry
         if (sender == StartWithWinSwitch)
         {
-            StartupManager.SetAutoStart(App.Settings.StartWithWindows);
+            if (!_syncingStartup && !StartupManager.SetAutoStart(App.Settings.StartWithWindows))
+            {
+                App.Settings.StartWithWindows = StartupManager.IsAutoStartEnabled();
+                _syncingStartup = true;
+                try
+                {
+                    StartWithWinSwitch.IsChecked = App.Settings.StartWithWindows;
+                }
+                finally
+                {
+                    _syncingStartup = false;
+                }
+                ShowToast(Strings.T("AutoStartFailed"));
+            }
         }
 
         SaveAndNotify();
@@ -268,6 +287,13 @@ public partial class SettingsWindow : Window
         AutoUpdatesDescLbl.Text = Strings.T("AutoCheckUpdatesDesc");
         HotkeyTitleLbl.Text = Strings.T("GlobalHotkeyTitle");
         HotkeyDescLbl.Text = Strings.T("GlobalHotkeyDesc");
+
+        if (RefreshIntervalComboBox.Items.Count >= 3)
+        {
+            ((ComboBoxItem)RefreshIntervalComboBox.Items[0]).Content = Strings.T("RefreshFast");
+            ((ComboBoxItem)RefreshIntervalComboBox.Items[1]).Content = Strings.T("RefreshNormal");
+            ((ComboBoxItem)RefreshIntervalComboBox.Items[2]).Content = Strings.T("RefreshSlow");
+        }
 
         // Buttons
         ResetBtn.Content = Strings.T("ResetDefaults");

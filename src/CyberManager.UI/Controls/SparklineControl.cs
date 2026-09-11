@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -133,6 +134,12 @@ public class SparklineControl : FrameworkElement
     }
 
     public int MaxSamples { get; set; } = 60;
+    private Brush? _cachedStrokeBrush;
+    private Pen? _cachedStrokePen;
+    private Brush? _cachedSecondaryStrokeBrush;
+    private Pen? _cachedSecondaryStrokePen;
+    private Brush? _cachedGridBrush;
+    private Pen? _cachedGridPen;
 
     public SparklineControl()
     {
@@ -146,6 +153,7 @@ public class SparklineControl : FrameworkElement
         RaiseEvent(new RoutedEventArgs(ClickEvent, this));
     }
 
+    [SuppressMessage("Naming", "CA1725", Justification = "The parameter name is part of the WPF override contract.")]
     protected override void OnRender(DrawingContext dc)
     {
         base.OnRender(dc);
@@ -161,8 +169,7 @@ public class SparklineControl : FrameworkElement
         // Draw faint horizontal grid line at 50%
         if (GridLinesBrush != null)
         {
-            var gridPen = new Pen(GridLinesBrush, 1.0);
-            gridPen.Freeze();
+            var gridPen = GetPen(GridLinesBrush, 1.0, ref _cachedGridBrush, ref _cachedGridPen);
             dc.DrawLine(gridPen, new Point(0, h * 0.5), new Point(w, h * 0.5));
             dc.DrawLine(gridPen, new Point(0, h - 0.5), new Point(w, h - 0.5));
         }
@@ -174,14 +181,16 @@ public class SparklineControl : FrameworkElement
         var values = Values;
         if (values != null && values.Length > 0)
         {
-            DrawSeries(dc, values, w, h, max, capacity, FillBrush, StrokeBrush, 1.4);
+            var strokePen = GetPen(StrokeBrush, 1.4, ref _cachedStrokeBrush, ref _cachedStrokePen);
+            DrawSeries(dc, values, w, h, max, capacity, FillBrush, strokePen);
         }
 
         // 2. Draw Secondary Series (e.g. Kernel CPU)
         var secValues = SecondaryValues;
         if (secValues != null && secValues.Length > 0)
         {
-            DrawSeries(dc, secValues, w, h, max, capacity, SecondaryFillBrush, SecondaryStrokeBrush, 1.2);
+            var strokePen = GetPen(SecondaryStrokeBrush, 1.2, ref _cachedSecondaryStrokeBrush, ref _cachedSecondaryStrokePen);
+            DrawSeries(dc, secValues, w, h, max, capacity, SecondaryFillBrush, strokePen);
         }
 
         dc.Pop(); // pop clip
@@ -195,8 +204,7 @@ public class SparklineControl : FrameworkElement
         double max,
         int capacity,
         Brush? fillBrush,
-        Brush? strokeBrush,
-        double strokeThickness)
+        Pen? strokePen)
     {
         int count = data.Length;
         if (count < 1) return;
@@ -231,7 +239,7 @@ public class SparklineControl : FrameworkElement
         }
 
         // Draw Line Stroke
-        if (strokeBrush != null)
+        if (strokePen != null)
         {
             var lineGeo = new StreamGeometry();
             using (var ctx = lineGeo.Open())
@@ -243,14 +251,26 @@ public class SparklineControl : FrameworkElement
                 }
             }
             lineGeo.Freeze();
-            var pen = new Pen(strokeBrush, strokeThickness)
-            {
-                StartLineCap = PenLineCap.Round,
-                EndLineCap = PenLineCap.Round,
-                LineJoin = PenLineJoin.Round
-            };
-            pen.Freeze();
-            dc.DrawGeometry(null, pen, lineGeo);
+            dc.DrawGeometry(null, strokePen, lineGeo);
         }
+    }
+
+    private static Pen GetPen(
+        Brush brush,
+        double thickness,
+        ref Brush? cachedBrush,
+        ref Pen? cachedPen)
+    {
+        if (cachedPen != null && ReferenceEquals(cachedBrush, brush)) return cachedPen;
+
+        cachedBrush = brush;
+        cachedPen = new Pen(brush, thickness)
+        {
+            StartLineCap = PenLineCap.Round,
+            EndLineCap = PenLineCap.Round,
+            LineJoin = PenLineJoin.Round
+        };
+        if (cachedPen.CanFreeze) cachedPen.Freeze();
+        return cachedPen;
     }
 }
