@@ -216,8 +216,8 @@
                           Fill="{DynamicResource AccentBrush}" Width="15" Height="15" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock x:Name="TitleText" Text="Configuración" FontSize="14.5" FontWeight="Bold" Foreground="{DynamicResource TextBrush}"/>
-                    <TextBlock x:Name="SubtitleText" Text="Preferencias • Comportamiento de UI • Opciones del Sistema" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
+                    <TextBlock x:Name="TitleText" Text="Configuración" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextBrush}"/>
+                    <TextBlock x:Name="SubtitleText" Text="Preferencias • Comportamiento de UI • Opciones del Sistema" FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -227,7 +227,7 @@
             <StackPanel>
 
                 <!-- SECTION 1: GENERAL & APPEARANCE -->
-                <TextBlock x:Name="SecGeneralLbl" Text="General y Apariencia" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                <TextBlock x:Name="SecGeneralLbl" Text="General y Apariencia" FontWeight="Bold" FontSize="14.5" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
                 <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
                     <StackPanel>
                         <!-- LANGUAGE -->
@@ -237,8 +237,8 @@
                                 <ColumnDefinition Width="180"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="LanguageTitleLbl" Text="Idioma / Language" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="LanguageDescLbl" Text="Idioma usado en menús, ventanas y métricas." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="LanguageTitleLbl" Text="Idioma / Language" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="LanguageDescLbl" Text="Idioma usado en menús, ventanas y métricas." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                             <ComboBox x:Name="LangComboBox" Grid.Column="1" Height="34" AutomationProperties.Name="Language" Style="{StaticResource ModernComboBox}" SelectionChanged="LangComboBox_SelectionChanged">
                                 <ComboBoxItem Content="Español (Spanish)"/>
@@ -249,9 +249,9 @@
                         <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12"/>
 
                         <!-- THEME SELECTION -->
-                        <StackPanel Margin="0,0,0,12">
-                            <TextBlock x:Name="ThemeTitleLbl" Text="Tema" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                            <TextBlock x:Name="ThemeDescLbl" Text="Elige el aspecto visual característico de CyberManager." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,8"/>
+                        <StackPanel Margin="0,0,0,4">
+                            <TextBlock x:Name="ThemeTitleLbl" Text="Tema" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                            <TextBlock x:Name="ThemeDescLbl" Text="Elige el aspecto visual característico de CyberManager." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,8"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -263,8 +263,8 @@
                                         <Border Width="24" Height="24" CornerRadius="12" Background="#070B12" BorderBrush="#00E5FF" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
                                             <Border Width="8" Height="8" CornerRadius="4" Background="#00E5FF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <TextBlock Text="CyberManager" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="Obsidian &amp; Cyan" FontSize="9.5" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="CyberManager" FontWeight="Bold" FontSize="12.5" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Obsidian &amp; Cyan" FontSize="11" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </RadioButton>
 
@@ -273,8 +273,8 @@
                                         <Border Width="24" Height="24" CornerRadius="12" Background="#121214" BorderBrush="#6366F1" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
                                             <Border Width="8" Height="8" CornerRadius="4" Background="#6366F1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <TextBlock Text="Dark" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="Charcoal &amp; Indigo" FontSize="9.5" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Dark" FontWeight="Bold" FontSize="12.5" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Charcoal &amp; Indigo" FontSize="11" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </RadioButton>
 
@@ -283,38 +283,17 @@
                                         <Border Width="24" Height="24" CornerRadius="12" Background="#F8FAFC" BorderBrush="#2563EB" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
                                             <Border Width="8" Height="8" CornerRadius="4" Background="#2563EB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <TextBlock Text="Light" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="Slate &amp; Blue" FontSize="9.5" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Light" FontWeight="Bold" FontSize="12.5" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Slate &amp; Blue" FontSize="11" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </RadioButton>
                             </Grid>
                         </StackPanel>
-
-                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,0,0,12"/>
-
-                        <!-- ROW TEXT SIZE SLIDER -->
-                        <Grid Margin="0,0,0,4">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="180"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="TextSizeTitleLbl" Text="Tamaño de texto de procesos" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="TextSizeDescLbl" Text="Ajusta el tamaño de fuente de la tabla para lectura cómoda." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                <TextBlock Text="11px" FontSize="10" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                                <Slider x:Name="FontSizeSlider" Minimum="11" Maximum="17" Value="13" Width="90" AutomationProperties.Name="Text size" VerticalAlignment="Center"
-                                        SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1"
-                                        ValueChanged="FontSizeSlider_ValueChanged"/>
-                                <TextBlock x:Name="FontSizeValLbl" Text="13px" FontWeight="Bold" FontSize="11.5" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" Margin="6,0,0,0" Width="30"/>
-                            </StackPanel>
-                        </Grid>
                     </StackPanel>
                 </Border>
 
                 <!-- SECTION 2: PROCESS LIST & DISPLAY -->
-                <TextBlock x:Name="SecProcessViewLbl" Text="Lista de Procesos" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                <TextBlock x:Name="SecProcessViewLbl" Text="Lista de Procesos" FontWeight="Bold" FontSize="14.5" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
                 <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
                     <StackPanel>
                         <!-- SHOW SYSTEM IDLE PROCESS TOGGLE -->
@@ -328,8 +307,8 @@
                                 <Path Data="M 12 2 A 10 10 0 1 0 12 22 A 10 10 0 0 0 12 2 M 12 6 V 12 L 16 14" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="ShowIdleTitleLbl" Text="Mostrar proceso System Idle (PID 0)" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="ShowIdleDescLbl" Text="Muestra el tiempo ocioso del CPU como una fila. Desactívalo para ocultarlo como hace el Administrador de Tareas." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="ShowIdleTitleLbl" Text="Mostrar proceso System Idle (PID 0)" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="ShowIdleDescLbl" Text="Muestra el tiempo ocioso del CPU como una fila. Desactívalo para ocultarlo como hace el Administrador de Tareas." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <CheckBox x:Name="ShowIdleSwitch" Grid.Column="2" AutomationProperties.Name="Show system idle process" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
@@ -347,8 +326,8 @@
                                 <Path Data="M 4 4 H 10 V 10 H 4 Z M 14 4 H 20 V 10 H 14 Z M 4 14 H 10 V 20 H 4 Z M 14 14 H 20 V 20 H 14 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="GroupByAppTitleLbl" Text="Agrupar procesos por aplicación" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="GroupByAppDescLbl" Text="Agrupa múltiples instancias de una aplicación bajo un encabezado jerárquico expandible." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="GroupByAppTitleLbl" Text="Agrupar procesos por aplicación" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="GroupByAppDescLbl" Text="Agrupa múltiples instancias de una aplicación bajo un encabezado jerárquico expandible." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <CheckBox x:Name="GroupByAppSwitch" Grid.Column="2" AutomationProperties.Name="Group processes by application" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
@@ -366,8 +345,8 @@
                                 <Path Data="M 6 4 H 10 V 20 H 6 Z M 14 4 H 18 V 20 H 14 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="HighlightSuspendedTitleLbl" Text="Atenuar procesos suspendidos" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="HighlightSuspendedDescLbl" Text="Distingue visualmente con menor opacidad los procesos suspendidos o en ahorro de energía." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="HighlightSuspendedTitleLbl" Text="Atenuar procesos suspendidos" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="HighlightSuspendedDescLbl" Text="Distingue visualmente con menor opacidad los procesos suspendidos o en ahorro de energía." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <CheckBox x:Name="HighlightSuspendedSwitch" Grid.Column="2" AutomationProperties.Name="Dim suspended processes" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
@@ -375,7 +354,7 @@
                 </Border>
 
                 <!-- SECTION 3: PERFORMANCE & ENGINE -->
-                <TextBlock x:Name="SecPerfLbl" Text="Rendimiento y Motor" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                <TextBlock x:Name="SecPerfLbl" Text="Rendimiento y Motor" FontWeight="Bold" FontSize="14.5" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
                 <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
                     <StackPanel>
                         <!-- REFRESH INTERVAL -->
@@ -385,8 +364,8 @@
                                 <ColumnDefinition Width="220"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="RefreshRateTitleLbl" Text="Frecuencia de actualización" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="RefreshRateDescLbl" Text="Determina la frecuencia con que el Motor NT actualiza procesos y gráficos." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="RefreshRateTitleLbl" Text="Frecuencia de actualización" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="RefreshRateDescLbl" Text="Determina la frecuencia con que el Motor NT actualiza procesos y gráficos." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                             <ComboBox x:Name="RefreshIntervalComboBox" Grid.Column="1" Height="34" AutomationProperties.Name="Refresh rate" Style="{StaticResource ModernComboBox}" SelectionChanged="RefreshIntervalComboBox_SelectionChanged">
                                 <ComboBoxItem Content="Rápido (500 ms)"/>
@@ -398,7 +377,7 @@
                 </Border>
 
                 <!-- SECTION 4: SYSTEM & INTEGRATION -->
-                <TextBlock x:Name="SecSystemLbl" Text="Sistema e Integración" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
+                <TextBlock x:Name="SecSystemLbl" Text="Sistema e Integración" FontWeight="Bold" FontSize="14.5" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
                 <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
                     <StackPanel>
                         <!-- START WITH WINDOWS -->
@@ -412,8 +391,8 @@
                                 <Path Data="M 3 5 L 10 4 L 10 11 L 3 11 Z M 11 3.8 L 21 2 L 21 11 L 11 11 Z M 3 13 L 10 13 L 10 20 L 3 19 Z M 11 13 L 21 13 L 21 22 L 11 20.2 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.2" Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="StartWithWinTitleLbl" Text="Iniciar con Windows" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="StartWithWinDescLbl" Text="Ejecutar CyberManager automáticamente al iniciar sesión en Windows." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="StartWithWinTitleLbl" Text="Iniciar con Windows" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="StartWithWinDescLbl" Text="Ejecutar CyberManager automáticamente al iniciar sesión en Windows." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <CheckBox x:Name="StartWithWinSwitch" Grid.Column="2" AutomationProperties.Name="Start with Windows" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
@@ -431,8 +410,8 @@
                                 <Path Data="M 12 3 L 12 15 M 8 11 L 12 15 L 16 11 M 4 19 L 20 19" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="MinimizeToTrayTitleLbl" Text="Minimizar a la bandeja del sistema" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="MinimizeToTrayDescLbl" Text="Al cerrar la ventana, minimiza a la bandeja en lugar de cerrar la aplicación." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="MinimizeToTrayTitleLbl" Text="Minimizar a la bandeja del sistema" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="MinimizeToTrayDescLbl" Text="Al cerrar la ventana, minimiza a la bandeja en lugar de cerrar la aplicación." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <CheckBox x:Name="MinimizeToTraySwitch" Grid.Column="2" AutomationProperties.Name="Minimize to tray" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
@@ -450,8 +429,8 @@
                                 <Path Data="M 12 2 L 15 8 L 22 9 L 17 14 L 18 21 L 12 17.5 L 6 21 L 7 14 L 2 9 L 9 8 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.2" Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="AlwaysOnTopTitleLbl" Text="Siempre visible" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="AlwaysOnTopDescLbl" Text="Mantiene la ventana de CyberManager superpuesta a otras aplicaciones." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="AlwaysOnTopTitleLbl" Text="Siempre visible" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="AlwaysOnTopDescLbl" Text="Mantiene la ventana de CyberManager superpuesta a otras aplicaciones." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <CheckBox x:Name="AlwaysOnTopSwitch" Grid.Column="2" AutomationProperties.Name="Always on top" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
@@ -469,8 +448,8 @@
                                 <Path Data="M 21 12 A 9 9 0 1 1 18.36 5.64 L 21 8 M 21 3 V 8 H 16" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.3" Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <TextBlock x:Name="AutoUpdatesTitleLbl" Text="Buscar actualizaciones al iniciar" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="AutoUpdatesDescLbl" Text="Comprobar periódicamente si hay nuevas versiones disponibles." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="AutoUpdatesTitleLbl" Text="Buscar actualizaciones al iniciar" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="AutoUpdatesDescLbl" Text="Comprobar periódicamente si hay nuevas versiones disponibles." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <CheckBox x:Name="AutoUpdatesSwitch" Grid.Column="2" AutomationProperties.Name="Check for updates automatically" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
@@ -489,11 +468,11 @@
                             <Path Data="M 4 6 H 20 V 18 H 4 Z M 8 10 H 8.01 M 12 10 H 12.01 M 16 10 H 16.01 M 7 14 H 17" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                         </Border>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                            <TextBlock x:Name="HotkeyTitleLbl" Text="Atajo de teclado global" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                            <TextBlock x:Name="HotkeyDescLbl" Text="Presiónalo desde cualquier lugar de Windows para mostrar u ocultar CyberManager." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="HotkeyTitleLbl" Text="Atajo de teclado global" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                            <TextBlock x:Name="HotkeyDescLbl" Text="Presiónalo desde cualquier lugar de Windows para mostrar u ocultar CyberManager." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                         </StackPanel>
                         <Border Grid.Column="2" Background="{DynamicResource HeaderBgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10,5" VerticalAlignment="Center">
-                            <TextBlock Text="Ctrl + Alt + M" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentBrush}"/>
+                            <TextBlock Text="Ctrl + Alt + M" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}"/>
                         </Border>
                     </Grid>
                 </Border>
@@ -503,7 +482,7 @@
         <!-- Footer Actions -->
         <Border Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,10,0,0">
             <Grid>
-                <TextBlock x:Name="ToastText" Text="" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Opacity="0"/>
+                <TextBlock x:Name="ToastText" Text="" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" FontSize="12.5" VerticalAlignment="Center" Opacity="0"/>
                 <Button x:Name="ResetBtn" Content="Restablecer" Style="{StaticResource SecondaryActionBtn}" HorizontalAlignment="Right" Click="ResetBtn_Click"/>
             </Grid>
         </Border>

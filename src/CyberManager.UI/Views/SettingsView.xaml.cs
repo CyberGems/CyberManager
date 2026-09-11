@@ -67,9 +67,6 @@ public partial class SettingsView : UserControl
                 break;
         }
 
-        // Font Size
-        FontSizeSlider.Value = App.Settings.RowFontSize;
-        FontSizeValLbl.Text = $"{App.Settings.RowFontSize:F0}px";
 
         // Refresh Interval
         RefreshIntervalComboBox.SelectedIndex = App.Settings.RefreshIntervalMs switch
@@ -153,18 +150,6 @@ public partial class SettingsView : UserControl
         }
     }
 
-    private void FontSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        if (FontSizeValLbl != null)
-        {
-            FontSizeValLbl.Text = $"{e.NewValue:F0}px";
-        }
-
-        if (_initializing) return;
-
-        App.Settings.RowFontSize = e.NewValue;
-        SaveAndNotify();
-    }
 
     private void RefreshIntervalComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -205,7 +190,6 @@ public partial class SettingsView : UserControl
         MinimizeToTraySwitch.IsChecked = true;
         StartWithWinSwitch.IsChecked = true;
         AutoUpdatesSwitch.IsChecked = true;
-        FontSizeSlider.Value = 13.0;
         RefreshIntervalComboBox.SelectedIndex = 1;
 
         _initializing = false;
@@ -260,8 +244,6 @@ public partial class SettingsView : UserControl
         LanguageDescLbl.Text = Strings.Current == Lang.Es ? "Idioma usado en menús, ventanas y métricas." : "Language used across menus, dialogs, and metrics.";
         ThemeTitleLbl.Text = Strings.T("Theme");
         ThemeDescLbl.Text = Strings.Current == Lang.Es ? "Elige el aspecto visual característico de CyberManager." : "Select visual accent and background style.";
-        TextSizeTitleLbl.Text = Strings.T("TextSize");
-        TextSizeDescLbl.Text = Strings.Current == Lang.Es ? "Ajusta el tamaño de fuente de la tabla para lectura cómoda." : "Adjust table font size for compact or comfortable viewing.";
 
         // Performance
         RefreshRateTitleLbl.Text = Strings.T("RefreshIntervalTitle");
