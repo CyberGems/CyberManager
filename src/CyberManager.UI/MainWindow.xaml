@@ -119,6 +119,39 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="ModeToggleButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="{DynamicResource AccentGlowBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="MinWidth" Value="42"/>
+            <Setter Property="Padding" Value="8,5"/>
+        </Style>
+        <Style x:Key="ModeIconButton" TargetType="Button" BasedOn="{StaticResource TitleBtn}">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="DangerModernButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -323,17 +356,19 @@
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                             <Border x:Name="StatsBorder" Background="Transparent" CornerRadius="6" Padding="4,2" Cursor="Hand" Focusable="True" KeyboardNavigation.IsTabStop="True"
                                 AutomationProperties.Name="System Information" MouseLeftButtonUp="SystemInfo_Click" KeyDown="SystemInfoBorder_KeyDown"
-                                ToolTip="Click to open System Information" Margin="0,0,10,0">
+                                ToolTip="Clic para abrir Información del Sistema" Margin="0,0,10,0">
                             <TextBlock x:Name="StatsText" Text="—" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
                         </Border>
-                        <Button x:Name="FullModeToggleBtn" Style="{StaticResource TitleBtn}" Click="FullModeToggle_Click" ToolTip="Compact mode" AutomationProperties.Name="Compact mode">
-                            <TextBlock Text="⤢" FontSize="15" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Button x:Name="FullModeToggleBtn" Width="42" Margin="2,0,0,0" Style="{StaticResource ModeToggleButton}" Click="FullModeToggle_Click" ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto">
+                            <Path Data="M 3,3 L 8,8 M 3,8 L 8,8 L 8,3 M 16,16 L 11,11 M 16,11 L 11,11 L 11,16"
+                                  Width="16" Height="16" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.6"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                         </Button>
-                        <Button x:Name="SettingsBtn" Style="{StaticResource TitleBtn}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)" AutomationProperties.Name="Settings"><TextBlock Text="⚙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="AboutBtn" Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About" AutomationProperties.Name="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="MinimizeBtn" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="MaximizeBtn" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="CloseBtn" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="SettingsBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Settings_Click" ToolTip="Settings (Ctrl+,)" AutomationProperties.Name="Settings"><TextBlock Text="⚙" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="AboutBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="About_Click" ToolTip="About" AutomationProperties.Name="About"><TextBlock Text="ⓘ" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="MinimizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="MaximizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="CloseBtn" Margin="2,0,0,0" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                     </StackPanel>
                 </Grid>
 
@@ -397,7 +432,7 @@
 
                     <!-- Actions -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0,0,0">
-                        <Button x:Name="RefreshBtn" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)" AutomationProperties.Name="Refresh">
+                        <Button x:Name="RefreshBtn" MinWidth="112" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)" AutomationProperties.Name="Refresh">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                 <TextBlock x:Name="RefreshBtnText" Text="Refresh" VerticalAlignment="Center"/>

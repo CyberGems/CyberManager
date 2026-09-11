@@ -19,7 +19,7 @@ public sealed class AppSettings
     public bool ShowSuspended { get; set; } = true;
     public string SearchText { get; set; } = "";
     public bool MinimizeToTray { get; set; } = true;
-    public bool StartWithWindows { get; set; }
+    public bool StartWithWindows { get; set; } = true;
     public bool StartMinimized { get; set; }
     public bool AutoCheckForUpdates { get; set; } = true;
     public string GlobalHotkey { get; set; } = "Ctrl+Alt+M";

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -77,6 +78,7 @@ public partial class CompactProcessView : UserControl
         RefreshButton.ToolTip = Strings.T("Refresh");
         PinButton.ToolTip = Strings.T("AlwaysOnTop");
         ModeButton.ToolTip = Strings.T("MoreDetails");
+        AutomationProperties.SetName(ModeButton, Strings.T("MoreDetails"));
         SettingsButton.ToolTip = Strings.T("Settings");
         CloseButton.ToolTip = Strings.T("Close");
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");

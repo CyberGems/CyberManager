@@ -204,11 +204,11 @@ public partial class SettingsWindow : Window
         App.Settings.RefreshIntervalMs = 800;
         App.Settings.AlwaysOnTop = false;
         App.Settings.MinimizeToTray = true;
-        App.Settings.StartWithWindows = false;
+        App.Settings.StartWithWindows = true;
         App.Settings.AutoCheckForUpdates = true;
         App.Settings.RowFontSize = 13.0;
 
-        StartupManager.SetAutoStart(false);
+        StartupManager.SetAutoStart(true);
 
         ShowIdleSwitch.IsChecked = false;
         CompactModeSwitch.IsChecked = false;
@@ -216,7 +216,7 @@ public partial class SettingsWindow : Window
         HighlightSuspendedSwitch.IsChecked = true;
         AlwaysOnTopSwitch.IsChecked = false;
         MinimizeToTraySwitch.IsChecked = true;
-        StartWithWinSwitch.IsChecked = false;
+        StartWithWinSwitch.IsChecked = true;
         AutoUpdatesSwitch.IsChecked = true;
         FontSizeSlider.Value = 13.0;
         RefreshIntervalComboBox.SelectedIndex = 1;

@@ -27,6 +27,13 @@ public class AppSettingsTests
     }
 
     [Fact]
+    public void AppSettings_DefaultStartWithWindows_IsTrue()
+    {
+        var settings = new AppSettings();
+        Assert.True(settings.StartWithWindows);
+    }
+
+    [Fact]
     public void AppSettings_DefaultCompactMode_IsFalse()
     {
         var settings = new AppSettings();

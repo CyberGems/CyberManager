@@ -133,17 +133,27 @@
                             ToolTip="Always on top"
                             AutomationProperties.Name="Always on top"/>
                     </Border>
-                    <Button x:Name="ModeButton"
-                        Width="28"
-                        Height="26"
-                        Margin="2,0,0,0"
-                        Content="⤢"
-                        FontSize="15"
-                        Padding="0"
-                        Style="{DynamicResource TitleBtn}"
-                        Click="MoreDetailsButton_Click"
-                        ToolTip="More details"
-                        AutomationProperties.Name="More details"/>
+                    <Border x:Name="ModeButtonHost"
+                            Width="32"
+                            Height="30"
+                            Margin="2,0,0,0"
+                            CornerRadius="7"
+                            Background="{DynamicResource AccentGlowBrush}"
+                            BorderBrush="{DynamicResource AccentBrush}"
+                            BorderThickness="1">
+                        <Button x:Name="ModeButton"
+                            Width="28"
+                            Height="26"
+                            Style="{DynamicResource ModeIconButton}"
+                            Padding="0"
+                            Click="MoreDetailsButton_Click"
+                            ToolTip="Más detalles"
+                            AutomationProperties.Name="Más detalles">
+                            <Path Data="M 3,8 L 3,3 L 8,3 M 3,3 L 8,8 M 13,16 L 16,16 L 16,11 M 16,16 L 11,11"
+                                  Width="15" Height="15" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.6"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                        </Button>
+                    </Border>
                     <Button x:Name="SettingsButton"
                         Width="28"
                         Height="26"
