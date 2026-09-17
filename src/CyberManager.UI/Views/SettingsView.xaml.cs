@@ -174,6 +174,7 @@ public partial class SettingsView : UserControl
         App.Settings.CompactMode = false;
         App.Settings.GroupProcesses = true;
         App.Settings.ShowSuspended = true;
+        App.Settings.SearchText = "";
         App.Settings.RefreshIntervalMs = 800;
         App.Settings.AlwaysOnTop = false;
         App.Settings.MinimizeToTray = true;
@@ -260,6 +261,7 @@ public partial class SettingsView : UserControl
         AutoUpdatesDescLbl.Text = Strings.T("AutoCheckUpdatesDesc");
         HotkeyTitleLbl.Text = Strings.T("GlobalHotkeyTitle");
         HotkeyDescLbl.Text = Strings.T("GlobalHotkeyDesc");
+        HotkeyValueText.Text = App.Settings.GlobalHotkey;
 
         if (RefreshIntervalComboBox.Items.Count >= 3)
         {

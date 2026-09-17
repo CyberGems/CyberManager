@@ -104,7 +104,8 @@
                             Padding="5,1"
                             Margin="8,0,0,0"
                             VerticalAlignment="Center">
-                        <TextBlock Text="NT ENGINE"
+                        <TextBlock x:Name="EngineBadgeText"
+                                   Text="NT ENGINE"
                                    Foreground="{DynamicResource AccentBrush}"
                                    FontSize="8.5"
                                    FontWeight="Bold"/>

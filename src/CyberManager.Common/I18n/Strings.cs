@@ -228,6 +228,7 @@ public static class Strings
         ["ResetDefaults"] = ("Reset Defaults", "Restablecer"),
         ["SettingsSaved"] = ("Settings saved", "Configuración guardada"),
         ["AutoStartFailed"] = ("Could not update Windows startup settings.", "No se pudo actualizar el inicio automático de Windows."),
+        ["GlobalHotkeyUnavailable"] = ("The global hotkey could not be registered. It may already be in use.", "No se pudo registrar el atajo global. Puede que ya esté en uso."),
     };
 
     public static string T(string key, params object[] args)

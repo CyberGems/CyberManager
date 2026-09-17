@@ -52,6 +52,9 @@ public sealed class TrayIconService : IDisposable
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
     private static extern bool Shell_NotifyIcon(int dwMessage, ref NOTIFYICONDATA lpdata);
 
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern uint RegisterWindowMessage(string lpString);
+
     [DllImport("user32.dll")]
     private static extern IntPtr LoadIcon(IntPtr hInstance, IntPtr lpIconName);
 
@@ -77,6 +80,7 @@ public sealed class TrayIconService : IDisposable
     private NOTIFYICONDATA _nid;
     private bool _isAdded;
     private IntPtr _hIcon = IntPtr.Zero;
+    private uint _taskbarCreatedMessage;
 
     private ContextMenu? _contextMenu;
     private MenuItem? _headerMenuItem;
@@ -137,6 +141,7 @@ public sealed class TrayIconService : IDisposable
 
         _source = HwndSource.FromHwnd(_hwnd);
         _source?.AddHook(HwndHook);
+        _taskbarCreatedMessage = RegisterWindowMessage("TaskbarCreated");
 
         // Build WPF ContextMenu
         BuildContextMenu();
@@ -155,8 +160,11 @@ public sealed class TrayIconService : IDisposable
             szTip = $"CyberManager {UpdateService.GetCurrentVersionLabel()}"
         };
 
-        _isAdded = Shell_NotifyIcon(NIM_ADD, ref _nid);
+        _isAdded = AddTrayIcon();
     }
+
+    private bool AddTrayIcon() =>
+        _hIcon != IntPtr.Zero && Shell_NotifyIcon(NIM_ADD, ref _nid);
 
     private void BuildContextMenu()
     {
@@ -461,6 +469,13 @@ public sealed class TrayIconService : IDisposable
 
     private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
+        if (_taskbarCreatedMessage != 0 && msg == _taskbarCreatedMessage)
+        {
+            _isAdded = AddTrayIcon();
+            handled = true;
+            return IntPtr.Zero;
+        }
+
         if (msg == WM_TRAYICON)
         {
             var eventCode = lParam.ToInt32();

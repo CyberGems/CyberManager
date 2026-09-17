@@ -77,11 +77,19 @@ public partial class CompactProcessView : UserControl
         EndTaskButton.ToolTip = Strings.T("Kill");
         RefreshButton.ToolTip = Strings.T("Refresh");
         PinButton.ToolTip = Strings.T("AlwaysOnTop");
+        EngineBadgeText.Text = Strings.T("WfpEngineBadge");
         ModeButton.ToolTip = Strings.T("MoreDetails");
         AutomationProperties.SetName(ModeButton, Strings.T("MoreDetails"));
         SettingsButton.ToolTip = Strings.T("Settings");
         CloseButton.ToolTip = Strings.T("Close");
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");
+        AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
+        AutomationProperties.SetName(SettingsButton, Strings.T("Settings"));
+        AutomationProperties.SetName(CloseButton, Strings.T("Close"));
+        AutomationProperties.SetName(SearchBox, Strings.T("SearchProcesses"));
+        AutomationProperties.SetName(RefreshButton, Strings.T("Refresh"));
+        AutomationProperties.SetName(EndTaskButton, Strings.T("Kill"));
+        AutomationProperties.SetName(CompactGrid, Strings.T("Processes"));
         ContextHintText.Text = Strings.T("CompactContextHint");
         EmptyStateText.Text = Strings.T("NoProcesses");
         if (CompactGrid.Columns.Count >= 4)
@@ -110,10 +118,11 @@ public partial class CompactProcessView : UserControl
     }
 
     public void SetStatus(string value) => StatusText.Text = value;
-    public void SetStatusToolTip(string value) => StatusText.ToolTip = value;
+    public void SetStatusToolTip(string? value) => StatusText.ToolTip = value;
 
-    public void SetEmptyState(bool empty)
+    public void SetEmptyState(bool empty, string? message = null)
     {
+        EmptyStateText.Text = message ?? Strings.T("NoProcesses");
         CompactGrid.Visibility = empty ? Visibility.Collapsed : Visibility.Visible;
         EmptyStateText.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -133,6 +142,7 @@ public partial class CompactProcessView : UserControl
         PinButton.ToolTip = pinned
             ? $"{Strings.T("AlwaysOnTop")} ✓"
             : Strings.T("AlwaysOnTop");
+        AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
     }
 
     public void RefreshItems() => CompactGrid.Items.Refresh();

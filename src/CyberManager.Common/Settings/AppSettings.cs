@@ -143,12 +143,23 @@ public sealed class AppSettings
     {
         RefreshIntervalMs = Math.Clamp(RefreshIntervalMs, 500, 2000);
         RowFontSize = Math.Clamp(RowFontSize, 11, 17);
-        MainWindowWidth = Math.Max(MainWindowWidth, 900);
-        MainWindowHeight = Math.Max(MainWindowHeight, 520);
-        CompactWindowWidth = Math.Max(CompactWindowWidth, 500);
-        CompactWindowHeight = Math.Max(CompactWindowHeight, 220);
+        MainWindowWidth = NormalizeDimension(MainWindowWidth, 900, 1100);
+        MainWindowHeight = NormalizeDimension(MainWindowHeight, 520, 700);
+        CompactWindowWidth = NormalizeDimension(CompactWindowWidth, 500, 560);
+        CompactWindowHeight = NormalizeDimension(CompactWindowHeight, 220, 360);
+        MainWindowLeft = NormalizeCoordinate(MainWindowLeft);
+        MainWindowTop = NormalizeCoordinate(MainWindowTop);
+        CompactWindowLeft = NormalizeCoordinate(CompactWindowLeft);
+        CompactWindowTop = NormalizeCoordinate(CompactWindowTop);
+        SearchText ??= "";
         GlobalHotkey = string.IsNullOrWhiteSpace(GlobalHotkey) ? "Ctrl+Alt+M" : GlobalHotkey.Trim();
     }
+
+    private static double NormalizeDimension(double value, double minimum, double fallback) =>
+        double.IsFinite(value) ? Math.Max(value, minimum) : fallback;
+
+    private static double NormalizeCoordinate(double value) =>
+        double.IsFinite(value) ? value : 0;
 
     private static string CreateTemporaryPath(string directory) =>
         System.IO.Path.Combine(directory, $"settings.{Environment.ProcessId}.{Guid.NewGuid():N}.tmp");

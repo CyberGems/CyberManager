@@ -26,6 +26,8 @@ public sealed class GlobalHotkeyService : IDisposable
     {
         try
         {
+            Unregister();
+
             var helper = new WindowInteropHelper(window);
             _hwnd = helper.Handle;
             if (_hwnd == IntPtr.Zero)
@@ -37,12 +39,19 @@ public sealed class GlobalHotkeyService : IDisposable
             _source = HwndSource.FromHwnd(_hwnd);
             _source?.AddHook(HwndHook);
 
-            var (modifiers, vk) = ParseHotkey(hotkeyString);
+            if (!TryParseHotkey(hotkeyString, out var modifiers, out var vk))
+            {
+                Unregister();
+                return false;
+            }
+
             _isRegistered = RegisterHotKey(_hwnd, HotkeyId, modifiers | MOD_NOREPEAT, vk);
+            if (!_isRegistered) Unregister();
             return _isRegistered;
         }
         catch
         {
+            Unregister();
             return false;
         }
     }
@@ -80,44 +89,54 @@ public sealed class GlobalHotkeyService : IDisposable
         return IntPtr.Zero;
     }
 
-    private static (uint modifiers, uint vk) ParseHotkey(string str)
+    private static bool TryParseHotkey(string? str, out uint modifiers, out uint vk)
     {
-        uint mod = 0;
-        uint vk = 0x4D; // Default: 'M'
+        modifiers = 0;
+        vk = 0;
 
         if (string.IsNullOrWhiteSpace(str))
         {
-            return (MOD_CONTROL | MOD_ALT, 0x4D);
+            return false;
         }
 
+        var hasKey = false;
         var parts = str.Split(HotkeySeparators, StringSplitOptions.RemoveEmptyEntries);
         foreach (var p in parts)
         {
             var trimmed = p.Trim();
             if (trimmed.Equals("ctrl", StringComparison.OrdinalIgnoreCase) || trimmed.Equals("control", StringComparison.OrdinalIgnoreCase))
-                mod |= MOD_CONTROL;
+                modifiers |= MOD_CONTROL;
             else if (trimmed.Equals("alt", StringComparison.OrdinalIgnoreCase))
-                mod |= MOD_ALT;
+                modifiers |= MOD_ALT;
             else if (trimmed.Equals("shift", StringComparison.OrdinalIgnoreCase))
-                mod |= MOD_SHIFT;
+                modifiers |= MOD_SHIFT;
             else if (trimmed.Equals("win", StringComparison.OrdinalIgnoreCase) || trimmed.Equals("windows", StringComparison.OrdinalIgnoreCase))
-                mod |= MOD_WIN;
+                modifiers |= MOD_WIN;
             else if (trimmed.Length == 1 && char.IsLetterOrDigit(trimmed[0]))
             {
+                if (hasKey) return false;
                 vk = (uint)char.ToUpperInvariant(trimmed[0]);
+                hasKey = true;
             }
             else if (trimmed.Equals("esc", StringComparison.OrdinalIgnoreCase) || trimmed.Equals("escape", StringComparison.OrdinalIgnoreCase))
             {
+                if (hasKey) return false;
                 vk = 0x1B; // VK_ESCAPE
+                hasKey = true;
             }
             else if (trimmed.StartsWith("F", StringComparison.OrdinalIgnoreCase) && int.TryParse(trimmed.AsSpan(1), out var fNum) && fNum >= 1 && fNum <= 12)
             {
+                if (hasKey) return false;
                 vk = (uint)(0x70 + (fNum - 1)); // VK_F1 to VK_F12
+                hasKey = true;
+            }
+            else
+            {
+                return false;
             }
         }
 
-        if (mod == 0) mod = MOD_CONTROL | MOD_ALT;
-        return (mod, vk);
+        return modifiers != 0 && hasKey;
     }
 
     public void Dispose()

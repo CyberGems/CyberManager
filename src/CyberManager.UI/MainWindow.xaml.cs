@@ -78,6 +78,16 @@ public partial class MainWindow : Window
         }
     }
 
+    private void NavigateToTab(MainTab tab, string? subTab = null)
+    {
+        if (_isCompactMode)
+        {
+            ApplyViewMode(compact: false, restoreBounds: false);
+        }
+
+        SelectTab(tab, subTab);
+    }
+
     private void TabClick(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement elem && elem.Tag is string tag)
@@ -91,7 +101,7 @@ public partial class MainWindow : Window
             };
             if (CurrentTab != targetTab)
             {
-                SelectTab(targetTab);
+                NavigateToTab(targetTab);
             }
         }
     }
@@ -159,12 +169,15 @@ public partial class MainWindow : Window
     private string _sortColumn = "CpuPercent";
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
 
+    private sealed record ProcessIdentity(int Pid, DateTime StartTime);
+
     private sealed record ContextMenuTarget(
         ProcessInfo Item,
         int Pid,
         DateTime StartTime,
         bool IsGroupParent,
-        string Name);
+        string Name,
+        IReadOnlyList<ProcessIdentity> GroupMembers);
 
     public MainWindow()
     {
@@ -187,6 +200,7 @@ public partial class MainWindow : Window
         Loaded += OnLoaded;
         Closing += OnClosing;
         IsVisibleChanged += OnVisibilityChanged;
+        StateChanged += OnWindowStateChanged;
         Closed += OnClosed;
         _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
         _timer.Tick += (_, _) => _ = RefreshAsync(_lifetimeCts.Token);
@@ -202,6 +216,10 @@ public partial class MainWindow : Window
         SettingsTabContent.SettingsChanged += () =>
         {
             ApplySortingAndFilter();
+            if (!string.Equals(_pendingSearch, App.Settings.SearchText, StringComparison.Ordinal))
+            {
+                SyncSearchFromSettings();
+            }
             ApplyTheme();
             ApplyLanguage();
             if (_isCompactMode != App.Settings.CompactMode)
@@ -226,6 +244,7 @@ public partial class MainWindow : Window
         {
             ApplyLanguage();
             ApplyTheme();
+            SyncSearchFromSettings();
             GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
             Topmost = App.Settings.AlwaysOnTop;
             CompactView.SetPinned(Topmost);
@@ -234,7 +253,7 @@ public partial class MainWindow : Window
             ProcGrid.FontSize = FontSizeSlider.Value;
             CompactView.RowFontSize = Math.Min(FontSizeSlider.Value, 13);
             FontSizeLabel.Text = $"{FontSizeSlider.Value:F0}px";
-            FooterText.Text = Strings.T("Ready");
+            SetStatus(Strings.T("Ready"));
             ApplyViewMode(App.Settings.CompactMode, restoreBounds: true);
 
             // Setup System Tray
@@ -250,7 +269,10 @@ public partial class MainWindow : Window
                 ExitApplication);
 
             // Register Global Hotkey
-            _hotkeyService.Register(this, App.Settings.GlobalHotkey);
+            if (!_hotkeyService.Register(this, App.Settings.GlobalHotkey))
+            {
+                SetStatus(Strings.T("GlobalHotkeyUnavailable"));
+            }
             _hotkeyService.HotkeyPressed += OnGlobalHotkeyPressed;
 
             // Start Minimized Check
@@ -273,7 +295,7 @@ public partial class MainWindow : Window
                         {
                             Dispatcher.Invoke(() =>
                             {
-                                FooterText.Text = $"⭐ {Strings.T("UpdateAvailable", r.LatestVersionLabel)}";
+                                SetStatus($"⭐ {Strings.T("UpdateAvailable", r.LatestVersionLabel)}");
                             });
                         }
                     }
@@ -282,11 +304,11 @@ public partial class MainWindow : Window
             }
 
             _ = RefreshAsync(_lifetimeCts.Token);
-            if (IsVisible) _timer.Start();
+            if (IsVisible && WindowState != WindowState.Minimized) _timer.Start();
         }
         catch (Exception ex)
         {
-            FooterText.Text = $"Init error: {ex.Message}";
+            SetStatus($"Init error: {ex.Message}");
         }
     }
 
@@ -322,7 +344,7 @@ public partial class MainWindow : Window
     {
         if (!_isLoaded || _isClosed) return;
 
-        if (IsVisible)
+        if (IsVisible && WindowState != WindowState.Minimized)
         {
             _timer.Start();
             _ = RefreshAsync(_lifetimeCts.Token);
@@ -330,6 +352,21 @@ public partial class MainWindow : Window
         else
         {
             // There is no useful UI to update while the app is in the tray.
+            _timer.Stop();
+        }
+    }
+
+    private void OnWindowStateChanged(object? sender, EventArgs e)
+    {
+        if (!_isLoaded || _isClosed) return;
+
+        if (IsVisible && WindowState != WindowState.Minimized)
+        {
+            _timer.Start();
+            _ = RefreshAsync(_lifetimeCts.Token);
+        }
+        else
+        {
             _timer.Stop();
         }
     }
@@ -454,9 +491,11 @@ public partial class MainWindow : Window
     {
         if (compact)
         {
-            if (App.Settings.CompactWindowWidth >= MinWidth) Width = App.Settings.CompactWindowWidth;
-            if (App.Settings.CompactWindowHeight >= MinHeight) Height = App.Settings.CompactWindowHeight;
-            if (App.Settings.CompactWindowLeft >= 0 && App.Settings.CompactWindowTop >= 0)
+            if (double.IsFinite(App.Settings.CompactWindowWidth) && App.Settings.CompactWindowWidth >= MinWidth)
+                Width = App.Settings.CompactWindowWidth;
+            if (double.IsFinite(App.Settings.CompactWindowHeight) && App.Settings.CompactWindowHeight >= MinHeight)
+                Height = App.Settings.CompactWindowHeight;
+            if (double.IsFinite(App.Settings.CompactWindowLeft) && double.IsFinite(App.Settings.CompactWindowTop))
             {
                 Left = App.Settings.CompactWindowLeft;
                 Top = App.Settings.CompactWindowTop;
@@ -466,9 +505,11 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (App.Settings.MainWindowWidth >= MinWidth) Width = App.Settings.MainWindowWidth;
-        if (App.Settings.MainWindowHeight >= MinHeight) Height = App.Settings.MainWindowHeight;
-        if (App.Settings.MainWindowLeft >= 0 && App.Settings.MainWindowTop >= 0)
+        if (double.IsFinite(App.Settings.MainWindowWidth) && App.Settings.MainWindowWidth >= MinWidth)
+            Width = App.Settings.MainWindowWidth;
+        if (double.IsFinite(App.Settings.MainWindowHeight) && App.Settings.MainWindowHeight >= MinHeight)
+            Height = App.Settings.MainWindowHeight;
+        if (double.IsFinite(App.Settings.MainWindowLeft) && double.IsFinite(App.Settings.MainWindowTop))
         {
             Left = App.Settings.MainWindowLeft;
             Top = App.Settings.MainWindowTop;
@@ -525,6 +566,14 @@ public partial class MainWindow : Window
         }, DispatcherPriority.Background);
     }
 
+    private void SetStatus(string status, string? toolTip = null)
+    {
+        FooterText.Text = status;
+        FooterText.ToolTip = toolTip;
+        CompactView.SetStatus(status);
+        CompactView.SetStatusToolTip(toolTip);
+    }
+
     private async Task RefreshAsync(CancellationToken cancellationToken = default)
     {
         if (_isClosed || Interlocked.Exchange(ref _refreshInFlight, 1) == 1) return;
@@ -532,7 +581,7 @@ public partial class MainWindow : Window
         {
             if (_all.Count == 0)
             {
-                FooterText.Text = "Collecting...";
+                SetStatus(Strings.T("CollectingProcesses"));
             }
 
             var now = DateTime.UtcNow;
@@ -570,7 +619,9 @@ public partial class MainWindow : Window
         {
             // Keep the last valid snapshot visible instead of showing a blank list
             // when a transient NT query or permission error occurs.
-            FooterText.Text = $"{Strings.T("RefreshFailed")}: {ex.Message}";
+            var message = $"{Strings.T("RefreshFailed")}: {ex.Message}";
+            SetStatus(message, message);
+            CompactView.SetEmptyState(_view.Count == 0, message);
             Debug.WriteLine($"Refresh error: {ex}");
         }
         finally
@@ -584,7 +635,7 @@ public partial class MainWindow : Window
         string? sub = null;
         if (sender == CpuSparklineBorder || sender == CpuSparkline) sub = "Cpu";
         else if (sender == RamSparklineBorder || sender == RamSparkline) sub = "Memory";
-        SelectTab(MainTab.Performance, sub);
+        NavigateToTab(MainTab.Performance, sub);
     }
 
     private void SystemInfoBorder_KeyDown(object sender, KeyEventArgs e)
@@ -714,10 +765,7 @@ public partial class MainWindow : Window
                 : Strings.T("NormalProcessesTip", _all.Count, timeStr);
         }
 
-        FooterText.Text = status;
-        FooterText.ToolTip = toolTip;
-        CompactView.SetStatus(status);
-        CompactView.SetStatusToolTip(toolTip);
+        SetStatus(status, toolTip);
     }
 
     private ProcessInfo? Selected => ProcGrid.SelectedItem as ProcessInfo;
@@ -768,8 +816,10 @@ public partial class MainWindow : Window
     private void CompactView_SearchChanged(object? sender, EventArgs e)
     {
         _pendingSearch = CompactView.SearchText;
+        App.Settings.SearchText = _pendingSearch;
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
+        ThrottledSaveSettings();
     }
 
     private ProcessInfo? GetActionTarget(object source)
@@ -779,31 +829,35 @@ public partial class MainWindow : Window
             return Selected;
         }
 
-        if (IsContextTargetVisible(target))
+        var currentTarget = _view.FirstOrDefault(process => MatchesContextTarget(process, target));
+        if (currentTarget != null)
         {
-            return target.Item;
+            return currentTarget;
         }
 
         CloseContextMenuForUnavailableProcess();
         return null;
     }
 
-    private bool IsContextTargetVisible(ContextMenuTarget target) =>
-        _view.Any(process => MatchesContextTarget(process, target));
-
     private static bool MatchesContextTarget(ProcessInfo process, ContextMenuTarget target)
     {
         if (process.IsGroupParent != target.IsGroupParent) return false;
         if (target.IsGroupParent)
         {
-            return process.Name.Equals(target.Name, StringComparison.OrdinalIgnoreCase);
+            return process.Name.Equals(target.Name, StringComparison.OrdinalIgnoreCase) &&
+                   process.Children.Count == target.GroupMembers.Count &&
+                   target.GroupMembers.All(member =>
+                       process.Children.Any(child => SameProcessIdentity(child, member)));
         }
 
         return process.Pid == target.Pid && SameStartTime(process.StartTime, target.StartTime);
     }
 
     private static bool SameStartTime(DateTime left, DateTime right) =>
-        left == default || right == default || left.ToFileTimeUtc() == right.ToFileTimeUtc();
+        left != default && right != default && left.ToFileTimeUtc() == right.ToFileTimeUtc();
+
+    private static bool SameProcessIdentity(ProcessInfo process, ProcessIdentity target) =>
+        process.Pid == target.Pid && SameStartTime(process.StartTime, target.StartTime);
 
     private void ProcGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -867,7 +921,7 @@ public partial class MainWindow : Window
 
         if (_pendingContextMenuMessage is { } message)
         {
-            FooterText.Text = message;
+            SetStatus(message);
             _pendingContextMenuMessage = null;
         }
     }
@@ -887,7 +941,12 @@ public partial class MainWindow : Window
             process.Pid,
             process.StartTime,
             process.IsGroupParent,
-            process.Name);
+            process.Name,
+            process.IsGroupParent
+                ? process.Children
+                    .Select(child => new ProcessIdentity(child.Pid, child.StartTime))
+                    .ToArray()
+                : Array.Empty<ProcessIdentity>());
 
         SetSelectedProcess(process);
         sourceGrid.Focus();
@@ -1014,7 +1073,7 @@ public partial class MainWindow : Window
 
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
-        SelectTab(MainTab.Settings);
+        NavigateToTab(MainTab.Settings);
     }
 
     private void FullModeToggle_Click(object sender, RoutedEventArgs e) =>
@@ -1079,12 +1138,21 @@ public partial class MainWindow : Window
         w.ShowDialog();
     }
 
+    private void SyncSearchFromSettings()
+    {
+        _pendingSearch = App.Settings.SearchText ?? "";
+        SearchBox.Text = _pendingSearch;
+        CompactView.SetSearchText(_pendingSearch);
+    }
+
     private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
         _pendingSearch = SearchBox.Text ?? "";
+        App.Settings.SearchText = _pendingSearch;
         CompactView.SetSearchText(_pendingSearch);
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
+        ThrottledSaveSettings();
     }
 
     private void ClearSearch_Click(object sender, RoutedEventArgs e)
@@ -1372,7 +1440,7 @@ public partial class MainWindow : Window
 
         if (issues.Count == 0) return;
 
-        FooterText.Text = issues[0]!;
+        SetStatus(issues[0]!);
         ConfirmDialog.Show(
             this,
             Strings.T("ProcessActionFailed"),
@@ -1390,7 +1458,7 @@ public partial class MainWindow : Window
         try
         {
             Clipboard.SetText(textToCopy);
-            FooterText.Text = Strings.T("PathCopied");
+            SetStatus(Strings.T("PathCopied"));
         }
         catch { }
     }
@@ -1474,7 +1542,7 @@ public partial class MainWindow : Window
             StatsBorder.ToolTip = Strings.T("OpenSystemInfoTip");
             CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
             RamSparklineBorder.ToolTip = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
-            FooterText.Text = Strings.T("Ready");
+            SetStatus(Strings.T("Ready"));
             CompactView.ApplyLanguage();
             CompactView.SetPinned(Topmost);
             _trayService.UpdateLocalization();
@@ -1550,21 +1618,21 @@ public partial class MainWindow : Window
         if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D1 || e.Key == Key.NumPad1))
         {
             e.Handled = true;
-            SelectTab(MainTab.Processes);
+            NavigateToTab(MainTab.Processes);
             return;
         }
 
         if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D2 || e.Key == Key.NumPad2))
         {
             e.Handled = true;
-            SelectTab(MainTab.Performance);
+            NavigateToTab(MainTab.Performance);
             return;
         }
 
         if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D3 || e.Key == Key.NumPad3))
         {
             e.Handled = true;
-            SelectTab(MainTab.Settings);
+            NavigateToTab(MainTab.Settings);
             return;
         }
 
@@ -1592,14 +1660,14 @@ public partial class MainWindow : Window
         if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.I)
         {
             e.Handled = true;
-            SystemInfo_Click(sender, e);
+            NavigateToTab(MainTab.Performance);
             return;
         }
 
         if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.OemComma || e.Key == Key.OemPeriod))
         {
             e.Handled = true;
-            Settings_Click(sender, e);
+            NavigateToTab(MainTab.Settings);
             return;
         }
 
@@ -1814,7 +1882,7 @@ public partial class MainWindow : Window
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
         }
-        SelectTab(MainTab.Performance);
+        NavigateToTab(MainTab.Performance);
     }
 
     private void OpenSettingsFromTray()
@@ -1825,7 +1893,7 @@ public partial class MainWindow : Window
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
             Activate();
         }
-        SelectTab(MainTab.Settings);
+        NavigateToTab(MainTab.Settings);
     }
 
     private void OpenAboutFromTray(bool checkUpdatesNow)
@@ -1846,7 +1914,7 @@ public partial class MainWindow : Window
         if (!StartupManager.SetAutoStart(enable))
         {
             App.Settings.StartWithWindows = StartupManager.IsAutoStartEnabled();
-            FooterText.Text = Strings.T("AutoStartFailed");
+            SetStatus(Strings.T("AutoStartFailed"));
         }
         App.Settings.Save();
         _trayService.UpdateLocalization();
