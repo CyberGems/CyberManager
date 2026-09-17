@@ -1,6 +1,6 @@
 ## ⚡ CyberManager {{VERSION}} — Release Notes
 
-Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is a lightweight, high-capacity virtualized task manager. Powered by the native NT engine, it offers instant search and a compact mode — the ultimate alternative to Windows Task Manager.
+Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is a lightweight, high-capacity task manager with instant search and a compact mode, the ultimate alternative to Windows Task Manager.
 
 ---
 
@@ -34,18 +34,22 @@ Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is a 
 
 ### 📦 Downloads & Packages
 
+> ⬇️ **Direct download:** click a file name to download it now. Same files as in **Assets** at the bottom of this page.
+
 | File | Description | Platform |
 | :--- | :--- | :--- |
-| **`CyberManager-Setup-{{VERSION}}.exe`** | 🚀 **Recommended Installer** (Inno Setup with Start Menu, Desktop & Auto-Startup options) | Windows 10 / 11 (x64) |
-| **`CyberManager-{{VERSION}}-Portable-win-x64.zip`** | 💼 **Portable Archive** (Extract and run with Administrator privileges) | Windows 10 / 11 (x64) |
+| **[`CyberManager-Setup-{{VERSION}}.exe`](https://github.com/CyberGems/CyberManager/releases/download/{{VERSION}}/CyberManager-Setup-{{VERSION}}.exe)** | 🚀 **Recommended Installer** (Inno Setup with Start Menu, Desktop & Auto-Startup options) | Windows 10 / 11 (x64) |
+| **[`CyberManager-{{VERSION}}-Portable-win-x64.zip`](https://github.com/CyberGems/CyberManager/releases/download/{{VERSION}}/CyberManager-{{VERSION}}-Portable-win-x64.zip)** | 💼 **Portable Archive** (Extract and run with Administrator privileges) | Windows 10 / 11 (x64) |
 
 ---
 
 ### 🔍 VirusTotal Scan Results (70+ Antivirus Engines)
 
-- 🛡️ **Setup Installer**: [View VirusTotal Inspection Report](https://www.virustotal.com/gui/file/{{INSTALLER_HASH}})  
+> ℹ️ These links open the security report on VirusTotal in a new tab, they do not download the app.
+
+- 🛡️ **Setup Installer**: [View security report on VirusTotal](https://www.virustotal.com/gui/file/{{INSTALLER_HASH}})  
   *(SHA256: `{{INSTALLER_HASH}}`)*
-- 💼 **Portable Archive**: [View VirusTotal Inspection Report](https://www.virustotal.com/gui/file/{{PORTABLE_HASH}})  
+- 💼 **Portable Archive**: [View security report on VirusTotal](https://www.virustotal.com/gui/file/{{PORTABLE_HASH}})  
   *(SHA256: `{{PORTABLE_HASH}}`)*
 
 ---
