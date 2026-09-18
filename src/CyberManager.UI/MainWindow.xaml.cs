@@ -142,6 +142,7 @@ public partial class MainWindow : Window
     private readonly ProcessCollector _collector = new();
     private readonly DispatcherTimer _timer = new();
     private readonly DispatcherTimer _searchDebounceTimer = new();
+    private readonly DispatcherTimer _searchHistoryTimer = new();
     private readonly DispatcherTimer _settingsSaveTimer = new();
     private readonly CancellationTokenSource _lifetimeCts = new();
     private readonly SemaphoreSlim _processActionGate = new(1, 1);
@@ -165,6 +166,7 @@ public partial class MainWindow : Window
     private string? _pendingContextMenuMessage;
     private bool _isCompactMode;
     private bool _syncingSelection;
+    private bool _syncingHeavyFilter;
 
     private string _sortColumn = "CpuPercent";
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
@@ -192,6 +194,9 @@ public partial class MainWindow : Window
         CompactView.CloseRequested += Close_Click;
         CompactView.DragRequested += CompactView_DragRequested;
         CompactView.SearchChanged += CompactView_SearchChanged;
+        CompactView.SearchSubmitted += CompactView_SearchSubmitted;
+        CompactView.SearchHistoryRequested += SearchHistoryButton_Click;
+        CompactView.HeavyFilterChanged += CompactView_HeavyFilterChanged;
         CompactView.ProcessGrid.SelectionChanged += ProcGrid_SelectionChanged;
         ProcGrid.PreviewMouseLeftButtonDown += ProcessGrid_PreviewMouseLeftButtonDown;
         CompactView.ProcessGrid.PreviewMouseLeftButtonDown += ProcessGrid_PreviewMouseLeftButtonDown;
@@ -208,6 +213,12 @@ public partial class MainWindow : Window
         _timer.Tick += (_, _) => _ = RefreshAsync(_lifetimeCts.Token);
         _searchDebounceTimer.Interval = TimeSpan.FromMilliseconds(150);
         _searchDebounceTimer.Tick += (_, _) => { _searchDebounceTimer.Stop(); ApplySortingAndFilter(); };
+        _searchHistoryTimer.Interval = TimeSpan.FromMilliseconds(750);
+        _searchHistoryTimer.Tick += (_, _) =>
+        {
+            _searchHistoryTimer.Stop();
+            CommitSearchHistory(_pendingSearch);
+        };
         _settingsSaveTimer.Interval = TimeSpan.FromMilliseconds(350);
         _settingsSaveTimer.Tick += async (_, _) =>
         {
@@ -231,6 +242,7 @@ public partial class MainWindow : Window
             _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
             Topmost = App.Settings.AlwaysOnTop;
             CompactView.SetPinned(Topmost);
+            SetHeavyFilterControls(App.Settings.HeavyProcessesOnly);
             GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
             FontSizeSlider.Value = App.Settings.RowFontSize;
             ProcGrid.FontSize = App.Settings.RowFontSize;
@@ -250,6 +262,7 @@ public partial class MainWindow : Window
             GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
             Topmost = App.Settings.AlwaysOnTop;
             CompactView.SetPinned(Topmost);
+            SetHeavyFilterControls(App.Settings.HeavyProcessesOnly);
             KillBtn.IsEnabled = Selected != null;
             FontSizeSlider.Value = App.Settings.RowFontSize > 0 ? App.Settings.RowFontSize : 13;
             ProcGrid.FontSize = FontSizeSlider.Value;
@@ -332,6 +345,7 @@ public partial class MainWindow : Window
             _isClosed = true;
             _timer.Stop();
             _searchDebounceTimer.Stop();
+            _searchHistoryTimer.Stop();
             _settingsSaveTimer.Stop();
             _lifetimeCts.Cancel();
             _hotkeyService.Dispose();
@@ -379,6 +393,7 @@ public partial class MainWindow : Window
         _isClosed = true;
         _timer.Stop();
         _searchDebounceTimer.Stop();
+        _searchHistoryTimer.Stop();
         _settingsSaveTimer.Stop();
         _lifetimeCts.Cancel();
         PathToIconConverter.IconReady -= OnIconReady;
@@ -745,7 +760,8 @@ public partial class MainWindow : Window
                 App.Settings.ShowSuspended,
                 _sortColumn,
                 _sortDirection,
-                _expandedGroups));
+                _expandedGroups,
+                App.Settings.HeavyProcessesOnly));
 
         var prevSelectedPid = Selected?.Pid;
         if (_contextMenuOpen)
@@ -852,7 +868,136 @@ public partial class MainWindow : Window
         App.Settings.SearchText = _pendingSearch;
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
+        ScheduleSearchHistory(_pendingSearch);
         ThrottledSaveSettings();
+    }
+
+    private void CompactView_SearchSubmitted(object? sender, EventArgs e) =>
+        CommitSearchHistory(CompactView.SearchText);
+
+    private void ScheduleSearchHistory(string query)
+    {
+        _searchHistoryTimer.Stop();
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            _searchHistoryTimer.Start();
+        }
+    }
+
+    private void CommitSearchHistory(string query)
+    {
+        _searchHistoryTimer.Stop();
+        App.Settings.RecordSearch(query);
+        ThrottledSaveSettings();
+    }
+
+    private void SearchHistoryButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement target) return;
+
+        var menu = new ContextMenu
+        {
+            Style = (Style)FindResource("ModernContextMenu"),
+            PlacementTarget = target,
+            Placement = PlacementMode.Bottom
+        };
+
+        menu.Items.Add(new MenuItem
+        {
+            Header = Strings.T("RecentSearches"),
+            IsEnabled = false,
+            Style = (Style)FindResource("ModernMenuItem")
+        });
+
+        if (App.Settings.RecentSearches.Count == 0)
+        {
+            menu.Items.Add(new MenuItem
+            {
+                Header = Strings.T("NoRecentSearches"),
+                IsEnabled = false,
+                Style = (Style)FindResource("ModernMenuItem")
+            });
+        }
+        else
+        {
+            foreach (var query in App.Settings.RecentSearches)
+            {
+                var item = new MenuItem
+                {
+                    Header = query,
+                    Tag = query,
+                    Style = (Style)FindResource("ModernMenuItem")
+                };
+                item.Click += SearchHistoryItem_Click;
+                menu.Items.Add(item);
+            }
+        }
+
+        menu.Items.Add(new Separator());
+        var clearItem = new MenuItem
+        {
+            Header = Strings.T("ClearSearchHistory"),
+            Style = (Style)FindResource("ModernMenuItem")
+        };
+        clearItem.Click += ClearSearchHistory_Click;
+        menu.Items.Add(clearItem);
+
+        menu.IsOpen = true;
+        e.Handled = true;
+    }
+
+    private void SearchHistoryItem_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem { Tag: string query }) return;
+
+        _searchHistoryTimer.Stop();
+        SearchBox.Text = query;
+        CompactView.SetSearchText(query);
+        _pendingSearch = query;
+        App.Settings.SearchText = query;
+        _searchDebounceTimer.Stop();
+        ApplySortingAndFilter();
+        CommitSearchHistory(query);
+    }
+
+    private void ClearSearchHistory_Click(object sender, RoutedEventArgs e)
+    {
+        App.Settings.ClearSearchHistory();
+        ThrottledSaveSettings();
+    }
+
+    private void HeavyFilterToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_syncingHeavyFilter)
+        {
+            SetHeavyFilterControls(HeavyFilterToggle.IsChecked == true);
+        }
+    }
+
+    private void CompactView_HeavyFilterChanged(object? sender, EventArgs e) =>
+        SetHeavyFilterControls(CompactView.IsHeavyFilterEnabled);
+
+    private void SetHeavyFilterControls(bool enabled)
+    {
+        var changed = App.Settings.HeavyProcessesOnly != enabled;
+        App.Settings.HeavyProcessesOnly = enabled;
+
+        _syncingHeavyFilter = true;
+        try
+        {
+            HeavyFilterToggle.IsChecked = enabled;
+            CompactView.SetHeavyFilter(enabled);
+        }
+        finally
+        {
+            _syncingHeavyFilter = false;
+        }
+
+        if (changed)
+        {
+            ThrottledSaveSettings();
+            ApplySortingAndFilter();
+        }
     }
 
     private ProcessInfo? GetActionTarget(object source)
@@ -1246,6 +1391,7 @@ public partial class MainWindow : Window
         CompactView.SetSearchText(_pendingSearch);
         _searchDebounceTimer.Stop();
         _searchDebounceTimer.Start();
+        ScheduleSearchHistory(_pendingSearch);
         ThrottledSaveSettings();
     }
 
@@ -1620,9 +1766,11 @@ public partial class MainWindow : Window
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
             ClearBtn.ToolTip = Strings.T("Clear");
+            HeavyFilterToggle.ToolTip = Strings.T("ShowHeavyProcesses");
             AutomationProperties.SetName(RefreshBtn, Strings.T("Refresh"));
             AutomationProperties.SetName(KillBtn, Strings.T("Kill"));
             AutomationProperties.SetName(ClearBtn, Strings.T("Clear"));
+            AutomationProperties.SetName(HeavyFilterToggle, Strings.T("ShowHeavyProcesses"));
             FullModeToggleBtn.ToolTip = Strings.T("CompactMode");
             AutomationProperties.SetName(FullModeToggleBtn, Strings.T("CompactMode"));
             MoreBtn.ToolTip = Strings.T("MoreOptions");
@@ -1796,6 +1944,11 @@ public partial class MainWindow : Window
 
     private void SearchBox_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Enter)
+        {
+            CommitSearchHistory(SearchBox.Text);
+        }
+
         if (e.Key == Key.Down || e.Key == Key.Enter)
         {
             if (ProcGrid.Items.Count > 0)

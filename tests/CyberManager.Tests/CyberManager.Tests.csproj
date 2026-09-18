@@ -18,5 +18,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\CyberManager.Core\CyberManager.Core.csproj" />
     <ProjectReference Include="..\..\src\CyberManager.Common\CyberManager.Common.csproj" />
+    <ProjectReference Include="..\..\src\CyberManager.UI\CyberManager.UI.csproj" />
   </ItemGroup>
 </Project>

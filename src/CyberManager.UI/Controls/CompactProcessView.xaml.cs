@@ -33,6 +33,7 @@ public partial class CompactProcessView : UserControl
             new PropertyMetadata(12.0));
 
     private bool _syncingSearch;
+    private bool _syncingHeavyFilter;
     private double _cpuPercent;
     private double _usedRamGb;
     private double _totalRamGb;
@@ -68,7 +69,12 @@ public partial class CompactProcessView : UserControl
 
     public bool IsSearchFocused => SearchBox.IsFocused;
 
+    public bool IsHeavyFilterEnabled => HeavyFilterToggle.IsChecked == true;
+
     public event EventHandler? SearchChanged;
+    public event EventHandler? SearchSubmitted;
+    public event RoutedEventHandler? SearchHistoryRequested;
+    public event EventHandler? HeavyFilterChanged;
     public event RoutedEventHandler? ToggleRequested;
     public event RoutedEventHandler? EndTaskRequested;
     public event RoutedEventHandler? PinRequested;
@@ -90,7 +96,10 @@ public partial class CompactProcessView : UserControl
         SettingsButton.ToolTip = Strings.T("Settings");
         CloseButton.ToolTip = Strings.T("Close");
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");
+        SearchHint.Text = Strings.T("SearchPlaceholder");
         ClearSearchButton.ToolTip = Strings.T("Clear");
+        SearchHistoryButton.ToolTip = Strings.T("RecentSearches");
+        HeavyFilterToggle.ToolTip = Strings.T("ShowHeavyProcesses");
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
         AutomationProperties.SetName(SettingsButton, Strings.T("Settings"));
         MinimizeButton.ToolTip = Strings.T("Minimize");
@@ -98,6 +107,8 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
         AutomationProperties.SetName(SearchBox, Strings.T("SearchProcesses"));
         AutomationProperties.SetName(ClearSearchButton, Strings.T("Clear"));
+        AutomationProperties.SetName(SearchHistoryButton, Strings.T("RecentSearches"));
+        AutomationProperties.SetName(HeavyFilterToggle, Strings.T("ShowHeavyProcesses"));
         AutomationProperties.SetName(EndTaskButton, Strings.T("Kill"));
         AutomationProperties.SetName(CompactGrid, Strings.T("Processes"));
         ContextHintText.Text = Strings.T("CompactContextHint");
@@ -115,7 +126,7 @@ public partial class CompactProcessView : UserControl
     {
         if (string.Equals(SearchBox.Text, value, StringComparison.Ordinal))
         {
-            UpdateSearchClearButtonVisibility();
+            UpdateSearchVisuals();
             return;
         }
 
@@ -130,7 +141,7 @@ public partial class CompactProcessView : UserControl
             _syncingSearch = false;
         }
 
-        UpdateSearchClearButtonVisibility();
+        UpdateSearchVisuals();
     }
 
     public void SetStatus(string value) => StatusText.Text = value;
@@ -164,6 +175,21 @@ public partial class CompactProcessView : UserControl
 
     public void SetEndTaskEnabled(bool enabled) => EndTaskButton.IsEnabled = enabled;
 
+    public void SetHeavyFilter(bool enabled)
+    {
+        if (IsHeavyFilterEnabled == enabled) return;
+
+        _syncingHeavyFilter = true;
+        try
+        {
+            HeavyFilterToggle.IsChecked = enabled;
+        }
+        finally
+        {
+            _syncingHeavyFilter = false;
+        }
+    }
+
     public void SetPinned(bool pinned)
     {
         PinButton.Opacity = pinned ? 1.0 : 0.65;
@@ -190,15 +216,19 @@ public partial class CompactProcessView : UserControl
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        UpdateSearchClearButtonVisibility();
+        UpdateSearchVisuals();
         if (!_syncingSearch) SearchChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private void UpdateSearchClearButtonVisibility()
+    private void UpdateSearchVisuals()
     {
-        ClearSearchButton.Visibility = string.IsNullOrEmpty(SearchBox.Text)
+        var isEmpty = string.IsNullOrEmpty(SearchBox.Text);
+        ClearSearchButton.Visibility = isEmpty
             ? Visibility.Collapsed
             : Visibility.Visible;
+        SearchHint.Visibility = isEmpty
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
@@ -207,10 +237,23 @@ public partial class CompactProcessView : UserControl
         SearchBox.Focus();
     }
 
+    private void SearchHistoryButton_Click(object sender, RoutedEventArgs e) =>
+        SearchHistoryRequested?.Invoke(sender, e);
+
+    private void HeavyFilterToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_syncingHeavyFilter) HeavyFilterChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     private void SearchBox_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key is Key.Down or Key.Enter)
         {
+            if (e.Key == Key.Enter)
+            {
+                SearchSubmitted?.Invoke(this, EventArgs.Empty);
+            }
+
             if (CompactGrid.Items.Count > 0)
             {
                 e.Handled = true;

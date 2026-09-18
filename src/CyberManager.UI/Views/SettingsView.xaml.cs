@@ -174,7 +174,9 @@ public partial class SettingsView : UserControl
         App.Settings.CompactMode = false;
         App.Settings.GroupProcesses = true;
         App.Settings.ShowSuspended = true;
+        App.Settings.HeavyProcessesOnly = false;
         App.Settings.SearchText = "";
+        App.Settings.ClearSearchHistory();
         App.Settings.SuppressedConfirmations.Clear();
         App.Settings.RefreshIntervalMs = 800;
         App.Settings.AlwaysOnTop = false;

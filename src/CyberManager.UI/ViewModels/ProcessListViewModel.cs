@@ -11,7 +11,9 @@ public sealed record ProcessListQuery(
     bool DimSuspended,
     string SortColumn,
     ListSortDirection SortDirection,
-    IReadOnlySet<string> ExpandedGroups);
+    IReadOnlySet<string> ExpandedGroups,
+    bool HeavyProcessesOnly = false,
+    int HeavyProcessLimit = 10);
 
 public sealed class ProcessListViewModel
 {
@@ -43,6 +45,11 @@ public sealed class ProcessListViewModel
                 process.IsGroupChild = false;
                 process.InstanceCount = 1;
                 process.DimWhenSuspended = query.DimSuspended && process.Status == "Suspended";
+            }
+
+            if (query.HeavyProcessesOnly)
+            {
+                filtered = TakeHeaviest(filtered, query.HeavyProcessLimit);
             }
 
             return ApplySorting(filtered, query).ToList();
@@ -103,8 +110,11 @@ public sealed class ProcessListViewModel
             topLevel.Add(parent);
         }
 
+        var candidates = query.HeavyProcessesOnly
+            ? TakeHeaviest(topLevel, query.HeavyProcessLimit)
+            : topLevel;
         var result = new List<ProcessInfo>();
-        foreach (var item in ApplySorting(topLevel, query))
+        foreach (var item in ApplySorting(candidates, query))
         {
             result.Add(item);
             if (item.IsGroupParent && item.IsExpanded)
@@ -115,6 +125,42 @@ public sealed class ProcessListViewModel
 
         return result;
     }
+
+    private static IEnumerable<ProcessInfo> TakeHeaviest(
+        IEnumerable<ProcessInfo> processes,
+        int limit)
+    {
+        var candidates = processes.ToList();
+        if (limit <= 0 || candidates.Count <= limit) return candidates;
+
+        var maxCpu = candidates.Max(process => NormalizeCpu(process.CpuPercent));
+        var maxMemory = candidates.Max(process => Math.Max(0L, process.WorkingSetBytes));
+
+        return candidates
+            .Select(process =>
+            {
+                var cpuScore = maxCpu > 0
+                    ? NormalizeCpu(process.CpuPercent) / maxCpu
+                    : 0;
+                var memoryScore = maxMemory > 0
+                    ? Math.Max(0L, process.WorkingSetBytes) / (double)maxMemory
+                    : 0;
+                return new
+                {
+                    Process = process,
+                    Score = (cpuScore + memoryScore) / 2
+                };
+            })
+            .OrderByDescending(item => item.Score)
+            .ThenByDescending(item => item.Process.CpuPercent)
+            .ThenByDescending(item => item.Process.WorkingSetBytes)
+            .ThenBy(item => item.Process.Name, StringComparer.OrdinalIgnoreCase)
+            .Take(limit)
+            .Select(item => item.Process);
+    }
+
+    private static double NormalizeCpu(double value) =>
+        double.IsFinite(value) ? Math.Max(0, value) : 0;
 
     public void Update(IReadOnlyList<ProcessInfo> next)
     {

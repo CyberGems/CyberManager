@@ -58,4 +58,31 @@ public class AppSettingsTests
 
         Assert.False(settings.IsConfirmationSuppressed("process.kill"));
     }
+
+    [Fact]
+    public void AppSettings_SearchHistory_DeduplicatesAndKeepsTenMostRecent()
+    {
+        var settings = new AppSettings();
+
+        for (var index = 0; index < 12; index++)
+        {
+            settings.RecordSearch($" process-{index} ");
+        }
+        settings.RecordSearch("PROCESS-5");
+
+        Assert.Equal(10, settings.RecentSearches.Count);
+        Assert.Equal("PROCESS-5", settings.RecentSearches[0]);
+        Assert.DoesNotContain("process-0", settings.RecentSearches);
+        Assert.Equal(10, settings.RecentSearches.Distinct(StringComparer.OrdinalIgnoreCase).Count());
+    }
+
+    [Fact]
+    public void AppSettings_SearchHistory_IgnoresBlankQueries()
+    {
+        var settings = new AppSettings();
+
+        settings.RecordSearch("  ");
+
+        Assert.Empty(settings.RecentSearches);
+    }
 }

@@ -17,7 +17,9 @@ public sealed class AppSettings
     public bool GroupProcesses { get; set; } = true;
     public double RowFontSize { get; set; } = 13.0;
     public bool ShowSuspended { get; set; } = true;
+    public bool HeavyProcessesOnly { get; set; }
     public string SearchText { get; set; } = "";
+    public List<string> RecentSearches { get; set; } = new();
     public HashSet<string> SuppressedConfirmations { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public bool MinimizeToTray { get; set; } = true;
     public bool StartWithWindows { get; set; } = true;
@@ -153,6 +155,7 @@ public sealed class AppSettings
         CompactWindowLeft = NormalizeCoordinate(CompactWindowLeft);
         CompactWindowTop = NormalizeCoordinate(CompactWindowTop);
         SearchText ??= "";
+        RecentSearches = NormalizeSearchHistory(RecentSearches);
         SuppressedConfirmations ??= new(StringComparer.OrdinalIgnoreCase);
         GlobalHotkey = string.IsNullOrWhiteSpace(GlobalHotkey) ? "Ctrl+Alt+M" : GlobalHotkey.Trim();
     }
@@ -174,11 +177,52 @@ public sealed class AppSettings
         }
     }
 
+    public void RecordSearch(string query)
+    {
+        var normalized = query?.Trim();
+        if (string.IsNullOrWhiteSpace(normalized)) return;
+
+        RecentSearches ??= new();
+        RecentSearches.RemoveAll(existing =>
+            string.Equals(existing?.Trim(), normalized, StringComparison.OrdinalIgnoreCase));
+        RecentSearches.Insert(0, normalized);
+
+        if (RecentSearches.Count > 10)
+        {
+            RecentSearches.RemoveRange(10, RecentSearches.Count - 10);
+        }
+    }
+
+    public void ClearSearchHistory()
+    {
+        RecentSearches ??= new();
+        RecentSearches.Clear();
+    }
+
     private static double NormalizeDimension(double value, double minimum, double fallback) =>
         double.IsFinite(value) ? Math.Max(value, minimum) : fallback;
 
     private static double NormalizeCoordinate(double value) =>
         double.IsFinite(value) ? value : 0;
+
+    private static List<string> NormalizeSearchHistory(IEnumerable<string>? searches)
+    {
+        var normalized = new List<string>();
+        foreach (var search in searches ?? Enumerable.Empty<string>())
+        {
+            var trimmed = search?.Trim();
+            if (string.IsNullOrWhiteSpace(trimmed) ||
+                normalized.Any(existing => string.Equals(existing, trimmed, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            normalized.Add(trimmed);
+            if (normalized.Count == 10) break;
+        }
+
+        return normalized;
+    }
 
     private static string CreateTemporaryPath(string directory) =>
         System.IO.Path.Combine(directory, $"settings.{Environment.ProcessId}.{Guid.NewGuid():N}.tmp");
