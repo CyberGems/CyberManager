@@ -199,6 +199,10 @@
             </Setter>
         </Style>
         <Style x:Key="DangerModernButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#E81123"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E81123"/>
+            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -210,14 +214,15 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#E81123"/>
-                                <Setter TargetName="Bd" Property="Background" Value="#22E81123"/>
-                                <Setter Property="Foreground" Value="#FF6B6B"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#FF6B6B"/>
+                                <Setter TargetName="Bd" Property="Background" Value="#F0263A"/>
+                                <Setter Property="Foreground" Value="White"/>
                                 <Setter TargetName="Bd" Property="RenderTransform">
                                     <Setter.Value><ScaleTransform ScaleX="1.03" ScaleY="1.03"/></Setter.Value>
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#B90F1D"/>
                                 <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
                                 <Setter TargetName="Bd" Property="RenderTransform">
                                     <Setter.Value><ScaleTransform ScaleX="0.95" ScaleY="0.95"/></Setter.Value>
@@ -284,6 +289,18 @@
                                     <Path x:Name="SortArrow" Margin="4,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource AccentBrush}"
                                           Data="M 0 0 L 4 5 L 8 0 Z" Width="8" Height="5" Stretch="Uniform" Visibility="Collapsed"/>
                                 </StackPanel>
+                                <Thumb x:Name="PART_LeftHeaderGripper"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Stretch"
+                                       Width="8"
+                                       Background="Transparent"
+                                       Cursor="SizeWE"/>
+                                <Thumb x:Name="PART_RightHeaderGripper"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Stretch"
+                                       Width="8"
+                                       Background="Transparent"
+                                       Cursor="SizeWE"/>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
