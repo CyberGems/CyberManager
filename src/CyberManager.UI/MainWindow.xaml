@@ -1020,7 +1020,7 @@
                                                 </Grid>
 
                                                 <!-- Process Name -->
-                                                <TextBlock Grid.Column="2" Text="{Binding Name}" Foreground="{DynamicResource TextBrush}"
+                                                <TextBlock Grid.Column="2" Text="{Binding FriendlyName}" Foreground="{DynamicResource TextBrush}"
                                                            FontWeight="{Binding IsGroupParent, Converter={StaticResource ParentFontWeightConverter}}"
                                                            VerticalAlignment="Center" Margin="3,0,0,0" TextTrimming="CharacterEllipsis"/>
 
@@ -1034,7 +1034,7 @@
                                                     </Border>
 
                                                     <!-- Main Window UI Badge -->
-                                                    <Border Background="#2000E5FF" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
+                                                    <Border Background="#2024A6B5" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"
                                                             CornerRadius="4" Padding="4,1" Margin="0,0,4,0" VerticalAlignment="Center"
                                                             ToolTip="{Binding MainWindowTitle}"
                                                             Visibility="{Binding HasWindow, Converter={StaticResource BoolToVisConverter}}">

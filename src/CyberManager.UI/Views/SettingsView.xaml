@@ -223,8 +223,12 @@
         </Border>
 
         <!-- Main Scrollable Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="0,0,6,0">
-            <StackPanel>
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      HorizontalContentAlignment="Center"
+                      Padding="0,0,6,0">
+            <StackPanel Width="820">
 
                 <!-- SECTION 1: GENERAL & APPEARANCE -->
                 <TextBlock x:Name="SecGeneralLbl" Text="General y Apariencia" FontWeight="Bold" FontSize="14.5" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
@@ -260,8 +264,8 @@
                                 </Grid.ColumnDefinitions>
                                 <RadioButton x:Name="ThemeCyberManagerRadio" Grid.Column="0" GroupName="AppThemeGroup" Style="{StaticResource ThemeOptionButton}" Click="ThemeRadio_Click">
                                     <StackPanel HorizontalAlignment="Center">
-                                        <Border Width="24" Height="24" CornerRadius="12" Background="#070B12" BorderBrush="#00E5FF" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
-                                            <Border Width="8" Height="8" CornerRadius="4" Background="#00E5FF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Border Width="24" Height="24" CornerRadius="12" Background="#090D14" BorderBrush="#24A6B5" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
+                                            <Border Width="8" Height="8" CornerRadius="4" Background="#24A6B5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
                                         <TextBlock Text="CyberManager" FontWeight="Bold" FontSize="12.5" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
                                         <TextBlock Text="Obsidian &amp; Cyan" FontSize="11" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>

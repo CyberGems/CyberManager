@@ -33,6 +33,7 @@ public sealed class ProcessListViewModel
             var isPid = int.TryParse(search, out var pid);
             filtered = filtered.Where(process =>
                 process.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                process.FriendlyName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 process.ExePath.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                 (isPid && process.Pid == pid));
         }
@@ -77,6 +78,7 @@ public sealed class ProcessListViewModel
                 Pid = mainProcess.Pid,
                 ParentPid = mainProcess.ParentPid,
                 Name = group.Key,
+                FriendlyName = mainProcess.FriendlyName,
                 ExePath = !string.IsNullOrEmpty(mainProcess.ExePath)
                     ? mainProcess.ExePath
                     : processes.FirstOrDefault(process => !string.IsNullOrEmpty(process.ExePath))?.ExePath ?? "",
@@ -286,6 +288,7 @@ public sealed class ProcessListViewModel
         target.Pid = source.Pid;
         target.ParentPid = source.ParentPid;
         target.Name = source.Name;
+        target.FriendlyName = source.FriendlyName;
         target.ExePath = source.ExePath;
         target.UserName = source.UserName;
         target.Status = source.Status;

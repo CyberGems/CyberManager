@@ -10,6 +10,7 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     private int _pid;
     private int _parentPid;
     private string _name = "";
+    private string _friendlyName = "";
     private string _exePath = "";
     private string _userName = "";
     private string _status = "Running";
@@ -37,6 +38,15 @@ public sealed class ProcessInfo : INotifyPropertyChanged
         set
         {
             if (Set(ref _name, value)) OnPropertyChanged(nameof(DisplayName));
+        }
+    }
+
+    public string FriendlyName
+    {
+        get => string.IsNullOrWhiteSpace(_friendlyName) ? _name : _friendlyName;
+        set
+        {
+            if (Set(ref _friendlyName, value)) OnPropertyChanged(nameof(DisplayName));
         }
     }
 
@@ -130,7 +140,14 @@ public sealed class ProcessInfo : INotifyPropertyChanged
 
     public bool IsContextTarget { get => _isContextTarget; set => Set(ref _isContextTarget, value); }
 
-    public string DisplayName => InstanceCount > 1 && IsGroupParent ? $"{Name} ({InstanceCount})" : Name;
+    public string DisplayName
+    {
+        get
+        {
+            var name = string.IsNullOrWhiteSpace(FriendlyName) ? Name : FriendlyName;
+            return InstanceCount > 1 && IsGroupParent ? $"{name} ({InstanceCount})" : name;
+        }
+    }
 
     public string RoleBadge => HasWindow ? "UI" : (IsGroupChild ? "Worker" : "");
 

@@ -57,7 +57,7 @@ public partial class ProcessPropertiesWindow : Window
         InstancesLabel.Text = Strings.T("Instances");
 
         CloseButton.ToolTip = Strings.T("Close");
-        CloseFooterButton.Content = Strings.T("Close");
+        CloseFooterText.Text = Strings.T("Close");
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
         AutomationProperties.SetName(CloseFooterButton, Strings.T("Close"));
     }

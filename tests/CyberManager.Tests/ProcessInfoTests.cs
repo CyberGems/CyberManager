@@ -72,6 +72,18 @@ public class ProcessInfoTests
     }
 
     [Fact]
+    public void DisplayName_PrefersFriendlyName()
+    {
+        var info = new ProcessInfo
+        {
+            Name = "dwm.exe",
+            FriendlyName = "Desktop Window Manager"
+        };
+
+        Assert.Equal("Desktop Window Manager", info.DisplayName);
+    }
+
+    [Fact]
     public void DisplayName_GroupParent_ReturnsNameWithCount()
     {
         var info = new ProcessInfo { Name = "Antigravity IDE", InstanceCount = 12, IsGroupParent = true };

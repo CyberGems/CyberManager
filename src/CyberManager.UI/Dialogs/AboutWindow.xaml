@@ -125,7 +125,7 @@
                 </TransformGroup>
             </Border.RenderTransform>
             <Border.Effect>
-                <DropShadowEffect x:Name="WindowGlow" Color="#00E5FF" Opacity="0" BlurRadius="20" ShadowDepth="0"/>
+                <DropShadowEffect x:Name="WindowGlow" Color="{DynamicResource AccentColor}" Opacity="0" BlurRadius="20" ShadowDepth="0"/>
             </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>

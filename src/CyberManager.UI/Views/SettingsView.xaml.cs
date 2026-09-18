@@ -181,7 +181,7 @@ public partial class SettingsView : UserControl
         App.Settings.SuppressedConfirmations.Clear();
         App.Settings.RefreshIntervalMs = 800;
         App.Settings.AlwaysOnTop = false;
-        App.Settings.MinimizeToTray = true;
+        App.Settings.MinimizeToTray = false;
         App.Settings.StartWithWindows = true;
         App.Settings.AutoCheckForUpdates = true;
         App.Settings.RowFontSize = 13.0;
@@ -192,7 +192,7 @@ public partial class SettingsView : UserControl
         GroupByAppSwitch.IsChecked = true;
         HighlightSuspendedSwitch.IsChecked = true;
         AlwaysOnTopSwitch.IsChecked = false;
-        MinimizeToTraySwitch.IsChecked = true;
+        MinimizeToTraySwitch.IsChecked = false;
         StartWithWinSwitch.IsChecked = true;
         AutoUpdatesSwitch.IsChecked = true;
         RefreshIntervalComboBox.SelectedIndex = 1;

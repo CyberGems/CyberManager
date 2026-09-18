@@ -17,6 +17,8 @@ public sealed class ProcessCollector
 
     private readonly ProcessCpuTracker _cpuTracker = new();
     private readonly ConcurrentDictionary<ProcessCacheKey, string> _pathCache = new();
+    private readonly ConcurrentDictionary<string, string> _friendlyNameCache =
+        new(StringComparer.OrdinalIgnoreCase);
     private readonly SemaphoreSlim _collectGate = new(1, 1);
 
     public IReadOnlyList<ProcessInfo> Collect()
@@ -171,6 +173,7 @@ public sealed class ProcessCollector
 
                 // Exe Path with bounded identity-aware caching
                 info.ExePath = GetOrResolveExePath(pid, name, info.StartTime);
+                info.FriendlyName = GetOrResolveFriendlyName(name, info.ExePath);
 
                 result.Add(info);
 
@@ -240,6 +243,43 @@ public sealed class ProcessCollector
         _pathCache[key] = path;
         return path;
     }
+
+    private string GetOrResolveFriendlyName(string processName, string executablePath)
+    {
+        if (string.IsNullOrWhiteSpace(executablePath)) return processName;
+        if (_friendlyNameCache.TryGetValue(executablePath, out var cachedName))
+        {
+            return cachedName;
+        }
+
+        var friendlyName = processName;
+        try
+        {
+            var versionInfo = FileVersionInfo.GetVersionInfo(executablePath);
+            friendlyName = FirstNonEmpty(
+                versionInfo.FileDescription,
+                versionInfo.ProductName,
+                processName);
+        }
+        catch (Exception ex)
+        {
+            Trace.WriteLine($"Unable to resolve friendly name for {executablePath}: {ex.Message}");
+        }
+
+        if (_friendlyNameCache.Count >= MaxPathCacheEntries)
+        {
+            foreach (var oldKey in _friendlyNameCache.Keys.Take(64))
+            {
+                _friendlyNameCache.TryRemove(oldKey, out _);
+            }
+        }
+
+        _friendlyNameCache[executablePath] = friendlyName;
+        return friendlyName;
+    }
+
+    private static string FirstNonEmpty(params string?[] values) =>
+        values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim() ?? string.Empty;
 
     private static long GetStartTimeKey(DateTime startTime) =>
         startTime == default ? 0 : startTime.ToFileTimeUtc();

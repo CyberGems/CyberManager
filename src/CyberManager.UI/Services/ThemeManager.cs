@@ -13,7 +13,7 @@ public static class ThemeManager
 
     private static readonly Dictionary<AppTheme, Palette> Palettes = new()
     {
-        [AppTheme.CyberManager] = new("#070B12","#0E1726","#131F33","#162844","#1C2E4A","#2A436A","#F0F6FC","#8BA2C4","#00E5FF","#3300E5FF","#070B12","#0A111D","#111C2E","#0A1220","#0A1220","#00E5FF","#1C2E4A","#00E5FF","#2000E5FF"),
+        [AppTheme.CyberManager] = new("#090D14","#131A26","#1A2535","#20344A","#29394D","#42566B","#F0F6FC","#93A2B4","#24A6B5","#3324A6B5","#071216","#0C131D","#1B2737","#111A27","#111A27","#24A6B5","#29394D","#24A6B5","#2024A6B5"),
         [AppTheme.Dark] = new("#121214","#1A1A1E","#222228","#282834","#2E2E38","#424250","#EDEDF0","#9E9EA8","#6366F1","#336366F1","#FFFFFF","#161619","#222229","#16161A","#16161A","#6366F1","#2E2E38","#00E5FF","#2000E5FF"),
         [AppTheme.Light] = new("#F8FAFC","#FFFFFF","#F1F5F9","#DBEAFE","#E2E8F0","#CBD5E1","#0F172A","#64748B","#2563EB","#222563EB","#FFFFFF","#F8FAFC","#F1F5F9","#FFFFFF","#FFFFFF","#2563EB","#CBD5E1","#0284C7","#200284C7"),
     };

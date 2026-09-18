@@ -242,7 +242,7 @@ public static class Strings
         ["StartWithWindowsTitle"] = ("Start with Windows", "Iniciar con Windows"),
         ["StartWithWindowsDesc"] = ("Automatically launch CyberManager when you log into Windows.", "Ejecutar CyberManager automáticamente al iniciar sesión en Windows."),
         ["MinimizeToTrayTitle"] = ("Minimize to tray", "Minimizar a la bandeja del sistema"),
-        ["MinimizeToTrayDesc"] = ("Closing the window minimizes to notification area instead of quitting.", "Al cerrar la ventana, minimiza a la bandeja en lugar de cerrar la aplicación."),
+        ["MinimizeToTrayDesc"] = ("Closing the window keeps CyberManager running in the notification area.", "Al cerrar la ventana, CyberManager permanece activo en la bandeja del sistema."),
         ["AutoCheckUpdatesTitle"] = ("Check updates on startup", "Buscar actualizaciones al iniciar"),
         ["AutoCheckUpdatesDesc"] = ("Check for newer versions automatically in background.", "Comprobar periódicamente si hay nuevas versiones disponibles."),
         ["GlobalHotkeyTitle"] = ("Global Hotkey", "Atajo de teclado global"),
