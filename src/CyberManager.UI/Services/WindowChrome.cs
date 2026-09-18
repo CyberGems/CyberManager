@@ -19,7 +19,14 @@ public static class CyberManagerWindowChrome
     public static void Apply(Window w, double radius = 12)
     {
         bool canResize = w.ResizeMode is ResizeMode.CanResize or ResizeMode.CanResizeWithGrip;
-        WindowChrome.SetWindowChrome(w, new WindowChrome { CaptionHeight = 0, CornerRadius = new CornerRadius(radius), GlassFrameThickness = new Thickness(0), ResizeBorderThickness = canResize ? new Thickness(8) : new Thickness(0), UseAeroCaptionButtons = false });
+        WindowChrome.SetWindowChrome(w, new WindowChrome
+        {
+            CaptionHeight = 0,
+            CornerRadius = new CornerRadius(radius),
+            GlassFrameThickness = new Thickness(0),
+            ResizeBorderThickness = canResize ? new Thickness(8, 0, 8, 8) : new Thickness(0),
+            UseAeroCaptionButtons = false
+        });
         ApplyRounded(w, radius);
     }
 

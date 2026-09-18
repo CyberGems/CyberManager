@@ -69,6 +69,7 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? RefreshRequested;
     public event RoutedEventHandler? PinRequested;
     public event RoutedEventHandler? SettingsRequested;
+    public event RoutedEventHandler? MinimizeRequested;
     public event RoutedEventHandler? CloseRequested;
     public event MouseButtonEventHandler? DragRequested;
 
@@ -85,6 +86,8 @@ public partial class CompactProcessView : UserControl
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
         AutomationProperties.SetName(SettingsButton, Strings.T("Settings"));
+        MinimizeButton.ToolTip = Strings.T("Minimize");
+        AutomationProperties.SetName(MinimizeButton, Strings.T("Minimize"));
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
         AutomationProperties.SetName(SearchBox, Strings.T("SearchProcesses"));
         AutomationProperties.SetName(RefreshButton, Strings.T("Refresh"));
@@ -211,6 +214,9 @@ public partial class CompactProcessView : UserControl
     private void SettingsButton_Click(object sender, RoutedEventArgs e) =>
         SettingsRequested?.Invoke(sender, e);
 
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e) =>
+        MinimizeRequested?.Invoke(sender, e);
+
     private void CloseButton_Click(object sender, RoutedEventArgs e) =>
         CloseRequested?.Invoke(sender, e);
 
@@ -219,7 +225,7 @@ public partial class CompactProcessView : UserControl
         var source = e.OriginalSource as DependencyObject;
         if (FindVisualParent<Button>(source) != null ||
             FindVisualParent<TextBox>(source) != null ||
-            FindVisualParent<Border>(source)?.Name == nameof(PinButtonHost))
+            FindVisualParent<Border>(source)?.Name is nameof(PinButtonHost) or nameof(ModeButtonHost))
         {
             return;
         }

@@ -189,6 +189,7 @@ public partial class MainWindow : Window
         CompactView.RefreshRequested += Refresh_Click;
         CompactView.PinRequested += CompactView_PinRequested;
         CompactView.SettingsRequested += Settings_Click;
+        CompactView.MinimizeRequested += Minimize_Click;
         CompactView.CloseRequested += Close_Click;
         CompactView.DragRequested += CompactView_DragRequested;
         CompactView.SearchChanged += CompactView_SearchChanged;
