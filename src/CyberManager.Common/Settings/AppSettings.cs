@@ -21,7 +21,7 @@ public sealed class AppSettings
     public string SearchText { get; set; } = "";
     public List<string> RecentSearches { get; set; } = new();
     public HashSet<string> SuppressedConfirmations { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-    public bool MinimizeToTray { get; set; }
+    public bool MinimizeToTray { get; set; } = true;
     public bool StartWithWindows { get; set; } = true;
     public bool StartMinimized { get; set; }
     public bool AutoCheckForUpdates { get; set; } = true;

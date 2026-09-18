@@ -524,11 +524,47 @@
                                             </TextBlock.Style>
                                         </TextBlock>
                                     </Grid>
-                                    <TextBlock Grid.Column="1"
-                                               Text="{Binding DisplayName}"
-                                               Foreground="{DynamicResource TextBrush}"
-                                               VerticalAlignment="Center"
-                                               TextTrimming="CharacterEllipsis"/>
+                                    <Grid Grid.Column="1" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding FriendlyName}"
+                                                   Foreground="{DynamicResource TextBrush}"
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <StackPanel Grid.Column="1"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Center"
+                                                    Margin="6,0,0,0">
+                                            <Border Background="{DynamicResource CardSecondaryBrush}"
+                                                    BorderBrush="{DynamicResource BorderBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Padding="5,1"
+                                                    Margin="0,0,4,0"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding IsGroupParent, Converter={StaticResource BoolToVisConverter}}">
+                                                <TextBlock Text="{Binding InstanceCount}"
+                                                           FontSize="9.5"
+                                                           FontWeight="Bold"
+                                                           Foreground="{DynamicResource AccentBrush}"/>
+                                            </Border>
+                                            <Border Background="#2024A6B5"
+                                                    BorderBrush="{DynamicResource AccentBrush}"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Padding="4,1"
+                                                    VerticalAlignment="Center"
+                                                    ToolTip="{Binding MainWindowTitle}"
+                                                    Visibility="{Binding HasWindow, Converter={StaticResource BoolToVisConverter}}">
+                                                <TextBlock Text="UI"
+                                                           FontSize="9"
+                                                           FontWeight="Bold"
+                                                           Foreground="{DynamicResource AccentBrush}"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
                                 </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

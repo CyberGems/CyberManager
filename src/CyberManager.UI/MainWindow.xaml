@@ -86,7 +86,7 @@
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource HeaderBgBrush}"/>
                                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
                                 <Setter TargetName="Bd" Property="RenderTransform">
-                                    <Setter.Value><ScaleTransform ScaleX="1.06" ScaleY="1.06"/></Setter.Value>
+                                    <Setter.Value><ScaleTransform ScaleX="1.03" ScaleY="1.03"/></Setter.Value>
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
@@ -115,7 +115,7 @@
                                 <Setter TargetName="Bd" Property="Background" Value="#E81123"/>
                                 <Setter Property="Foreground" Value="White"/>
                                 <Setter TargetName="Bd" Property="RenderTransform">
-                                    <Setter.Value><ScaleTransform ScaleX="1.06" ScaleY="1.06"/></Setter.Value>
+                                    <Setter.Value><ScaleTransform ScaleX="1.03" ScaleY="1.03"/></Setter.Value>
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
@@ -511,7 +511,7 @@
                             <RadioButton x:Name="TabSettingsBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="Settings">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Path x:Name="TabSettingsIcon" Data="M 12 15 C 10.3 15 9 13.7 9 12 C 9 10.3 10.3 9 12 9 C 13.7 9 15 10.3 15 12 C 15 13.7 13.7 15 12 15 Z M 19.4 13 C 19.5 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.5 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10.1 2 C 9.8 2 9.6 2.2 9.6 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.5 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.5 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.6 21.6 C 9.6 21.8 9.8 22 10.1 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.2" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
-                                    <TextBlock x:Name="TabSettingsText" Text="Ajustes" FontSize="11.5" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="TabSettingsText" Text="Configuración" FontSize="11.5" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
                         </StackPanel>
@@ -519,12 +519,12 @@
 
                     <!-- Right: Window Controls -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Button x:Name="FullModeToggleBtn" Width="42" Margin="2,0,0,0" Style="{StaticResource ModeToggleButton}" Click="FullModeToggle_Click" ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto">
+                        <Button x:Name="FullModeToggleBtn" Width="42" Margin="4,0,0,0" Style="{StaticResource ModeToggleButton}" Click="FullModeToggle_Click" ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto">
                             <Path Data="M 3,3 L 8,8 M 3,8 L 8,8 L 8,3 M 16,16 L 11,11 M 16,11 L 11,11 L 11,16"
                                   Width="16" Height="16" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.6"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                         </Button>
-                        <Button x:Name="MoreBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}"
+                        <Button x:Name="MoreBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}"
                                 PreviewMouseLeftButtonDown="MoreBtn_PreviewMouseLeftButtonDown"
                                 Click="MoreBtn_Click" ToolTip="More options" AutomationProperties.Name="More options">
                             <Button.ContextMenu>
@@ -620,8 +620,8 @@
                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
-                        <Button x:Name="MinimizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="MaximizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize">
+                        <Button x:Name="MinimizeBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="MaximizeBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize">
                             <Path x:Name="MaximizeIconPath"
                                   Data="M 3 7 L 3 3 L 7 3 M 3 3 L 6.5 6.5 M 11 7 L 11 11 L 7 11 M 11 11 L 7.5 7.5"
                                   Stroke="{DynamicResource SubTextBrush}"
@@ -632,7 +632,7 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
                         </Button>
-                        <Button x:Name="CloseBtn" Margin="2,0,0,0" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="CloseBtn" Margin="4,0,0,0" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                     </StackPanel>
                 </Grid>
 

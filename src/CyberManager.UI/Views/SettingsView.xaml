@@ -415,7 +415,7 @@
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
                                 <TextBlock x:Name="MinimizeToTrayTitleLbl" Text="Minimizar a la bandeja del sistema" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="MinimizeToTrayDescLbl" Text="Al cerrar la ventana, minimiza a la bandeja en lugar de cerrar la aplicación." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="MinimizeToTrayDescLbl" Text="Al cerrar la ventana, CyberManager permanece activo en la bandeja del sistema." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
                             <CheckBox x:Name="MinimizeToTraySwitch" Grid.Column="2" AutomationProperties.Name="Minimize to tray" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
