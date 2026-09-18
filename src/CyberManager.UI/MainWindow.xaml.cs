@@ -227,6 +227,8 @@ public partial class MainWindow : Window
             await App.Settings.SaveAsync(_lifetimeCts.Token);
         };
         PathToIconConverter.IconReady += OnIconReady;
+        SettingsTabContent.HotkeyChangeRequested += SettingsView_HotkeyChangeRequested;
+        SettingsTabContent.DefaultsReset += SettingsView_DefaultsReset;
         SettingsTabContent.SettingsChanged += () =>
         {
             ApplySortingAndFilter();
@@ -1358,6 +1360,35 @@ public partial class MainWindow : Window
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
         NavigateToTab(MainTab.Settings);
+    }
+
+    private bool SettingsView_HotkeyChangeRequested(string hotkey)
+    {
+        var previousHotkey = App.Settings.GlobalHotkey;
+        if (_hotkeyService.Register(this, hotkey))
+        {
+            App.Settings.GlobalHotkey = hotkey;
+            _trayService.UpdateLocalization();
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(previousHotkey))
+        {
+            _hotkeyService.Register(this, previousHotkey);
+        }
+
+        SetStatus(Strings.T("GlobalHotkeyUnavailable"));
+        return false;
+    }
+
+    private void SettingsView_DefaultsReset()
+    {
+        WorkAreaMaximize.Restore(this);
+        WindowState = WindowState.Normal;
+        ApplyViewMode(compact: false, restoreBounds: true);
+        Topmost = App.Settings.AlwaysOnTop;
+        CompactView.SetPinned(Topmost);
+        _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
     }
 
     private void FullModeToggle_Click(object sender, RoutedEventArgs e) =>

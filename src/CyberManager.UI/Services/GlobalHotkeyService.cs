@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
+using System.Globalization;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Interop;
 
 namespace CyberManager.UI.Services;
@@ -89,7 +91,7 @@ public sealed class GlobalHotkeyService : IDisposable
         return IntPtr.Zero;
     }
 
-    private static bool TryParseHotkey(string? str, out uint modifiers, out uint vk)
+    public static bool TryParseHotkey(string? str, out uint modifiers, out uint vk)
     {
         modifiers = 0;
         vk = 0;
@@ -112,22 +114,8 @@ public sealed class GlobalHotkeyService : IDisposable
                 modifiers |= MOD_SHIFT;
             else if (trimmed.Equals("win", StringComparison.OrdinalIgnoreCase) || trimmed.Equals("windows", StringComparison.OrdinalIgnoreCase))
                 modifiers |= MOD_WIN;
-            else if (trimmed.Length == 1 && char.IsLetterOrDigit(trimmed[0]))
+            else if (!hasKey && TryParseKey(trimmed, out vk))
             {
-                if (hasKey) return false;
-                vk = (uint)char.ToUpperInvariant(trimmed[0]);
-                hasKey = true;
-            }
-            else if (trimmed.Equals("esc", StringComparison.OrdinalIgnoreCase) || trimmed.Equals("escape", StringComparison.OrdinalIgnoreCase))
-            {
-                if (hasKey) return false;
-                vk = 0x1B; // VK_ESCAPE
-                hasKey = true;
-            }
-            else if (trimmed.StartsWith("F", StringComparison.OrdinalIgnoreCase) && int.TryParse(trimmed.AsSpan(1), out var fNum) && fNum >= 1 && fNum <= 12)
-            {
-                if (hasKey) return false;
-                vk = (uint)(0x70 + (fNum - 1)); // VK_F1 to VK_F12
                 hasKey = true;
             }
             else
@@ -138,6 +126,81 @@ public sealed class GlobalHotkeyService : IDisposable
 
         return modifiers != 0 && hasKey;
     }
+
+    public static ModifierKeys GetModifier(Key key) => key switch
+    {
+        Key.LeftCtrl or Key.RightCtrl => ModifierKeys.Control,
+        Key.LeftAlt or Key.RightAlt => ModifierKeys.Alt,
+        Key.LeftShift or Key.RightShift => ModifierKeys.Shift,
+        Key.LWin or Key.RWin => ModifierKeys.Windows,
+        _ => ModifierKeys.None
+    };
+
+    public static string FormatHotkey(ModifierKeys modifiers, Key key)
+    {
+        var parts = new List<string>(5);
+        if (modifiers.HasFlag(ModifierKeys.Control)) parts.Add("Ctrl");
+        if (modifiers.HasFlag(ModifierKeys.Alt)) parts.Add("Alt");
+        if (modifiers.HasFlag(ModifierKeys.Shift)) parts.Add("Shift");
+        if (modifiers.HasFlag(ModifierKeys.Windows)) parts.Add("Win");
+        if (key != Key.None) parts.Add(FormatKey(key));
+        return string.Join(" + ", parts);
+    }
+
+    private static bool TryParseKey(string token, out uint vk)
+    {
+        vk = 0;
+        if (token.Length == 1 && char.IsLetterOrDigit(token[0]))
+        {
+            vk = (uint)char.ToUpperInvariant(token[0]);
+            return true;
+        }
+
+        if (token.StartsWith("F", StringComparison.OrdinalIgnoreCase) &&
+            int.TryParse(token.AsSpan(1), out var fNum) &&
+            fNum >= 1 && fNum <= 24)
+        {
+            vk = (uint)(0x70 + (fNum - 1));
+            return true;
+        }
+
+        var normalized = token.ToUpperInvariant() switch
+        {
+            "ESC" or "ESCAPE" => "Escape",
+            "RETURN" => "Enter",
+            "BACKSPACE" => "Back",
+            "DEL" => "Delete",
+            "PGUP" => "PageUp",
+            "PGDN" => "PageDown",
+            _ => token
+        };
+
+        if (!Enum.TryParse<Key>(normalized, ignoreCase: true, out var key) || key == Key.None)
+        {
+            return false;
+        }
+
+        vk = (uint)KeyInterop.VirtualKeyFromKey(key);
+        return vk != 0;
+    }
+
+    private static string FormatKey(Key key) => key switch
+    {
+        >= Key.A and <= Key.Z => key.ToString(),
+        >= Key.D0 and <= Key.D9 => ((int)key - (int)Key.D0).ToString(CultureInfo.InvariantCulture),
+        >= Key.NumPad0 and <= Key.NumPad9 => $"NumPad{(int)key - (int)Key.NumPad0}",
+        >= Key.F1 and <= Key.F24 => key.ToString(),
+        Key.Escape => "Esc",
+        Key.Enter => "Enter",
+        Key.Back => "Backspace",
+        Key.Delete => "Delete",
+        Key.Insert => "Insert",
+        Key.Space => "Space",
+        Key.Tab => "Tab",
+        Key.PageUp => "PageUp",
+        Key.PageDown => "PageDown",
+        _ => key.ToString()
+    };
 
     public void Dispose()
     {

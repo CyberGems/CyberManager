@@ -93,4 +93,49 @@ public class AppSettingsTests
 
         Assert.Empty(settings.RecentSearches);
     }
+
+    [Fact]
+    public void AppSettings_ResetToDefaults_RestoresAllUserPreferences()
+    {
+        var settings = new AppSettings
+        {
+            Language = CyberManager.Common.I18n.Lang.En,
+            Theme = AppTheme.Light,
+            AlwaysOnTop = true,
+            GroupProcesses = false,
+            HeavyProcessesOnly = true,
+            SearchText = "chrome",
+            MinimizeToTrayOnMinimize = true,
+            MinimizeToTrayOnClose = false,
+            StartWithWindows = false,
+            StartMinimized = true,
+            AutoCheckForUpdates = false,
+            GlobalHotkey = "Ctrl+Shift+P",
+            CompactMode = true,
+            MainWindowBoundsSaved = true,
+            CompactWindowBoundsSaved = true
+        };
+        settings.RecordSearch("chrome");
+        settings.SetConfirmationSuppressed("process.kill", suppressed: true);
+
+        settings.ResetToDefaults();
+
+        Assert.Equal(CyberManager.Common.I18n.Lang.Es, settings.Language);
+        Assert.Equal(AppTheme.CyberManager, settings.Theme);
+        Assert.False(settings.AlwaysOnTop);
+        Assert.True(settings.GroupProcesses);
+        Assert.False(settings.HeavyProcessesOnly);
+        Assert.Empty(settings.SearchText);
+        Assert.Empty(settings.RecentSearches);
+        Assert.Empty(settings.SuppressedConfirmations);
+        Assert.False(settings.MinimizeToTrayOnMinimize);
+        Assert.True(settings.MinimizeToTrayOnClose);
+        Assert.True(settings.StartWithWindows);
+        Assert.False(settings.StartMinimized);
+        Assert.True(settings.AutoCheckForUpdates);
+        Assert.Equal("Ctrl+Alt+M", settings.GlobalHotkey);
+        Assert.False(settings.CompactMode);
+        Assert.False(settings.MainWindowBoundsSaved);
+        Assert.False(settings.CompactWindowBoundsSaved);
+    }
 }

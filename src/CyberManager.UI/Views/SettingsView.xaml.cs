@@ -1,5 +1,7 @@
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
@@ -10,10 +12,17 @@ namespace CyberManager.UI.Views;
 
 public partial class SettingsView : UserControl
 {
+    private const string DefaultGlobalHotkey = "Ctrl+Alt+M";
+
     public event Action? SettingsChanged;
+    public event Action? DefaultsReset;
+    public event Func<string, bool>? HotkeyChangeRequested;
 
     private bool _initializing = true;
     private bool _syncingStartup;
+    private bool _capturingHotkey;
+    private ModifierKeys _heldHotkeyModifiers;
+    private string _committedHotkey = DefaultGlobalHotkey;
     private readonly DispatcherTimer _saveDebounceTimer = new();
 
     public SettingsView()
@@ -82,6 +91,8 @@ public partial class SettingsView : UserControl
         MinimizeToTrayOnCloseSwitch.IsChecked = App.Settings.MinimizeToTrayOnClose;
         AlwaysOnTopSwitch.IsChecked = App.Settings.AlwaysOnTop;
         AutoUpdatesSwitch.IsChecked = App.Settings.AutoCheckForUpdates;
+        _committedHotkey = App.Settings.GlobalHotkey;
+        HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
 
         RefreshLocalization();
         _initializing = false;
@@ -172,36 +183,20 @@ public partial class SettingsView : UserControl
     private void ResetBtn_Click(object sender, RoutedEventArgs e)
     {
         _initializing = true;
+        var previousHotkey = App.Settings.GlobalHotkey;
+        App.Settings.ResetToDefaults();
+        Strings.Current = App.Settings.Language;
+        ThemeManager.Apply(App.Settings.Theme);
 
-        App.Settings.ShowIdleProcess = false;
-        App.Settings.CompactMode = false;
-        App.Settings.GroupProcesses = true;
-        App.Settings.ShowSuspended = true;
-        App.Settings.HeavyProcessesOnly = false;
-        App.Settings.SearchText = "";
-        App.Settings.ClearSearchHistory();
-        App.Settings.SuppressedConfirmations.Clear();
-        App.Settings.RefreshIntervalMs = 800;
-        App.Settings.AlwaysOnTop = false;
-        App.Settings.MinimizeToTrayOnMinimize = false;
-        App.Settings.MinimizeToTrayOnClose = true;
-        App.Settings.StartWithWindows = true;
-        App.Settings.AutoCheckForUpdates = true;
-        App.Settings.RowFontSize = 13.0;
+        if (HotkeyChangeRequested?.Invoke(App.Settings.GlobalHotkey) == false)
+        {
+            App.Settings.GlobalHotkey = previousHotkey;
+            ShowToast(Strings.T("GlobalHotkeyUnavailable"));
+        }
 
-        StartupManager.SetAutoStart(true, requestElevation: true);
-
-        ShowIdleSwitch.IsChecked = false;
-        GroupByAppSwitch.IsChecked = true;
-        HighlightSuspendedSwitch.IsChecked = true;
-        AlwaysOnTopSwitch.IsChecked = false;
-        MinimizeToTrayOnMinimizeSwitch.IsChecked = false;
-        MinimizeToTrayOnCloseSwitch.IsChecked = true;
-        StartWithWinSwitch.IsChecked = true;
-        AutoUpdatesSwitch.IsChecked = true;
-        RefreshIntervalComboBox.SelectedIndex = 1;
-
-        _initializing = false;
+        StartupManager.SetAutoStart(App.Settings.StartWithWindows, requestElevation: true);
+        LoadCurrentSettings();
+        DefaultsReset?.Invoke();
         SaveAndNotify();
         ShowToast(Strings.T("SettingsSaved"));
     }
@@ -228,6 +223,109 @@ public partial class SettingsView : UserControl
         };
         timer.Start();
     }
+
+    private void HotkeyBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        _capturingHotkey = true;
+        _heldHotkeyModifiers = ModifierKeys.None;
+        HotkeyBox.Text = Strings.T("GlobalHotkeyCaptureHint");
+        HotkeyBox.SelectAll();
+    }
+
+    private void HotkeyBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (!_capturingHotkey) return;
+
+        _capturingHotkey = false;
+        _heldHotkeyModifiers = ModifierKeys.None;
+        HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
+    }
+
+    private void HotkeyBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (!_capturingHotkey) return;
+
+        e.Handled = true;
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        if (key == Key.Escape)
+        {
+            Keyboard.ClearFocus();
+            return;
+        }
+
+        var modifier = GlobalHotkeyService.GetModifier(key);
+        if (modifier != ModifierKeys.None)
+        {
+            _heldHotkeyModifiers |= modifier;
+            UpdateHotkeyPreview();
+            return;
+        }
+
+        if (key == Key.None) return;
+
+        var modifiers = _heldHotkeyModifiers | Keyboard.Modifiers;
+        var candidate = GlobalHotkeyService.FormatHotkey(modifiers, key);
+        HotkeyBox.Text = candidate;
+        if (modifiers == ModifierKeys.None) return;
+
+        if (TryApplyHotkey(candidate))
+        {
+            Keyboard.ClearFocus();
+        }
+        else
+        {
+            Keyboard.ClearFocus();
+        }
+    }
+
+    private void HotkeyBox_PreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        if (!_capturingHotkey) return;
+
+        var modifier = GlobalHotkeyService.GetModifier(e.Key);
+        if (modifier == ModifierKeys.None) return;
+
+        _heldHotkeyModifiers &= ~modifier;
+        UpdateHotkeyPreview();
+        e.Handled = true;
+    }
+
+    private void HotkeyResetBtn_Click(object sender, RoutedEventArgs e)
+    {
+        if (TryApplyHotkey(DefaultGlobalHotkey))
+        {
+            ShowToast(Strings.T("SettingsSaved"));
+        }
+    }
+
+    private bool TryApplyHotkey(string hotkey)
+    {
+        if (HotkeyChangeRequested?.Invoke(hotkey) == false)
+        {
+            HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
+            ShowToast(Strings.T("GlobalHotkeyUnavailable"));
+            return false;
+        }
+
+        App.Settings.GlobalHotkey = hotkey;
+        _committedHotkey = hotkey;
+        HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
+        SaveAndNotify();
+        return true;
+    }
+
+    private void UpdateHotkeyPreview()
+    {
+        var modifiers = _heldHotkeyModifiers | Keyboard.Modifiers;
+        HotkeyBox.Text = modifiers == ModifierKeys.None
+            ? Strings.T("GlobalHotkeyCaptureHint")
+            : GlobalHotkeyService.FormatHotkey(modifiers, Key.None) + " + ...";
+    }
+
+    private static string FormatStoredHotkey(string hotkey) =>
+        string.Join(
+            " + ",
+            hotkey.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
     public void RefreshLocalization()
     {
@@ -271,7 +369,9 @@ public partial class SettingsView : UserControl
         AutoUpdatesDescLbl.Text = Strings.T("AutoCheckUpdatesDesc");
         HotkeyTitleLbl.Text = Strings.T("GlobalHotkeyTitle");
         HotkeyDescLbl.Text = Strings.T("GlobalHotkeyDesc");
-        HotkeyValueText.Text = App.Settings.GlobalHotkey;
+        HotkeyResetBtn.Content = Strings.T("GlobalHotkeyReset");
+        HotkeyBox.ToolTip = Strings.T("GlobalHotkeyCaptureHint");
+        AutomationProperties.SetName(HotkeyBox, Strings.T("GlobalHotkeyTitle"));
 
         if (RefreshIntervalComboBox.Items.Count >= 3)
         {
@@ -281,6 +381,6 @@ public partial class SettingsView : UserControl
         }
 
         // Buttons
-        ResetBtn.Content = Strings.T("ResetDefaults");
+        ResetBtn.Content = Strings.T("RestoreFactorySettings");
     }
 }

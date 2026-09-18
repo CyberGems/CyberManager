@@ -168,6 +168,44 @@ public sealed class AppSettings
         GlobalHotkey = string.IsNullOrWhiteSpace(GlobalHotkey) ? "Ctrl+Alt+M" : GlobalHotkey.Trim();
     }
 
+    public void ResetToDefaults()
+    {
+        var defaults = new AppSettings();
+
+        Language = defaults.Language;
+        Theme = defaults.Theme;
+        RefreshIntervalMs = defaults.RefreshIntervalMs;
+        AlwaysOnTop = defaults.AlwaysOnTop;
+        GroupProcesses = defaults.GroupProcesses;
+        RowFontSize = defaults.RowFontSize;
+        ShowSuspended = defaults.ShowSuspended;
+        HeavyProcessesOnly = defaults.HeavyProcessesOnly;
+        SearchText = defaults.SearchText;
+        RecentSearches = new();
+        SuppressedConfirmations = new(StringComparer.OrdinalIgnoreCase);
+        MinimizeToTrayOnMinimize = defaults.MinimizeToTrayOnMinimize;
+        MinimizeToTrayOnClose = defaults.MinimizeToTrayOnClose;
+        StartWithWindows = defaults.StartWithWindows;
+        StartMinimized = defaults.StartMinimized;
+        AutoCheckForUpdates = defaults.AutoCheckForUpdates;
+        GlobalHotkey = defaults.GlobalHotkey;
+        ShowIdleProcess = defaults.ShowIdleProcess;
+        CompactMode = defaults.CompactMode;
+        MainWindowBoundsSaved = defaults.MainWindowBoundsSaved;
+        MainWindowMonitor = defaults.MainWindowMonitor;
+        MainWindowLeft = defaults.MainWindowLeft;
+        MainWindowTop = defaults.MainWindowTop;
+        MainWindowWidth = defaults.MainWindowWidth;
+        MainWindowHeight = defaults.MainWindowHeight;
+        MainWindowMaximized = defaults.MainWindowMaximized;
+        CompactWindowBoundsSaved = defaults.CompactWindowBoundsSaved;
+        CompactWindowMonitor = defaults.CompactWindowMonitor;
+        CompactWindowLeft = defaults.CompactWindowLeft;
+        CompactWindowTop = defaults.CompactWindowTop;
+        CompactWindowWidth = defaults.CompactWindowWidth;
+        CompactWindowHeight = defaults.CompactWindowHeight;
+    }
+
     public bool IsConfirmationSuppressed(string key) =>
         !string.IsNullOrWhiteSpace(key) && SuppressedConfirmations.Contains(key);
 
