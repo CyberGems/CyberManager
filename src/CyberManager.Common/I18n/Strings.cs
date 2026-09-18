@@ -17,6 +17,7 @@ public static class Strings
         ["Process"] = ("Process", "Proceso"),
         ["Pid"] = ("PID", "PID"),
         ["Cpu"] = ("CPU", "CPU"),
+        ["Ram"] = ("RAM", "RAM"),
         ["Memory"] = ("Memory", "Memoria"),
         ["Threads"] = ("Threads", "Hilos"),
         ["Path"] = ("Path", "Ruta"),

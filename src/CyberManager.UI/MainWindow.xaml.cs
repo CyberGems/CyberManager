@@ -607,6 +607,7 @@ public partial class MainWindow : Window
             CpuSparkline.Values = cpuHistory;
             CpuSparkline.SecondaryValues = cpuKernelHistory;
             CpuSparklineText.Text = $"{sysMetrics.CpuTotalPercent:F1}%";
+            CompactView.SetSystemMetrics(sysMetrics.CpuTotalPercent, sysMetrics.UsedRamGb);
 
             RamSparkline.Values = ramPctHistory;
             RamSparklineText.Text = $"{sysMetrics.UsedRamGb:F1} GB";
@@ -1023,6 +1024,38 @@ public partial class MainWindow : Window
         }
 
         return null;
+    }
+
+    private void OuterBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isCompactMode || e.ChangedButton != MouseButton.Left) return;
+
+        var source = e.OriginalSource as DependencyObject;
+        if (IsDescendantOf(source, CompactView) && !CompactView.IsTitleBarDragSource(source))
+        {
+            return;
+        }
+
+        if (e.ClickCount == 2)
+        {
+            ApplyViewMode(!_isCompactMode, restoreBounds: false);
+            e.Handled = true;
+            return;
+        }
+
+        e.Handled = true;
+        DragWindow(e);
+    }
+
+    private static bool IsDescendantOf(DependencyObject? source, DependencyObject ancestor)
+    {
+        while (source != null)
+        {
+            if (ReferenceEquals(source, ancestor)) return true;
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        return false;
     }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

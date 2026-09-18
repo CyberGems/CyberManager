@@ -79,6 +79,8 @@ public partial class CompactProcessView : UserControl
         RefreshButton.ToolTip = Strings.T("Refresh");
         PinButton.ToolTip = Strings.T("AlwaysOnTop");
         EngineBadgeText.Text = Strings.T("WfpEngineBadge");
+        CompactCpuLabel.Text = Strings.T("Cpu");
+        CompactRamLabel.Text = Strings.T("Ram");
         ModeButton.ToolTip = Strings.T("MoreDetails");
         AutomationProperties.SetName(ModeButton, Strings.T("MoreDetails"));
         SettingsButton.ToolTip = Strings.T("Settings");
@@ -122,6 +124,12 @@ public partial class CompactProcessView : UserControl
 
     public void SetStatus(string value) => StatusText.Text = value;
     public void SetStatusToolTip(string? value) => StatusText.ToolTip = value;
+
+    public void SetSystemMetrics(double cpuPercent, double usedRamGb)
+    {
+        CompactCpuText.Text = $"{cpuPercent:F1}%";
+        CompactRamText.Text = $"{usedRamGb:F1} GB";
+    }
 
     public void SetEmptyState(bool empty, string? message = null)
     {
@@ -222,15 +230,26 @@ public partial class CompactProcessView : UserControl
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        var source = e.OriginalSource as DependencyObject;
-        if (FindVisualParent<Button>(source) != null ||
-            FindVisualParent<TextBox>(source) != null ||
-            FindVisualParent<Border>(source)?.Name is nameof(PinButtonHost) or nameof(ModeButtonHost))
-        {
-            return;
-        }
+        if (!IsTitleBarDragSource(e.OriginalSource as DependencyObject)) return;
 
         DragRequested?.Invoke(this, e);
+    }
+
+    public bool IsTitleBarDragSource(DependencyObject? source) =>
+        IsDescendantOf(source, CompactTitleBar) &&
+        FindVisualParent<Button>(source) == null &&
+        FindVisualParent<TextBox>(source) == null &&
+        FindVisualParent<Border>(source)?.Name is not (nameof(PinButtonHost) or nameof(ModeButtonHost));
+
+    private static bool IsDescendantOf(DependencyObject? source, DependencyObject ancestor)
+    {
+        while (source != null)
+        {
+            if (ReferenceEquals(source, ancestor)) return true;
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        return false;
     }
 
     private static T? FindVisualParent<T>(DependencyObject? source)

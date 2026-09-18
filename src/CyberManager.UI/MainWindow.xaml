@@ -380,7 +380,13 @@
         </Style>
     </Window.Resources>
     <Border Margin="5" CornerRadius="12">
-        <Border x:Name="OuterBorder" CornerRadius="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource BgBrush}" ClipToBounds="True">
+        <Border x:Name="OuterBorder"
+                CornerRadius="12"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                Background="{DynamicResource BgBrush}"
+                ClipToBounds="True"
+                PreviewMouseLeftButtonDown="OuterBorder_MouseLeftButtonDown">
             <Grid Margin="20,14,20,16">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Row 0: TitleBar -->
