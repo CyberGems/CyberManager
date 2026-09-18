@@ -369,7 +369,7 @@
                                 <ColumnDefinition Width="220"/>
                             </Grid.ColumnDefinitions>
                             <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
-                                <Path Data="M 4 4 V 9 H 9 M 4 9 A 8 8 0 1 0 6 17" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
                                 <TextBlock x:Name="RefreshRateTitleLbl" Text="Frecuencia de actualización" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
@@ -562,15 +562,54 @@
                         </StackPanel>
                     </Grid>
                 </Border>
+                <Grid Margin="0,0,0,16">
+                    <TextBlock x:Name="ToastText"
+                               Text=""
+                               Foreground="{DynamicResource AccentBrush}"
+                               FontWeight="SemiBold"
+                               FontSize="12.5"
+                               VerticalAlignment="Center"
+                               Opacity="0"/>
+                    <Button x:Name="ResetBtn" Content="Restaurar ajustes de fábrica" Style="{StaticResource SecondaryActionBtn}" HorizontalAlignment="Right" Click="ResetBtn_Click"/>
+                </Grid>
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Footer Actions -->
-        <Border Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,10,0,0">
-            <Grid>
-                <TextBlock x:Name="ToastText" Text="" Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" FontSize="12.5" VerticalAlignment="Center" Opacity="0"/>
-                <Button x:Name="ResetBtn" Content="Restaurar ajustes de fábrica" Style="{StaticResource SecondaryActionBtn}" HorizontalAlignment="Right" Click="ResetBtn_Click"/>
-            </Grid>
+        <!-- Footer / Version Card -->
+        <Border x:Name="FooterAboutBorder"
+                Grid.Row="2"
+                Background="{DynamicResource CardBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="10"
+                Padding="16,10"
+                Margin="0,10,0,0"
+                Cursor="Hand"
+                ToolTip="About CyberManager"
+                MouseLeftButtonUp="FooterAboutBorder_MouseLeftButtonUp">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,2">
+                    <Image Source="pack://application:,,,/Assets/CyberManager.png"
+                           Width="16"
+                           Height="16"
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0"/>
+                    <TextBlock x:Name="FooterVersionText"
+                               Text="CyberManager v1.0.0"
+                               FontSize="12.5"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource SubTextBrush}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock x:Name="FooterCopyrightText"
+                           Text="© 2026 CyberGems"
+                           FontSize="11.5"
+                           Foreground="{DynamicResource SubTextBrush}"
+                           Opacity="0.75"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
         </Border>
     </Grid>
 </UserControl>

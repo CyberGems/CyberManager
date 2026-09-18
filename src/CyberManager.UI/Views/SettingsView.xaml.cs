@@ -17,6 +17,7 @@ public partial class SettingsView : UserControl
     public event Action? SettingsChanged;
     public event Action? DefaultsReset;
     public event Func<string, bool>? HotkeyChangeRequested;
+    public event RoutedEventHandler? AboutRequested;
 
     private bool _initializing = true;
     private bool _syncingStartup;
@@ -306,6 +307,12 @@ public partial class SettingsView : UserControl
         }
     }
 
+    private void FooterAboutBorder_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        AboutRequested?.Invoke(this, new RoutedEventArgs());
+    }
+
     private bool TryApplyHotkey(string hotkey)
     {
         if (HotkeyChangeRequested?.Invoke(hotkey) == false)
@@ -383,6 +390,10 @@ public partial class SettingsView : UserControl
         AutomationProperties.SetName(HotkeyBox, Strings.T("GlobalHotkeyTitle"));
         AutomationProperties.SetName(HotkeyClearBtn, Strings.T("GlobalHotkeyClear"));
         AutomationProperties.SetName(HotkeyResetBtn, Strings.T("GlobalHotkeyReset"));
+        FooterVersionText.Text = $"CyberManager {UpdateService.GetCurrentVersionLabel()}";
+        FooterCopyrightText.Text = Strings.T("Copyright");
+        FooterAboutBorder.ToolTip = Strings.T("AboutCyberManager");
+        AutomationProperties.SetName(FooterAboutBorder, Strings.T("AboutCyberManager"));
 
         if (RefreshIntervalComboBox.Items.Count >= 3)
         {

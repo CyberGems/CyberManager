@@ -193,6 +193,7 @@ public partial class MainWindow : Window
         CompactView.MinimizeRequested += Minimize_Click;
         CompactView.CloseRequested += Close_Click;
         CompactView.AboutRequested += About_Click;
+        SettingsTabContent.AboutRequested += About_Click;
         CompactView.DragRequested += CompactView_DragRequested;
         CompactView.SearchChanged += CompactView_SearchChanged;
         CompactView.SearchSubmitted += CompactView_SearchSubmitted;
