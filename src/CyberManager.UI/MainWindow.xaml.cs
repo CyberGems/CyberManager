@@ -186,7 +186,6 @@ public partial class MainWindow : Window
         CompactView.ItemsSource = _processList.Items;
         CompactView.ToggleRequested += CompactView_ToggleRequested;
         CompactView.EndTaskRequested += Kill_Click;
-        CompactView.RefreshRequested += Refresh_Click;
         CompactView.PinRequested += CompactView_PinRequested;
         CompactView.SettingsRequested += Settings_Click;
         CompactView.MinimizeRequested += Minimize_Click;

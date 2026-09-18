@@ -126,13 +126,13 @@
                             <TextBlock x:Name="CompactCpuLabel"
                                        Text="CPU"
                                        Foreground="{DynamicResource SubTextBrush}"
-                                       FontSize="8.5"
+                                       FontSize="9"
                                        FontWeight="SemiBold"
                                        Margin="0,0,4,0"/>
                             <TextBlock x:Name="CompactCpuText"
                                        Text="0.0%"
                                        Foreground="{DynamicResource TextBrush}"
-                                       FontSize="9"
+                                       FontSize="10"
                                        FontWeight="Bold"/>
                         </StackPanel>
                     </Border>
@@ -143,13 +143,13 @@
                             <TextBlock x:Name="CompactRamLabel"
                                        Text="RAM"
                                        Foreground="{DynamicResource SubTextBrush}"
-                                       FontSize="8.5"
+                                       FontSize="9"
                                        FontWeight="SemiBold"
                                        Margin="0,0,4,0"/>
                             <TextBlock x:Name="CompactRamText"
                                        Text="0.0 GB"
                                        Foreground="{DynamicResource TextBrush}"
-                                       FontSize="9"
+                                       FontSize="10"
                                        FontWeight="Bold"/>
                         </StackPanel>
                     </Border>
@@ -243,7 +243,6 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <TextBox x:Name="SearchBox"
@@ -263,29 +262,21 @@
                          TextChanged="SearchBox_TextChanged"
                          PreviewKeyDown="SearchBox_PreviewKeyDown"/>
 
-                <Button x:Name="RefreshButton"
+                <Button x:Name="EndTaskButton"
                         Grid.Column="1"
                         Width="28"
                         Height="26"
-                        Margin="0,0,4,0"
-                        Content="↻"
-                        FontSize="14"
                         Padding="0"
-                        Style="{DynamicResource ModernButton}"
-                        Click="RefreshButton_Click"
-                        ToolTip="Refresh"
-                        AutomationProperties.Name="Refresh"/>
-
-                <Button x:Name="EndTaskButton"
-                        Grid.Column="2"
-                        Width="28"
-                        Height="26"
-                        Padding="0"
-                        Content="✕"
                         Style="{DynamicResource DangerModernButton}"
                         Click="EndTaskButton_Click"
                         ToolTip="End task"
-                        AutomationProperties.Name="End task"/>
+                        AutomationProperties.Name="End task">
+                    <Path Data="M 3,3 H 13 V 13 H 3 Z"
+                          Width="11"
+                          Height="11"
+                          Stretch="Uniform"
+                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                </Button>
             </Grid>
 
             <Grid Grid.Row="2">

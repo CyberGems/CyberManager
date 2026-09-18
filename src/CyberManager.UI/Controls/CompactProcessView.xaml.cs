@@ -66,7 +66,6 @@ public partial class CompactProcessView : UserControl
     public event EventHandler? SearchChanged;
     public event RoutedEventHandler? ToggleRequested;
     public event RoutedEventHandler? EndTaskRequested;
-    public event RoutedEventHandler? RefreshRequested;
     public event RoutedEventHandler? PinRequested;
     public event RoutedEventHandler? SettingsRequested;
     public event RoutedEventHandler? MinimizeRequested;
@@ -76,7 +75,6 @@ public partial class CompactProcessView : UserControl
     public void ApplyLanguage()
     {
         EndTaskButton.ToolTip = Strings.T("Kill");
-        RefreshButton.ToolTip = Strings.T("Refresh");
         PinButton.ToolTip = Strings.T("AlwaysOnTop");
         EngineBadgeText.Text = Strings.T("WfpEngineBadge");
         CompactCpuLabel.Text = Strings.T("Cpu");
@@ -92,7 +90,6 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(MinimizeButton, Strings.T("Minimize"));
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
         AutomationProperties.SetName(SearchBox, Strings.T("SearchProcesses"));
-        AutomationProperties.SetName(RefreshButton, Strings.T("Refresh"));
         AutomationProperties.SetName(EndTaskButton, Strings.T("Kill"));
         AutomationProperties.SetName(CompactGrid, Strings.T("Processes"));
         ContextHintText.Text = Strings.T("CompactContextHint");
@@ -212,9 +209,6 @@ public partial class CompactProcessView : UserControl
 
     private void EndTaskButton_Click(object sender, RoutedEventArgs e) =>
         EndTaskRequested?.Invoke(sender, e);
-
-    private void RefreshButton_Click(object sender, RoutedEventArgs e) =>
-        RefreshRequested?.Invoke(sender, e);
 
     private void PinButton_Click(object sender, RoutedEventArgs e) =>
         PinRequested?.Invoke(sender, e);
