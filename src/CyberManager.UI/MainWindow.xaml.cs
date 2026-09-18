@@ -318,6 +318,7 @@ public partial class MainWindow : Window
     {
         try
         {
+            ClearSearchState();
             SaveCurrentWindowBounds();
             App.Settings.Save();
 
@@ -1250,9 +1251,17 @@ public partial class MainWindow : Window
 
     private void ClearSearch_Click(object sender, RoutedEventArgs e)
     {
+        ClearSearchState();
+    }
+
+    private void ClearSearchState()
+    {
+        _searchDebounceTimer.Stop();
         SearchBox.Clear();
+        _searchDebounceTimer.Stop();
         _pendingSearch = "";
         CompactView.SetSearchText("");
+        App.Settings.SearchText = "";
         ApplySortingAndFilter();
     }
 
@@ -1610,8 +1619,10 @@ public partial class MainWindow : Window
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
+            ClearBtn.ToolTip = Strings.T("Clear");
             AutomationProperties.SetName(RefreshBtn, Strings.T("Refresh"));
             AutomationProperties.SetName(KillBtn, Strings.T("Kill"));
+            AutomationProperties.SetName(ClearBtn, Strings.T("Clear"));
             FullModeToggleBtn.ToolTip = Strings.T("CompactMode");
             AutomationProperties.SetName(FullModeToggleBtn, Strings.T("CompactMode"));
             MoreBtn.ToolTip = Strings.T("MoreOptions");

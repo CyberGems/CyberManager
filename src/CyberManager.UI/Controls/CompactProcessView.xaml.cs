@@ -90,12 +90,14 @@ public partial class CompactProcessView : UserControl
         SettingsButton.ToolTip = Strings.T("Settings");
         CloseButton.ToolTip = Strings.T("Close");
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");
+        ClearSearchButton.ToolTip = Strings.T("Clear");
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
         AutomationProperties.SetName(SettingsButton, Strings.T("Settings"));
         MinimizeButton.ToolTip = Strings.T("Minimize");
         AutomationProperties.SetName(MinimizeButton, Strings.T("Minimize"));
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
         AutomationProperties.SetName(SearchBox, Strings.T("SearchProcesses"));
+        AutomationProperties.SetName(ClearSearchButton, Strings.T("Clear"));
         AutomationProperties.SetName(EndTaskButton, Strings.T("Kill"));
         AutomationProperties.SetName(CompactGrid, Strings.T("Processes"));
         ContextHintText.Text = Strings.T("CompactContextHint");
@@ -111,7 +113,11 @@ public partial class CompactProcessView : UserControl
 
     public void SetSearchText(string value)
     {
-        if (string.Equals(SearchBox.Text, value, StringComparison.Ordinal)) return;
+        if (string.Equals(SearchBox.Text, value, StringComparison.Ordinal))
+        {
+            UpdateSearchClearButtonVisibility();
+            return;
+        }
 
         _syncingSearch = true;
         try
@@ -123,6 +129,8 @@ public partial class CompactProcessView : UserControl
         {
             _syncingSearch = false;
         }
+
+        UpdateSearchClearButtonVisibility();
     }
 
     public void SetStatus(string value) => StatusText.Text = value;
@@ -182,7 +190,21 @@ public partial class CompactProcessView : UserControl
 
     private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
+        UpdateSearchClearButtonVisibility();
         if (!_syncingSearch) SearchChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void UpdateSearchClearButtonVisibility()
+    {
+        ClearSearchButton.Visibility = string.IsNullOrEmpty(SearchBox.Text)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+    }
+
+    private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
+    {
+        SearchBox.Clear();
+        SearchBox.Focus();
     }
 
     private void SearchBox_PreviewKeyDown(object sender, KeyEventArgs e)

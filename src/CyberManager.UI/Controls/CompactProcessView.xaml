@@ -28,7 +28,7 @@
                                 BorderThickness="{TemplateBinding BorderThickness}">
                             <Grid>
                                 <Border x:Name="HoverOverlay"
-                                        Background="{DynamicResource CardSecondaryBrush}"
+                                        Background="{DynamicResource SelectionBgBrush}"
                                         Opacity="0"
                                         CornerRadius="0"/>
                                 <Border x:Name="AccentLine"
@@ -366,18 +366,30 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox x:Name="SearchBox"
-                         Height="26"
-                         MinWidth="60"
-                         Margin="0,0,6,0"
-                         Padding="7,0"
-                         Style="{StaticResource CompactSearchBoxStyle}"
-                         FontSize="11"
-                         VerticalContentAlignment="Center"
-                         AutomationProperties.Name="Search processes"
-                         ToolTip="Search process, PID or path..."
-                         TextChanged="SearchBox_TextChanged"
-                         PreviewKeyDown="SearchBox_PreviewKeyDown"/>
+                <Grid Grid.Column="0" Margin="0,0,6,0">
+                    <TextBox x:Name="SearchBox"
+                             Height="26"
+                             MinWidth="60"
+                             Padding="7,0,30,0"
+                             Style="{StaticResource CompactSearchBoxStyle}"
+                             FontSize="11"
+                             VerticalContentAlignment="Center"
+                             AutomationProperties.Name="Search processes"
+                             ToolTip="Search process, PID or path..."
+                             TextChanged="SearchBox_TextChanged"
+                             PreviewKeyDown="SearchBox_PreviewKeyDown"/>
+                    <Button x:Name="ClearSearchButton"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Width="24"
+                            Height="24"
+                            Content="✕"
+                            Style="{DynamicResource SearchClearButtonStyle}"
+                            Click="ClearSearchButton_Click"
+                            Visibility="Collapsed"
+                            ToolTip="Clear"
+                            AutomationProperties.Name="Clear search"/>
+                </Grid>
 
                 <Button x:Name="EndTaskButton"
                         Grid.Column="1"

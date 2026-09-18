@@ -230,6 +230,12 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="SearchClearButtonStyle" TargetType="Button" BasedOn="{StaticResource IconButton}">
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource HeaderBgBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontWeight" Value="Bold"/><Setter Property="FontSize" Value="11"/><Setter Property="Height" Value="32"/>
@@ -241,7 +247,7 @@
                         <Border x:Name="HeaderBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                             <Grid>
                                 <!-- Hover highlight overlay -->
-                                <Border x:Name="HoverOverlay" Background="{DynamicResource CardSecondaryBrush}" Opacity="0" CornerRadius="0"/>
+                                <Border x:Name="HoverOverlay" Background="{DynamicResource SelectionBgBrush}" Opacity="0" CornerRadius="0"/>
                                 <!-- Bottom accent line on hover -->
                                 <Border x:Name="AccentLine" Height="2" VerticalAlignment="Bottom" Background="{DynamicResource AccentBrush}" Opacity="0"/>
                                 <StackPanel Orientation="Horizontal" Margin="{TemplateBinding Padding}" VerticalAlignment="Center">
@@ -570,7 +576,14 @@
                             <TextBlock Text="⌕" Foreground="{DynamicResource SubTextBrush}" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <TextBox x:Name="SearchBox" Grid.Column="1" AutomationProperties.Name="Search processes" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextBrush}" CaretBrush="{DynamicResource AccentBrush}" FontSize="12.5" VerticalAlignment="Center" TextChanged="SearchBox_TextChanged" PreviewKeyDown="SearchBox_PreviewKeyDown"/>
                             <TextBlock x:Name="SearchHint" Grid.Column="1" Text="Search process, PID or path..." Foreground="{DynamicResource SubTextBrush}" FontSize="12.5" VerticalAlignment="Center" IsHitTestVisible="False" Margin="0,0,0,0"/>
-                            <Button Grid.Column="2" Content="✕" Foreground="{DynamicResource SubTextBrush}" Background="Transparent" BorderThickness="0" FontSize="10" Cursor="Hand" Padding="6,0" Click="ClearSearch_Click" Visibility="Collapsed" x:Name="ClearBtn" AutomationProperties.Name="Clear search"/>
+                            <Button x:Name="ClearBtn"
+                                    Grid.Column="2"
+                                    Content="✕"
+                                    Style="{StaticResource SearchClearButtonStyle}"
+                                    Click="ClearSearch_Click"
+                                    Visibility="Collapsed"
+                                    ToolTip="Clear"
+                                    AutomationProperties.Name="Clear search"/>
                         </Grid>
                     </Border>
 
