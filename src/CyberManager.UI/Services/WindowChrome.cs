@@ -27,6 +27,10 @@ public static class CyberManagerWindowChrome
             ResizeBorderThickness = canResize ? new Thickness(8, 0, 8, 8) : new Thickness(0),
             UseAeroCaptionButtons = false
         });
+        if (canResize)
+        {
+            WorkAreaMaximize.Attach(w);
+        }
         ApplyRounded(w, radius);
     }
 
@@ -38,8 +42,13 @@ public static class CyberManagerWindowChrome
             if (hwnd == IntPtr.Zero) return;
             if (OperatingSystem.IsWindowsVersionAtLeast(10,0,22000))
             {
-                int pref = DWMWCP_ROUND;
+                int pref = WorkAreaMaximize.IsFilled(w) ? DWMWCP_DONOTROUND : DWMWCP_ROUND;
                 _ = DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref pref, sizeof(int));
+                return;
+            }
+            if (WorkAreaMaximize.IsFilled(w))
+            {
+                _ = SetWindowRgn(hwnd, IntPtr.Zero, true);
                 return;
             }
             if (w.ActualWidth <= 0 || w.ActualHeight <= 0) return;

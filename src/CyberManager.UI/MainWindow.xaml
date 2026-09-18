@@ -241,6 +241,22 @@
             <Setter Property="Height" Value="26"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
+        <Style x:Key="SearchBarStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SearchBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentGlowBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
         <Style x:Key="HeavyFilterToggleStyle" TargetType="ToggleButton">
             <Setter Property="Width" Value="38"/>
             <Setter Property="Height" Value="38"/>
@@ -605,7 +621,17 @@
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
                         <Button x:Name="MinimizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="MaximizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize"><TextBlock Text="☐" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button x:Name="MaximizeBtn" Margin="2,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize">
+                            <Path x:Name="MaximizeIconPath"
+                                  Data="M 3 7 L 3 3 L 7 3 M 3 3 L 6.5 6.5 M 11 7 L 11 11 L 7 11 M 11 11 L 7.5 7.5"
+                                  Stroke="{DynamicResource SubTextBrush}"
+                                  StrokeThickness="1.3"
+                                  Width="9.5"
+                                  Height="9.5"
+                                  Stretch="Uniform"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                        </Button>
                         <Button x:Name="CloseBtn" Margin="2,0,0,0" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
                     </StackPanel>
                 </Grid>
@@ -628,7 +654,10 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Search Box -->
-                    <Border Background="{DynamicResource SearchBgBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12,0" Height="38">
+                    <Border x:Name="FullSearchBar"
+                            Style="{StaticResource SearchBarStyle}"
+                            Padding="12,0"
+                            Height="38">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

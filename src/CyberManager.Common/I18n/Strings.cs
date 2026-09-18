@@ -93,6 +93,7 @@ public static class Strings
         ["ShowHeavyProcesses"] = ("Show heaviest processes", "Mostrar procesos más pesados"),
         ["Minimize"] = ("Minimize", "Minimizar"),
         ["Maximize"] = ("Maximize", "Maximizar"),
+        ["Restore"] = ("Restore", "Restaurar"),
         ["RefreshFailed"] = ("Refresh failed", "Falló la actualización"),
         ["ProcessActionFailed"] = ("Process action failed", "Falló la acción sobre el proceso"),
         ["ProcessUnavailable"] = ("The selected process is no longer available.", "El proceso seleccionado ya no está disponible."),

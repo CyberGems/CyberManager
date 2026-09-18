@@ -377,6 +377,7 @@ public partial class MainWindow : Window
     {
         if (!_isLoaded || _isClosed) return;
 
+        UpdateMaximizeButtonIcon();
         if (IsVisible && WindowState != WindowState.Minimized)
         {
             _timer.Start();
@@ -412,6 +413,10 @@ public partial class MainWindow : Window
 
         if (compact)
         {
+            if (WorkAreaMaximize.IsFilled(this))
+            {
+                WorkAreaMaximize.Restore(this);
+            }
             WindowState = WindowState.Normal;
             MinWidth = 500;
             MinHeight = 220;
@@ -453,6 +458,7 @@ public partial class MainWindow : Window
         CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
         CompactView.SelectedItem = Selected;
         KeepWindowInWorkArea();
+        UpdateMaximizeButtonIcon();
         if (_contextMenuOpen)
         {
             KeepContextTargetVisible();
@@ -551,6 +557,13 @@ public partial class MainWindow : Window
             }
 
             App.Settings.CompactWindowBoundsSaved = true;
+            return;
+        }
+
+        if (WorkAreaMaximize.IsFilled(this) || WindowState == WindowState.Maximized)
+        {
+            App.Settings.MainWindowMaximized = true;
+            App.Settings.MainWindowBoundsSaved = true;
             return;
         }
 
@@ -1233,9 +1246,14 @@ public partial class MainWindow : Window
 
     private void OuterBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        var source = e.OriginalSource as DependencyObject;
+        if (!IsSearchBarSource(source))
+        {
+            ClearSearchFocus();
+        }
+
         if (!_isCompactMode || e.ChangedButton != MouseButton.Left) return;
 
-        var source = e.OriginalSource as DependencyObject;
         if (IsDescendantOf(source, CompactView) && !CompactView.IsTitleBarDragSource(source))
         {
             return;
@@ -1250,6 +1268,18 @@ public partial class MainWindow : Window
 
         e.Handled = true;
         DragWindow(e);
+    }
+
+    private bool IsSearchBarSource(DependencyObject? source) =>
+        IsDescendantOf(source, FullSearchBar) ||
+        (_isCompactMode && CompactView.IsSearchBarSource(source));
+
+    private void ClearSearchFocus()
+    {
+        if (SearchBox.IsKeyboardFocusWithin || CompactView.IsSearchFocused)
+        {
+            Keyboard.ClearFocus();
+        }
     }
 
     private static bool IsDescendantOf(DependencyObject? source, DependencyObject ancestor)
@@ -1791,6 +1821,7 @@ public partial class MainWindow : Window
             MinimizeBtn.ToolTip = Strings.T("Minimize");
             MaximizeBtn.ToolTip = Strings.T("Maximize");
             CloseBtn.ToolTip = Strings.T("Close");
+            UpdateMaximizeButtonIcon();
             StatsBorder.ToolTip = Strings.T("OpenSystemInfoTip");
             CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
             RamSparklineBorder.ToolTip = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
@@ -1840,6 +1871,26 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"ApplyLanguage error: {ex}");
+        }
+    }
+
+    private void UpdateMaximizeButtonIcon()
+    {
+        if (MaximizeBtn == null || MaximizeIconPath == null) return;
+
+        if (WorkAreaMaximize.IsFilled(this) || WindowState == WindowState.Maximized)
+        {
+            MaximizeBtn.ToolTip = Strings.T("Restore");
+            AutomationProperties.SetName(MaximizeBtn, Strings.T("Restore"));
+            MaximizeIconPath.Data = Geometry.Parse(
+                "M 6 2 L 6 6 L 2 6 M 6 6 L 2.5 2.5 M 8 12 L 8 8 L 12 8 M 8 8 L 11.5 11.5");
+        }
+        else
+        {
+            MaximizeBtn.ToolTip = Strings.T("Maximize");
+            AutomationProperties.SetName(MaximizeBtn, Strings.T("Maximize"));
+            MaximizeIconPath.Data = Geometry.Parse(
+                "M 3 7 L 3 3 L 7 3 M 3 3 L 6.5 6.5 M 11 7 L 11 11 L 7 11 M 11 11 L 7.5 7.5");
         }
     }
 
@@ -2207,7 +2258,8 @@ public partial class MainWindow : Window
 
     private void Maximize_Click(object sender, RoutedEventArgs e)
     {
-        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        WorkAreaMaximize.Toggle(this);
+        UpdateMaximizeButtonIcon();
     }
 
     private void Close_Click(object sender, RoutedEventArgs e)

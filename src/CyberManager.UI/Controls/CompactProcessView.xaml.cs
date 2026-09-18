@@ -71,6 +71,9 @@ public partial class CompactProcessView : UserControl
 
     public bool IsHeavyFilterEnabled => HeavyFilterToggle.IsChecked == true;
 
+    public bool IsSearchBarSource(DependencyObject? source) =>
+        IsDescendantOf(source, CompactSearchBar);
+
     public event EventHandler? SearchChanged;
     public event EventHandler? SearchSubmitted;
     public event RoutedEventHandler? SearchHistoryRequested;
