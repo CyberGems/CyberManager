@@ -51,13 +51,27 @@
                                        VerticalAlignment="Stretch"
                                        Width="6"
                                        Background="Transparent"
-                                       Cursor="SizeWE"/>
+                                       Cursor="SizeWE"
+                                       OverridesDefaultStyle="True">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="Transparent"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
                                 <Thumb x:Name="PART_RightHeaderGripper"
                                        HorizontalAlignment="Right"
                                        VerticalAlignment="Stretch"
                                        Width="6"
                                        Background="Transparent"
-                                       Cursor="SizeWE"/>
+                                       Cursor="SizeWE"
+                                       OverridesDefaultStyle="True">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="Transparent"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -365,7 +379,7 @@
                         Width="28"
                         Height="26"
                         Padding="0"
-                        Style="{DynamicResource DangerModernButton}"
+                        Style="{DynamicResource ModernButton}"
                         Click="EndTaskButton_Click"
                         MouseEnter="InteractiveControl_MouseEnter"
                         MouseLeave="InteractiveControl_MouseLeave"
@@ -375,7 +389,7 @@
                           Width="11"
                           Height="11"
                           Stretch="Uniform"
-                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                          Fill="#E81123"/>
                 </Button>
             </Grid>
 
@@ -465,13 +479,13 @@
                                 <Border Background="{Binding CpuPercent, Converter={StaticResource CpuHeatmapBrushConverter}}"
                                         CornerRadius="3"
                                         Margin="1,1"
-                                        Padding="5,1"
+                                        Padding="8,1"
                                         HorizontalAlignment="Stretch"
                                         VerticalAlignment="Stretch">
                                     <TextBlock Text="{Binding CpuFormatted}"
                                                Foreground="{DynamicResource TextBrush}"
                                                FontWeight="{Binding CpuPercent, Converter={StaticResource HighCpuWeightConverter}}"
-                                               HorizontalAlignment="Right"
+                                               HorizontalAlignment="Left"
                                                VerticalAlignment="Center"/>
                                 </Border>
                             </DataTemplate>
@@ -483,13 +497,13 @@
                                 <Border Background="{Binding WorkingSetBytes, Converter={StaticResource MemoryHeatmapBrushConverter}}"
                                         CornerRadius="3"
                                         Margin="1,1"
-                                        Padding="5,1"
+                                        Padding="8,1"
                                         HorizontalAlignment="Stretch"
                                         VerticalAlignment="Stretch">
                                     <TextBlock Text="{Binding MemoryFormatted}"
                                                Foreground="{DynamicResource TextBrush}"
                                                FontWeight="{Binding WorkingSetBytes, Converter={StaticResource HighMemoryWeightConverter}}"
-                                               HorizontalAlignment="Right"
+                                               HorizontalAlignment="Left"
                                                VerticalAlignment="Center"/>
                                 </Border>
                             </DataTemplate>
