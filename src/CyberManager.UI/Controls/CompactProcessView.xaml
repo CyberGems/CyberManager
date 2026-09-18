@@ -60,6 +60,10 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="CompactGridValueTextStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="8,0,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
     </UserControl.Resources>
 
     <Border Background="{DynamicResource BgBrush}"
@@ -357,9 +361,12 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="62" SortMemberPath="Pid"/>
-                    <DataGridTextColumn Header="CPU" Binding="{Binding CpuFormatted}" Width="68" SortMemberPath="CpuPercent"/>
-                    <DataGridTextColumn Header="Memory" Binding="{Binding MemoryFormatted}" Width="82" SortMemberPath="WorkingSetBytes"/>
+                    <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="62" SortMemberPath="Pid"
+                                        ElementStyle="{StaticResource CompactGridValueTextStyle}"/>
+                    <DataGridTextColumn Header="CPU" Binding="{Binding CpuFormatted}" Width="68" SortMemberPath="CpuPercent"
+                                        ElementStyle="{StaticResource CompactGridValueTextStyle}"/>
+                    <DataGridTextColumn Header="Memory" Binding="{Binding MemoryFormatted}" Width="82" SortMemberPath="WorkingSetBytes"
+                                        ElementStyle="{StaticResource CompactGridValueTextStyle}"/>
                 </DataGrid.Columns>
             </DataGrid>
             <TextBlock x:Name="EmptyStateText"

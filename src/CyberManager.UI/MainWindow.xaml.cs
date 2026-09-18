@@ -909,6 +909,10 @@ public partial class MainWindow : Window
     private void ProcContextMenu_Opened(object sender, RoutedEventArgs e)
     {
         _contextMenuOpen = true;
+        if (_contextMenuTarget is { } target)
+        {
+            UpdateContextMenuAvailability(target.Item);
+        }
         KeepContextTargetVisible();
     }
 
@@ -962,7 +966,32 @@ public partial class MainWindow : Window
         ProcContextMenu.PlacementTarget = realizedRow;
         ProcContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
         ProcContextMenu.DataContext = process;
+        UpdateContextMenuAvailability(process);
     }
+
+    private void UpdateContextMenuAvailability(ProcessInfo process)
+    {
+        var hasProcessTree = process.IsGroupParent && process.Children.Count > 0;
+        var hasSuspendedProcesses = process.IsGroupParent
+            ? process.Children.Any(IsSuspended)
+            : IsSuspended(process);
+        var hasRunningProcesses = process.IsGroupParent
+            ? process.Children.Any(child => !IsSuspended(child))
+            : !IsSuspended(process);
+        var hasExecutablePath = !string.IsNullOrWhiteSpace(process.ExePath);
+
+        ContextKillItem.IsEnabled = process.Pid > 0;
+        ContextKillTreeItem.IsEnabled = hasProcessTree;
+        ContextSuspendItem.IsEnabled = hasRunningProcesses;
+        ContextResumeItem.IsEnabled = hasSuspendedProcesses;
+        ContextSetPriorityItem.IsEnabled = process.Pid > 0;
+        ContextCopyPathItem.IsEnabled = hasExecutablePath;
+        ContextOpenFolderItem.IsEnabled = hasExecutablePath;
+        ContextSearchOnlineItem.IsEnabled = !string.IsNullOrWhiteSpace(process.Name);
+    }
+
+    private static bool IsSuspended(ProcessInfo process) =>
+        string.Equals(process.Status, "Suspended", StringComparison.OrdinalIgnoreCase);
 
     private void ClearContextMenuTarget()
     {
