@@ -4,6 +4,7 @@ using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using CyberManager.Common.I18n;
 
 namespace CyberManager.UI.Controls;
@@ -239,6 +240,35 @@ public partial class CompactProcessView : UserControl
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) =>
         CloseRequested?.Invoke(sender, e);
+
+    private void InteractiveControl_MouseEnter(object sender, MouseEventArgs e) =>
+        AnimateInteraction(sender, 1.05);
+
+    private void InteractiveControl_MouseLeave(object sender, MouseEventArgs e) =>
+        AnimateInteraction(sender, 1.0);
+
+    private static void AnimateInteraction(object sender, double scale)
+    {
+        if (sender is not UIElement element) return;
+
+        element.RenderTransformOrigin = new Point(0.5, 0.5);
+        if (element.RenderTransform is not ScaleTransform transform)
+        {
+            transform = new ScaleTransform(1, 1);
+            element.RenderTransform = transform;
+        }
+
+        var duration = new Duration(TimeSpan.FromMilliseconds(130));
+        var easing = new QuadraticEase { EasingMode = EasingMode.EaseOut };
+        transform.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(scale, duration)
+        {
+            EasingFunction = easing
+        });
+        transform.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(scale, duration)
+        {
+            EasingFunction = easing
+        });
+    }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {

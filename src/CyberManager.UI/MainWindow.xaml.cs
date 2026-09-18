@@ -1608,10 +1608,10 @@ public partial class MainWindow : Window
             LoaderSub.Text = Strings.T("InitializingNtEngine");
             GroupToggleLabel.Text = Strings.T("GroupByApp");
             FontSizeSlider.ToolTip = Strings.T("TextSize");
-            RefreshBtnText.Text = Strings.T("Refresh");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
-            KillBtnText.Text = Strings.T("Kill");
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
+            AutomationProperties.SetName(RefreshBtn, Strings.T("Refresh"));
+            AutomationProperties.SetName(KillBtn, Strings.T("Kill"));
             FullModeToggleBtn.ToolTip = Strings.T("CompactMode");
             AutomationProperties.SetName(FullModeToggleBtn, Strings.T("CompactMode"));
             MoreBtn.ToolTip = Strings.T("MoreOptions");

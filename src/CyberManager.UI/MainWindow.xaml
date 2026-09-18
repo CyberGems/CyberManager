@@ -622,17 +622,16 @@
 
                     <!-- Actions -->
                     <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="8,0,0,0">
-                        <Button x:Name="RefreshBtn" Height="38" MinWidth="112" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)" AutomationProperties.Name="Refresh">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
-                                <TextBlock x:Name="RefreshBtnText" Text="Refresh" VerticalAlignment="Center"/>
-                            </StackPanel>
+                        <Button x:Name="RefreshBtn" Width="38" Height="38" Padding="0" Style="{StaticResource ModernButton}" Click="Refresh_Click" ToolTip="Refresh (F5)" AutomationProperties.Name="Refresh">
+                            <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15"
+                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Fill="Transparent"/>
                         </Button>
-                        <Button x:Name="KillBtn" Height="38" Style="{StaticResource DangerModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)" IsEnabled="False" AutomationProperties.Name="End task">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Path Data="M 3 3 L 11 11 M 11 3 L 3 11" Stroke="#FF5252" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="10" Height="10" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
-                                <TextBlock x:Name="KillBtnText" Text="End Task" VerticalAlignment="Center"/>
-                            </StackPanel>
+                        <Button x:Name="KillBtn" Width="38" Height="38" Padding="0" Style="{StaticResource DangerModernButton}" Margin="8,0,0,0" Click="Kill_Click" ToolTip="End Task (Del)" IsEnabled="False" AutomationProperties.Name="End task">
+                            <Path Data="M 3,3 H 13 V 13 H 3 Z"
+                                  Width="16" Height="16" Stretch="Uniform"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                         </Button>
                     </StackPanel>
                 </Grid>

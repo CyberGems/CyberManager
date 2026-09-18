@@ -19,6 +19,47 @@
             <Setter Property="Padding" Value="8,0"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                </Trigger>
+                <EventTrigger RoutedEvent="Mouse.MouseEnter">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                             To="1.02" Duration="0:0:0.12">
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                             To="1.02" Duration="0:0:0.12">
+                                <DoubleAnimation.EasingFunction>
+                                    <QuadraticEase EasingMode="EaseOut"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+                <EventTrigger RoutedEvent="Mouse.MouseLeave">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                             To="1" Duration="0:0:0.12"/>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                             To="1" Duration="0:0:0.12"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style TargetType="DataGridRow">
@@ -67,6 +108,21 @@
         <Style x:Key="CompactGridValueTextStyle" TargetType="TextBlock">
             <Setter Property="Margin" Value="8,0,0,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="CompactSearchBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource SearchBgBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
@@ -130,7 +186,9 @@
                             Background="{DynamicResource CardSecondaryBrush}"
                             CornerRadius="4"
                             Padding="5,2"
-                            Margin="0,0,4,0">
+                            Margin="0,0,4,0"
+                            MouseEnter="InteractiveControl_MouseEnter"
+                            MouseLeave="InteractiveControl_MouseLeave">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock x:Name="CompactCpuLabel"
                                        Text="CPU"
@@ -148,7 +206,9 @@
                     <Border x:Name="CompactRamMetricHost"
                             Background="{DynamicResource CardSecondaryBrush}"
                             CornerRadius="4"
-                            Padding="5,2">
+                            Padding="5,2"
+                            MouseEnter="InteractiveControl_MouseEnter"
+                            MouseLeave="InteractiveControl_MouseLeave">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock x:Name="CompactRamLabel"
                                        Text="RAM"
@@ -184,6 +244,8 @@
                             Padding="0"
                             Style="{DynamicResource TitleBtn}"
                             Click="PinButton_Click"
+                            MouseEnter="InteractiveControl_MouseEnter"
+                            MouseLeave="InteractiveControl_MouseLeave"
                             ToolTip="Always on top"
                             AutomationProperties.Name="Always on top"/>
                     </Border>
@@ -201,6 +263,8 @@
                             Style="{DynamicResource ModeIconButton}"
                             Padding="0"
                             Click="MoreDetailsButton_Click"
+                            MouseEnter="InteractiveControl_MouseEnter"
+                            MouseLeave="InteractiveControl_MouseLeave"
                             ToolTip="Más detalles"
                             AutomationProperties.Name="Más detalles">
                             <Path Data="M 3,8 L 3,3 L 8,3 M 3,3 L 8,8 M 13,16 L 16,16 L 16,11 M 16,16 L 11,11"
@@ -217,6 +281,8 @@
                         Padding="0"
                         Style="{DynamicResource TitleBtn}"
                         Click="SettingsButton_Click"
+                        MouseEnter="InteractiveControl_MouseEnter"
+                        MouseLeave="InteractiveControl_MouseLeave"
                         ToolTip="Settings"
                         AutomationProperties.Name="Settings"/>
                     <Button x:Name="MinimizeButton"
@@ -226,6 +292,8 @@
                         Padding="0"
                         Style="{DynamicResource TitleBtn}"
                         Click="MinimizeButton_Click"
+                        MouseEnter="InteractiveControl_MouseEnter"
+                        MouseLeave="InteractiveControl_MouseLeave"
                         ToolTip="Minimize"
                         AutomationProperties.Name="Minimize">
                         <Path Data="M 3,12 H 13"
@@ -244,6 +312,8 @@
                         Content="✕"
                         Style="{DynamicResource TitleCloseBtn}"
                         Click="CloseButton_Click"
+                        MouseEnter="InteractiveControl_MouseEnter"
+                        MouseLeave="InteractiveControl_MouseLeave"
                         ToolTip="Close"
                         AutomationProperties.Name="Close"/>
                 </StackPanel>
@@ -260,11 +330,7 @@
                          MinWidth="60"
                          Margin="0,0,6,0"
                          Padding="7,0"
-                         Background="{DynamicResource SearchBgBrush}"
-                         BorderBrush="{DynamicResource BorderBrush}"
-                         BorderThickness="1"
-                         Foreground="{DynamicResource TextBrush}"
-                         CaretBrush="{DynamicResource AccentBrush}"
+                         Style="{StaticResource CompactSearchBoxStyle}"
                          FontSize="11"
                          VerticalContentAlignment="Center"
                          AutomationProperties.Name="Search processes"
@@ -279,6 +345,8 @@
                         Padding="0"
                         Style="{DynamicResource DangerModernButton}"
                         Click="EndTaskButton_Click"
+                        MouseEnter="InteractiveControl_MouseEnter"
+                        MouseLeave="InteractiveControl_MouseLeave"
                         ToolTip="End task"
                         AutomationProperties.Name="End task">
                     <Path Data="M 3,3 H 13 V 13 H 3 Z"
@@ -311,6 +379,8 @@
                       VirtualizingPanel.VirtualizationMode="Recycling"
                       VirtualizingPanel.ScrollUnit="Pixel"
                       ScrollViewer.CanContentScroll="True"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                       SelectionMode="Single"
                       SelectionUnit="FullRow"
                       AutomationProperties.Name="Compact process list">
