@@ -12,7 +12,7 @@ namespace CyberManager.UI.Views;
 
 public partial class SettingsView : UserControl
 {
-    private const string DefaultGlobalHotkey = "Ctrl+Alt+M";
+    private const string DefaultGlobalHotkey = "Alt+Shift+M";
 
     public event Action? SettingsChanged;
     public event Action? DefaultsReset;
@@ -298,6 +298,14 @@ public partial class SettingsView : UserControl
         }
     }
 
+    private void HotkeyClearBtn_Click(object sender, RoutedEventArgs e)
+    {
+        if (TryApplyHotkey(""))
+        {
+            ShowToast(Strings.T("SettingsSaved"));
+        }
+    }
+
     private bool TryApplyHotkey(string hotkey)
     {
         if (HotkeyChangeRequested?.Invoke(hotkey) == false)
@@ -369,9 +377,12 @@ public partial class SettingsView : UserControl
         AutoUpdatesDescLbl.Text = Strings.T("AutoCheckUpdatesDesc");
         HotkeyTitleLbl.Text = Strings.T("GlobalHotkeyTitle");
         HotkeyDescLbl.Text = Strings.T("GlobalHotkeyDesc");
-        HotkeyResetBtn.Content = Strings.T("GlobalHotkeyReset");
+        HotkeyResetBtn.ToolTip = Strings.T("GlobalHotkeyReset");
+        HotkeyClearBtn.ToolTip = Strings.T("GlobalHotkeyClear");
         HotkeyBox.ToolTip = Strings.T("GlobalHotkeyCaptureHint");
         AutomationProperties.SetName(HotkeyBox, Strings.T("GlobalHotkeyTitle"));
+        AutomationProperties.SetName(HotkeyClearBtn, Strings.T("GlobalHotkeyClear"));
+        AutomationProperties.SetName(HotkeyResetBtn, Strings.T("GlobalHotkeyReset"));
 
         if (RefreshIntervalComboBox.Items.Count >= 3)
         {

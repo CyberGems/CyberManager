@@ -33,7 +33,7 @@ public sealed class AppSettings
     public bool StartWithWindows { get; set; } = true;
     public bool StartMinimized { get; set; }
     public bool AutoCheckForUpdates { get; set; } = true;
-    public string GlobalHotkey { get; set; } = "Ctrl+Alt+M";
+    public string GlobalHotkey { get; set; } = "Alt+Shift+M";
     public bool ShowIdleProcess { get; set; }
     public bool CompactMode { get; set; }
     public bool MainWindowBoundsSaved { get; set; }
@@ -165,7 +165,7 @@ public sealed class AppSettings
         SearchText ??= "";
         RecentSearches = NormalizeSearchHistory(RecentSearches);
         SuppressedConfirmations ??= new(StringComparer.OrdinalIgnoreCase);
-        GlobalHotkey = string.IsNullOrWhiteSpace(GlobalHotkey) ? "Ctrl+Alt+M" : GlobalHotkey.Trim();
+        GlobalHotkey = GlobalHotkey?.Trim() ?? "";
     }
 
     public void ResetToDefaults()

@@ -24,11 +24,16 @@ public sealed class GlobalHotkeyService : IDisposable
 
     public event Action? HotkeyPressed;
 
-    public bool Register(Window window, string hotkeyString = "Ctrl+Alt+M")
+    public bool Register(Window window, string hotkeyString = "Alt+Shift+M")
     {
         try
         {
             Unregister();
+
+            if (string.IsNullOrWhiteSpace(hotkeyString))
+            {
+                return true;
+            }
 
             var helper = new WindowInteropHelper(window);
             _hwnd = helper.Handle;

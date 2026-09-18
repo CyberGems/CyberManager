@@ -34,6 +34,13 @@ public class AppSettingsTests
     }
 
     [Fact]
+    public void AppSettings_DefaultGlobalHotkey_IsAltShiftM()
+    {
+        var settings = new AppSettings();
+        Assert.Equal("Alt+Shift+M", settings.GlobalHotkey);
+    }
+
+    [Fact]
     public void AppSettings_DefaultTrayBehaviors_AreExplicit()
     {
         var settings = new AppSettings();
@@ -133,7 +140,7 @@ public class AppSettingsTests
         Assert.True(settings.StartWithWindows);
         Assert.False(settings.StartMinimized);
         Assert.True(settings.AutoCheckForUpdates);
-        Assert.Equal("Ctrl+Alt+M", settings.GlobalHotkey);
+        Assert.Equal("Alt+Shift+M", settings.GlobalHotkey);
         Assert.False(settings.CompactMode);
         Assert.False(settings.MainWindowBoundsSaved);
         Assert.False(settings.CompactWindowBoundsSaved);

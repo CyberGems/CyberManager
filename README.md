@@ -33,7 +33,7 @@ Most task managers either freeze under heavy load or bury basic features behind 
 | Identify resource hogs | Adaptive CPU/RAM heatmap with thermal tinting |
 | Monitor system health | Live sparklines + System Information window with 4 tabs |
 | Control processes | End, end tree, suspend, resume, set priority |
-| Stay out of the way | System tray + global hotkey (`Ctrl+Alt+M`) + auto-start |
+| Stay out of the way | System tray + global hotkey (`Alt+Shift+M`) + auto-start |
 | Make it yours | 3 themes, bilingual EN/ES, always-on-top |
 
 ---
@@ -67,7 +67,7 @@ Most task managers either freeze under heavy load or bury basic features behind 
 
 ### 🖥️ Desktop Integration
 - **System Tray** — Minimize to tray, quick actions menu, version info
-- **Global Hotkey** — Configurable toggle shortcut (default: `Ctrl+Alt+M`)
+- **Global Hotkey** — Configurable toggle shortcut (default: `Alt+Shift+M`)
 - **Always on Top** — Pin window above other applications
 - **Auto-Start** — Launch at Windows sign-in
 - **Auto-Updates** — Check GitHub Releases on startup with download progress
@@ -109,7 +109,7 @@ CyberManager.slnx
 
 1. Download the [latest release](https://github.com/CyberGems/CyberManager/releases/latest)
 2. Run the installer or portable version
-3. Press `Ctrl+Alt+M` to toggle the window from any application
+3. Press `Alt+Shift+M` to toggle the window from any application
 
 ### 🛡️ Windows SmartScreen
 
@@ -151,7 +151,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 
 | Key | Action | Scope |
 |---|---|---|
-| `Ctrl+Alt+M` | Toggle CyberManager | Global |
+| `Alt+Shift+M` | Toggle CyberManager | Global |
 | `Ctrl+F` / `Ctrl+E` | Focus search box | Application |
 | `Ctrl+G` | Toggle process grouping | Application |
 | `Ctrl+I` | Open System Information | Application |
