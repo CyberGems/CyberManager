@@ -183,35 +183,37 @@
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock x:Name="TitleLbl" Text="CyberManager" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis"/>
                     <TextBlock x:Name="MessageLbl" Text="Confirm action?" Foreground="{DynamicResource SubTextBrush}" FontSize="12.5" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="18"/>
-                    <CheckBox x:Name="DoNotShowAgainCheck"
-                              Content="Don't show again"
-                              Style="{StaticResource ModalCheckBoxStyle}"
-                              AutomationProperties.Name="Don't show again"
-                              Margin="0,10,0,0"
-                              Visibility="Collapsed"/>
                 </StackPanel>
             </Grid>
 
             <!-- Bottom Action Button Bar -->
             <Border Grid.Row="1" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,11,11" Padding="16,10">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button x:Name="OkBtn" MinWidth="90" Height="32" Padding="14,0" Style="{StaticResource PrimaryButtonStyle}" Click="Ok_Click" IsDefault="True">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock x:Name="OkTextLbl" Text="Aceptar" VerticalAlignment="Center"/>
-                            <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="4" Padding="5,1" Margin="8,0,0,0">
-                                <TextBlock Text="↵" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
-                            </Border>
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="CancelBtn" MinWidth="90" Height="32" Padding="14,0" Margin="10,0,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click" IsCancel="True">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock x:Name="CancelTextLbl" Text="Cancelar" VerticalAlignment="Center"/>
-                            <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="4" Padding="5,1" Margin="8,0,0,0">
-                                <TextBlock Text="Esc" Foreground="{DynamicResource SubTextBrush}" FontSize="10" VerticalAlignment="Center"/>
-                            </Border>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
+                <Grid>
+                    <CheckBox x:Name="DoNotShowAgainCheck"
+                              Content="Don't show again"
+                              Style="{StaticResource ModalCheckBoxStyle}"
+                              AutomationProperties.Name="Don't show again"
+                              HorizontalAlignment="Left"
+                              VerticalAlignment="Center"
+                              Margin="0,0,12,0"
+                              Visibility="Collapsed"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="OkBtn" MinWidth="90" Height="32" Padding="14,0" Style="{StaticResource PrimaryButtonStyle}" Click="Ok_Click" IsDefault="True">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock x:Name="OkTextLbl" Text="Aceptar" VerticalAlignment="Center"/>
+                                <TextBlock Text="↵" Foreground="{DynamicResource SubTextBrush}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="CancelBtn" MinWidth="90" Height="32" Padding="14,0" Margin="10,0,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click" IsCancel="True">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock x:Name="CancelTextLbl" Text="Cancelar" VerticalAlignment="Center"/>
+                                <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="4" Padding="5,1" Margin="8,0,0,0">
+                                    <TextBlock Text="Esc" Foreground="{DynamicResource SubTextBrush}" FontSize="10" VerticalAlignment="Center"/>
+                                </Border>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
             </Border>
         </Grid>
     </Border>
