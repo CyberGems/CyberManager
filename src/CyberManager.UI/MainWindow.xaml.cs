@@ -606,7 +606,11 @@ public partial class MainWindow : Window
             CpuSparkline.Values = cpuHistory;
             CpuSparkline.SecondaryValues = cpuKernelHistory;
             CpuSparklineText.Text = $"{sysMetrics.CpuTotalPercent:F1}%";
-            CompactView.SetSystemMetrics(sysMetrics.CpuTotalPercent, sysMetrics.UsedRamGb);
+            CompactView.SetSystemMetrics(
+                sysMetrics.CpuTotalPercent,
+                sysMetrics.UsedRamGb,
+                sysMetrics.CpuModelName,
+                sysMetrics.TotalRamGb);
 
             RamSparkline.Values = ramPctHistory;
             RamSparklineText.Text = $"{sysMetrics.UsedRamGb:F1} GB";
@@ -1252,7 +1256,7 @@ public partial class MainWindow : Window
         if (s.IsGroupParent && s.InstanceCount > 1)
         {
             var msg = Strings.T("KillGroupConfirm", s.InstanceCount, s.Name);
-            if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), msg, s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true))
+            if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), msg, s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true, confirmationKey: "process.kill"))
             {
                 var pidsToKill = s.Children.Select(c => c.Pid).ToList();
                 if (!pidsToKill.Contains(s.Pid)) pidsToKill.Add(s.Pid);
@@ -1262,7 +1266,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), Strings.T("KillConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true))
+        if (ConfirmDialog.ShowProcess(this, Strings.T("Kill"), Strings.T("KillConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Kill"), Strings.T("Cancel"), isDanger: true, confirmationKey: "process.kill"))
         {
             var result = await Task.Run(() => ProcessActions.TryKill(s.Pid), _lifetimeCts.Token);
             ApplyActionResults(new Dictionary<int, ProcessActions.ActionResult> { [s.Pid] = result });
@@ -1273,7 +1277,7 @@ public partial class MainWindow : Window
     {
         var s = GetActionTarget(sender);
         if (s == null) return;
-        if (ConfirmDialog.ShowProcess(this, Strings.T("KillTree"), Strings.T("KillTreeConfirm", s.Name), s.ExePath, Strings.T("KillTree"), Strings.T("Cancel"), isDanger: true))
+        if (ConfirmDialog.ShowProcess(this, Strings.T("KillTree"), Strings.T("KillTreeConfirm", s.Name), s.ExePath, Strings.T("KillTree"), Strings.T("Cancel"), isDanger: true, confirmationKey: "process.kill-tree"))
         {
             int rootPid = s.Pid;
             var pidsToKill = s.IsGroupParent && s.Children.Count > 0 ? s.Children.Select(c => c.Pid).ToList() : new List<int> { rootPid };
@@ -1292,7 +1296,7 @@ public partial class MainWindow : Window
         if (s.IsGroupParent && s.InstanceCount > 1)
         {
             var msg = Strings.T("SuspendGroupConfirm", s.InstanceCount, s.Name);
-            if (ConfirmDialog.ShowProcess(this, Strings.T("Suspend"), msg, s.ExePath, Strings.T("Suspend"), Strings.T("Cancel"), isDanger: false))
+            if (ConfirmDialog.ShowProcess(this, Strings.T("Suspend"), msg, s.ExePath, Strings.T("Suspend"), Strings.T("Cancel"), isDanger: false, confirmationKey: "process.suspend"))
             {
                 var results = await RunProcessActionsAsync(s.Children.Select(c => c.Pid), ProcessActions.TrySuspend);
                 foreach (var c in s.Children)
@@ -1310,7 +1314,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (ConfirmDialog.ShowProcess(this, Strings.T("Suspend"), Strings.T("SuspendConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Suspend"), Strings.T("Cancel"), isDanger: false))
+        if (ConfirmDialog.ShowProcess(this, Strings.T("Suspend"), Strings.T("SuspendConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Suspend"), Strings.T("Cancel"), isDanger: false, confirmationKey: "process.suspend"))
         {
             var result = await Task.Run(() => ProcessActions.TrySuspend(s.Pid), _lifetimeCts.Token);
             if (result.Succeeded)
@@ -1330,7 +1334,7 @@ public partial class MainWindow : Window
         if (s.IsGroupParent && s.InstanceCount > 1)
         {
             var msg = Strings.T("ResumeGroupConfirm", s.InstanceCount, s.Name);
-            if (ConfirmDialog.ShowProcess(this, Strings.T("Resume"), msg, s.ExePath, Strings.T("Resume"), Strings.T("Cancel"), isDanger: false))
+            if (ConfirmDialog.ShowProcess(this, Strings.T("Resume"), msg, s.ExePath, Strings.T("Resume"), Strings.T("Cancel"), isDanger: false, confirmationKey: "process.resume"))
             {
                 var results = await RunProcessActionsAsync(s.Children.Select(c => c.Pid), ProcessActions.TryResume);
                 foreach (var c in s.Children)
@@ -1349,7 +1353,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (ConfirmDialog.ShowProcess(this, Strings.T("Resume"), Strings.T("ResumeConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Resume"), Strings.T("Cancel"), isDanger: false))
+        if (ConfirmDialog.ShowProcess(this, Strings.T("Resume"), Strings.T("ResumeConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Resume"), Strings.T("Cancel"), isDanger: false, confirmationKey: "process.resume"))
         {
             var result = await Task.Run(() => ProcessActions.TryResume(s.Pid), _lifetimeCts.Token);
             if (result.Succeeded)

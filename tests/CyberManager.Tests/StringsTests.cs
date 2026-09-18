@@ -68,7 +68,7 @@ public class StringsTests
             "Suspend", "Resume", "CopyPath", "OpenFolder", "SearchOnline", "Priority",
             "NoProcesses", "Refresh", "AlwaysOnTop", "KillConfirm", "KillTreeConfirm",
             "Settings", "About", "ThemeCyberManager", "ThemeDark", "ThemeLight",
-            "Ok", "Cancel", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",
+            "Ok", "Cancel", "DoNotShowAgain", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",
             "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction",
             "GroupByApp", "Ungroup", "KillGroupConfirm", "SuspendGroupConfirm", "ResumeGroupConfirm",
             "MainProcess", "WorkerProcess", "PriorityIdle", "PriorityBelowNormal", "TextSize",
@@ -78,7 +78,8 @@ public class StringsTests
             "RefreshIntervalTitle", "RefreshIntervalDesc", "RefreshFast", "RefreshNormal", "RefreshSlow",
             "StartWithWindowsTitle", "MinimizeToTrayTitle", "AlwaysOnTopTitle", "AutoCheckUpdatesTitle",
             "GlobalHotkeyTitle", "ResetDefaults", "SettingsSaved",
-            "MoreOptions", "DocumentationWiki", "AboutCyberManager", "Description"
+            "MoreOptions", "DocumentationWiki", "AboutCyberManager", "Description",
+            "Unknown", "CpuModel", "TotalRam"
         };
         foreach (var key in keys)
         {

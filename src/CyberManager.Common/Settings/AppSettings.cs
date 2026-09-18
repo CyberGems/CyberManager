@@ -18,6 +18,7 @@ public sealed class AppSettings
     public double RowFontSize { get; set; } = 13.0;
     public bool ShowSuspended { get; set; } = true;
     public string SearchText { get; set; } = "";
+    public HashSet<string> SuppressedConfirmations { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public bool MinimizeToTray { get; set; } = true;
     public bool StartWithWindows { get; set; } = true;
     public bool StartMinimized { get; set; }
@@ -152,7 +153,25 @@ public sealed class AppSettings
         CompactWindowLeft = NormalizeCoordinate(CompactWindowLeft);
         CompactWindowTop = NormalizeCoordinate(CompactWindowTop);
         SearchText ??= "";
+        SuppressedConfirmations ??= new(StringComparer.OrdinalIgnoreCase);
         GlobalHotkey = string.IsNullOrWhiteSpace(GlobalHotkey) ? "Ctrl+Alt+M" : GlobalHotkey.Trim();
+    }
+
+    public bool IsConfirmationSuppressed(string key) =>
+        !string.IsNullOrWhiteSpace(key) && SuppressedConfirmations.Contains(key);
+
+    public void SetConfirmationSuppressed(string key, bool suppressed)
+    {
+        if (string.IsNullOrWhiteSpace(key)) return;
+
+        if (suppressed)
+        {
+            SuppressedConfirmations.Add(key);
+        }
+        else
+        {
+            SuppressedConfirmations.Remove(key);
+        }
     }
 
     private static double NormalizeDimension(double value, double minimum, double fallback) =>

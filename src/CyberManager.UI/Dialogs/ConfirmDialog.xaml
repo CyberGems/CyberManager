@@ -108,6 +108,51 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="ModalCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal">
+                            <Border x:Name="CheckBoxBorder"
+                                    Width="16"
+                                    Height="16"
+                                    CornerRadius="4"
+                                    Background="{DynamicResource InputBgBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    Margin="0,0,7,0">
+                                <Path x:Name="CheckGlyph"
+                                      Data="M 3,8 L 7,12 L 14,4"
+                                      Width="11"
+                                      Height="11"
+                                      Stretch="Uniform"
+                                      Stroke="{DynamicResource AccentFgBrush}"
+                                      StrokeThickness="1.8"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Visibility="Collapsed"/>
+                            </Border>
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBoxBorder" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter TargetName="CheckGlyph" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     
     <Border CornerRadius="12" ClipToBounds="True" BorderThickness="1" BorderBrush="{DynamicResource BorderBrush}" Background="{DynamicResource CardBrush}" SnapsToDevicePixels="True">
@@ -138,14 +183,34 @@
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock x:Name="TitleLbl" Text="CyberManager" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" TextTrimming="CharacterEllipsis"/>
                     <TextBlock x:Name="MessageLbl" Text="Confirm action?" Foreground="{DynamicResource SubTextBrush}" FontSize="12.5" TextWrapping="Wrap" Margin="0,4,0,0" LineHeight="18"/>
+                    <CheckBox x:Name="DoNotShowAgainCheck"
+                              Content="Don't show again"
+                              Style="{StaticResource ModalCheckBoxStyle}"
+                              AutomationProperties.Name="Don't show again"
+                              Margin="0,10,0,0"
+                              Visibility="Collapsed"/>
                 </StackPanel>
             </Grid>
 
             <!-- Bottom Action Button Bar -->
             <Border Grid.Row="1" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,11,11" Padding="16,10">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button x:Name="OkBtn" Content="Aceptar" MinWidth="90" Height="32" Padding="14,0" Style="{StaticResource PrimaryButtonStyle}" Click="Ok_Click" IsDefault="True"/>
-                    <Button x:Name="CancelBtn" Content="Cancelar" MinWidth="90" Height="32" Padding="14,0" Margin="10,0,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click" IsCancel="True"/>
+                    <Button x:Name="OkBtn" MinWidth="90" Height="32" Padding="14,0" Style="{StaticResource PrimaryButtonStyle}" Click="Ok_Click" IsDefault="True">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="OkTextLbl" Text="Aceptar" VerticalAlignment="Center"/>
+                            <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="4" Padding="5,1" Margin="8,0,0,0">
+                                <TextBlock Text="↵" Foreground="{DynamicResource SubTextBrush}" FontSize="11" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="CancelBtn" MinWidth="90" Height="32" Padding="14,0" Margin="10,0,0,0" Style="{StaticResource SecondaryButtonStyle}" Click="Cancel_Click" IsCancel="True">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="CancelTextLbl" Text="Cancelar" VerticalAlignment="Center"/>
+                            <Border Background="{DynamicResource HeaderBgBrush}" CornerRadius="4" Padding="5,1" Margin="8,0,0,0">
+                                <TextBlock Text="Esc" Foreground="{DynamicResource SubTextBrush}" FontSize="10" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Border>
         </Grid>

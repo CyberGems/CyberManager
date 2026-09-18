@@ -175,6 +175,7 @@ public partial class SettingsView : UserControl
         App.Settings.GroupProcesses = true;
         App.Settings.ShowSuspended = true;
         App.Settings.SearchText = "";
+        App.Settings.SuppressedConfirmations.Clear();
         App.Settings.RefreshIntervalMs = 800;
         App.Settings.AlwaysOnTop = false;
         App.Settings.MinimizeToTray = true;

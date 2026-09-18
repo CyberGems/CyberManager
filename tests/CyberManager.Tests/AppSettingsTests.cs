@@ -41,4 +41,21 @@ public class AppSettingsTests
         Assert.Equal(560, settings.CompactWindowWidth);
         Assert.Equal(360, settings.CompactWindowHeight);
     }
+
+    [Fact]
+    public void AppSettings_ConfirmationSuppression_IsScopedPerAction()
+    {
+        var settings = new AppSettings();
+
+        Assert.False(settings.IsConfirmationSuppressed("process.kill"));
+
+        settings.SetConfirmationSuppressed("process.kill", suppressed: true);
+
+        Assert.True(settings.IsConfirmationSuppressed("process.kill"));
+        Assert.False(settings.IsConfirmationSuppressed("process.suspend"));
+
+        settings.SetConfirmationSuppressed("process.kill", suppressed: false);
+
+        Assert.False(settings.IsConfirmationSuppressed("process.kill"));
+    }
 }

@@ -32,6 +32,10 @@ public partial class CompactProcessView : UserControl
             new PropertyMetadata(12.0));
 
     private bool _syncingSearch;
+    private double _cpuPercent;
+    private double _usedRamGb;
+    private double _totalRamGb;
+    private string _cpuModelName = "";
 
     public CompactProcessView()
     {
@@ -79,6 +83,7 @@ public partial class CompactProcessView : UserControl
         EngineBadgeText.Text = Strings.T("WfpEngineBadge");
         CompactCpuLabel.Text = Strings.T("Cpu");
         CompactRamLabel.Text = Strings.T("Ram");
+        UpdateMetricToolTips();
         ModeButton.ToolTip = Strings.T("MoreDetails");
         AutomationProperties.SetName(ModeButton, Strings.T("MoreDetails"));
         SettingsButton.ToolTip = Strings.T("Settings");
@@ -122,10 +127,23 @@ public partial class CompactProcessView : UserControl
     public void SetStatus(string value) => StatusText.Text = value;
     public void SetStatusToolTip(string? value) => StatusText.ToolTip = value;
 
-    public void SetSystemMetrics(double cpuPercent, double usedRamGb)
+    public void SetSystemMetrics(double cpuPercent, double usedRamGb, string? cpuModelName, double totalRamGb)
     {
+        _cpuPercent = cpuPercent;
+        _usedRamGb = usedRamGb;
+        _cpuModelName = cpuModelName?.Trim() ?? "";
+        _totalRamGb = totalRamGb;
+
         CompactCpuText.Text = $"{cpuPercent:F1}%";
         CompactRamText.Text = $"{usedRamGb:F1} GB";
+        UpdateMetricToolTips();
+    }
+
+    private void UpdateMetricToolTips()
+    {
+        var cpuModel = string.IsNullOrWhiteSpace(_cpuModelName) ? Strings.T("Unknown") : _cpuModelName;
+        CompactCpuMetricHost.ToolTip = $"{Strings.T("CpuModel")}: {cpuModel}\n{Strings.T("CpuTotal", _cpuPercent)}";
+        CompactRamMetricHost.ToolTip = $"{Strings.T("TotalRam", _totalRamGb)}\n{Strings.T("MemTotal", _usedRamGb)}";
     }
 
     public void SetEmptyState(bool empty, string? message = null)

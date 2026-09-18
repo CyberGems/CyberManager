@@ -118,7 +118,8 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
                             Margin="0,0,8,0">
-                    <Border Background="{DynamicResource CardSecondaryBrush}"
+                    <Border x:Name="CompactCpuMetricHost"
+                            Background="{DynamicResource CardSecondaryBrush}"
                             CornerRadius="4"
                             Padding="5,2"
                             Margin="0,0,4,0">
@@ -136,7 +137,8 @@
                                        FontWeight="Bold"/>
                         </StackPanel>
                     </Border>
-                    <Border Background="{DynamicResource CardSecondaryBrush}"
+                    <Border x:Name="CompactRamMetricHost"
+                            Background="{DynamicResource CardSecondaryBrush}"
                             CornerRadius="4"
                             Padding="5,2">
                         <StackPanel Orientation="Horizontal">
