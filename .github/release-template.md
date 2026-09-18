@@ -6,29 +6,29 @@ Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is a 
 
 ### ✨ Key Features & Highlights
 
-- 🗂️ **GlassWire-Style Unified Navigation Tab Bar**:
-  - **Embedded Views**: Integrated **Processes**, **Performance Telemetry**, and **Settings** directly into the main window via a central header tab bar, removing multiple floating windows and delivering a unified, seamless workspace.
-  - **Fluid Transitions**: Retains full virtualization and live telemetry state without layout flicker or process reload lag.
+- 🖥️ **Refined Compact Monitor**:
+  - **Clear At-a-Glance Metrics**: CPU, RAM, PID, and process badges with informative tooltips.
+  - **Responsive Controls**: Improved title bar dragging, taskbar-aware maximize/restore, column resizing, header hover states, and process selection.
+  - **Heavy Process Filter**: Show the 10 processes with the highest combined CPU and RAM usage.
 
-- ⋯ **Titlebar "More Options" (`···`) Dropdown Menu**:
-  - **Suite-Standard Menu**: Added a CyberFeeds-inspired quick-access dropdown replacing the standalone `ⓘ` button in the titlebar.
-  - **Integrated Actions**: One-click access to *Donate to project*, *Refresh processes* (`F5`), *System Information* (`Ctrl+I`), *Compact mode* (`Ctrl+Shift+M`), *Documentation & Wiki*, *FAQ*, *Changelog*, *Website*, and in-app *Check for updates*.
-  - **Refined Toggle Logic**: Left-click and right-click toggle support with native backdrop styling and dynamic icon color highlighting.
+- ⌨️ **Editable Global Hotkey**:
+  - **Live Capture**: Record modifier combinations as they are pressed, with conflict feedback.
+  - **Default Shortcut**: `Alt+Shift+M`, with icon-only reset and clear controls.
 
-- 📌 **Compact Monitor with Pinning**:
-  - **Always-on-Top Toggle**: Pin button with active crimson/red badge glow keeps the compact process monitor floating cleanly above other applications and games.
-  - **Dense Telemetry**: Real-time CPU, RAM, and PID indicators with context-menu process control (End task, Priority, etc.).
+- 🔎 **Search and Process Insight**:
+  - **Persistent Search History**: Recent searches are shared between Full and Compact modes.
+  - **Properties Dialog**: Inspect friendly names, file metadata, runtime state, parent PID, and resource usage.
+  - **Modern Identity Display**: Friendly process names and vector icons make system processes easier to recognize.
 
-- 💬 **Enriched Refresh Tooltips & Telemetry Display**:
-  - **Clean Status Line**: Streamlined footer text displaying exact update timestamp (`Updated HH:mm:ss`) without misleading row counts.
-  - **Detailed Bilingual Tooltips**: Hovering reveals distinct application group counts, total active processes in the system, and filtered search match counts in both English and Spanish.
-  - **Enlarged Metric Badges**: Expanded live CPU and RAM badges in the main toolbar for effortless at-a-glance monitoring.
+- ⚙️ **Reliable Settings and Windows Integration**:
+  - **Factory Reset**: Restore all preferences, window state, tray behavior, confirmations, and hotkey settings.
+  - **Separate Tray Behaviors**: Choose independently whether minimizing or closing sends the app to the tray.
+  - **Reliable Auto-Start**: Uses Windows Task Scheduler with a registry fallback when appropriate.
 
-- 🎨 **Interface, Typography & Theme Refinements**:
-  - **Native Scale Typography**: Elevated SettingsView typography and removed redundant table font size slider.
-  - **Light Theme Contrast**: Enhanced RAM and accent color contrast in the Light theme for optimal readability on bright backgrounds.
-  - **Suite-Aligned About Window**: Aligned footer icons, donation links, and wiki documentation with the CyberSnap and CyberGems suite standard.
-  - **Streamlined Tray Menu**: Removed redundant toggles from the notification tray context menu for a clean, distraction-free desktop experience.
+- 🎨 **Interface and Theme Polish**:
+  - **Bilingual Experience**: Updated English and Spanish labels, helpers, tooltips, and modal actions.
+  - **Refined Default Theme**: Softer row contrast, calibrated saturation, and modern system-process icons.
+  - **Branded Loading and About Surfaces**: Animated startup loader and clickable CyberGems branding.
 
 ---
 

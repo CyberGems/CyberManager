@@ -30,9 +30,10 @@ Most task managers either freeze under heavy load or bury basic features behind 
 |---|---|
 | Manage thousands of processes | UI virtualization — only visible rows rendered, 3000+ at 144fps |
 | Instant process refresh | NT-native engine — direct API calls, zero WMI overhead |
-| Identify resource hogs | Adaptive CPU/RAM heatmap with thermal tinting |
+| Identify resource hogs | Adaptive CPU/RAM heatmap and top-10 heavy-process filter |
 | Monitor system health | Live sparklines + System Information window with 4 tabs |
 | Control processes | End, end tree, suspend, resume, set priority |
+| Understand processes | Friendly names, metadata, and a detailed Properties dialog |
 | Stay out of the way | System tray + global hotkey (`Alt+Shift+M`) + auto-start |
 | Make it yours | 3 themes, bilingual EN/ES, always-on-top |
 
@@ -45,8 +46,10 @@ Most task managers either freeze under heavy load or bury basic features behind 
 - **NT-Native Engine** — Direct `NtQuerySystemInformation` + differential snapshots
 - **Real-Time CPU %** — Delta-based per-process calculation, accurate and lightweight
 - **Instant Search & Filter** — By name, PID, or path with zero blocking (150ms debounce)
+- **Search History** — Persistent recent queries available from both search bars
 - **Process Grouping** — Group by application with expandable tree hierarchy
 - **Resource Heatmap** — Adaptive CPU/RAM thermal tinting (green → yellow → red)
+- **Heavy Process Filter** — Show the 10 processes with the highest combined CPU/RAM usage
 
 ### 🎛️ Process Control
 - **End Task** — Terminate selected process
@@ -56,6 +59,7 @@ Most task managers either freeze under heavy load or bury basic features behind 
 - **Copy Path** — Copy executable path to clipboard
 - **Open Folder** — Open containing folder in Explorer
 - **Search Online** — Google search for process name
+- **Properties** — Inspect friendly name, file metadata, runtime state, and resource usage
 
 ### 📊 System Monitoring
 - **Live Sparklines** — Real-time CPU and RAM history graphs in the main window footer
@@ -66,17 +70,18 @@ Most task managers either freeze under heavy load or bury basic features behind 
   - **I/O History** — Process/thread/handle counts + kernel pool stats
 
 ### 🖥️ Desktop Integration
-- **System Tray** — Minimize to tray, quick actions menu, version info
+- **System Tray** — Separate tray behavior for minimizing and closing, quick actions, version info
 - **Global Hotkey** — Configurable toggle shortcut (default: `Alt+Shift+M`)
 - **Always on Top** — Pin window above other applications
-- **Auto-Start** — Launch at Windows sign-in
+- **Auto-Start** — Reliable Windows sign-in startup through scheduled task registration with a registry fallback
 - **Auto-Updates** — Check GitHub Releases on startup with download progress
 
 ### 🎨 Customization
-- **3 Themes** — CyberManager (Obsidian & Neon Cyan), Dark (Charcoal & Indigo), Light (Slate & Royal Blue)
+- **3 Themes** — CyberManager (Obsidian & Soft Cyan), Dark (Charcoal & Indigo), Light (Slate & Royal Blue)
 - **Row Font Size** — Adjustable 11–17px with live preview
 - **Bilingual UI** — Full English and Spanish interface
 - **Frameless Chrome** — DWM rounded corners, Mica/Acrylic background effects
+- **Factory Reset** — Restore all application preferences to their defaults
 
 ---
 
