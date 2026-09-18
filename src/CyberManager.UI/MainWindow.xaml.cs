@@ -192,6 +192,7 @@ public partial class MainWindow : Window
         CompactView.SettingsRequested += Settings_Click;
         CompactView.MinimizeRequested += Minimize_Click;
         CompactView.CloseRequested += Close_Click;
+        CompactView.AboutRequested += About_Click;
         CompactView.DragRequested += CompactView_DragRequested;
         CompactView.SearchChanged += CompactView_SearchChanged;
         CompactView.SearchSubmitted += CompactView_SearchSubmitted;
@@ -333,7 +334,7 @@ public partial class MainWindow : Window
             SaveCurrentWindowBounds();
             App.Settings.Save();
 
-            if (App.Settings.MinimizeToTray && !_isExplicitExit)
+            if (App.Settings.MinimizeToTrayOnClose && !_isExplicitExit)
             {
                 e.Cancel = true;
                 Hide();
@@ -374,6 +375,14 @@ public partial class MainWindow : Window
     private void OnWindowStateChanged(object? sender, EventArgs e)
     {
         if (!_isLoaded || _isClosed) return;
+
+        if (WindowState == WindowState.Minimized &&
+            App.Settings.MinimizeToTrayOnMinimize &&
+            IsVisible)
+        {
+            Hide();
+            return;
+        }
 
         UpdateMaximizeButtonIcon();
         if (IsVisible && WindowState != WindowState.Minimized)
@@ -1296,6 +1305,13 @@ public partial class MainWindow : Window
     {
         if (e.ChangedButton != MouseButton.Left) return;
         var source = e.OriginalSource as DependencyObject;
+        if (IsDescendantOf(source, FullBrandingPanel))
+        {
+            e.Handled = true;
+            About_Click(this, e);
+            return;
+        }
+
         if (FindVisualParent<ButtonBase>(source) != null ||
             FindVisualParent<TextBox>(source) != null ||
             FindVisualParent<Border>(source)?.Name == "NavTabBarBorder" ||
@@ -1795,6 +1811,8 @@ public partial class MainWindow : Window
             SettingsTabContent?.RefreshLocalization();
 
             SubtitleText.Text = Strings.T("AppSubtitle");
+            FullBrandingPanel.ToolTip = Strings.T("About");
+            AutomationProperties.SetName(FullBrandingPanel, Strings.T("About"));
             SearchHint.Text = Strings.T("SearchPlaceholder");
             EmptyStateText.Text = Strings.T("NoProcesses");
             LoaderTitle.Text = Strings.T("CollectingProcesses");
@@ -2146,7 +2164,7 @@ public partial class MainWindow : Window
     {
         if (IsVisible && WindowState != WindowState.Minimized && IsActive)
         {
-            if (App.Settings.MinimizeToTray)
+            if (App.Settings.MinimizeToTrayOnMinimize)
             {
                 Hide();
             }
@@ -2236,7 +2254,7 @@ public partial class MainWindow : Window
 
     private void Minimize_Click(object sender, RoutedEventArgs e)
     {
-        if (App.Settings.MinimizeToTray)
+        if (App.Settings.MinimizeToTrayOnMinimize)
         {
             Hide();
         }

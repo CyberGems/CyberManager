@@ -82,6 +82,7 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? EndTaskRequested;
     public event RoutedEventHandler? PinRequested;
     public event RoutedEventHandler? SettingsRequested;
+    public event RoutedEventHandler? AboutRequested;
     public event RoutedEventHandler? MinimizeRequested;
     public event RoutedEventHandler? CloseRequested;
     public event MouseButtonEventHandler? DragRequested;
@@ -96,6 +97,8 @@ public partial class CompactProcessView : UserControl
         UpdateMetricToolTips();
         ModeButton.ToolTip = Strings.T("MoreDetails");
         AutomationProperties.SetName(ModeButton, Strings.T("MoreDetails"));
+        BrandingPanel.ToolTip = Strings.T("About");
+        AutomationProperties.SetName(BrandingPanel, Strings.T("About"));
         SettingsButton.ToolTip = Strings.T("Settings");
         CloseButton.ToolTip = Strings.T("Close");
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");
@@ -340,13 +343,22 @@ public partial class CompactProcessView : UserControl
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (!IsTitleBarDragSource(e.OriginalSource as DependencyObject)) return;
+        var source = e.OriginalSource as DependencyObject;
+        if (IsDescendantOf(source, BrandingPanel))
+        {
+            AboutRequested?.Invoke(this, e);
+            e.Handled = true;
+            return;
+        }
+
+        if (!IsTitleBarDragSource(source)) return;
 
         DragRequested?.Invoke(this, e);
     }
 
     public bool IsTitleBarDragSource(DependencyObject? source) =>
         IsDescendantOf(source, CompactTitleBar) &&
+        !IsDescendantOf(source, BrandingPanel) &&
         FindVisualParent<Button>(source) == null &&
         FindVisualParent<TextBox>(source) == null &&
         FindVisualParent<Border>(source)?.Name is not (nameof(PinButtonHost) or nameof(ModeButtonHost));

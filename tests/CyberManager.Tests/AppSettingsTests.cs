@@ -34,10 +34,11 @@ public class AppSettingsTests
     }
 
     [Fact]
-    public void AppSettings_DefaultMinimizeToTray_IsTrue()
+    public void AppSettings_DefaultTrayBehaviors_AreExplicit()
     {
         var settings = new AppSettings();
-        Assert.True(settings.MinimizeToTray);
+        Assert.False(settings.MinimizeToTrayOnMinimize);
+        Assert.True(settings.MinimizeToTrayOnClose);
     }
 
     [Fact]

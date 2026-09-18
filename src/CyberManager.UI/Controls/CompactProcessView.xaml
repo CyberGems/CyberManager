@@ -175,7 +175,8 @@
                 <StackPanel x:Name="BrandingPanel"
                             Orientation="Horizontal"
                             VerticalAlignment="Center"
-                            IsHitTestVisible="True">
+                            IsHitTestVisible="True"
+                            Cursor="Hand">
                     <Image Source="pack://application:,,,/Assets/CyberManager.png"
                            Width="24"
                            Height="24"

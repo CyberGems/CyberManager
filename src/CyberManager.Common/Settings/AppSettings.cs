@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using CyberManager.Common.I18n;
 
 namespace CyberManager.Common.Settings;
@@ -21,7 +22,14 @@ public sealed class AppSettings
     public string SearchText { get; set; } = "";
     public List<string> RecentSearches { get; set; } = new();
     public HashSet<string> SuppressedConfirmations { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-    public bool MinimizeToTray { get; set; } = true;
+    public bool MinimizeToTrayOnMinimize { get; set; }
+    public bool MinimizeToTrayOnClose { get; set; } = true;
+    [JsonIgnore]
+    public bool MinimizeToTray
+    {
+        get => MinimizeToTrayOnClose;
+        set => MinimizeToTrayOnClose = value;
+    }
     public bool StartWithWindows { get; set; } = true;
     public bool StartMinimized { get; set; }
     public bool AutoCheckForUpdates { get; set; } = true;

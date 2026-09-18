@@ -476,7 +476,10 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <StackPanel x:Name="FullBrandingPanel"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                Cursor="Hand">
                         <Image Source="pack://application:,,,/Assets/CyberManager.png" Width="30" Height="30" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" Margin="0,0,12,0"/>
                         <StackPanel VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">

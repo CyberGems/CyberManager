@@ -78,7 +78,8 @@ public partial class SettingsView : UserControl
 
         // System Settings
         StartWithWinSwitch.IsChecked = App.Settings.StartWithWindows;
-        MinimizeToTraySwitch.IsChecked = App.Settings.MinimizeToTray;
+        MinimizeToTrayOnMinimizeSwitch.IsChecked = App.Settings.MinimizeToTrayOnMinimize;
+        MinimizeToTrayOnCloseSwitch.IsChecked = App.Settings.MinimizeToTrayOnClose;
         AlwaysOnTopSwitch.IsChecked = App.Settings.AlwaysOnTop;
         AutoUpdatesSwitch.IsChecked = App.Settings.AutoCheckForUpdates;
 
@@ -94,7 +95,8 @@ public partial class SettingsView : UserControl
         App.Settings.GroupProcesses = GroupByAppSwitch.IsChecked == true;
         App.Settings.ShowSuspended = HighlightSuspendedSwitch.IsChecked == true;
         App.Settings.StartWithWindows = StartWithWinSwitch.IsChecked == true;
-        App.Settings.MinimizeToTray = MinimizeToTraySwitch.IsChecked == true;
+        App.Settings.MinimizeToTrayOnMinimize = MinimizeToTrayOnMinimizeSwitch.IsChecked == true;
+        App.Settings.MinimizeToTrayOnClose = MinimizeToTrayOnCloseSwitch.IsChecked == true;
         App.Settings.AlwaysOnTop = AlwaysOnTopSwitch.IsChecked == true;
         App.Settings.AutoCheckForUpdates = AutoUpdatesSwitch.IsChecked == true;
 
@@ -181,7 +183,8 @@ public partial class SettingsView : UserControl
         App.Settings.SuppressedConfirmations.Clear();
         App.Settings.RefreshIntervalMs = 800;
         App.Settings.AlwaysOnTop = false;
-        App.Settings.MinimizeToTray = true;
+        App.Settings.MinimizeToTrayOnMinimize = false;
+        App.Settings.MinimizeToTrayOnClose = true;
         App.Settings.StartWithWindows = true;
         App.Settings.AutoCheckForUpdates = true;
         App.Settings.RowFontSize = 13.0;
@@ -192,7 +195,8 @@ public partial class SettingsView : UserControl
         GroupByAppSwitch.IsChecked = true;
         HighlightSuspendedSwitch.IsChecked = true;
         AlwaysOnTopSwitch.IsChecked = false;
-        MinimizeToTraySwitch.IsChecked = true;
+        MinimizeToTrayOnMinimizeSwitch.IsChecked = false;
+        MinimizeToTrayOnCloseSwitch.IsChecked = true;
         StartWithWinSwitch.IsChecked = true;
         AutoUpdatesSwitch.IsChecked = true;
         RefreshIntervalComboBox.SelectedIndex = 1;
@@ -257,8 +261,10 @@ public partial class SettingsView : UserControl
         // System
         StartWithWinTitleLbl.Text = Strings.T("StartWithWindowsTitle");
         StartWithWinDescLbl.Text = Strings.T("StartWithWindowsDesc");
-        MinimizeToTrayTitleLbl.Text = Strings.T("MinimizeToTrayTitle");
-        MinimizeToTrayDescLbl.Text = Strings.T("MinimizeToTrayDesc");
+        MinimizeToTrayOnMinimizeTitleLbl.Text = Strings.T("MinimizeToTrayOnMinimizeTitle");
+        MinimizeToTrayOnMinimizeDescLbl.Text = Strings.T("MinimizeToTrayOnMinimizeDesc");
+        MinimizeToTrayOnCloseTitleLbl.Text = Strings.T("MinimizeToTrayOnCloseTitle");
+        MinimizeToTrayOnCloseDescLbl.Text = Strings.T("MinimizeToTrayOnCloseDesc");
         AlwaysOnTopTitleLbl.Text = Strings.T("AlwaysOnTopTitle");
         AlwaysOnTopDescLbl.Text = Strings.T("AlwaysOnTopDesc");
         AutoUpdatesTitleLbl.Text = Strings.T("AutoCheckUpdatesTitle");
