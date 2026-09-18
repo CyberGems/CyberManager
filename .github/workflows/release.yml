@@ -35,7 +35,8 @@ jobs:
         run: dotnet restore CyberManager.slnx
 
       - name: Run Tests
-        run: dotnet test tests/CyberManager.Tests/CyberManager.Tests.csproj --configuration Release --no-restore -p:TreatWarningsAsErrors=true -p:CollectCoverage=true -p:CoverletOutput=TestResults/coverage/ -p:CoverletOutputFormat=cobertura -p:Threshold=20 -p:ThresholdType=line
+        # WPF UI code-behind is covered by UI validation, while Common and Core remain under the unit-test coverage gate.
+        run: dotnet test tests/CyberManager.Tests/CyberManager.Tests.csproj --configuration Release --no-restore -p:TreatWarningsAsErrors=true -p:CollectCoverage=true -p:CoverletOutput=TestResults/coverage/ -p:CoverletOutputFormat=cobertura -p:Threshold=20 -p:ThresholdType=line -p:Exclude="[CyberManager]*"
 
       - name: Upload Coverage Report
         if: always()
