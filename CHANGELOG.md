@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-18
+
+### Added
+- **Editable Global Hotkey**: Added live capture for modifier combinations, reset and clear actions, conflict handling, and the new default shortcut `Alt+Shift+M`.
+- **Factory Settings Reset**: Added a complete reset action for preferences, window state, search history, confirmation choices, tray behavior, and hotkey configuration.
+- **Search History and Heavy Process Filter**: Added persistent recent searches and a synchronized filter for the 10 heaviest processes in Full and Compact modes.
+- **Process Properties**: Added a localized process properties dialog with friendly names, file metadata, runtime information, and graceful fallbacks.
+- **Reliable Windows Startup**: Added hybrid Task Scheduler and registry startup registration with elevation only when required.
+
+### Changed
+- **Compact Mode**: Refined the title bar, metrics, search controls, column headers, process heatmaps, context actions, resizing, selection behavior, and taskbar/tray lifecycle.
+- **Settings Experience**: Split minimize and close tray behaviors, added a clickable About footer, refreshed the global hotkey controls, and added a refresh-rate icon.
+- **Process Identity**: Friendly process names are now shown in the main lists, with richer system-process metadata and consistent vector fallback icons.
+- **Theme and Branding**: Reduced the default alternating-row contrast, polished the default theme saturation, and added a branded animated startup loader.
+- **Application Navigation**: Added About access from the Full and Compact branding areas and renamed the Settings tab to Configuration.
+
+### Fixed
+- **Compact Mode Startup**: Fixed the missing global converter resource that caused a XAML parse crash when switching modes.
+- **Window Management**: Maximization now respects monitor work areas and taskbars.
+- **Search and Grid Usability**: Unified search styling, focus handling, clear controls, column alignment, header hover feedback, and unavailable context actions.
+- **Modal and Tray Behavior**: Standardized confirmation actions, keyboard affordances, suppressed confirmations, and separate tray behavior defaults.
+
 ## [1.2.0] - 2026-09-11
 
 ### Added
@@ -39,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory leak in icon generation** — Fixed `Icon.FromHandle` handle leak by properly destroying the original handle after cloning.
 - **Double-click kills process** — Removed dangerous double-click-to-kill behavior.
 
-[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/CyberGems/CyberManager/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/CyberGems/CyberManager/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/CyberGems/CyberManager/releases/tag/v1.1.0
