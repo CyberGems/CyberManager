@@ -193,6 +193,8 @@ public partial class MainWindow : Window
         CompactView.DragRequested += CompactView_DragRequested;
         CompactView.SearchChanged += CompactView_SearchChanged;
         CompactView.ProcessGrid.SelectionChanged += ProcGrid_SelectionChanged;
+        ProcGrid.PreviewMouseLeftButtonDown += ProcessGrid_PreviewMouseLeftButtonDown;
+        CompactView.ProcessGrid.PreviewMouseLeftButtonDown += ProcessGrid_PreviewMouseLeftButtonDown;
         CompactView.ProcessGrid.Sorting += ProcGrid_Sorting;
         CompactView.ProcessGrid.PreviewMouseRightButtonDown += CompactGrid_PreviewMouseRightButtonDown;
         CompactView.ProcessGrid.PreviewKeyDown += ProcGrid_PreviewKeyDown;
@@ -669,6 +671,31 @@ public partial class MainWindow : Window
             }
             ApplySortingAndFilter();
         }
+    }
+
+    private void ProcessGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left ||
+            IsGroupChevronSource(e.OriginalSource as DependencyObject) ||
+            FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject)?.DataContext is not ProcessInfo process ||
+            !ReferenceEquals(Selected, process))
+        {
+            return;
+        }
+
+        SetSelectedProcess(null);
+        e.Handled = true;
+    }
+
+    private static bool IsGroupChevronSource(DependencyObject? source)
+    {
+        while (source != null)
+        {
+            if (source is FrameworkElement element && Equals(element.Tag, "GroupChevron")) return true;
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        return false;
     }
 
     private void ProcGrid_Sorting(object sender, DataGridSortingEventArgs e)

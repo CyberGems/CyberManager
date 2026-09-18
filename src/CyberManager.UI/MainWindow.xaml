@@ -814,6 +814,7 @@
                                                 <!-- Chevron button for Group Parents -->
                                                 <Border Grid.Column="0" Width="18" Height="18" VerticalAlignment="Center" HorizontalAlignment="Center"
                                                         Visibility="{Binding IsGroupParent, Converter={StaticResource BoolToVisConverter}}"
+                                                        Tag="GroupChevron"
                                                         Cursor="Hand" Background="Transparent" MouseLeftButtonDown="GroupChevron_MouseDown"
                                                         RenderTransformOrigin="0.5,0.5">
                                                     <Border.RenderTransform>
