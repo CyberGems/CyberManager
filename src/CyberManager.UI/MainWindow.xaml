@@ -804,6 +804,22 @@
                                         </MenuItem.Header>
                                     </MenuItem>
                                     <Separator/>
+                                    <MenuItem x:Name="ContextPropertiesItem" Header="Process properties" Style="{StaticResource ModernMenuItem}" Click="Properties_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 12,2 A 10,10 0 1 0 12,22 A 10,10 0 1 0 12,2 Z M 12,10 V 16 M 12,6 H 12.01"
+                                                  Stroke="{DynamicResource AccentBrush}"
+                                                  StrokeThickness="1.5"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  Width="14"
+                                                  Height="14"
+                                                  Stretch="Uniform"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator/>
                                     <MenuItem x:Name="ContextKillItem" Header="End Task" Style="{StaticResource ModernMenuItem}" Click="Kill_Click">
                                         <MenuItem.Icon>
                                             <Path Data="M 4,4 H 12 V 12 H 4 Z"

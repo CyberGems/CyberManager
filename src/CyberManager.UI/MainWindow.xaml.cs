@@ -1165,6 +1165,7 @@ public partial class MainWindow : Window
         var hasExecutablePath = !string.IsNullOrWhiteSpace(process.ExePath);
 
         ContextKillItem.IsEnabled = process.Pid > 0;
+        ContextPropertiesItem.IsEnabled = process.Pid > 0 || hasExecutablePath;
         ContextKillTreeItem.IsEnabled = hasProcessTree;
         ContextSuspendItem.IsEnabled = hasRunningProcesses;
         ContextResumeItem.IsEnabled = hasSuspendedProcesses;
@@ -1753,6 +1754,15 @@ public partial class MainWindow : Window
         try { Process.Start(new ProcessStartInfo($"https://www.google.com/search?q={Uri.EscapeDataString(s.Name)}") { UseShellExecute = true }); } catch { }
     }
 
+    private void Properties_Click(object sender, RoutedEventArgs e)
+    {
+        var process = GetActionTarget(sender);
+        if (process == null) return;
+
+        var dialog = new ProcessPropertiesWindow(process) { Owner = this };
+        dialog.ShowDialog();
+    }
+
 
     private void ApplyTheme()
     {
@@ -1851,6 +1861,7 @@ public partial class MainWindow : Window
             if (ProcContextMenu != null)
             {
                 ContextKillItem.Header = Strings.T("Kill");
+                ContextPropertiesItem.Header = Strings.T("ProcessProperties");
                 ContextKillTreeItem.Header = Strings.T("KillTree");
                 ContextSuspendItem.Header = Strings.T("Suspend");
                 ContextResumeItem.Header = Strings.T("Resume");
