@@ -87,8 +87,6 @@ public sealed class TrayIconService : IDisposable
     private MenuItem? _showMenuItem;
     private MenuItem? _sysInfoMenuItem;
     private MenuItem? _refreshMenuItem;
-    private MenuItem? _startWithWindowsMenuItem;
-    private MenuItem? _minimizeToTrayMenuItem;
     private MenuItem? _helpMenuItem;
     private MenuItem? _subHelpItem;
     private MenuItem? _subFaqItem;
@@ -104,8 +102,6 @@ public sealed class TrayIconService : IDisposable
     private Action? _onToggleShow;
     private Action? _onOpenSystemInfo;
     private Action? _onRefresh;
-    private Action<bool>? _onToggleStartWithWindows;
-    private Action<bool>? _onToggleMinimizeToTray;
     private Action? _onOpenSettings;
     private Action<bool>? _onOpenAbout;
     private Action? _onExit;
@@ -115,8 +111,6 @@ public sealed class TrayIconService : IDisposable
         Action onToggleShow,
         Action onOpenSystemInfo,
         Action onRefresh,
-        Action<bool> onToggleStartWithWindows,
-        Action<bool> onToggleMinimizeToTray,
         Action onOpenSettings,
         Action<bool> onOpenAbout,
         Action onExit)
@@ -125,8 +119,6 @@ public sealed class TrayIconService : IDisposable
         _onToggleShow = onToggleShow;
         _onOpenSystemInfo = onOpenSystemInfo;
         _onRefresh = onRefresh;
-        _onToggleStartWithWindows = onToggleStartWithWindows;
-        _onToggleMinimizeToTray = onToggleMinimizeToTray;
         _onOpenSettings = onOpenSettings;
         _onOpenAbout = onOpenAbout;
         _onExit = onExit;
@@ -228,40 +220,6 @@ public sealed class TrayIconService : IDisposable
         };
         if (miStyle != null) _refreshMenuItem.Style = miStyle;
         _refreshMenuItem.Click += (_, _) => _onRefresh?.Invoke();
-
-        // 5. Start with Windows
-        _startWithWindowsMenuItem = new MenuItem
-        {
-            Header = Strings.T("StartWithWindows"),
-            IsCheckable = true,
-            IsChecked = App.Settings.StartWithWindows,
-            Icon = CreatePathIcon("M 3 3 H 10 V 10 H 3 Z M 14 3 H 21 V 10 H 14 Z M 3 14 H 10 V 21 H 3 Z M 14 14 H 21 V 21 H 14 Z")
-        };
-        if (miStyle != null) _startWithWindowsMenuItem.Style = miStyle;
-        _startWithWindowsMenuItem.Click += (_, _) =>
-        {
-            if (_startWithWindowsMenuItem != null)
-            {
-                _onToggleStartWithWindows?.Invoke(_startWithWindowsMenuItem.IsChecked);
-            }
-        };
-
-        // 8. Minimize to Tray
-        _minimizeToTrayMenuItem = new MenuItem
-        {
-            Header = Strings.T("MinimizeToTray"),
-            IsCheckable = true,
-            IsChecked = App.Settings.MinimizeToTray,
-            Icon = CreatePathIcon("M 4 14 L 12 22 L 20 14 M 12 2 V 20")
-        };
-        if (miStyle != null) _minimizeToTrayMenuItem.Style = miStyle;
-        _minimizeToTrayMenuItem.Click += (_, _) =>
-        {
-            if (_minimizeToTrayMenuItem != null)
-            {
-                _onToggleMinimizeToTray?.Invoke(_minimizeToTrayMenuItem.IsChecked);
-            }
-        };
 
         // 8b. Settings
         _settingsMenuItem = new MenuItem
@@ -369,9 +327,6 @@ public sealed class TrayIconService : IDisposable
         _contextMenu.Items.Add(_sysInfoMenuItem);
         _contextMenu.Items.Add(_refreshMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
-        _contextMenu.Items.Add(_startWithWindowsMenuItem);
-        _contextMenu.Items.Add(_minimizeToTrayMenuItem);
-        _contextMenu.Items.Add(new Separator { Style = sepStyle });
         _contextMenu.Items.Add(_settingsMenuItem);
         _contextMenu.Items.Add(_helpMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
@@ -432,16 +387,6 @@ public sealed class TrayIconService : IDisposable
         if (_refreshMenuItem != null)
         {
             _refreshMenuItem.Header = Strings.T("RefreshProcesses");
-        }
-        if (_startWithWindowsMenuItem != null)
-        {
-            _startWithWindowsMenuItem.Header = Strings.T("StartWithWindows");
-            _startWithWindowsMenuItem.IsChecked = App.Settings.StartWithWindows;
-        }
-        if (_minimizeToTrayMenuItem != null)
-        {
-            _minimizeToTrayMenuItem.Header = Strings.T("MinimizeToTray");
-            _minimizeToTrayMenuItem.IsChecked = App.Settings.MinimizeToTray;
         }
         if (_settingsMenuItem != null) _settingsMenuItem.Header = $"{Strings.T("Settings")}...";
         if (_helpMenuItem != null) _helpMenuItem.Header = Strings.T("Help");

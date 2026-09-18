@@ -90,7 +90,7 @@ public static class Strings
         ["RecentSearches"] = ("Recent searches", "Búsquedas recientes"),
         ["NoRecentSearches"] = ("No recent searches", "No hay búsquedas recientes"),
         ["ClearSearchHistory"] = ("Clear search history", "Limpiar historial de búsqueda"),
-        ["ShowHeavyProcesses"] = ("Show heaviest processes", "Mostrar procesos más pesados"),
+        ["ShowHeavyProcesses"] = ("Show the 10 heaviest processes", "Mostrar los 10 procesos más pesados"),
         ["Minimize"] = ("Minimize", "Minimizar"),
         ["Maximize"] = ("Maximize", "Maximizar"),
         ["Restore"] = ("Restore", "Restaurar"),

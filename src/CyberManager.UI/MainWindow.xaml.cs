@@ -277,8 +277,6 @@ public partial class MainWindow : Window
                 ToggleTrayVisibility,
                 OpenSystemInfoFromTray,
                 () => _ = RefreshAsync(_lifetimeCts.Token),
-                OnToggleStartWithWindows,
-                OnToggleMinimizeToTray,
                 OpenSettingsFromTray,
                 OpenAboutFromTray,
                 ExitApplication);
@@ -2214,25 +2212,6 @@ public partial class MainWindow : Window
         }
         var dlg = new AboutWindow(checkUpdatesNow) { Owner = this };
         dlg.ShowDialog();
-    }
-
-    private void OnToggleStartWithWindows(bool enable)
-    {
-        App.Settings.StartWithWindows = enable;
-        if (!StartupManager.SetAutoStart(enable))
-        {
-            App.Settings.StartWithWindows = StartupManager.IsAutoStartEnabled();
-            SetStatus(Strings.T("AutoStartFailed"));
-        }
-        App.Settings.Save();
-        _trayService.UpdateLocalization();
-    }
-
-    private void OnToggleMinimizeToTray(bool enable)
-    {
-        App.Settings.MinimizeToTray = enable;
-        App.Settings.Save();
-        _trayService.UpdateLocalization();
     }
 
     private void ExitApplication()
