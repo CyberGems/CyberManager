@@ -1005,11 +1005,20 @@
                                                             </Style>
                                                         </Image.Style>
                                                     </Image>
-                                                    <TextBlock Text="{Binding Name, Converter={StaticResource SystemProcessIconConverter}}"
-                                                               Foreground="{DynamicResource SubTextBrush}" FontSize="10"
-                                                               HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
+                                                    <Path Data="{Binding Name, Converter={StaticResource SystemProcessIconConverter}}"
+                                                          Stroke="{DynamicResource SubTextBrush}"
+                                                          StrokeThickness="1.4"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round"
+                                                          StrokeLineJoin="Round"
+                                                          Width="16"
+                                                          Height="16"
+                                                          Stretch="Uniform"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"
+                                                          Fill="Transparent">
+                                                        <Path.Style>
+                                                            <Style TargetType="Path">
                                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding ElementName=ProcIcon, Path=Visibility}" Value="Collapsed">
@@ -1017,8 +1026,8 @@
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
+                                                        </Path.Style>
+                                                    </Path>
                                                 </Grid>
 
                                                 <!-- Process Name -->
@@ -1103,20 +1112,55 @@
                                                 </TextBlock>
 
                                                 <!-- Enriched Descriptive Subtitle for Special Kernel / System Processes with empty path -->
-                                                <TextBlock Text="{Binding Name, Converter={StaticResource ProcessDescriptionConverter}}"
-                                                           Foreground="{DynamicResource AccentBrush}" Opacity="0.85" FontStyle="Italic" FontSize="11"
-                                                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center">
-                                                    <TextBlock.Style>
-                                                        <Style TargetType="TextBlock">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding ExePath}" Value="">
-                                                                    <Setter Property="Visibility" Value="Visible"/>
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </TextBlock.Style>
-                                                </TextBlock>
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="18"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Path Grid.Column="0"
+                                                          Data="{Binding Name, Converter={StaticResource SystemProcessIconConverter}}"
+                                                          Stroke="{DynamicResource AccentBrush}"
+                                                          StrokeThickness="1.2"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round"
+                                                          StrokeLineJoin="Round"
+                                                          Width="14"
+                                                          Height="14"
+                                                          Stretch="Uniform"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"
+                                                          Fill="Transparent">
+                                                        <Path.Style>
+                                                            <Style TargetType="Path">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ExePath}" Value="">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Path.Style>
+                                                    </Path>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding Name, Converter={StaticResource ProcessDescriptionConverter}}"
+                                                               Foreground="{DynamicResource AccentBrush}"
+                                                               Opacity="0.85"
+                                                               FontSize="11"
+                                                               Margin="6,0,0,0"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ExePath}" Value="">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                </Grid>
                                             </Grid>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>

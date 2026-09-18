@@ -5,6 +5,7 @@
              SnapsToDevicePixels="True">
     <UserControl.Resources>
         <conv:PathToIconConverter x:Key="PathToIconConverter"/>
+        <conv:SystemProcessIconConverter x:Key="SystemProcessIconConverter"/>
         <conv:CpuHeatmapBrushConverter x:Key="CpuHeatmapBrushConverter"/>
         <conv:MemoryHeatmapBrushConverter x:Key="MemoryHeatmapBrushConverter"/>
         <conv:HighCpuWeightConverter x:Key="HighCpuWeightConverter"/>
@@ -508,13 +509,20 @@
                                                 </Style>
                                             </Image.Style>
                                         </Image>
-                                        <TextBlock Text="◈"
-                                                   Foreground="{DynamicResource SubTextBrush}"
-                                                   FontSize="10"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
+                                        <Path Data="{Binding Name, Converter={StaticResource SystemProcessIconConverter}}"
+                                              Stroke="{DynamicResource SubTextBrush}"
+                                              StrokeThickness="1.4"
+                                              StrokeStartLineCap="Round"
+                                              StrokeEndLineCap="Round"
+                                              StrokeLineJoin="Round"
+                                              Width="16"
+                                              Height="16"
+                                              Stretch="Uniform"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Fill="Transparent">
+                                            <Path.Style>
+                                                <Style TargetType="Path">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ElementName=ProcessIcon, Path=Visibility}" Value="Collapsed">
@@ -522,8 +530,8 @@
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
+                                            </Path.Style>
+                                        </Path>
                                     </Grid>
                                     <Grid Grid.Column="1" VerticalAlignment="Center">
                                         <Grid.ColumnDefinitions>

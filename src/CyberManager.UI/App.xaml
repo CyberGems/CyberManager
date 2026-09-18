@@ -17,7 +17,7 @@
         <SolidColorBrush x:Key="AccentBrush" Color="#24A6B5"/>
         <SolidColorBrush x:Key="AccentGlowBrush" Color="#3324A6B5"/>
         <SolidColorBrush x:Key="AccentFgBrush" Color="#071216"/>
-        <SolidColorBrush x:Key="GridAltBrush" Color="#0A111D"/>
+        <SolidColorBrush x:Key="GridAltBrush" Color="#101824"/>
         <SolidColorBrush x:Key="HeaderBgBrush" Color="#1B2737"/>
         <SolidColorBrush x:Key="SearchBgBrush" Color="#111A27"/>
         <SolidColorBrush x:Key="InputBgBrush" Color="#111A27"/>
