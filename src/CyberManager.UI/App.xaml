@@ -5,6 +5,7 @@
              ShutdownMode="OnMainWindowClose">
     <Application.Resources>
         <primitives:PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</primitives:PopupAnimation>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
         <SolidColorBrush x:Key="BgBrush" Color="#070B12"/>
         <SolidColorBrush x:Key="CardBrush" Color="#131A26"/>
         <SolidColorBrush x:Key="CardSecondaryBrush" Color="#1A2535"/>

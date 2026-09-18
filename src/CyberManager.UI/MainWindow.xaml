@@ -55,7 +55,6 @@
             </Setter>
         </Style>
 
-        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
         <conv:ChildIndentMarginConverter x:Key="ChildIndentMarginConverter"/>
         <conv:ExpandedChevronConverter x:Key="ExpandedChevronConverter"/>
         <conv:ParentFontWeightConverter x:Key="ParentFontWeightConverter"/>
