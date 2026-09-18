@@ -1125,42 +1125,132 @@
                         </DataGrid>
                         <TextBlock x:Name="EmptyStateText" Style="{StaticResource EmptyStateText}" Text="No processes found" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,40"/>
 
-                        <!-- Modern CyberGems Pulse & Spinner Initial Loader Overlay -->
+                        <!-- Branded CyberGems Initial Loader Overlay -->
                         <Grid x:Name="LoaderOverlay" Background="{DynamicResource CardBrush}" Visibility="Visible">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <!-- Rotating CyberGem -->
-                                <Border Width="48" Height="48" CornerRadius="14" Background="{DynamicResource CardSecondaryBrush}"
-                                        BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1.5" HorizontalAlignment="Center"
-                                        RenderTransformOrigin="0.5,0.5">
-                                    <Border.RenderTransform>
-                                        <RotateTransform x:Name="LoaderRotate" Angle="0"/>
-                                    </Border.RenderTransform>
-                                    <Border.Triggers>
+                                <Grid Width="104" Height="104" HorizontalAlignment="Center" Margin="0,0,0,12">
+                                    <!-- Breathing accent halo -->
+                                    <Ellipse x:Name="LoaderPulse"
+                                             Width="92"
+                                             Height="92"
+                                             Stroke="{DynamicResource AccentGlowBrush}"
+                                             StrokeThickness="1.5"
+                                             Opacity="0.45"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             RenderTransformOrigin="0.5,0.5">
+                                        <Ellipse.RenderTransform>
+                                            <ScaleTransform x:Name="LoaderPulseScale" ScaleX="0.82" ScaleY="0.82"/>
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+
+                                    <!-- Rotating segmented ring -->
+                                    <Ellipse Width="82"
+                                             Height="82"
+                                             Stroke="{DynamicResource AccentBrush}"
+                                             StrokeThickness="2"
+                                             StrokeDashArray="18 82"
+                                             StrokeDashCap="Round"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"
+                                             RenderTransformOrigin="0.5,0.5">
+                                        <Ellipse.RenderTransform>
+                                            <RotateTransform x:Name="LoaderRingRotate" Angle="0"/>
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+
+                                    <!-- CyberManager mark -->
+                                    <Border Width="58"
+                                            Height="58"
+                                            CornerRadius="18"
+                                            Background="{DynamicResource CardSecondaryBrush}"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderThickness="1"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="{DynamicResource AccentColor}" Opacity="0.5" BlurRadius="18" ShadowDepth="0"/>
+                                        </Border.Effect>
+                                        <Image Source="pack://application:,,,/Assets/CyberManager.png"
+                                               Width="36"
+                                               Height="36"
+                                               Stretch="Uniform"
+                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                    </Border>
+
+                                    <Grid.Triggers>
                                         <EventTrigger RoutedEvent="Loaded">
                                             <BeginStoryboard>
                                                 <Storyboard RepeatBehavior="Forever">
-                                                    <DoubleAnimation Storyboard.TargetName="LoaderRotate"
+                                                    <DoubleAnimation Storyboard.TargetName="LoaderPulseScale"
+                                                                     Storyboard.TargetProperty="ScaleX"
+                                                                     From="0.82" To="1.12" Duration="0:0:1.8"
+                                                                     AutoReverse="True"/>
+                                                    <DoubleAnimation Storyboard.TargetName="LoaderPulseScale"
+                                                                     Storyboard.TargetProperty="ScaleY"
+                                                                     From="0.82" To="1.12" Duration="0:0:1.8"
+                                                                     AutoReverse="True"/>
+                                                    <DoubleAnimation Storyboard.TargetName="LoaderPulse"
+                                                                     Storyboard.TargetProperty="Opacity"
+                                                                     From="0.5" To="0.08" Duration="0:0:1.8"
+                                                                     AutoReverse="True"/>
+                                                    <DoubleAnimation Storyboard.TargetName="LoaderRingRotate"
                                                                      Storyboard.TargetProperty="Angle"
-                                                                     From="0" To="360" Duration="0:0:1.8"/>
+                                                                     From="0" To="360" Duration="0:0:2.2"/>
                                                 </Storyboard>
                                             </BeginStoryboard>
                                         </EventTrigger>
-                                    </Border.Triggers>
-                                    <TextBlock Text="◈" Foreground="{DynamicResource AccentBrush}" FontSize="24" FontWeight="Bold"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
+                                    </Grid.Triggers>
+                                </Grid>
 
-                                <!-- Title & Status Subtitle -->
-                                <TextBlock x:Name="LoaderTitle" Text="Recopilando procesos..." FontSize="13.5" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center" Margin="0,14,0,3"/>
-                                <TextBlock x:Name="LoaderSub" Text="Inicializando Motor NT • Calculando deltas de CPU" FontSize="11"
-                                           Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
+                                <!-- Title & status subtitle -->
+                                <TextBlock x:Name="LoaderTitle"
+                                           Text="Recopilando procesos..."
+                                           FontSize="14"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,0,0,4"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock x:Name="LoaderSub"
+                                               Text="Inicializando Motor NT • Calculando deltas de CPU"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource SubTextBrush}"/>
+                                    <TextBlock x:Name="LoaderDots"
+                                               Text=" ···"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource AccentBrush}">
+                                        <TextBlock.Triggers>
+                                            <EventTrigger RoutedEvent="Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                         From="0.25" To="1"
+                                                                         Duration="0:0:0.8"
+                                                                         AutoReverse="True"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </TextBlock.Triggers>
+                                    </TextBlock>
+                                </StackPanel>
 
-                                <!-- Glowing Progress Track -->
-                                <Border Width="160" Height="3" CornerRadius="1.5" Background="{DynamicResource BorderBrush}" Margin="0,14,0,0" ClipToBounds="True">
-                                    <Border Width="50" Height="3" CornerRadius="1.5" Background="{DynamicResource AccentBrush}" HorizontalAlignment="Left">
+                                <!-- Glowing progress track -->
+                                <Border Width="220"
+                                        Height="4"
+                                        CornerRadius="2"
+                                        Background="{DynamicResource BorderBrush}"
+                                        Margin="0,16,0,0"
+                                        ClipToBounds="True">
+                                    <Border Width="72"
+                                            Height="4"
+                                            CornerRadius="2"
+                                            Background="{DynamicResource AccentBrush}"
+                                            HorizontalAlignment="Left">
                                         <Border.RenderTransform>
-                                            <TranslateTransform x:Name="LoaderBarTrans" X="-50"/>
+                                            <TranslateTransform x:Name="LoaderBarTrans" X="-72"/>
                                         </Border.RenderTransform>
                                         <Border.Triggers>
                                             <EventTrigger RoutedEvent="Loaded">
@@ -1168,7 +1258,7 @@
                                                     <Storyboard RepeatBehavior="Forever">
                                                         <DoubleAnimation Storyboard.TargetName="LoaderBarTrans"
                                                                          Storyboard.TargetProperty="X"
-                                                                         From="-50" To="160" Duration="0:0:1.2"/>
+                                                                         From="-72" To="220" Duration="0:0:1.35"/>
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </EventTrigger>

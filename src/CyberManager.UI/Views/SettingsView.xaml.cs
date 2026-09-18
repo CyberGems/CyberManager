@@ -313,6 +313,18 @@ public partial class SettingsView : UserControl
         AboutRequested?.Invoke(this, new RoutedEventArgs());
     }
 
+    private void FooterAboutBorder_MouseEnter(object sender, MouseEventArgs e)
+    {
+        FooterVersionText.SetResourceReference(TextBlock.ForegroundProperty, "AccentBrush");
+        FooterCopyrightText.SetResourceReference(TextBlock.ForegroundProperty, "TextBrush");
+    }
+
+    private void FooterAboutBorder_MouseLeave(object sender, MouseEventArgs e)
+    {
+        FooterVersionText.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
+        FooterCopyrightText.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
+    }
+
     private bool TryApplyHotkey(string hotkey)
     {
         if (HotkeyChangeRequested?.Invoke(hotkey) == false)
