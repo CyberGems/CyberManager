@@ -101,7 +101,8 @@ public partial class SettingsView : UserControl
         // Sync Start with Windows Registry
         if (sender == StartWithWinSwitch)
         {
-            if (!_syncingStartup && !StartupManager.SetAutoStart(App.Settings.StartWithWindows))
+            if (!_syncingStartup &&
+                !StartupManager.SetAutoStart(App.Settings.StartWithWindows, requestElevation: true))
             {
                 App.Settings.StartWithWindows = StartupManager.IsAutoStartEnabled();
                 _syncingStartup = true;
@@ -185,7 +186,7 @@ public partial class SettingsView : UserControl
         App.Settings.AutoCheckForUpdates = true;
         App.Settings.RowFontSize = 13.0;
 
-        StartupManager.SetAutoStart(true);
+        StartupManager.SetAutoStart(true, requestElevation: true);
 
         ShowIdleSwitch.IsChecked = false;
         GroupByAppSwitch.IsChecked = true;

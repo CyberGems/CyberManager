@@ -15,6 +15,8 @@ public partial class App : System.Windows.Application
         Strings.Current = Settings.Language;
         base.OnStartup(e);
         ThemeManager.Apply(Settings.Theme);
+        _ = Task.Run(() =>
+            StartupManager.EnsureAutoStart(Settings.StartWithWindows, startMinimized: true));
         var w = new MainWindow();
         MainWindow = w;
         w.Show();
