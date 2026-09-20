@@ -16,7 +16,11 @@
   <a href="https://github.com/CyberGems/CyberManager/wiki"><img src="https://img.shields.io/badge/Wiki-Documentation-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=0284C7" alt="Wiki" /></a>
 </p>
 
-CyberManager is a lightweight, high-capacity virtualized task manager. Powered by the native NT engine, it offers instant search and a compact mode. The ultimate alternative to Windows Task Manager.
+---
+
+## What is CyberManager?
+
+CyberManager is a lightweight, high-capacity alternative to Windows Task Manager, designed to remain fast even when thousands of processes are active. Its virtualized interface and native NT engine provide instant search, responsive refreshes, live CPU and memory telemetry, and direct controls for ending, suspending, resuming, or reprioritizing processes. A compact mode, system tray access, global hotkey, and detailed system information keep essential monitoring close without filling the desktop.
 
 *Free and open source (GPLv3): no ads, no tracking, and no data collection. Just enjoy it.*
 
