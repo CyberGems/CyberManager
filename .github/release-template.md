@@ -1,6 +1,13 @@
-## ⚡ CyberManager {{VERSION}} — Release Notes
+## ⚡ CyberManager {{VERSION}}: Release Notes
 
-Welcome to the official **CyberManager {{VERSION}}** release! CyberManager is a lightweight, high-capacity task manager with instant search and a compact mode, the ultimate alternative to Windows Task Manager.
+### 🚀 What's new in this release
+
+<!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
+<!-- changelog-summary:start -->
+Compact mode is now more polished and informative, with richer process identity, clearer at-a-glance metrics, reliable Windows startup, editable global shortcuts, and a more complete settings experience.
+<!-- changelog-summary:end -->
+
+> **New to CyberManager?** A lightweight Windows task manager with instant search, process insight, and a focused compact mode.
 
 ---
 
