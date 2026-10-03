@@ -1,4 +1,8 @@
 <p align="center">
+  English · <a href="./README.es.md">Español</a>
+</p>
+
+<p align="center">
   <a href="https://cybergems.org/apps/cybermanager/">
     <img src="https://cybergems.org/banners/cybermanager.png" alt="CyberManager, a fast task manager for thousands of processes" />
   </a>
@@ -89,35 +93,12 @@ Most task managers either freeze under heavy load or bury basic features behind 
 
 ---
 
-## 🛠️ Tech Stack & Architecture
-
-- **Platform:** Windows 10 / 11 (x64)
-- **Framework:** .NET 10 + WPF (Native UI)
-- **Architecture:** Native UI with async NT engine
-
-```
-CyberManager.slnx
-├── src/CyberManager.Common/   Models, I18n, Settings
-├── src/CyberManager.Core/     ProcessCollector, SystemMetricsCollector (NT API)
-└── src/CyberManager.UI/       Frameless WPF, Sparkline, SystemInfoWindow
-```
-
-### Architecture Highlights
-
-- **NT-Native Engine** — Direct `NtQuerySystemInformation`, `NtSuspendProcess`, `NtResumeProcess` calls
-- **Async Collection** — Process enumeration on thread pool with differential snapshots
-- **UI Virtualization** — Only visible rows rendered in the DataGrid
-- **System Metrics** — `GetSystemTimes` + `GlobalMemoryStatusEx` + `GetPerformanceInfo` for telemetry
-- **Icon Extraction** — `SHGetFileInfo` with path-based fallback and deduplicated cache
-
----
-
 ## 🚀 Getting Started
 
 ### Install
 
 1. Download the [latest release](https://github.com/CyberGems/CyberManager/releases/latest)
-2. Run the installer or portable version
+2. Run the installer or the [portable version](https://github.com/CyberGems/CyberManager/releases/latest)
 3. Press `Alt+Shift+M` to toggle the window from any application
 
 ### 🛡️ Windows SmartScreen
@@ -145,7 +126,32 @@ You can verify the file independently: compare the SHA with the GitHub release, 
 
 </details>
 
-### Build from Source
+---
+
+## 🛠️ Tech Stack & Architecture
+
+- **Platform:** Windows 10 / 11 (x64)
+- **Framework:** .NET 10 + WPF (Native UI)
+- **Architecture:** Native UI with async NT engine
+
+```
+CyberManager.slnx
+├── src/CyberManager.Common/   Models, I18n, Settings
+├── src/CyberManager.Core/     ProcessCollector, SystemMetricsCollector (NT API)
+└── src/CyberManager.UI/       Frameless WPF, Sparkline, SystemInfoWindow
+```
+
+### Architecture Highlights
+
+- **NT-Native Engine** — Direct `NtQuerySystemInformation`, `NtSuspendProcess`, `NtResumeProcess` calls
+- **Async Collection** — Process enumeration on thread pool with differential snapshots
+- **UI Virtualization** — Only visible rows rendered in the DataGrid
+- **System Metrics** — `GetSystemTimes` + `GlobalMemoryStatusEx` + `GetPerformanceInfo` for telemetry
+- **Icon Extraction** — `SHGetFileInfo` with path-based fallback and deduplicated cache
+
+### Building from Source (Developers)
+
+Only needed if you want to work on CyberManager or build it yourself; regular users can skip this section.
 
 ```powershell
 git clone https://github.com/CyberGems/CyberManager.git
