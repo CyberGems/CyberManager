@@ -80,6 +80,7 @@ public partial class CompactProcessView : UserControl
     public event EventHandler? HeavyFilterChanged;
     public event RoutedEventHandler? ToggleRequested;
     public event RoutedEventHandler? EndTaskRequested;
+    public event RoutedEventHandler? RestartRequested;
     public event RoutedEventHandler? PinRequested;
     public event RoutedEventHandler? SettingsRequested;
     public event RoutedEventHandler? AboutRequested;
@@ -90,6 +91,9 @@ public partial class CompactProcessView : UserControl
     public void ApplyLanguage()
     {
         EndTaskButton.ToolTip = Strings.T("Kill");
+        RestartButton.ToolTip = Strings.T("Restart");
+        AutomationProperties.SetName(RestartButton, Strings.T("Restart"));
+        ToolTipService.SetShowOnDisabled(RestartButton, true);
         PinButton.ToolTip = Strings.T("AlwaysOnTop");
         EngineBadgeText.Text = Strings.T("WfpEngineBadge");
         CompactCpuLabel.Text = Strings.T("Cpu");
@@ -180,6 +184,22 @@ public partial class CompactProcessView : UserControl
     }
 
     public void SetEndTaskEnabled(bool enabled) => EndTaskButton.IsEnabled = enabled;
+
+    public void SetRestartEnabled(bool enabled) => RestartButton.IsEnabled = enabled;
+
+    /// <summary>
+    /// Enables or disables the restart button and sets its tooltip. When the reason is
+    /// <c>null</c> the plain informative tooltip (name + shortcut) is shown, which covers the
+    /// "nothing selected" case. A disabled control keeps its tooltip visible only when
+    /// <c>ToolTipService.ShowOnDisabled</c> is set, which <see cref="ApplyLanguage"/> handles.
+    /// </summary>
+    public void SetRestartState(bool enabled, string? tooltip)
+    {
+        RestartButton.IsEnabled = enabled;
+        RestartButton.ToolTip = string.IsNullOrWhiteSpace(tooltip)
+            ? $"{Strings.T("Restart")} ({Strings.T("RestartShortcutHint")})"
+            : tooltip;
+    }
 
     public void SetHeavyFilter(bool enabled)
     {
@@ -299,6 +319,9 @@ public partial class CompactProcessView : UserControl
 
     private void EndTaskButton_Click(object sender, RoutedEventArgs e) =>
         EndTaskRequested?.Invoke(sender, e);
+
+    private void RestartButton_Click(object sender, RoutedEventArgs e) =>
+        RestartRequested?.Invoke(sender, e);
 
     private void PinButton_Click(object sender, RoutedEventArgs e) =>
         PinRequested?.Invoke(sender, e);

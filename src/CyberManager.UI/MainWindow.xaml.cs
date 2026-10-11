@@ -188,6 +188,7 @@ public partial class MainWindow : Window
         CompactView.ItemsSource = _processList.Items;
         CompactView.ToggleRequested += CompactView_ToggleRequested;
         CompactView.EndTaskRequested += Kill_Click;
+        CompactView.RestartRequested += Restart_Click;
         CompactView.PinRequested += CompactView_PinRequested;
         CompactView.SettingsRequested += Settings_Click;
         CompactView.MinimizeRequested += Minimize_Click;
@@ -820,6 +821,7 @@ public partial class MainWindow : Window
         CompactView.SetEmptyState(_view.Count == 0);
         KillBtn.IsEnabled = Selected != null;
         CompactView.SetEndTaskEnabled(Selected != null);
+        UpdateRestartControls(Selected);
 
         string timeStr = DateTime.Now.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
         string status;
@@ -857,6 +859,7 @@ public partial class MainWindow : Window
 
         KillBtn.IsEnabled = process != null;
         CompactView.SetEndTaskEnabled(process != null);
+        UpdateRestartControls(process);
     }
 
     private void CompactView_ToggleRequested(object? sender, RoutedEventArgs e) =>
@@ -1179,6 +1182,9 @@ public partial class MainWindow : Window
         ContextKillItem.IsEnabled = process.Pid > 0;
         ContextPropertiesItem.IsEnabled = process.Pid > 0 || hasExecutablePath;
         ContextKillTreeItem.IsEnabled = hasProcessTree;
+        var restartReason = GetRestartDisabledReason(process);
+        ContextRestartItem.IsEnabled = restartReason == null;
+        ContextRestartItem.ToolTip = restartReason;
         ContextSuspendItem.IsEnabled = hasRunningProcesses;
         ContextResumeItem.IsEnabled = hasSuspendedProcesses;
         ContextSetPriorityItem.IsEnabled = process.Pid > 0;
@@ -1528,6 +1534,7 @@ public partial class MainWindow : Window
 
         KillBtn.IsEnabled = selected != null;
         CompactView.SetEndTaskEnabled(selected != null);
+        UpdateRestartControls(selected);
     }
 
     private void ThrottledSaveSettings()
@@ -1651,6 +1658,105 @@ public partial class MainWindow : Window
             }
             else ShowActionFailures(new[] { result });
         }
+    }
+
+    private async void Restart_Click(object sender, RoutedEventArgs e)
+    {
+        var s = GetActionTarget(sender);
+        if (s == null) return;
+
+        if (IsPackagedApp(s.ExePath))
+        {
+            ShowRestartUnavailable(Strings.T("RestartPackagedUnsupported"));
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(s.ExePath))
+        {
+            ShowRestartUnavailable(Strings.T("RestartUnavailable"));
+            return;
+        }
+
+        if (s.IsGroupParent && s.InstanceCount > 1)
+        {
+            // Group restart: relaunch each instance from its own executable, then terminate it.
+            if (ConfirmDialog.ShowProcess(this, Strings.T("Restart"), Strings.T("RestartConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Restart"), Strings.T("Cancel"), isDanger: false, confirmationKey: "process.restart"))
+            {
+                var pidsToRestart = s.Children.Select(c => c.Pid).ToList();
+                if (!pidsToRestart.Contains(s.Pid)) pidsToRestart.Add(s.Pid);
+                var results = await RunProcessActionsAsync(pidsToRestart, pid =>
+                {
+                    var target = _all.FirstOrDefault(p => p.Pid == pid);
+                    return ProcessActions.TryRestart(pid, target?.ExePath ?? s.ExePath);
+                });
+                ApplyActionResults(results);
+            }
+            return;
+        }
+
+        if (ConfirmDialog.ShowProcess(this, Strings.T("Restart"), Strings.T("RestartConfirm", s.Name, s.Pid), s.ExePath, Strings.T("Restart"), Strings.T("Cancel"), isDanger: false, confirmationKey: "process.restart"))
+        {
+            var exePath = s.ExePath;
+            var result = await Task.Run(() => ProcessActions.TryRestart(s.Pid, exePath), _lifetimeCts.Token);
+            ApplyActionResults(new Dictionary<int, ProcessActions.ActionResult> { [s.Pid] = result });
+        }
+    }
+
+    /// <summary>
+    /// A process image living under WindowsApps belongs to a packaged (UWP / Microsoft Store)
+    /// app, which cannot be relaunched by executing its image path.
+    /// </summary>
+    private static bool IsPackagedApp(string? exePath) =>
+        !string.IsNullOrEmpty(exePath) &&
+        exePath.Contains(@"\WindowsApps\", StringComparison.OrdinalIgnoreCase);
+
+    private static bool CanRestart(ProcessInfo? process) => GetRestartDisabledReason(process) == null;
+
+    /// <summary>
+    /// Returns <c>null</c> when the process can be restarted, otherwise a localized reason
+    /// explaining why the action is unavailable. Used to keep the restart controls' tooltips
+    /// informative instead of leaving users guessing.
+    /// </summary>
+    private static string? GetRestartDisabledReason(ProcessInfo? process)
+    {
+        // No selection is not a limitation worth explaining: the caller falls back to the
+        // plain informative tooltip in that case.
+        if (process == null) return null;
+        if (string.IsNullOrWhiteSpace(process.ExePath)) return Strings.T("RestartHintNoPath");
+        if (IsPackagedApp(process.ExePath)) return Strings.T("RestartHintPackaged");
+        if (IsSuspended(process)) return Strings.T("RestartHintSuspended");
+        return null;
+    }
+
+    private void UpdateRestartControls(ProcessInfo? process)
+    {
+        // When nothing is selected the button stays disabled, but the tooltip remains purely
+        // informative (name + shortcut) instead of showing a reason that would look confusing.
+        var reason = GetRestartDisabledReason(process);
+        var enabled = process != null && reason == null;
+        var tooltip = reason ?? $"{Strings.T("Restart")} ({Strings.T("RestartShortcutHint")})";
+
+        RestartBtn.IsEnabled = enabled;
+        RestartBtn.ToolTip = tooltip;
+
+        CompactView.SetRestartState(enabled, tooltip);
+        if (ProcContextMenu != null)
+        {
+            ContextRestartItem.IsEnabled = enabled;
+            ContextRestartItem.ToolTip = reason;
+        }
+    }
+
+    private void ShowRestartUnavailable(string message)
+    {
+        SetStatus(message);
+        ConfirmDialog.Show(
+            this,
+            Strings.T("ProcessActionFailed"),
+            message,
+            Strings.T("Ok"),
+            null,
+            ConfirmIconType.Warning);
     }
 
     private void FontSizeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -1853,10 +1959,12 @@ public partial class MainWindow : Window
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
+            RestartBtn.ToolTip = $"{Strings.T("Restart")} ({Strings.T("RestartShortcutHint")})";
             ClearBtn.ToolTip = Strings.T("Clear");
             HeavyFilterToggle.ToolTip = Strings.T("ShowHeavyProcesses");
             AutomationProperties.SetName(RefreshBtn, Strings.T("Refresh"));
             AutomationProperties.SetName(KillBtn, Strings.T("Kill"));
+            AutomationProperties.SetName(RestartBtn, Strings.T("Restart"));
             AutomationProperties.SetName(ClearBtn, Strings.T("Clear"));
             AutomationProperties.SetName(HeavyFilterToggle, Strings.T("ShowHeavyProcesses"));
             FullModeToggleBtn.ToolTip = Strings.T("CompactMode");
@@ -1913,6 +2021,7 @@ public partial class MainWindow : Window
                 ContextKillItem.Header = Strings.T("Kill");
                 ContextPropertiesItem.Header = Strings.T("ProcessProperties");
                 ContextKillTreeItem.Header = Strings.T("KillTree");
+                ContextRestartItem.Header = Strings.T("Restart");
                 ContextSuspendItem.Header = Strings.T("Suspend");
                 ContextResumeItem.Header = Strings.T("Resume");
                 ContextSetPriorityItem.Header = Strings.T("SetPriority");
@@ -1925,6 +2034,9 @@ public partial class MainWindow : Window
                 ContextCopyPathItem.Header = Strings.T("CopyPath");
                 ContextOpenFolderItem.Header = Strings.T("OpenFolder");
                 ContextSearchOnlineItem.Header = Strings.T("SearchOnline");
+
+                // Refresh state-dependent text that carries a localized reason.
+                UpdateRestartControls(Selected);
             }
         }
         catch (Exception ex)
@@ -2152,6 +2264,15 @@ public partial class MainWindow : Window
                 Kill_Click(sender, e);
             }
             return;
+        }
+        else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.R)
+        {
+            if (Selected != null)
+            {
+                Restart_Click(sender, e);
+                e.Handled = true;
+                return;
+            }
         }
         else if (e.Key == Key.Apps || (e.Key == Key.F10 && Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)))
         {

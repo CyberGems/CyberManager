@@ -352,6 +352,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <Border x:Name="CompactSearchBar"
@@ -454,6 +455,28 @@
                           Height="11"
                           Stretch="Uniform"
                           Fill="#E81123"/>
+                </Button>
+
+                <Button x:Name="RestartButton"
+                        Grid.Column="3"
+                        Width="28"
+                        Height="26"
+                        Padding="0"
+                        Style="{DynamicResource ModernButton}"
+                        Click="RestartButton_Click"
+                        MouseEnter="InteractiveControl_MouseEnter"
+                        MouseLeave="InteractiveControl_MouseLeave"
+                        ToolTip="Restart process"
+                        AutomationProperties.Name="Restart process">
+                    <Path Data="M 8,2 A 6,6 0 1 1 2.6,8.6 M 8,2 V 0 M 8,2 H 6"
+                          Width="12"
+                          Height="12"
+                          Stroke="{DynamicResource AccentBrush}"
+                          StrokeThickness="1.5"
+                          StrokeStartLineCap="Round"
+                          StrokeEndLineCap="Round"
+                          Stretch="Uniform"
+                          Fill="Transparent"/>
                 </Button>
             </Grid>
 

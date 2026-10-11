@@ -132,6 +132,7 @@
             <Setter Property="Background" Value="{DynamicResource CardBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/><Setter Property="BorderThickness" Value="1"/>
             <Setter Property="FontSize" Value="12"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Padding" Value="12,6"/><Setter Property="Cursor" Value="Hand"/><Setter Property="Focusable" Value="True"/>
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -767,6 +768,12 @@
                                   Width="16" Height="16" Stretch="Uniform"
                                   Fill="#E81123"/>
                         </Button>
+                        <Button x:Name="RestartBtn" Width="38" Height="38" Padding="0" Style="{StaticResource ModernButton}" Margin="8,0,0,0" Click="Restart_Click" ToolTip="Restart Process (Ctrl+R)" IsEnabled="False" AutomationProperties.Name="Restart process">
+                            <Path Data="M 12,4 A 8,8 0 1 1 4.6,12.9 M 12,4 V 1 M 12,4 H 9"
+                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Fill="Transparent"/>
+                        </Button>
                     </StackPanel>
                 </Grid>
 
@@ -840,6 +847,15 @@
                                         </MenuItem.Icon>
                                     </MenuItem>
                                     <Separator/>
+                                    <MenuItem x:Name="ContextRestartItem" Header="Restart Process" Style="{StaticResource ModernMenuItem}" Click="Restart_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 12,4 A 8,8 0 1 1 4.6,12.9 M 12,4 V 1 M 12,4 H 9"
+                                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="14" Height="14" Stretch="Uniform"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
                                     <MenuItem x:Name="ContextSuspendItem" Header="Suspend" Style="{StaticResource ModernMenuItem}" Click="Suspend_Click">
                                         <MenuItem.Icon>
                                             <Path Data="M 5,3 H 9 V 13 H 5 Z M 15,3 H 19 V 13 H 15 Z"
