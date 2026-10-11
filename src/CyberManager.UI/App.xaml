@@ -59,20 +59,34 @@
             </Setter>
         </Style>
         <!-- Global CyberGems Themed ScrollBar Styles -->
+        <!-- The repeat buttons must be fully transparent and templated, otherwise WPF falls
+             back to the default button chrome and paints an ugly frame around the thumb. -->
+        <Style x:Key="ScrollBarPageButtonStyle" TargetType="{x:Type RepeatButton}">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Border Background="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="CustomScrollThumbStyle" TargetType="{x:Type Thumb}">
             <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Opacity" Value="0.4"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Thumb}">
-                        <Border CornerRadius="3" Background="{DynamicResource SubTextBrush}" Margin="1,2,2,2"/>
+                        <Border CornerRadius="3" Background="{DynamicResource SubTextBrush}" Opacity="0.35"/>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Opacity" Value="0.8"/>
+                    <Setter Property="Opacity" Value="0.7"/>
                 </Trigger>
                 <Trigger Property="IsDragging" Value="True">
                     <Setter Property="Opacity" Value="1"/>
@@ -81,48 +95,48 @@
         </Style>
 
         <Style x:Key="CustomScrollBarStyle" TargetType="{x:Type ScrollBar}">
-            <Setter Property="Width" Value="8"/>
+            <Setter Property="Width" Value="10"/>
             <Setter Property="Height" Value="Auto"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ScrollBar}">
-                        <Grid Background="Transparent" Width="{TemplateBinding Width}">
-                            <Track x:Name="PART_Track" IsDirectionReversed="True" Margin="0,4,0,4">
+                        <Border Background="{DynamicResource BgBrush}" CornerRadius="5" Padding="2">
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
                                 <Track.DecreaseRepeatButton>
-                                    <RepeatButton Command="ScrollBar.PageUpCommand" Background="Transparent" BorderThickness="0" Focusable="False" IsTabStop="False"/>
+                                    <RepeatButton Command="ScrollBar.PageUpCommand" Style="{StaticResource ScrollBarPageButtonStyle}"/>
                                 </Track.DecreaseRepeatButton>
                                 <Track.Thumb>
-                                    <Thumb Style="{StaticResource CustomScrollThumbStyle}"/>
+                                    <Thumb Style="{StaticResource CustomScrollThumbStyle}" Margin="0,0,0,2"/>
                                 </Track.Thumb>
                                 <Track.IncreaseRepeatButton>
-                                    <RepeatButton Command="ScrollBar.PageDownCommand" Background="Transparent" BorderThickness="0" Focusable="False" IsTabStop="False"/>
+                                    <RepeatButton Command="ScrollBar.PageDownCommand" Style="{StaticResource ScrollBarPageButtonStyle}"/>
                                 </Track.IncreaseRepeatButton>
                             </Track>
-                        </Grid>
+                        </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
                 <Trigger Property="Orientation" Value="Horizontal">
                     <Setter Property="Width" Value="Auto"/>
-                    <Setter Property="Height" Value="8"/>
+                    <Setter Property="Height" Value="10"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type ScrollBar}">
-                                <Grid Background="Transparent" Height="{TemplateBinding Height}">
-                                    <Track x:Name="PART_Track" IsDirectionReversed="False" Margin="4,0,4,0">
+                                <Border Background="{DynamicResource BgBrush}" CornerRadius="5" Padding="2">
+                                    <Track x:Name="PART_Track" IsDirectionReversed="False">
                                         <Track.DecreaseRepeatButton>
-                                            <RepeatButton Command="ScrollBar.PageLeftCommand" Background="Transparent" BorderThickness="0" Focusable="False" IsTabStop="False"/>
+                                            <RepeatButton Command="ScrollBar.PageLeftCommand" Style="{StaticResource ScrollBarPageButtonStyle}"/>
                                         </Track.DecreaseRepeatButton>
                                         <Track.Thumb>
-                                            <Thumb Style="{StaticResource CustomScrollThumbStyle}"/>
+                                            <Thumb Style="{StaticResource CustomScrollThumbStyle}" Margin="0,0,2,0"/>
                                         </Track.Thumb>
                                         <Track.IncreaseRepeatButton>
-                                            <RepeatButton Command="ScrollBar.PageRightCommand" Background="Transparent" BorderThickness="0" Focusable="False" IsTabStop="False"/>
+                                            <RepeatButton Command="ScrollBar.PageRightCommand" Style="{StaticResource ScrollBarPageButtonStyle}"/>
                                         </Track.IncreaseRepeatButton>
                                     </Track>
-                                </Grid>
+                                </Border>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>
