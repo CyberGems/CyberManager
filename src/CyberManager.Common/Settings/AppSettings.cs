@@ -36,6 +36,11 @@ public sealed class AppSettings
     public string GlobalHotkey { get; set; } = "Alt+Shift+M";
     public bool ShowIdleProcess { get; set; }
     public bool CompactMode { get; set; }
+    /// <summary>
+    /// SortMemberPath values of the process grid columns hidden by the user. Kept as a
+    /// comma-separated list so the column layout survives restarts.
+    /// </summary>
+    public string HiddenProcessColumns { get; set; } = "";
     public bool MainWindowBoundsSaved { get; set; }
     public string MainWindowMonitor { get; set; } = "";
     public double MainWindowLeft { get; set; }

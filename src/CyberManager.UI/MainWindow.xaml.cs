@@ -265,6 +265,7 @@ public partial class MainWindow : Window
         {
             ApplyLanguage();
             ApplyTheme();
+            ApplyColumnVisibility();
             SyncSearchFromSettings();
             GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
             Topmost = App.Settings.AlwaysOnTop;
@@ -1072,6 +1073,9 @@ public partial class MainWindow : Window
 
     private void ProcGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
+        // Let the column header open its own visibility menu instead of the row context menu.
+        if (FindVisualParent<DataGridColumnHeader>(e.OriginalSource as DependencyObject) != null) return;
+
         var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
         if (row?.DataContext is not ProcessInfo process)
         {
@@ -1528,6 +1532,82 @@ public partial class MainWindow : Window
 
         CompactView.SetDetectionPaused(paused);
         SetStatus(paused ? Strings.T("DetectionPaused") : Strings.T("Ready"));
+    }
+
+    /// <summary>
+    /// Rebuilds the header context menu from the current columns, so each column can be
+    /// toggled on or off the way Task Manager does it. The last visible column cannot be
+    /// hidden, and the Process column drives the row label and stays available.
+    /// </summary>
+    private void ColumnMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ContextMenu menu) return;
+
+        var grid = ProcGrid;
+        menu.Items.Clear();
+
+        var visibleCount = grid.Columns.Count(column => column.Visibility == Visibility.Visible);
+
+        foreach (var column in grid.Columns)
+        {
+            var headerText = column.Header?.ToString() ?? "";
+            if (string.IsNullOrWhiteSpace(headerText)) continue;
+
+            var item = new MenuItem
+            {
+                Header = headerText,
+                IsCheckable = true,
+                IsChecked = column.Visibility == Visibility.Visible,
+                Style = TryFindResource("ModernMenuItem") as Style,
+                // Hiding the last remaining column would leave an empty grid.
+                IsEnabled = column.Visibility == Visibility.Visible && visibleCount > 1
+            };
+            item.Click += (_, _) => ToggleColumnVisibility(grid, column);
+            menu.Items.Add(item);
+        }
+    }
+
+    private void ToggleColumnVisibility(DataGrid grid, DataGridColumn column)
+    {
+        var visibleCount = grid.Columns.Count(c => c.Visibility == Visibility.Visible);
+        if (column.Visibility == Visibility.Visible && visibleCount <= 1) return;
+
+        column.Visibility = column.Visibility == Visibility.Visible
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        SaveHiddenColumns(grid);
+    }
+
+    private void SaveHiddenColumns(DataGrid grid)
+    {
+        App.Settings.HiddenProcessColumns = string.Join(",",
+            grid.Columns
+                .Where(column => column.Visibility != Visibility.Visible)
+                .Select(column => column.SortMemberPath)
+                .Where(path => !string.IsNullOrWhiteSpace(path)));
+        ThrottledSaveSettings();
+    }
+
+    private void ApplyColumnVisibility()
+    {
+        var hidden = (App.Settings.HiddenProcessColumns ?? "")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var column in ProcGrid.Columns)
+        {
+            if (string.IsNullOrWhiteSpace(column.SortMemberPath)) continue;
+            column.Visibility = hidden.Contains(column.SortMemberPath)
+                ? Visibility.Collapsed
+                : Visibility.Visible;
+        }
+
+        // Never let a stale setting produce an empty grid.
+        if (ProcGrid.Columns.All(column => column.Visibility != Visibility.Visible))
+        {
+            ProcGrid.Columns[0].Visibility = Visibility.Visible;
+        }
     }
 
     private void GroupToggle_Checked(object sender, RoutedEventArgs e)
@@ -2038,13 +2118,26 @@ public partial class MainWindow : Window
 
             if (ProcGrid.Columns.Count >= 7)
             {
-                ProcGrid.Columns[0].Header = Strings.T("Process");
-                ProcGrid.Columns[1].Header = Strings.T("Pid");
-                ProcGrid.Columns[2].Header = Strings.T("Cpu");
-                ProcGrid.Columns[3].Header = Strings.T("Memory");
-                ProcGrid.Columns[4].Header = Strings.T("Threads");
-                ProcGrid.Columns[5].Header = Strings.T("Priority");
-                ProcGrid.Columns[6].Header = Strings.T("Path");
+                // Map by SortMemberPath instead of index so reordering or hiding columns
+                // cannot mislabel the headers.
+                var headerKeys = new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["Name"] = "Process",
+                    ["CpuPercent"] = "Cpu",
+                    ["Pid"] = "Pid",
+                    ["WorkingSetBytes"] = "Memory",
+                    ["ThreadCount"] = "Threads",
+                    ["Priority"] = "Priority",
+                    ["ExePath"] = "Path"
+                };
+
+                foreach (var column in ProcGrid.Columns)
+                {
+                    if (column.SortMemberPath is { } path && headerKeys.TryGetValue(path, out var key))
+                    {
+                        column.Header = Strings.T(key);
+                    }
+                }
 
                 foreach (var c in ProcGrid.Columns)
                 {
