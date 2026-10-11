@@ -1,7 +1,9 @@
 using System.Collections;
+using System.Linq;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -126,13 +128,19 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(CompactGrid, Strings.T("Processes"));
         ContextHintText.Text = Strings.T("CompactContextHint");
         EmptyStateText.Text = Strings.T("NoProcesses");
-        if (CompactGrid.Columns.Count >= 4)
-        {
-            CompactGrid.Columns[0].Header = Strings.T("Process");
-            CompactGrid.Columns[1].Header = Strings.T("Pid");
-            CompactGrid.Columns[2].Header = Strings.T("Cpu");
-            CompactGrid.Columns[3].Header = Strings.T("Memory");
-        }
+        // Localize by sort key instead of column index, so hiding or reordering columns
+        // never mislabels a header.
+        LocalizeColumn("Name", "Process");
+        LocalizeColumn("Pid", "Pid");
+        LocalizeColumn("CpuPercent", "Cpu");
+        LocalizeColumn("WorkingSetBytes", "Memory");
+    }
+
+    private void LocalizeColumn(string sortMemberPath, string stringKey)
+    {
+        var column = CompactGrid.Columns.FirstOrDefault(c =>
+            string.Equals(c.SortMemberPath, sortMemberPath, StringComparison.Ordinal));
+        if (column is not null) column.Header = Strings.T(stringKey);
     }
 
     public void SetSearchText(string value)
@@ -338,6 +346,71 @@ public partial class CompactProcessView : UserControl
 
     private void MoreDetailsButton_Click(object sender, RoutedEventArgs e) =>
         ToggleRequested?.Invoke(sender, e);
+
+    /// <summary>
+    /// Attaches an empty, per-header context menu as soon as a header is realized. WPF resolves
+    /// which ContextMenu to open before it raises <c>ContextMenuOpening</c>, so the header must
+    /// already own one. Each header needs its own instance because a ContextMenu can only have a
+    /// single logical parent.
+    /// </summary>
+    private void ColumnHeader_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is not DataGridColumnHeader header || header.Column is null) return;
+        if (!CompactGrid.Columns.Contains(header.Column)) return;
+        if (header.ContextMenu is not null) return;
+
+        header.ContextMenu = new ContextMenu
+        {
+            PlacementTarget = header,
+            Style = TryFindResource("ModernContextMenu") as Style
+        };
+    }
+
+    /// <summary>
+    /// Rebuilds the column visibility menu of the compact grid header that was clicked.
+    /// </summary>
+    private void ColumnHeader_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        if (sender is not DataGridColumnHeader header || header.Column is null) return;
+        if (!CompactGrid.Columns.Contains(header.Column)) return;
+
+        var visibleCount = CompactGrid.Columns.Count(column => column.Visibility == Visibility.Visible);
+
+        var menu = header.ContextMenu ??= new ContextMenu
+        {
+            PlacementTarget = header,
+            Style = TryFindResource("ModernContextMenu") as Style
+        };
+        menu.Items.Clear();
+
+        foreach (var column in CompactGrid.Columns)
+        {
+            var headerText = column.Header?.ToString() ?? "";
+            if (string.IsNullOrWhiteSpace(headerText)) continue;
+
+            var item = new MenuItem
+            {
+                Header = headerText,
+                IsCheckable = true,
+                IsChecked = column.Visibility == Visibility.Visible,
+                Style = TryFindResource("ModernMenuItem") as Style,
+                // Hiding the last remaining column would leave an empty grid.
+                IsEnabled = column.Visibility != Visibility.Visible || visibleCount > 1
+            };
+            item.Click += (_, _) => ToggleColumnVisibility(column);
+            menu.Items.Add(item);
+        }
+    }
+
+    private void ToggleColumnVisibility(DataGridColumn column)
+    {
+        var visibleCount = CompactGrid.Columns.Count(c => c.Visibility == Visibility.Visible);
+        if (column.Visibility == Visibility.Visible && visibleCount <= 1) return;
+
+        column.Visibility = column.Visibility == Visibility.Visible
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+    }
 
     private void EndTaskButton_Click(object sender, RoutedEventArgs e) =>
         EndTaskRequested?.Invoke(sender, e);

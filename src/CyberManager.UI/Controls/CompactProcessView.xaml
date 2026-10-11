@@ -20,6 +20,9 @@
             <Setter Property="Padding" Value="8,0"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
             <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <EventSetter Event="Loaded" Handler="ColumnHeader_Loaded"/>
+            <EventSetter Event="ContextMenuOpening" Handler="ColumnHeader_ContextMenuOpening"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DataGridColumnHeader">

@@ -1104,6 +1104,13 @@ public partial class MainWindow : Window
 
     private void ProcGrid_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
+        // A column header provides its own visibility menu. Marking the event handled here
+        // would make WPF cancel that menu, so leave it alone and let the header's menu open.
+        if (FindVisualParent<DataGridColumnHeader>(e.OriginalSource as DependencyObject) != null)
+        {
+            return;
+        }
+
         var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject)
                   ?? ProcContextMenu.PlacementTarget as DataGridRow;
         if (row?.DataContext is not ProcessInfo process)
@@ -1535,18 +1542,44 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Rebuilds the header context menu from the current columns, so each column can be
-    /// toggled on or off the way Task Manager does it. The last visible column cannot be
-    /// hidden, and the Process column drives the row label and stays available.
+    /// Attaches an empty, per-header context menu as soon as a header is realized. WPF resolves
+    /// which ContextMenu to open before it raises <c>ContextMenuOpening</c>, so the header must
+    /// already own one; otherwise the grid's row menu wins. Each header needs its own instance
+    /// because a ContextMenu can only have a single logical parent.
     /// </summary>
-    private void ColumnMenu_Opened(object sender, RoutedEventArgs e)
+    private void ColumnHeader_Loaded(object sender, RoutedEventArgs e)
     {
-        if (sender is not ContextMenu menu) return;
+        if (sender is not DataGridColumnHeader header || header.Column is null) return;
+        if (!ProcGrid.Columns.Contains(header.Column)) return;
+        if (header.ContextMenu is not null) return;
+
+        header.ContextMenu = new ContextMenu
+        {
+            PlacementTarget = header,
+            Style = TryFindResource("ModernContextMenu") as Style
+        };
+    }
+
+    /// <summary>
+    /// Rebuilds the column visibility menu of the header that was clicked, the way Task Manager
+    /// does it, so each column can be toggled on or off.
+    /// </summary>
+    private void ColumnHeader_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        if (sender is not DataGridColumnHeader header || header.Column is null) return;
+        // The implicit header style also covers any other grid in the window, so only build the
+        // menu for the process grid (and let non-process headers keep any menu they define).
+        if (!ProcGrid.Columns.Contains(header.Column)) return;
 
         var grid = ProcGrid;
-        menu.Items.Clear();
-
         var visibleCount = grid.Columns.Count(column => column.Visibility == Visibility.Visible);
+
+        var menu = header.ContextMenu ??= new ContextMenu
+        {
+            PlacementTarget = header,
+            Style = TryFindResource("ModernContextMenu") as Style
+        };
+        menu.Items.Clear();
 
         foreach (var column in grid.Columns)
         {
@@ -1560,7 +1593,7 @@ public partial class MainWindow : Window
                 IsChecked = column.Visibility == Visibility.Visible,
                 Style = TryFindResource("ModernMenuItem") as Style,
                 // Hiding the last remaining column would leave an empty grid.
-                IsEnabled = column.Visibility == Visibility.Visible && visibleCount > 1
+                IsEnabled = column.Visibility != Visibility.Visible || visibleCount > 1
             };
             item.Click += (_, _) => ToggleColumnVisibility(grid, column);
             menu.Items.Add(item);

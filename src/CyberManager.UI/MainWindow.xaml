@@ -310,17 +310,17 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <!-- Column visibility menu shown on the process grid headers. Items are populated in
-             code-behind because they mirror the DataGrid columns at runtime. -->
-        <ContextMenu x:Key="ColumnVisibilityMenu" Style="{StaticResource ModernContextMenu}"
-                     Opened="ColumnMenu_Opened"/>
+        <!-- Column visibility is built per header on demand (see ColumnHeader_ContextMenuOpening).
+             A shared ContextMenu resource cannot be used: a ContextMenu has a single logical
+             parent, so only the first header would ever be able to open it. -->
 
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource HeaderBgBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontWeight" Value="Bold"/><Setter Property="FontSize" Value="11"/><Setter Property="Height" Value="32"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Setter Property="Padding" Value="12,0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="ContextMenu" Value="{DynamicResource ColumnVisibilityMenu}"/>
+            <EventSetter Event="Loaded" Handler="ColumnHeader_Loaded"/>
+            <EventSetter Event="ContextMenuOpening" Handler="ColumnHeader_ContextMenuOpening"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DataGridColumnHeader">
@@ -1103,8 +1103,6 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80" SortMemberPath="Pid"
-                                                    ElementStyle="{StaticResource MainGridValueTextStyle}"/>
                                 <DataGridTemplateColumn Header="Memory" Width="105" SortMemberPath="WorkingSetBytes">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -1117,6 +1115,8 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
+                                <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80" SortMemberPath="Pid"
+                                                    ElementStyle="{StaticResource MainGridValueTextStyle}"/>
                                 <DataGridTextColumn Header="Threads" Binding="{Binding ThreadCount}" Width="70" SortMemberPath="ThreadCount"
                                                     ElementStyle="{StaticResource MainGridValueTextStyle}"/>
                                 <DataGridTextColumn Header="Priority" Binding="{Binding PriorityFormatted}" Width="90" SortMemberPath="Priority"
