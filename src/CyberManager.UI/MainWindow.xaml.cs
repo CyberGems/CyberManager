@@ -157,6 +157,7 @@ public partial class MainWindow : Window
     private readonly GlobalHotkeyService _hotkeyService = new();
     private readonly TrayIconService _trayService = new();
     private bool _isExplicitExit;
+    private bool _isCloseDialogOpen;
     private bool _isLoaded;
     private bool _isClosed;
     private bool _detectionPaused;
@@ -348,6 +349,16 @@ public partial class MainWindow : Window
     {
         try
         {
+            // A user-driven close (X button, Alt+F4, taskbar close) always asks what to do
+            // first, unless the choice has already been remembered. An explicit exit coming
+            // from the tray menu or a shutdown skips the question entirely.
+            if (!_isExplicitExit && !_isCloseDialogOpen)
+            {
+                e.Cancel = true;
+                RequestCloseFromUser();
+                return;
+            }
+
             ClearSearchState();
             SaveCurrentWindowBounds();
             App.Settings.Save();
@@ -371,6 +382,61 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             Debug.WriteLine($"Close error: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Handles a close request coming from the user. When a choice has been remembered the
+    /// stored action is applied directly; otherwise the close dialog is shown and its
+    /// result is honored.
+    /// </summary>
+    private void RequestCloseFromUser()
+    {
+        if (_isCloseDialogOpen) return;
+
+        var remembered = CloseWindowDialog.ReadRememberedAction(App.Settings);
+        if (remembered != null)
+        {
+            ApplyCloseAction(remembered.Value);
+            return;
+        }
+
+        _isCloseDialogOpen = true;
+        CloseWindowAction action;
+        try
+        {
+            var dlg = new CloseWindowDialog { Owner = this };
+            dlg.ShowDialog();
+            action = dlg.ChosenAction;
+        }
+        finally
+        {
+            _isCloseDialogOpen = false;
+        }
+
+        ApplyCloseAction(action);
+    }
+
+    /// <summary>Applies the outcome of the close dialog.</summary>
+    private void ApplyCloseAction(CloseWindowAction action)
+    {
+        switch (action)
+        {
+            case CloseWindowAction.MinimizeToTray:
+                // The explicit choice wins over the "send to tray on close" setting.
+                ClearSearchState();
+                SaveCurrentWindowBounds();
+                App.Settings.Save();
+                Hide();
+                break;
+
+            case CloseWindowAction.Quit:
+                ExitApplication();
+                break;
+
+            default:
+                // Cancel: leave the window open.
+                break;
         }
     }
 
@@ -2780,7 +2846,8 @@ public partial class MainWindow : Window
 
     private void Close_Click(object sender, RoutedEventArgs e)
     {
-        Close();
+        // Route through the same path as the window X so both trigger the close dialog.
+        RequestCloseFromUser();
     }
 
     #endregion
