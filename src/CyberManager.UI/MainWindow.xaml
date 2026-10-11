@@ -745,6 +745,12 @@
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Fill="Transparent"/>
                         </Button>
+                        <ToggleButton x:Name="PauseDetectionBtn" Width="38" Height="38" Margin="8,0,0,0" Padding="0" Style="{StaticResource HeavyFilterToggleStyle}" Click="PauseDetection_Click" ToolTip="Freeze (Ctrl+P)" AutomationProperties.Name="Freeze">
+                            <Path x:Name="PauseDetectionIcon"
+                                  Data="M 5,3 H 9 V 21 H 5 Z M 15,3 H 19 V 21 H 15 Z"
+                                  Fill="{DynamicResource AccentBrush}"
+                                  Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
+                        </ToggleButton>
                         <ToggleButton x:Name="HeavyFilterToggle"
                                       Width="38"
                                       Height="38"

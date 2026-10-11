@@ -81,6 +81,7 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? ToggleRequested;
     public event RoutedEventHandler? EndTaskRequested;
     public event RoutedEventHandler? RestartRequested;
+    public event RoutedEventHandler? PauseDetectionRequested;
     public event RoutedEventHandler? PinRequested;
     public event RoutedEventHandler? SettingsRequested;
     public event RoutedEventHandler? AboutRequested;
@@ -94,6 +95,8 @@ public partial class CompactProcessView : UserControl
         RestartButton.ToolTip = Strings.T("Restart");
         AutomationProperties.SetName(RestartButton, Strings.T("Restart"));
         ToolTipService.SetShowOnDisabled(RestartButton, true);
+        PauseDetectionButton.ToolTip = Strings.T("PauseDetection");
+        AutomationProperties.SetName(PauseDetectionButton, Strings.T("PauseDetection"));
         PinButton.ToolTip = Strings.T("AlwaysOnTop");
         EngineBadgeText.Text = Strings.T("WfpEngineBadge");
         CompactCpuLabel.Text = Strings.T("Cpu");
@@ -199,6 +202,25 @@ public partial class CompactProcessView : UserControl
         RestartButton.ToolTip = string.IsNullOrWhiteSpace(tooltip)
             ? $"{Strings.T("Restart")} ({Strings.T("RestartShortcutHint")})"
             : tooltip;
+    }
+
+    /// <summary>
+    /// Reflects the freeze state on the compact pause button: a play icon while frozen and a
+    /// pause icon while running, plus the matching tooltip.
+    /// </summary>
+    public void SetDetectionPaused(bool paused)
+    {
+        PauseDetectionButton.IsChecked = paused;
+        PauseDetectionIcon.Data = Geometry.Parse(paused
+            ? "M 5,3 L 19,12 L 5,21 Z"
+            : "M 5,3 H 9 V 21 H 5 Z M 15,3 H 19 V 21 H 15 Z");
+
+        PauseDetectionButton.ToolTip = paused
+            ? $"{Strings.T("ResumeDetection")} ({Strings.T("RestartShortcutHint")})"
+            : $"{Strings.T("PauseDetection")} ({Strings.T("RestartShortcutHint")})";
+        AutomationProperties.SetName(PauseDetectionButton, paused
+            ? Strings.T("ResumeDetection")
+            : Strings.T("PauseDetection"));
     }
 
     public void SetHeavyFilter(bool enabled)
@@ -322,6 +344,9 @@ public partial class CompactProcessView : UserControl
 
     private void RestartButton_Click(object sender, RoutedEventArgs e) =>
         RestartRequested?.Invoke(sender, e);
+
+    private void PauseDetectionButton_Click(object sender, RoutedEventArgs e) =>
+        PauseDetectionRequested?.Invoke(sender, e);
 
     private void PinButton_Click(object sender, RoutedEventArgs e) =>
         PinRequested?.Invoke(sender, e);

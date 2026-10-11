@@ -67,6 +67,7 @@ public class StringsTests
             "Threads", "Path", "Status", "Running", "Suspended", "Kill", "KillTree",
             "Suspend", "Resume", "Restart", "RestartConfirm", "RestartUnavailable", "RestartPackagedUnsupported", "RestartFailed", "RestartHintSuspended", "RestartHintNoPath", "RestartHintPackaged", "RestartShortcutHint", "CopyPath", "OpenFolder", "SearchOnline", "Priority",
             "NoProcesses", "Refresh", "AlwaysOnTop", "KillConfirm", "KillTreeConfirm",
+            "PauseDetection", "ResumeDetection", "DetectionPaused",
             "Settings", "About", "ThemeCyberManager", "ThemeDark", "ThemeLight",
             "Ok", "Cancel", "DoNotShowAgain", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",
             "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction",

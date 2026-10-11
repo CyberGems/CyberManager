@@ -154,6 +154,7 @@ public partial class MainWindow : Window
     private bool _isExplicitExit;
     private bool _isLoaded;
     private bool _isClosed;
+    private bool _detectionPaused;
     private int _iconRefreshPending;
     private List<ProcessInfo> _all = new();
     private List<ProcessInfo> _view = new();
@@ -189,6 +190,7 @@ public partial class MainWindow : Window
         CompactView.ToggleRequested += CompactView_ToggleRequested;
         CompactView.EndTaskRequested += Kill_Click;
         CompactView.RestartRequested += Restart_Click;
+        CompactView.PauseDetectionRequested += (_, _) => SetDetectionPaused(!_detectionPaused);
         CompactView.PinRequested += CompactView_PinRequested;
         CompactView.SettingsRequested += Settings_Click;
         CompactView.MinimizeRequested += Minimize_Click;
@@ -621,24 +623,29 @@ public partial class MainWindow : Window
         if (_isClosed || Interlocked.Exchange(ref _refreshInFlight, 1) == 1) return;
         try
         {
-            if (_all.Count == 0)
+            // When detection is frozen the process list keeps its last snapshot, but the
+            // system metrics (CPU / RAM) must keep updating so the gauges stay live.
+            if (!_detectionPaused)
             {
-                SetStatus(Strings.T("CollectingProcesses"));
-            }
+                if (_all.Count == 0)
+                {
+                    SetStatus(Strings.T("CollectingProcesses"));
+                }
 
-            var now = DateTime.UtcNow;
-            foreach (var kv in _terminatedPids)
-            {
-                if (kv.Value < now) _terminatedPids.TryRemove(kv.Key, out _);
-            }
+                var now = DateTime.UtcNow;
+                foreach (var kv in _terminatedPids)
+                {
+                    if (kv.Value < now) _terminatedPids.TryRemove(kv.Key, out _);
+                }
 
-            var data = await _collector.CollectAsync(cancellationToken);
-            _all = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
-            ApplySortingAndFilter();
+                var data = await _collector.CollectAsync(cancellationToken);
+                _all = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
+                ApplySortingAndFilter();
 
-            if (LoaderOverlay.Visibility == Visibility.Visible)
-            {
-                LoaderOverlay.Visibility = Visibility.Collapsed;
+                if (LoaderOverlay.Visibility == Visibility.Visible)
+                {
+                    LoaderOverlay.Visibility = Visibility.Collapsed;
+                }
             }
 
             var sysMetrics = SystemMetricsCollector.Instance.Sample(_all.Count);
@@ -1496,6 +1503,33 @@ public partial class MainWindow : Window
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => _ = RefreshAsync();
 
+    private void PauseDetection_Click(object sender, RoutedEventArgs e) => SetDetectionPaused(!_detectionPaused);
+
+    /// <summary>
+    /// Freezes or resumes automatic process detection. While frozen the list keeps its last
+    /// snapshot and only system metrics keep updating, so the gauges stay live.
+    /// </summary>
+    private void SetDetectionPaused(bool paused)
+    {
+        if (_detectionPaused == paused) return;
+        _detectionPaused = paused;
+
+        PauseDetectionBtn.IsChecked = paused;
+        PauseDetectionIcon.Data = Geometry.Parse(paused
+            ? "M 5,3 L 19,12 L 5,21 Z"
+            : "M 5,3 H 9 V 21 H 5 Z M 15,3 H 19 V 21 H 15 Z");
+
+        PauseDetectionBtn.ToolTip = paused
+            ? $"{Strings.T("ResumeDetection")} (Ctrl+P)"
+            : $"{Strings.T("PauseDetection")} (Ctrl+P)";
+        AutomationProperties.SetName(PauseDetectionBtn, paused
+            ? Strings.T("ResumeDetection")
+            : Strings.T("PauseDetection"));
+
+        CompactView.SetDetectionPaused(paused);
+        SetStatus(paused ? Strings.T("DetectionPaused") : Strings.T("Ready"));
+    }
+
     private void GroupToggle_Checked(object sender, RoutedEventArgs e)
     {
         App.Settings.GroupProcesses = GroupToggleCheck.IsChecked == true;
@@ -1958,6 +1992,12 @@ public partial class MainWindow : Window
             GroupToggleLabel.Text = Strings.T("GroupByApp");
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
+            PauseDetectionBtn.ToolTip = _detectionPaused
+                ? $"{Strings.T("ResumeDetection")} (Ctrl+P)"
+                : $"{Strings.T("PauseDetection")} (Ctrl+P)";
+            AutomationProperties.SetName(PauseDetectionBtn, _detectionPaused
+                ? Strings.T("ResumeDetection")
+                : Strings.T("PauseDetection"));
             KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
             RestartBtn.ToolTip = $"{Strings.T("Restart")} ({Strings.T("RestartShortcutHint")})";
             ClearBtn.ToolTip = Strings.T("Clear");
@@ -2263,6 +2303,12 @@ public partial class MainWindow : Window
             {
                 Kill_Click(sender, e);
             }
+            return;
+        }
+        else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.P)
+        {
+            SetDetectionPaused(!_detectionPaused);
+            e.Handled = true;
             return;
         }
         else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.R)
