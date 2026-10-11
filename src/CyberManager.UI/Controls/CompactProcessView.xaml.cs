@@ -41,6 +41,12 @@ public partial class CompactProcessView : UserControl
     private double _totalRamGb;
     private string _cpuModelName = "";
 
+    // Left-button press on the branding: About opens only if the pointer does not move beyond
+    // the drag threshold, so dragging the window from the branding keeps working.
+    private Point _brandingPressPoint;
+    private bool _brandingPressed;
+    private const double BrandingClickThreshold = 4.0;
+
     public CompactProcessView()
     {
         InitializeComponent();
@@ -89,7 +95,7 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? AboutRequested;
     public event RoutedEventHandler? MinimizeRequested;
     public event RoutedEventHandler? CloseRequested;
-    public event MouseButtonEventHandler? DragRequested;
+    public event RoutedEventHandler? DragRequested;
 
     public void ApplyLanguage()
     {
@@ -374,13 +380,76 @@ public partial class CompactProcessView : UserControl
         if (sender is not DataGridColumnHeader header || header.Column is null) return;
         if (!CompactGrid.Columns.Contains(header.Column)) return;
 
-        var visibleCount = CompactGrid.Columns.Count(column => column.Visibility == Visibility.Visible);
-
         var menu = header.ContextMenu ??= new ContextMenu
         {
             PlacementTarget = header,
             Style = TryFindResource("ModernContextMenu") as Style
         };
+
+        PopulateColumnVisibilityMenu(menu);
+    }
+
+    /// <summary>
+    /// Opens the column visibility menu when the pointer landed on the empty strip of the header
+    /// row, where no column header exists to raise a menu by itself. Returns true when it handled
+    /// the hit. The strip is not covered by the headers presenter, so the pointer is compared
+    /// against the presenter bounds instead of relying on the hit element.
+    /// </summary>
+    public bool TryOpenColumnMenuForStrip(DependencyObject? source, Point positionInGrid)
+    {
+        if (source is null) return false;
+        if (FindVisualParent<DataGridRow>(source) != null) return false;
+        if (FindVisualParent<DataGridColumnHeader>(source) != null) return false;
+
+        var presenter = FindVisualChild<DataGridColumnHeadersPresenter>(CompactGrid);
+        if (presenter is null || !presenter.IsVisible) return false;
+
+        var origin = presenter.TransformToAncestor(CompactGrid).Transform(new Point(0, 0));
+        var bounds = new Rect(origin, presenter.RenderSize);
+
+        // The presenter spans the whole grid width; the columns only cover its left part. The blank
+        // area to the right of the last column is the dead strip. Any pointer inside the header row
+        // band that is not on a header counts as the strip.
+        if (positionInGrid.Y < bounds.Top - 2 || positionInGrid.Y > bounds.Bottom + 2) return false;
+        if (positionInGrid.X <= GetLastVisibleHeaderRight()) return false;
+
+        var menu = new ContextMenu
+        {
+            PlacementTarget = CompactGrid,
+            Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint,
+            Style = TryFindResource("ModernContextMenu") as Style
+        };
+
+        PopulateColumnVisibilityMenu(menu);
+        menu.IsOpen = true;
+        return true;
+    }
+
+    private double GetLastVisibleHeaderRight()
+    {
+        var presenter = FindVisualChild<DataGridColumnHeadersPresenter>(CompactGrid);
+        if (presenter is null) return 0;
+
+        var right = 0.0;
+        var count = VisualTreeHelper.GetChildrenCount(presenter);
+        for (var i = 0; i < count; i++)
+        {
+            if (VisualTreeHelper.GetChild(presenter, i) is not DataGridColumnHeader header) continue;
+            if (!header.IsVisible) continue;
+            var edge = header.TransformToAncestor(CompactGrid).Transform(new Point(header.ActualWidth, 0)).X;
+            if (edge > right) right = edge;
+        }
+
+        return right;
+    }
+
+    /// <summary>
+    /// Fills a context menu with one checkable item per compact grid column, reflecting the
+    /// current visibility and preventing the last visible column from being hidden.
+    /// </summary>
+    private void PopulateColumnVisibilityMenu(ContextMenu menu)
+    {
+        var visibleCount = CompactGrid.Columns.Count(column => column.Visibility == Visibility.Visible);
         menu.Items.Clear();
 
         foreach (var column in CompactGrid.Columns)
@@ -467,19 +536,55 @@ public partial class CompactProcessView : UserControl
         var source = e.OriginalSource as DependencyObject;
         if (IsDescendantOf(source, BrandingPanel))
         {
-            AboutRequested?.Invoke(this, e);
+            // Defer the decision to the matching mouse-up: a plain click opens About, while a
+            // drag moves the window. Opening About here would make the branding undraggable.
+            _brandingPressed = true;
+            _brandingPressPoint = e.GetPosition(this);
             e.Handled = true;
             return;
         }
 
         if (!IsTitleBarDragSource(source)) return;
 
+        // A double click on the title bar toggles between compact and full mode.
+        if (e.ClickCount == 2)
+        {
+            e.Handled = true;
+            ToggleRequested?.Invoke(this, e);
+            return;
+        }
+
+        DragRequested?.Invoke(this, e);
+    }
+
+    private void TitleBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left || !_brandingPressed) return;
+        _brandingPressed = false;
+
+        // A press that released without moving is a click; anything else was a drag attempt.
+        var delta = e.GetPosition(this) - _brandingPressPoint;
+        if (Math.Abs(delta.X) < BrandingClickThreshold && Math.Abs(delta.Y) < BrandingClickThreshold)
+        {
+            AboutRequested?.Invoke(this, e);
+        }
+    }
+
+    private void TitleBar_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_brandingPressed || e.LeftButton != MouseButtonState.Pressed) return;
+
+        var delta = e.GetPosition(this) - _brandingPressPoint;
+        if (Math.Abs(delta.X) < BrandingClickThreshold && Math.Abs(delta.Y) < BrandingClickThreshold) return;
+
+        // Past the threshold the gesture is a drag: hand it to the host so the move feels native.
+        _brandingPressed = false;
+        e.Handled = true;
         DragRequested?.Invoke(this, e);
     }
 
     public bool IsTitleBarDragSource(DependencyObject? source) =>
         IsDescendantOf(source, CompactTitleBar) &&
-        !IsDescendantOf(source, BrandingPanel) &&
         FindVisualParent<Button>(source) == null &&
         FindVisualParent<TextBox>(source) == null &&
         FindVisualParent<Border>(source)?.Name is not (nameof(PinButtonHost) or nameof(ModeButtonHost));
@@ -506,4 +611,19 @@ public partial class CompactProcessView : UserControl
 
         return null;
     }
+
+    private static T? FindVisualChild<T>(DependencyObject parent)
+        where T : DependencyObject
+    {
+        var count = VisualTreeHelper.GetChildrenCount(parent);
+        for (var i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match) return match;
+            if (FindVisualChild<T>(child) is { } found) return found;
+        }
+
+        return null;
+    }
+
 }

@@ -476,7 +476,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- TitleBar -->
-                <Grid x:Name="FullTitleBar" Grid.Row="0" Margin="0,0,0,16" Background="Transparent" PreviewMouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid x:Name="FullTitleBar" Grid.Row="0" Margin="0,0,0,16" Background="Transparent" PreviewMouseLeftButtonDown="TitleBar_MouseLeftButtonDown" PreviewMouseLeftButtonUp="TitleBar_MouseLeftButtonUp" PreviewMouseMove="TitleBar_MouseMove">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>

@@ -169,7 +169,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <Grid x:Name="CompactTitleBar" Grid.Row="0" Margin="2,0,2,6" Height="30" Background="Transparent" PreviewMouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Grid x:Name="CompactTitleBar" Grid.Row="0" Margin="2,0,2,6" Height="30" Background="Transparent" PreviewMouseLeftButtonDown="TitleBar_MouseLeftButtonDown" PreviewMouseLeftButtonUp="TitleBar_MouseLeftButtonUp" PreviewMouseMove="TitleBar_MouseMove">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>

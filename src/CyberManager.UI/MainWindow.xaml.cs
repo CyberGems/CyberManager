@@ -139,6 +139,11 @@ public partial class MainWindow : Window
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MonitorInfo monitorInfo);
 
+    private delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdc, ref NativeRect rect, IntPtr data);
+
+    [DllImport("user32.dll")]
+    private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr clip, MonitorEnumProc callback, IntPtr data);
+
     private readonly ProcessCollector _collector = new();
     private readonly DispatcherTimer _timer = new();
     private readonly DispatcherTimer _searchDebounceTimer = new();
@@ -168,6 +173,12 @@ public partial class MainWindow : Window
     private bool _isCompactMode;
     private bool _syncingSelection;
     private bool _syncingHeavyFilter;
+
+    // Left-button press on the branding: About opens only if the pointer does not move
+    // beyond the drag threshold, so dragging the window from the branding keeps working.
+    private Point _brandingPressPoint;
+    private bool _brandingPressed;
+    private const double BrandingClickThreshold = 4.0;
 
     private string _sortColumn = "CpuPercent";
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
@@ -488,6 +499,19 @@ public partial class MainWindow : Window
     {
         if (WindowState != WindowState.Normal) return;
 
+        // A saved position may point at a monitor that is gone (unplugged, rearranged, or a
+        // different DPI layout). When the top-left corner no longer falls on any monitor, recenter
+        // on the primary one so the window cannot open where the user cannot reach it.
+        if (!IsPointOnAnyMonitor(Left, Top))
+        {
+            var primary = SystemParameters.WorkArea;
+            Width = Math.Min(Width, primary.Width);
+            Height = Math.Min(Height, primary.Height);
+            Left = primary.Left + Math.Max(0, (primary.Width - Width) / 2);
+            Top = primary.Top + Math.Max(0, (primary.Height - Height) / 2);
+            return;
+        }
+
         var workArea = GetCurrentWorkArea();
         if (workArea.Width <= 0 || workArea.Height <= 0) return;
 
@@ -498,8 +522,39 @@ public partial class MainWindow : Window
         Width = Math.Min(Width, workArea.Width);
         Height = Math.Min(Height, workArea.Height);
 
-        Left = Math.Clamp(Left, workArea.Left, workArea.Right - Width);
-        Top = Math.Clamp(Top, workArea.Top, workArea.Bottom - Height);
+        Left = Math.Clamp(Left, workArea.Left, Math.Max(workArea.Left, workArea.Right - Width));
+        Top = Math.Clamp(Top, workArea.Top, Math.Max(workArea.Top, workArea.Bottom - Height));
+    }
+
+    /// <summary>
+    /// True when the given device-independent point falls inside a monitor. Used to detect a stale
+    /// saved position after the display layout changed.
+    /// </summary>
+    private bool IsPointOnAnyMonitor(double left, double top)
+    {
+        if (!double.IsFinite(left) || !double.IsFinite(top)) return false;
+
+        // WPF coordinates are device independent; monitor bounds are physical pixels.
+        var toDevice = PresentationSource.FromVisual(this)?
+            .CompositionTarget?.TransformToDevice
+            ?? Matrix.Identity;
+        var devicePoint = toDevice.Transform(new Point(left, top));
+
+        var result = false;
+        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero,
+            (IntPtr hMonitor, IntPtr hdc, ref NativeRect rect, IntPtr data) =>
+            {
+                if (devicePoint.X >= rect.Left && devicePoint.X < rect.Right &&
+                    devicePoint.Y >= rect.Top && devicePoint.Y < rect.Bottom)
+                {
+                    result = true;
+                    return false;
+                }
+
+                return true;
+            },
+            IntPtr.Zero);
+        return result;
     }
 
     private Rect GetCurrentWorkArea()
@@ -882,18 +937,12 @@ public partial class MainWindow : Window
         _trayService.UpdateLocalization();
     }
 
-    private void CompactView_DragRequested(object? sender, MouseButtonEventArgs e)
+    private void CompactView_DragRequested(object? sender, RoutedEventArgs e)
     {
-        if (e.ChangedButton != MouseButton.Left) return;
-        if (e.ClickCount == 2)
-        {
-            ApplyViewMode(!_isCompactMode, restoreBounds: false);
-            e.Handled = true;
-            return;
-        }
-
+        // The compact view already resolved double clicks into ToggleRequested, so any drag
+        // request that reaches this point is a genuine window move.
         e.Handled = true;
-        DragWindow(e);
+        DragWindow();
     }
 
     private void CompactView_SearchChanged(object? sender, EventArgs e)
@@ -1076,6 +1125,16 @@ public partial class MainWindow : Window
         // Let the column header open its own visibility menu instead of the row context menu.
         if (FindVisualParent<DataGridColumnHeader>(e.OriginalSource as DependencyObject) != null) return;
 
+        // The empty strip to the right of the last header is not covered by the column headers
+        // presenter, so the hit reaches the grid's ScrollViewer and no menu would open. Compare the
+        // pointer against the presenter bounds and open the column menu when it is on the header row.
+        if (IsHeaderStripHit(e.OriginalSource as DependencyObject, e.GetPosition(ProcGrid)))
+        {
+            e.Handled = true;
+            ShowColumnVisibilityMenu(ProcGrid);
+            return;
+        }
+
         var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
         if (row?.DataContext is not ProcessInfo process)
         {
@@ -1087,8 +1146,61 @@ public partial class MainWindow : Window
         PrepareContextMenu(row, process, ProcGrid);
     }
 
+    /// <summary>
+    /// True when the pointer sits on the header row but not on a real column header, i.e. the empty
+    /// strip that appears to the right of the last column when the columns do not fill the grid.
+    /// </summary>
+    private bool IsHeaderStripHit(DependencyObject? source, Point positionInGrid)
+    {
+        if (source is null) return false;
+        // Anything inside a row is a process hit, never a header strip.
+        if (FindVisualParent<DataGridRow>(source) != null) return false;
+
+        var presenter = FindVisualChild<DataGridColumnHeadersPresenter>(ProcGrid);
+        if (presenter is null || !presenter.IsVisible) return false;
+
+        var origin = presenter.TransformToAncestor(ProcGrid).Transform(new Point(0, 0));
+        var bounds = new Rect(origin, presenter.RenderSize);
+
+        // The column headers presenter spans the whole grid width, but the columns only cover its
+        // left part. The blank area to the right of the last column is the "dead strip": the pointer
+        // lands on the presenter (or the grid's ScrollViewer) with no header under it. Treat any
+        // pointer inside the header row band that is not on a header as the strip.
+        if (positionInGrid.Y < bounds.Top - 2 || positionInGrid.Y > bounds.Bottom + 2) return false;
+
+        var headerRight = GetLastVisibleHeaderRight();
+        return positionInGrid.X > headerRight;
+    }
+
+    private double GetLastVisibleHeaderRight()
+    {
+        var presenter = FindVisualChild<DataGridColumnHeadersPresenter>(ProcGrid);
+        if (presenter is null) return 0;
+
+        var right = 0.0;
+        var count = VisualTreeHelper.GetChildrenCount(presenter);
+        for (var i = 0; i < count; i++)
+        {
+            if (VisualTreeHelper.GetChild(presenter, i) is not DataGridColumnHeader header) continue;
+            if (!header.IsVisible) continue;
+            var edge = header.TransformToAncestor(ProcGrid).Transform(new Point(header.ActualWidth, 0)).X;
+            if (edge > right) right = edge;
+        }
+
+        return right;
+    }
+
     private void CompactGrid_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
+        // The empty strip of the header row has no header and no row to raise a menu of its own.
+        if (CompactView.TryOpenColumnMenuForStrip(
+                e.OriginalSource as DependencyObject,
+                e.GetPosition(CompactView.ProcessGrid)))
+        {
+            e.Handled = true;
+            return;
+        }
+
         var row = FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject);
         if (row?.DataContext is not ProcessInfo process)
         {
@@ -1267,6 +1379,20 @@ public partial class MainWindow : Window
     private static DataGridRow? GetRowForItem(DataGrid grid, ProcessInfo process) =>
         grid.ItemContainerGenerator.ContainerFromItem(process) as DataGridRow;
 
+    private static T? FindVisualChild<T>(DependencyObject parent)
+        where T : DependencyObject
+    {
+        var count = VisualTreeHelper.GetChildrenCount(parent);
+        for (var i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T match) return match;
+            if (FindVisualChild<T>(child) is { } found) return found;
+        }
+
+        return null;
+    }
+
     private static T? FindVisualParent<T>(DependencyObject? source)
         where T : DependencyObject
     {
@@ -1289,7 +1415,10 @@ public partial class MainWindow : Window
 
         if (!_isCompactMode || e.ChangedButton != MouseButton.Left) return;
 
-        if (IsDescendantOf(source, CompactView) && !CompactView.IsTitleBarDragSource(source))
+        // The compact view owns its title bar and branding: it must be the one to decide between
+        // "click opens About" and "drag moves the window". Let its handlers run for those hits
+        // instead of starting a drag here, which would swallow the click.
+        if (IsDescendantOf(source, CompactView) && CompactView.IsTitleBarDragSource(source))
         {
             return;
         }
@@ -1302,7 +1431,7 @@ public partial class MainWindow : Window
         }
 
         e.Handled = true;
-        DragWindow(e);
+        DragWindow();
     }
 
     private bool IsSearchBarSource(DependencyObject? source) =>
@@ -1334,8 +1463,11 @@ public partial class MainWindow : Window
         var source = e.OriginalSource as DependencyObject;
         if (IsDescendantOf(source, FullBrandingPanel))
         {
+            // Defer the decision to the matching mouse-up: a plain click opens About, while a
+            // drag moves the window. Opening About here would make the branding undraggable.
+            _brandingPressed = true;
+            _brandingPressPoint = e.GetPosition(this);
             e.Handled = true;
-            About_Click(this, e);
             return;
         }
 
@@ -1355,10 +1487,36 @@ public partial class MainWindow : Window
         }
 
         e.Handled = true;
-        DragWindow(e);
+        DragWindow();
     }
 
-    private void DragWindow(MouseButtonEventArgs e)
+    private void TitleBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ChangedButton != MouseButton.Left || !_brandingPressed) return;
+        _brandingPressed = false;
+
+        // A press that released without moving is a click; anything else was a drag attempt.
+        var delta = e.GetPosition(this) - _brandingPressPoint;
+        if (Math.Abs(delta.X) < BrandingClickThreshold && Math.Abs(delta.Y) < BrandingClickThreshold)
+        {
+            About_Click(this, e);
+        }
+    }
+
+    private void TitleBar_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_brandingPressed || e.LeftButton != MouseButtonState.Pressed) return;
+
+        var delta = e.GetPosition(this) - _brandingPressPoint;
+        if (Math.Abs(delta.X) < BrandingClickThreshold && Math.Abs(delta.Y) < BrandingClickThreshold) return;
+
+        // Past the threshold the gesture is a drag: hand it to Windows so the move feels native.
+        _brandingPressed = false;
+        e.Handled = true;
+        DragWindow();
+    }
+
+    private void DragWindow()
     {
         var previousCursor = Mouse.OverrideCursor;
         try
@@ -1571,14 +1729,39 @@ public partial class MainWindow : Window
         // menu for the process grid (and let non-process headers keep any menu they define).
         if (!ProcGrid.Columns.Contains(header.Column)) return;
 
-        var grid = ProcGrid;
-        var visibleCount = grid.Columns.Count(column => column.Visibility == Visibility.Visible);
-
         var menu = header.ContextMenu ??= new ContextMenu
         {
             PlacementTarget = header,
             Style = TryFindResource("ModernContextMenu") as Style
         };
+
+        PopulateColumnVisibilityMenu(menu, ProcGrid);
+    }
+
+    /// <summary>
+    /// Opens the column visibility menu anchored to the grid, at the current pointer position. Used
+    /// for hits on the header strip, where no column header exists to raise a menu of its own.
+    /// </summary>
+    private void ShowColumnVisibilityMenu(FrameworkElement anchor)
+    {
+        var menu = new ContextMenu
+        {
+            PlacementTarget = anchor,
+            Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint,
+            Style = TryFindResource("ModernContextMenu") as Style
+        };
+
+        PopulateColumnVisibilityMenu(menu, ProcGrid);
+        menu.IsOpen = true;
+    }
+
+    /// <summary>
+    /// Fills a context menu with one checkable item per process grid column, reflecting the
+    /// current visibility and preventing the last visible column from being hidden.
+    /// </summary>
+    private void PopulateColumnVisibilityMenu(ContextMenu menu, DataGrid grid)
+    {
+        var visibleCount = grid.Columns.Count(column => column.Visibility == Visibility.Visible);
         menu.Items.Clear();
 
         foreach (var column in grid.Columns)
