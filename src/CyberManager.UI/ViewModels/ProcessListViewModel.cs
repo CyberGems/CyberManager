@@ -270,18 +270,29 @@ public sealed class ProcessListViewModel
         var ascending = query.SortDirection == ListSortDirection.Ascending;
         return query.SortColumn switch
         {
-            "Name" => ascending ? list.OrderBy(process => process.Name).ThenBy(process => process.Pid) : list.OrderByDescending(process => process.Name).ThenBy(process => process.Pid),
+            // The visible process name is DisplayName (FriendlyName when available), so sorting
+            // must use the same value the user sees. A case-insensitive, culture-invariant
+            // comparison keeps "chrome.exe" next to "Chrome", instead of pushing every lowercase
+            // entry after the uppercase ones.
+            "Name" => ascending
+                ? list.OrderBy(SortName, NameComparer).ThenBy(process => process.Pid)
+                : list.OrderByDescending(SortName, NameComparer).ThenBy(process => process.Pid),
             "Pid" => ascending ? list.OrderBy(process => process.Pid) : list.OrderByDescending(process => process.Pid),
-            "CpuPercent" => ascending ? list.OrderBy(process => process.CpuPercent).ThenBy(process => process.Name) : list.OrderByDescending(process => process.CpuPercent).ThenBy(process => process.Name),
-            "WorkingSetBytes" => ascending ? list.OrderBy(process => process.WorkingSetBytes).ThenBy(process => process.Name) : list.OrderByDescending(process => process.WorkingSetBytes).ThenBy(process => process.Name),
-            "ThreadCount" => ascending ? list.OrderBy(process => process.ThreadCount).ThenBy(process => process.Name) : list.OrderByDescending(process => process.ThreadCount).ThenBy(process => process.Name),
-            "Priority" => ascending ? list.OrderBy(process => process.Priority).ThenBy(process => process.Name) : list.OrderByDescending(process => process.Priority).ThenBy(process => process.Name),
+            "CpuPercent" => ascending ? list.OrderBy(process => process.CpuPercent).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.CpuPercent).ThenBy(SortName, NameComparer),
+            "WorkingSetBytes" => ascending ? list.OrderBy(process => process.WorkingSetBytes).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.WorkingSetBytes).ThenBy(SortName, NameComparer),
+            "ThreadCount" => ascending ? list.OrderBy(process => process.ThreadCount).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.ThreadCount).ThenBy(SortName, NameComparer),
+            "Priority" => ascending ? list.OrderBy(process => process.Priority).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.Priority).ThenBy(SortName, NameComparer),
             "ExePath" => ascending
-                ? list.OrderBy(process => string.IsNullOrWhiteSpace(process.ExePath) ? 1 : 0).ThenBy(process => process.ExePath).ThenBy(process => process.Name)
-                : list.OrderBy(process => string.IsNullOrWhiteSpace(process.ExePath) ? 1 : 0).ThenByDescending(process => process.ExePath).ThenBy(process => process.Name),
-            _ => list.OrderByDescending(process => process.CpuPercent).ThenBy(process => process.Name)
+                ? list.OrderBy(process => string.IsNullOrWhiteSpace(process.ExePath) ? 1 : 0).ThenBy(process => process.ExePath).ThenBy(SortName, NameComparer)
+                : list.OrderBy(process => string.IsNullOrWhiteSpace(process.ExePath) ? 1 : 0).ThenByDescending(process => process.ExePath).ThenBy(SortName, NameComparer),
+            _ => list.OrderByDescending(process => process.CpuPercent).ThenBy(SortName, NameComparer)
         };
     }
+
+    private static readonly StringComparer NameComparer = StringComparer.InvariantCultureIgnoreCase;
+
+    private static string SortName(ProcessInfo process) =>
+        string.IsNullOrWhiteSpace(process.FriendlyName) ? process.Name : process.FriendlyName;
 
     private static void CopyProcessInfo(ProcessInfo target, ProcessInfo source)
     {

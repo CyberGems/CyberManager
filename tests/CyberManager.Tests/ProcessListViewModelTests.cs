@@ -49,6 +49,78 @@ public class ProcessListViewModelTests
         Assert.Equal(200 * 1024L * 1024L, result[0].WorkingSetBytes);
     }
 
+    [Fact]
+    public void SortByName_Ascending_IsCaseInsensitiveAndAlphabetical()
+    {
+        var processes = new[]
+        {
+            CreateProcess("chrome.exe"),
+            CreateProcess("Acrobat.exe"),
+            CreateProcess("winword.exe"),
+            CreateProcess("Zoom.exe"),
+            CreateProcess("explorer.exe")
+        };
+
+        var result = ProcessListViewModel.Build(processes, CreateNameQuery(ListSortDirection.Ascending));
+
+        Assert.Equal(
+            new[] { "Acrobat.exe", "chrome.exe", "explorer.exe", "winword.exe", "Zoom.exe" },
+            result.Select(process => process.Name));
+    }
+
+    [Fact]
+    public void SortByName_Descending_IsExactReverse()
+    {
+        var processes = new[]
+        {
+            CreateProcess("chrome.exe"),
+            CreateProcess("Acrobat.exe"),
+            CreateProcess("winword.exe"),
+            CreateProcess("Zoom.exe"),
+            CreateProcess("explorer.exe")
+        };
+
+        var result = ProcessListViewModel.Build(processes, CreateNameQuery(ListSortDirection.Descending));
+
+        Assert.Equal(
+            new[] { "Zoom.exe", "winword.exe", "explorer.exe", "chrome.exe", "Acrobat.exe" },
+            result.Select(process => process.Name));
+    }
+
+    [Fact]
+    public void SortByName_UsesFriendlyNameLikeTheVisibleColumn()
+    {
+        var processes = new[]
+        {
+            CreateProcess("chrome.exe", friendlyName: "Google Chrome"),
+            CreateProcess("acrobat.exe", friendlyName: "Adobe Acrobat"),
+            CreateProcess("msedge.exe", friendlyName: "Microsoft Edge")
+        };
+
+        var result = ProcessListViewModel.Build(processes, CreateNameQuery(ListSortDirection.Ascending));
+
+        Assert.Equal(
+            new[] { "Adobe Acrobat", "Google Chrome", "Microsoft Edge" },
+            result.Select(process => process.FriendlyName));
+    }
+
+    private static ProcessListQuery CreateNameQuery(ListSortDirection direction) =>
+        new(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: false,
+            DimSuspended: true,
+            SortColumn: "Name",
+            SortDirection: direction,
+            ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+    private static ProcessInfo CreateProcess(string name, string? friendlyName = null) =>
+        new()
+        {
+            Name = name,
+            FriendlyName = friendlyName ?? name
+        };
+
     private static ProcessListQuery CreateHeavyQuery(bool groupProcesses, int limit) =>
         new(
             Search: "",
