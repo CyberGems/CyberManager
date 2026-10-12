@@ -285,6 +285,7 @@ public partial class MainWindow : Window
         _isLoaded = true;
         try
         {
+            ApplyStoredSorting();
             ApplyLanguage();
             ApplyTheme();
             ApplyColumnVisibility();
@@ -876,12 +877,37 @@ public partial class MainWindow : Window
         _sortColumn = sortMember;
         _sortDirection = newDirection;
 
+        App.Settings.SortColumn = _sortColumn;
+        App.Settings.SortAscending = _sortDirection == ListSortDirection.Ascending;
+        ThrottledSaveSettings();
+
         foreach (var col in ProcGrid.Columns.Concat(CompactView.ProcessGrid.Columns))
         {
             col.SortDirection = col.SortMemberPath == sortMember ? newDirection : null;
         }
 
         ApplySortingAndFilter();
+    }
+
+    /// <summary>
+    /// Restores the column and direction the user last sorted by, so the ordering survives
+    /// restarts. Runs once during load, before the first list build.
+    /// </summary>
+    private void ApplyStoredSorting()
+    {
+        if (!string.IsNullOrWhiteSpace(App.Settings.SortColumn))
+        {
+            _sortColumn = App.Settings.SortColumn;
+        }
+
+        _sortDirection = App.Settings.SortAscending
+            ? ListSortDirection.Ascending
+            : ListSortDirection.Descending;
+
+        foreach (var column in ProcGrid.Columns.Concat(CompactView.ProcessGrid.Columns))
+        {
+            column.SortDirection = column.SortMemberPath == _sortColumn ? _sortDirection : null;
+        }
     }
 
     private void ApplySortingAndFilter()
@@ -1742,6 +1768,7 @@ public partial class MainWindow : Window
         Topmost = App.Settings.AlwaysOnTop;
         CompactView.SetPinned(Topmost);
         _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
+        ApplyStoredSorting();
     }
 
     private void FullModeToggle_Click(object sender, RoutedEventArgs e) =>

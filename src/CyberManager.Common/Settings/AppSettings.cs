@@ -11,6 +11,13 @@ public enum AppTheme { CyberManager, Dark, Light }
 
 public sealed class AppSettings
 {
+    public const string DefaultSortColumn = "CpuPercent";
+
+    private static readonly string[] SortableColumns =
+    {
+        "Name", "Pid", "CpuPercent", "WorkingSetBytes", "ThreadCount", "Priority", "ExePath"
+    };
+
     public Lang Language { get; set; } = Lang.Es;
     public AppTheme Theme { get; set; } = AppTheme.CyberManager;
     public double RefreshIntervalMs { get; set; } = 800;
@@ -20,6 +27,15 @@ public sealed class AppSettings
     public bool ShowSuspended { get; set; } = true;
     public bool HideSystemProcesses { get; set; }
     public bool HeavyProcessesOnly { get; set; }
+    /// <summary>
+    /// SortMemberPath of the process grid column the user last sorted by. Persisted so the
+    /// ordering survives restarts.
+    /// </summary>
+    public string SortColumn { get; set; } = DefaultSortColumn;
+    /// <summary>
+    /// True when the persisted sort is ascending. The default grid sort is descending CPU.
+    /// </summary>
+    public bool SortAscending { get; set; }
     public string SearchText { get; set; } = "";
     public List<string> RecentSearches { get; set; } = new();
     public HashSet<string> SuppressedConfirmations { get; set; } = new(StringComparer.OrdinalIgnoreCase);
@@ -169,6 +185,7 @@ public sealed class AppSettings
         CompactWindowLeft = NormalizeCoordinate(CompactWindowLeft);
         CompactWindowTop = NormalizeCoordinate(CompactWindowTop);
         SearchText ??= "";
+        SortColumn = NormalizeSortColumn(SortColumn);
         RecentSearches = NormalizeSearchHistory(RecentSearches);
         SuppressedConfirmations ??= new(StringComparer.OrdinalIgnoreCase);
         GlobalHotkey = GlobalHotkey?.Trim() ?? "";
@@ -187,6 +204,8 @@ public sealed class AppSettings
         ShowSuspended = defaults.ShowSuspended;
         HideSystemProcesses = defaults.HideSystemProcesses;
         HeavyProcessesOnly = defaults.HeavyProcessesOnly;
+        SortColumn = defaults.SortColumn;
+        SortAscending = defaults.SortAscending;
         SearchText = defaults.SearchText;
         RecentSearches = new();
         SuppressedConfirmations = new(StringComparer.OrdinalIgnoreCase);
@@ -251,6 +270,12 @@ public sealed class AppSettings
         RecentSearches ??= new();
         RecentSearches.Clear();
     }
+
+    private static string NormalizeSortColumn(string? column) =>
+        !string.IsNullOrWhiteSpace(column) &&
+        Array.Exists(SortableColumns, candidate => string.Equals(candidate, column, StringComparison.Ordinal))
+            ? column
+            : DefaultSortColumn;
 
     private static double NormalizeDimension(double value, double minimum, double fallback) =>
         double.IsFinite(value) ? Math.Max(value, minimum) : fallback;

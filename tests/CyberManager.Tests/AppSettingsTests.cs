@@ -27,6 +27,14 @@ public class AppSettingsTests
     }
 
     [Fact]
+    public void AppSettings_DefaultSorting_IsDescendingCpu()
+    {
+        var settings = new AppSettings();
+        Assert.Equal(AppSettings.DefaultSortColumn, settings.SortColumn);
+        Assert.False(settings.SortAscending);
+    }
+
+    [Fact]
     public void AppSettings_DefaultAutoCheckForUpdates_IsTrue()
     {
         var settings = new AppSettings();
@@ -119,6 +127,8 @@ public class AppSettingsTests
             GroupProcesses = false,
             HideSystemProcesses = true,
             HeavyProcessesOnly = true,
+            SortColumn = "Name",
+            SortAscending = true,
             SearchText = "chrome",
             MinimizeToTrayOnMinimize = true,
             MinimizeToTrayOnClose = false,
@@ -141,6 +151,8 @@ public class AppSettingsTests
         Assert.True(settings.GroupProcesses);
         Assert.False(settings.HideSystemProcesses);
         Assert.False(settings.HeavyProcessesOnly);
+        Assert.Equal(AppSettings.DefaultSortColumn, settings.SortColumn);
+        Assert.False(settings.SortAscending);
         Assert.Empty(settings.SearchText);
         Assert.Empty(settings.RecentSearches);
         Assert.Empty(settings.SuppressedConfirmations);
