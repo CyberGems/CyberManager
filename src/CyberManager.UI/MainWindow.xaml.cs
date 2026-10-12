@@ -213,10 +213,9 @@ public partial class MainWindow : Window
         CompactView.SearchChanged += CompactView_SearchChanged;
         CompactView.SearchSubmitted += CompactView_SearchSubmitted;
         CompactView.SearchHistoryRequested += SearchHistoryButton_Click;
+        CompactView.ClearSelectionRequested += ClearSelectionBtn_Click;
         CompactView.HeavyFilterChanged += CompactView_HeavyFilterChanged;
         CompactView.ProcessGrid.SelectionChanged += ProcGrid_SelectionChanged;
-        ProcGrid.PreviewMouseLeftButtonDown += ProcessGrid_PreviewMouseLeftButtonDown;
-        CompactView.ProcessGrid.PreviewMouseLeftButtonDown += ProcessGrid_PreviewMouseLeftButtonDown;
         CompactView.ProcessGrid.Sorting += ProcGrid_Sorting;
         CompactView.ProcessGrid.PreviewMouseRightButtonDown += CompactGrid_PreviewMouseRightButtonDown;
         CompactView.ProcessGrid.PreviewKeyDown += ProcGrid_PreviewKeyDown;
@@ -842,31 +841,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ProcessGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ChangedButton != MouseButton.Left ||
-            IsGroupChevronSource(e.OriginalSource as DependencyObject) ||
-            FindVisualParent<DataGridRow>(e.OriginalSource as DependencyObject)?.DataContext is not ProcessInfo process ||
-            !ReferenceEquals(Selected, process))
-        {
-            return;
-        }
-
-        SetSelectedProcess(null);
-        e.Handled = true;
-    }
-
-    private static bool IsGroupChevronSource(DependencyObject? source)
-    {
-        while (source != null)
-        {
-            if (source is FrameworkElement element && Equals(element.Tag, "GroupChevron")) return true;
-            source = VisualTreeHelper.GetParent(source);
-        }
-
-        return false;
-    }
-
     private void ProcGrid_Sorting(object sender, DataGridSortingEventArgs e)
     {
         e.Handled = true;
@@ -916,7 +890,15 @@ public partial class MainWindow : Window
                 _expandedGroups,
                 App.Settings.HeavyProcessesOnly));
 
-        var prevSelectedPid = Selected?.Pid;
+        // The refresh tick rebuilds the item collection every interval, which would otherwise
+        // throw away a multi-selection. Snapshot the whole selection (by PID) before the rebuild
+        // and re-apply it afterwards, so a batch the user is assembling survives refreshes.
+        var previousSelection = GetMultiSelection(ProcGrid);
+        if (previousSelection.Count == 0)
+        {
+            previousSelection = GetMultiSelection(CompactView.ProcessGrid);
+        }
+
         if (_contextMenuOpen)
         {
             _processList.UpdatePreservingOrder(_view);
@@ -936,14 +918,7 @@ public partial class MainWindow : Window
             _processList.Update(_view);
         }
 
-        if (prevSelectedPid.HasValue)
-        {
-            var matched = _processList.Items.FirstOrDefault(x => x.Pid == prevSelectedPid.Value);
-            if (matched != null)
-            {
-                SetSelectedProcess(matched);
-            }
-        }
+        RestoreSelection(previousSelection);
 
         EmptyStateText.Visibility = _view.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ProcGrid.Visibility = _view.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
@@ -989,6 +964,9 @@ public partial class MainWindow : Window
         KillBtn.IsEnabled = process != null;
         CompactView.SetEndTaskEnabled(process != null);
         UpdateRestartControls(process);
+        UpdateSelectionSummary(process == null
+            ? Array.Empty<ProcessInfo>()
+            : new[] { process });
     }
 
     private void CompactView_ToggleRequested(object? sender, RoutedEventArgs e) =>
@@ -1376,6 +1354,15 @@ public partial class MainWindow : Window
         var hasExecutablePath = !string.IsNullOrWhiteSpace(process.ExePath);
 
         ContextKillItem.IsEnabled = process.Pid > 0;
+        var selection = GetMultiSelection(_isCompactMode ? CompactView.ProcessGrid : ProcGrid);
+        var batch = selection.Count > 1;
+        ContextKillSelectionItem.Visibility = batch ? Visibility.Visible : Visibility.Collapsed;
+        ContextKillSelectionItem.IsEnabled = batch;
+        if (batch)
+        {
+            ContextKillSelectionItem.Header = Strings.T("EndSelected", selection.Count);
+        }
+
         ContextPropertiesItem.IsEnabled = process.Pid > 0 || hasExecutablePath;
         ContextKillTreeItem.IsEnabled = hasProcessTree;
         var restartReason = GetRestartDisabledReason(process);
@@ -1908,21 +1895,16 @@ public partial class MainWindow : Window
 
     private void ProcGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        var selected = (sender as DataGrid)?.SelectedItem as ProcessInfo ?? Selected;
+        var source = sender as DataGrid ?? ProcGrid;
+        var selected = source.SelectedItem as ProcessInfo ?? Selected;
+        var multiple = GetMultiSelection(source);
+
         if (!_syncingSelection)
         {
             _syncingSelection = true;
             try
             {
-                if (!ReferenceEquals(ProcGrid.SelectedItem, selected))
-                {
-                    ProcGrid.SelectedItem = selected;
-                }
-
-                if (!ReferenceEquals(CompactView.SelectedItem, selected))
-                {
-                    CompactView.SelectedItem = selected;
-                }
+                MirrorSelection(multiple);
             }
             finally
             {
@@ -1931,8 +1913,201 @@ public partial class MainWindow : Window
         }
 
         KillBtn.IsEnabled = selected != null;
-        CompactView.SetEndTaskEnabled(selected != null);
         UpdateRestartControls(selected);
+        UpdateSelectionSummary(multiple);
+    }
+
+    /// <summary>
+    /// Mirrors the selection of one grid onto the other so switching between full and compact mode
+    /// keeps it. With <c>SelectionMode="Extended"</c> assigning <c>SelectedItem</c> alone would
+    /// collapse a multi-selection down to that single row, so each additional row is added to
+    /// <c>SelectedItems</c> explicitly.
+    /// </summary>
+    private void MirrorSelection(IReadOnlyList<ProcessInfo> selection)
+    {
+        var last = selection.Count > 0 ? selection[^1] : null;
+        foreach (var grid in new[] { ProcGrid, CompactView.ProcessGrid })
+        {
+            ApplySelection(grid, selection, last);
+        }
+    }
+
+    /// <summary>
+    /// Re-applies a selection captured before an item-collection rebuild. Items are matched by
+    /// process identity (PID plus start time) so a recycled row does not inherit another
+    /// process's selection when PIDs are reused.
+    /// </summary>
+    private void RestoreSelection(IReadOnlyList<ProcessInfo> previousSelection)
+    {
+        if (previousSelection.Count == 0)
+        {
+            // Nothing was selected before: clear any stale selection left by the rebuild.
+            if (ProcGrid.SelectedItems.Count > 0)
+            {
+                _syncingSelection = true;
+                try
+                {
+                    ProcGrid.SelectedItems.Clear();
+                    CompactView.ProcessGrid.SelectedItems.Clear();
+                }
+                finally
+                {
+                    _syncingSelection = false;
+                }
+            }
+
+            UpdateSelectionSummary(Array.Empty<ProcessInfo>());
+            return;
+        }
+
+        var wanted = previousSelection
+            .Select(item => new ProcessIdentity(item.Pid, item.StartTime))
+            .ToArray();
+
+        var restored = _processList.Items
+            .Where(item => wanted.Any(identity => SameProcessIdentity(item, identity)))
+            .Distinct()
+            .ToList();
+
+        if (restored.Count == 0)
+        {
+            UpdateSelectionSummary(Array.Empty<ProcessInfo>());
+            return;
+        }
+
+        _syncingSelection = true;
+        try
+        {
+            MirrorSelection(restored);
+        }
+        finally
+        {
+            _syncingSelection = false;
+        }
+
+        KillBtn.IsEnabled = true;
+        UpdateRestartControls(restored[^1]);
+        UpdateSelectionSummary(restored);
+    }
+
+    private static void ApplySelection(DataGrid grid, IReadOnlyList<ProcessInfo> selection, ProcessInfo? last)
+    {
+        // Never assign SelectedItem while a multi-selection is being rebuilt: on an Extended
+        // grid that assignment collapses the selection to that single row. Only the empty and
+        // single-row cases go through SelectedItem, which also keeps the current cell in sync.
+        if (selection.Count <= 1)
+        {
+            if (!ReferenceEquals(grid.SelectedItem, last))
+            {
+                grid.SelectedItem = last;
+            }
+
+            return;
+        }
+
+        if (grid.SelectedItems.Count != selection.Count ||
+            selection.Any(process => !grid.SelectedItems.Contains(process)))
+        {
+            grid.SelectedItems.Clear();
+            foreach (var process in selection)
+            {
+                grid.SelectedItems.Add(process);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Snapshot of the rows currently selected in the given grid, in display order.
+    /// </summary>
+    private static List<ProcessInfo> GetMultiSelection(DataGrid grid) =>
+        grid.SelectedItems.OfType<ProcessInfo>().ToList();
+
+    /// <summary>
+    /// Resolves a multi-selection into the flat set of PIDs a single "end selected" action should
+    /// operate on. A group parent stands for every instance it aggregates, and any group child
+    /// that is already covered by a selected parent is not added twice.
+    /// </summary>
+    private static List<int> ResolveSelectionPids(IReadOnlyList<ProcessInfo> selection)    {
+        var pids = new HashSet<int>();
+        foreach (var process in selection)
+        {
+            if (process.IsGroupParent)
+            {
+                foreach (var child in process.Children)
+                {
+                    pids.Add(child.Pid);
+                }
+            }
+
+            if (process.Pid > 0)
+            {
+                pids.Add(process.Pid);
+            }
+        }
+
+        return pids.ToList();
+    }
+
+    /// <summary>
+    /// Number of running instances a selection covers: a group parent counts as all of its
+    /// instances, an individual process counts as one. Used for the counter and the confirmation.
+    /// </summary>
+    private static int CountSelectionInstances(IReadOnlyList<ProcessInfo> selection)
+    {
+        var count = 0;
+        foreach (var process in selection)
+        {
+            count += process.IsGroupParent && process.InstanceCount > 0
+                ? process.InstanceCount
+                : 1;
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// Reflects the current multi-selection in both action bars: the shared counter label plus
+    /// the "End Task" button, whose label advertises how many processes it will terminate.
+    /// </summary>
+    private void UpdateSelectionSummary(IReadOnlyList<ProcessInfo> selection)
+    {
+        var count = selection.Count;
+        var instances = CountSelectionInstances(selection);
+
+        SelectionCountText.Text = count > 1
+            ? Strings.T("SelectionCount", count, instances)
+            : string.Empty;
+        SelectionCountBadge.Visibility = count > 1 ? Visibility.Visible : Visibility.Collapsed;
+        ClearSelectionBtn.Visibility = count > 1 ? Visibility.Visible : Visibility.Collapsed;
+
+        var hasSelection = count > 0;
+        KillBtn.ToolTip = count > 1
+            ? Strings.T("EndSelectedTooltip", count)
+            : Strings.T("EndTaskTooltip");
+        AutomationProperties.SetName(KillBtn, count > 1 ? Strings.T("EndSelected", count) : Strings.T("EndTask"));
+        // WPF TextBlocks share their parent's UI Automation peer, so the badge count is exposed
+        // through the clear button, which does own a peer of its own.
+        AutomationProperties.SetName(ClearSelectionBtn, Strings.T("SelectionCountShort", count));
+
+        CompactView.SetEndTaskEnabled(hasSelection);
+        CompactView.SetSelectionSummary(count);
+    }
+
+    private void ClearSelectionBtn_Click(object sender, RoutedEventArgs e)
+    {
+        _syncingSelection = true;
+        try
+        {
+            ProcGrid.SelectedItems.Clear();
+            CompactView.ProcessGrid.SelectedItems.Clear();
+        }
+        finally
+        {
+            _syncingSelection = false;
+        }
+
+        SetSelectedProcess(null);
+        UpdateSelectionSummary(Array.Empty<ProcessInfo>());
     }
 
     private void ThrottledSaveSettings()
@@ -1943,6 +2118,13 @@ public partial class MainWindow : Window
 
     private async void Kill_Click(object sender, RoutedEventArgs e)
     {
+        var selection = GetActiveSelection();
+        if (selection.Count > 1)
+        {
+            await KillSelectionAsync(selection);
+            return;
+        }
+
         var s = GetActionTarget(sender);
         if (s == null) return;
 
@@ -1964,6 +2146,52 @@ public partial class MainWindow : Window
             var result = await Task.Run(() => ProcessActions.TryKill(s.Pid), _lifetimeCts.Token);
             ApplyActionResults(new Dictionary<int, ProcessActions.ActionResult> { [s.Pid] = result });
         }
+    }
+
+    /// <summary>
+    /// Batch variant of "End Task": one confirmation summarises the whole selection, then every
+    /// resolved PID is terminated in a single pass. Keeping it separate from <see cref="Kill_Click"/>
+    /// preserves the per-process confirmations for the single-selection path.
+    /// </summary>
+    private async Task KillSelectionAsync(List<ProcessInfo> selection)
+    {
+        var pids = ResolveSelectionPids(selection);
+        if (pids.Count == 0) return;
+
+        var instances = CountSelectionInstances(selection);
+        var message = Strings.T("KillSelectionConfirm", selection.Count, instances);
+        if (!ConfirmDialog.ShowProcess(
+                this,
+                Strings.T("Kill"),
+                message,
+                exePath: null!,
+                okText: Strings.T("Kill"),
+                cancelText: Strings.T("Cancel"),
+                isDanger: true,
+                confirmationKey: "process.kill-selection"))
+        {
+            return;
+        }
+
+        var results = await RunProcessActionsAsync(pids, ProcessActions.TryKill);
+        ApplyActionResults(results);
+        SetStatus(Strings.T("KillSelectionDone", results.Values.Count(result => result.Succeeded)));
+    }
+
+    /// <summary>
+    /// The rows the current action should apply to: the multi-selection of the grid that has
+    /// focus, falling back to whichever grid is visible. A context-menu action keeps using its
+    /// own target so right-clicking a row never surprises the user by acting on other rows.
+    /// </summary>
+    private List<ProcessInfo> GetActiveSelection()
+    {
+        var grid = _isCompactMode ? CompactView.ProcessGrid : ProcGrid;
+        if (grid.IsKeyboardFocusWithin || grid.SelectedItems.Count > 0)
+        {
+            return GetMultiSelection(grid);
+        }
+
+        return GetMultiSelection(ProcGrid);
     }
 
     private async void KillTree_Click(object sender, RoutedEventArgs e)
@@ -2452,8 +2680,11 @@ public partial class MainWindow : Window
                 ContextOpenFolderItem.Header = Strings.T("OpenFolder");
                 ContextSearchOnlineItem.Header = Strings.T("SearchOnline");
 
-                // Refresh state-dependent text that carries a localized reason.
+                // Refresh state-dependent text that carries a localized reason. The selection
+                // summary is re-applied afterwards because it rewrites the End Task labels that
+                // the localization code above has just reset to their neutral form.
                 UpdateRestartControls(Selected);
+                UpdateSelectionSummary(GetActiveSelection());
             }
         }
         catch (Exception ex)
@@ -2681,8 +2912,7 @@ public partial class MainWindow : Window
                 Kill_Click(sender, e);
             }
             return;
-        }
-        else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.P)
+        }        else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.P)
         {
             SetDetectionPaused(!_detectionPaused);
             e.Handled = true;

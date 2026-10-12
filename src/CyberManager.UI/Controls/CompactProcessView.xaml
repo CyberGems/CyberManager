@@ -357,6 +357,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <Border x:Name="CompactSearchBar"
@@ -501,6 +502,36 @@
                           Width="12" Height="12" Stretch="Uniform"
                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </ToggleButton>
+                <Border x:Name="SelectionBadge"
+                        Grid.Column="5"
+                        VerticalAlignment="Center"
+                        Margin="6,0,0,0"
+                        Padding="6,2"
+                        CornerRadius="8"
+                        Background="{DynamicResource CardBrush}"
+                        BorderBrush="{DynamicResource AccentBrush}"
+                        BorderThickness="1"
+                        Visibility="Collapsed">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="SelectionCountText"
+                                   AutomationProperties.AutomationId="SelectionCountText"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+                        <Button x:Name="ClearSelectionButton"
+                                AutomationProperties.AutomationId="ClearSelectionBtn"
+                                Width="14" Height="14"
+                                Margin="4,0,0,0"
+                                Padding="0"
+                                Content="✕"
+                                FontSize="8"
+                                Style="{DynamicResource ModernButton}"
+                                Click="ClearSelectionButton_Click"
+                                ToolTip="Clear selection"
+                                AutomationProperties.Name="Clear selection"/>
+                    </StackPanel>
+                </Border>
             </Grid>
 
             <Grid Grid.Row="2">
@@ -527,7 +558,7 @@
                       ScrollViewer.CanContentScroll="True"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      SelectionMode="Single"
+                      SelectionMode="Extended"
                       SelectionUnit="FullRow"
                       AutomationProperties.Name="Compact process list">
                 <DataGrid.Columns>

@@ -96,6 +96,7 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? MinimizeRequested;
     public event RoutedEventHandler? CloseRequested;
     public event RoutedEventHandler? DragRequested;
+    public event RoutedEventHandler? ClearSelectionRequested;
 
     public void ApplyLanguage()
     {
@@ -201,6 +202,26 @@ public partial class CompactProcessView : UserControl
     }
 
     public void SetEndTaskEnabled(bool enabled) => EndTaskButton.IsEnabled = enabled;
+
+    /// <summary>
+    /// Reflects the current multi-selection on the compact action bar: a badge with the selected
+    /// row count, and an "End Task" button whose tooltip advertises the batch size. The compact
+    /// bar is narrow, so it shows the row count only.
+    /// </summary>
+    public void SetSelectionSummary(int count)
+    {
+        SelectionBadge.Visibility = count > 1 ? Visibility.Visible : Visibility.Collapsed;
+        SelectionCountText.Text = count > 1 ? Strings.T("SelectionCountShort", count) : string.Empty;
+        EndTaskButton.ToolTip = count > 1
+            ? Strings.T("EndSelectedTooltip", count)
+            : Strings.T("EndTaskTooltip");
+        AutomationProperties.SetName(
+            EndTaskButton,
+            count > 1 ? Strings.T("EndSelected", count) : Strings.T("EndTask"));
+        // The badge text itself is not exposed to UI Automation (TextBlocks share their parent's
+        // peer), so the count is also published through the clear button, which owns a peer.
+        AutomationProperties.SetName(ClearSelectionButton, Strings.T("SelectionCountShort", count));
+    }
 
     public void SetRestartEnabled(bool enabled) => RestartButton.IsEnabled = enabled;
 
@@ -483,6 +504,9 @@ public partial class CompactProcessView : UserControl
 
     private void EndTaskButton_Click(object sender, RoutedEventArgs e) =>
         EndTaskRequested?.Invoke(sender, e);
+
+    private void ClearSelectionButton_Click(object sender, RoutedEventArgs e) =>
+        ClearSelectionRequested?.Invoke(sender, e);
 
     private void RestartButton_Click(object sender, RoutedEventArgs e) =>
         RestartRequested?.Invoke(sender, e);
