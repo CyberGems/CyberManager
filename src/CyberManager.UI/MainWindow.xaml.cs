@@ -225,6 +225,7 @@ public partial class MainWindow : Window
         CompactView.SearchHistoryRequested += SearchHistoryButton_Click;
         CompactView.ClearSelectionRequested += ClearSelectionBtn_Click;
         CompactView.HeavyFilterChanged += CompactView_HeavyFilterChanged;
+        CompactView.MoreRequested += CompactView_MoreRequested;
         CompactView.ProcessGrid.SelectionChanged += ProcGrid_SelectionChanged;
         CompactView.ProcessGrid.Sorting += ProcGrid_Sorting;
         CompactView.ProcessGrid.PreviewMouseRightButtonDown += CompactGrid_PreviewMouseRightButtonDown;
@@ -558,6 +559,7 @@ public partial class MainWindow : Window
             SelectTab(CurrentTab);
         }
 
+        AttachMoreMenuToActiveView();
         CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
         CompactView.SelectedItem = Selected;
         KeepWindowInWorkArea();
@@ -1774,27 +1776,70 @@ public partial class MainWindow : Window
     private void FullModeToggle_Click(object sender, RoutedEventArgs e) =>
         ApplyViewMode(!_isCompactMode, restoreBounds: false);
 
-    private bool _moreMenuWasOpen;
+    // A ContextMenu dismisses itself when the pointer is pressed outside it, which is exactly
+    // what happens when the user presses the button that opened it. By the time Click runs the
+    // menu is already closed, so a plain IsOpen check would reopen it. Remember the dismissal
+    // (only for a short window, so an unrelated later click is unaffected) and treat the
+    // following click as a request to keep the menu closed.
+    private DateTime _moreMenuDismissedAtUtc = DateTime.MinValue;
+    private static readonly TimeSpan MoreMenuReopenGuard = TimeSpan.FromMilliseconds(400);
 
-    private void MoreBtn_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void MoreOptionsMenu_Opened(object sender, RoutedEventArgs e) =>
+        _moreMenuDismissedAtUtc = DateTime.MinValue;
+
+    private void MoreOptionsMenu_Closed(object sender, RoutedEventArgs e)
     {
-        _moreMenuWasOpen = MoreBtn.ContextMenu?.IsOpen == true;
+        // Menu items close the menu on mouse up, so a pressed button means an outside press.
+        if (Mouse.LeftButton == MouseButtonState.Pressed)
+        {
+            _moreMenuDismissedAtUtc = DateTime.UtcNow;
+        }
     }
 
-    private void MoreBtn_Click(object sender, RoutedEventArgs e)
+    private void MoreBtn_Click(object sender, RoutedEventArgs e) => ToggleMoreMenu(MoreBtn);
+
+    private void CompactView_MoreRequested(object sender, RoutedEventArgs e) =>
+        ToggleMoreMenu(sender as Button ?? MoreBtn);
+
+    /// <summary>
+    /// Opens the shared options menu below the given button, or closes it when it is already
+    /// open or was just dismissed by the same press. Reusing one menu keeps the compact and the
+    /// full view in sync without duplicating the items.
+    /// </summary>
+    private void ToggleMoreMenu(Button button)
     {
-        if (_moreMenuWasOpen)
+        if (button.ContextMenu is not { } menu) return;
+
+        if (menu.IsOpen || DateTime.UtcNow - _moreMenuDismissedAtUtc < MoreMenuReopenGuard)
         {
-            _moreMenuWasOpen = false;
+            _moreMenuDismissedAtUtc = DateTime.MinValue;
+            menu.IsOpen = false;
             return;
         }
 
-        if (MoreBtn.ContextMenu != null)
+        menu.PlacementTarget = button;
+        menu.Placement = PlacementMode.Bottom;
+        menu.IsOpen = true;
+    }
+
+    /// <summary>
+    /// A ContextMenu can only belong to one button at a time, so the options menu follows the
+    /// visible view: the compact title bar owns it in compact mode and the full title bar
+    /// otherwise. Both views therefore share a single menu with the same items, handlers and
+    /// highlighting, instead of duplicating it.
+    /// </summary>
+    private void AttachMoreMenuToActiveView()
+    {
+        var owner = _isCompactMode ? CompactView.MoreButton : MoreBtn;
+        if (ReferenceEquals(owner.ContextMenu, MoreOptionsMenu)) return;
+
+        if (ReferenceEquals(MoreBtn.ContextMenu, MoreOptionsMenu)) MoreBtn.ContextMenu = null;
+        if (ReferenceEquals(CompactView.MoreButton.ContextMenu, MoreOptionsMenu))
         {
-            MoreBtn.ContextMenu.PlacementTarget = MoreBtn;
-            MoreBtn.ContextMenu.Placement = PlacementMode.Bottom;
-            MoreBtn.ContextMenu.IsOpen = true;
+            CompactView.MoreButton.ContextMenu = null;
         }
+
+        owner.ContextMenu = MoreOptionsMenu;
     }
 
     private static void OpenExternalUrl(string url)

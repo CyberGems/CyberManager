@@ -320,6 +320,22 @@
                         MouseLeave="InteractiveControl_MouseLeave"
                         ToolTip="Settings"
                         AutomationProperties.Name="Settings"/>
+                    <Button x:Name="MoreButton"
+                        Width="28"
+                        Height="26"
+                        Margin="2,0,0,0"
+                        Padding="0"
+                        Style="{DynamicResource TitleBtn}"
+                        Click="MoreButton_Click"
+                        MouseEnter="InteractiveControl_MouseEnter"
+                        MouseLeave="InteractiveControl_MouseLeave"
+                        ToolTip="More options"
+                        AutomationProperties.Name="More options">
+                        <Path Data="M 5,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3 M 12,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3 M 19,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3"
+                              Width="14" Height="14" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
                     <Button x:Name="MinimizeButton"
                         Width="28"
                         Height="26"

@@ -92,6 +92,7 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? PauseDetectionRequested;
     public event RoutedEventHandler? PinRequested;
     public event RoutedEventHandler? SettingsRequested;
+    public event RoutedEventHandler? MoreRequested;
     public event RoutedEventHandler? AboutRequested;
     public event RoutedEventHandler? MinimizeRequested;
     public event RoutedEventHandler? CloseRequested;
@@ -116,6 +117,7 @@ public partial class CompactProcessView : UserControl
         BrandingPanel.ToolTip = Strings.T("About");
         AutomationProperties.SetName(BrandingPanel, Strings.T("About"));
         SettingsButton.ToolTip = Strings.T("Settings");
+        MoreButton.ToolTip = Strings.T("MoreOptions");
         CloseButton.ToolTip = Strings.T("Close");
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");
         SearchHint.Text = Strings.T("SearchPlaceholder");
@@ -124,6 +126,7 @@ public partial class CompactProcessView : UserControl
         HeavyFilterToggle.ToolTip = Strings.T("ShowHeavyProcesses");
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
         AutomationProperties.SetName(SettingsButton, Strings.T("Settings"));
+        AutomationProperties.SetName(MoreButton, Strings.T("MoreOptions"));
         MinimizeButton.ToolTip = Strings.T("Minimize");
         AutomationProperties.SetName(MinimizeButton, Strings.T("Minimize"));
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
@@ -519,6 +522,9 @@ public partial class CompactProcessView : UserControl
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e) =>
         SettingsRequested?.Invoke(sender, e);
+
+    private void MoreButton_Click(object sender, RoutedEventArgs e) =>
+        MoreRequested?.Invoke(sender, e);
 
     private void MinimizeButton_Click(object sender, RoutedEventArgs e) =>
         MinimizeRequested?.Invoke(sender, e);
