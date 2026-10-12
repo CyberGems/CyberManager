@@ -13,7 +13,8 @@ public sealed record ProcessListQuery(
     ListSortDirection SortDirection,
     IReadOnlySet<string> ExpandedGroups,
     bool HeavyProcessesOnly = false,
-    int HeavyProcessLimit = 10);
+    int HeavyProcessLimit = 10,
+    bool HideSystemProcesses = false);
 
 public sealed class ProcessListViewModel
 {
@@ -25,6 +26,11 @@ public sealed class ProcessListViewModel
         if (!query.ShowIdleProcess)
         {
             filtered = filtered.Where(process => process.Pid != 0);
+        }
+
+        if (query.HideSystemProcesses)
+        {
+            filtered = filtered.Where(process => !process.IsSystemProcess);
         }
 
         if (!string.IsNullOrWhiteSpace(query.Search))

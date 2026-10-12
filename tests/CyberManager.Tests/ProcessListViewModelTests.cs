@@ -104,6 +104,65 @@ public class ProcessListViewModelTests
             result.Select(process => process.FriendlyName));
     }
 
+    [Fact]
+    public void HideSystemProcesses_RemovesSystemCategory()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo { Pid = 4, Name = "System" },
+            new ProcessInfo
+            {
+                Pid = 100,
+                Name = "svchost.exe",
+                ExePath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                    "System32",
+                    "svchost.exe")
+            },
+            new ProcessInfo
+            {
+                Pid = 200,
+                Name = "app.exe",
+                ExePath = @"C:\Program Files\App\app.exe"
+            }
+        };
+
+        var result = ProcessListViewModel.Build(processes, CreateSystemFilterQuery(hideSystemProcesses: true));
+
+        Assert.Single(result);
+        Assert.Equal("app.exe", result[0].Name);
+    }
+
+    [Fact]
+    public void HideSystemProcesses_Disabled_KeepsSystemCategory()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo { Pid = 4, Name = "System" },
+            new ProcessInfo
+            {
+                Pid = 200,
+                Name = "app.exe",
+                ExePath = @"C:\Program Files\App\app.exe"
+            }
+        };
+
+        var result = ProcessListViewModel.Build(processes, CreateSystemFilterQuery(hideSystemProcesses: false));
+
+        Assert.Equal(2, result.Count);
+    }
+
+    private static ProcessListQuery CreateSystemFilterQuery(bool hideSystemProcesses) =>
+        new(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: false,
+            DimSuspended: true,
+            SortColumn: "Name",
+            SortDirection: ListSortDirection.Ascending,
+            ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+            HideSystemProcesses: hideSystemProcesses);
+
     private static ProcessListQuery CreateNameQuery(ListSortDirection direction) =>
         new(
             Search: "",

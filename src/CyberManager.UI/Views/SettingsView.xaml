@@ -354,6 +354,25 @@
                             </StackPanel>
                             <CheckBox x:Name="HighlightSuspendedSwitch" Grid.Column="2" AutomationProperties.Name="Dim suspended processes" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
                         </Grid>
+
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,4,0,8"/>
+
+                        <!-- HIDE SYSTEM PROCESSES -->
+                        <Grid Margin="0,4,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                <Path Data="M 12 2 L 20 5 V 11 C 20 16 16.8 20 12 22 C 7.2 20 4 16 4 11 V 5 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                <TextBlock x:Name="HideSystemTitleLbl" Text="Ocultar procesos del sistema" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="HideSystemDescLbl" Text="Oculta los procesos del sistema de Windows (tareas del kernel, controladores e imágenes dentro de la carpeta Windows) para dejar solo tus aplicaciones." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <CheckBox x:Name="HideSystemSwitch" Grid.Column="2" AutomationProperties.Name="Hide system processes" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                        </Grid>
                     </StackPanel>
                 </Border>
 

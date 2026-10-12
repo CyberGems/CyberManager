@@ -18,6 +18,7 @@ public sealed class AppSettings
     public bool GroupProcesses { get; set; } = true;
     public double RowFontSize { get; set; } = 13.0;
     public bool ShowSuspended { get; set; } = true;
+    public bool HideSystemProcesses { get; set; }
     public bool HeavyProcessesOnly { get; set; }
     public string SearchText { get; set; } = "";
     public List<string> RecentSearches { get; set; } = new();
@@ -184,6 +185,7 @@ public sealed class AppSettings
         GroupProcesses = defaults.GroupProcesses;
         RowFontSize = defaults.RowFontSize;
         ShowSuspended = defaults.ShowSuspended;
+        HideSystemProcesses = defaults.HideSystemProcesses;
         HeavyProcessesOnly = defaults.HeavyProcessesOnly;
         SearchText = defaults.SearchText;
         RecentSearches = new();

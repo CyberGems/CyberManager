@@ -59,6 +59,7 @@ public partial class SettingsView : UserControl
         ShowIdleSwitch.IsChecked = App.Settings.ShowIdleProcess;
         GroupByAppSwitch.IsChecked = App.Settings.GroupProcesses;
         HighlightSuspendedSwitch.IsChecked = App.Settings.ShowSuspended;
+        HideSystemSwitch.IsChecked = App.Settings.HideSystemProcesses;
 
         // Language
         LangComboBox.SelectedIndex = App.Settings.Language == Lang.Es ? 0 : 1;
@@ -106,6 +107,7 @@ public partial class SettingsView : UserControl
         App.Settings.ShowIdleProcess = ShowIdleSwitch.IsChecked == true;
         App.Settings.GroupProcesses = GroupByAppSwitch.IsChecked == true;
         App.Settings.ShowSuspended = HighlightSuspendedSwitch.IsChecked == true;
+        App.Settings.HideSystemProcesses = HideSystemSwitch.IsChecked == true;
         App.Settings.StartWithWindows = StartWithWinSwitch.IsChecked == true;
         App.Settings.MinimizeToTrayOnMinimize = MinimizeToTrayOnMinimizeSwitch.IsChecked == true;
         App.Settings.MinimizeToTrayOnClose = MinimizeToTrayOnCloseSwitch.IsChecked == true;
@@ -372,6 +374,8 @@ public partial class SettingsView : UserControl
         GroupByAppDescLbl.Text = Strings.T("GroupByAppDesc");
         HighlightSuspendedTitleLbl.Text = Strings.T("HighlightSuspendedTitle");
         HighlightSuspendedDescLbl.Text = Strings.T("HighlightSuspendedDesc");
+        HideSystemTitleLbl.Text = Strings.T("HideSystemProcessesTitle");
+        HideSystemDescLbl.Text = Strings.T("HideSystemProcessesDesc");
 
         // General
         LanguageTitleLbl.Text = Strings.T("Language");

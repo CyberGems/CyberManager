@@ -20,6 +20,13 @@ public class AppSettingsTests
     }
 
     [Fact]
+    public void AppSettings_DefaultHideSystemProcesses_IsFalse()
+    {
+        var settings = new AppSettings();
+        Assert.False(settings.HideSystemProcesses);
+    }
+
+    [Fact]
     public void AppSettings_DefaultAutoCheckForUpdates_IsTrue()
     {
         var settings = new AppSettings();
@@ -110,6 +117,7 @@ public class AppSettingsTests
             Theme = AppTheme.Light,
             AlwaysOnTop = true,
             GroupProcesses = false,
+            HideSystemProcesses = true,
             HeavyProcessesOnly = true,
             SearchText = "chrome",
             MinimizeToTrayOnMinimize = true,
@@ -131,6 +139,7 @@ public class AppSettingsTests
         Assert.Equal(AppTheme.CyberManager, settings.Theme);
         Assert.False(settings.AlwaysOnTop);
         Assert.True(settings.GroupProcesses);
+        Assert.False(settings.HideSystemProcesses);
         Assert.False(settings.HeavyProcessesOnly);
         Assert.Empty(settings.SearchText);
         Assert.Empty(settings.RecentSearches);

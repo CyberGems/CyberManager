@@ -1405,6 +1405,12 @@
                             <CheckBox x:Name="GroupToggleCheck" Style="{StaticResource CyberSnapToggleStyle}" AutomationProperties.Name="Group by application" VerticalAlignment="Center" Checked="GroupToggle_Checked" Unchecked="GroupToggle_Checked"/>
                         </StackPanel>
 
+                        <!-- Hide system processes toggle -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                            <TextBlock x:Name="SystemFilterLabel" Text="Hide system processes" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="SystemFilterLabel_Click"/>
+                            <CheckBox x:Name="SystemFilterCheck" Style="{StaticResource CyberSnapToggleStyle}" AutomationProperties.Name="Hide system processes" VerticalAlignment="Center" Checked="SystemFilter_Checked" Unchecked="SystemFilter_Checked"/>
+                        </StackPanel>
+
                         <!-- Text Size Slider -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
                             <TextBlock Text="🗛" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>

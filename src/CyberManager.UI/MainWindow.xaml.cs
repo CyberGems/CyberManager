@@ -177,6 +177,7 @@ public partial class MainWindow : Window
     private bool _syncingSelection;
     private bool _suppressSelectionMirror;
     private bool _syncingHeavyFilter;
+    private bool _syncingSystemFilter;
 
     // Row the current Shift+Arrow run is anchored to. Stored as a process identity rather than a
     // ProcessInfo reference because the list is rebuilt on every refresh (default 800 ms), which
@@ -271,6 +272,7 @@ public partial class MainWindow : Window
             CompactView.SetPinned(Topmost);
             SetHeavyFilterControls(App.Settings.HeavyProcessesOnly);
             GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
+            SystemFilterCheck.IsChecked = App.Settings.HideSystemProcesses;
             FontSizeSlider.Value = App.Settings.RowFontSize;
             ProcGrid.FontSize = App.Settings.RowFontSize;
             CompactView.RowFontSize = Math.Min(App.Settings.RowFontSize, 13);
@@ -288,6 +290,7 @@ public partial class MainWindow : Window
             ApplyColumnVisibility();
             SyncSearchFromSettings();
             GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
+            SystemFilterCheck.IsChecked = App.Settings.HideSystemProcesses;
             Topmost = App.Settings.AlwaysOnTop;
             CompactView.SetPinned(Topmost);
             SetHeavyFilterControls(App.Settings.HeavyProcessesOnly);
@@ -897,7 +900,8 @@ public partial class MainWindow : Window
                 _sortColumn,
                 _sortDirection,
                 _expandedGroups,
-                App.Settings.HeavyProcessesOnly));
+                App.Settings.HeavyProcessesOnly,
+                HideSystemProcesses: App.Settings.HideSystemProcesses));
 
         // The refresh tick rebuilds the item collection every interval, which would otherwise
         // throw away a multi-selection. Snapshot the whole selection (by PID) before the rebuild
@@ -2004,6 +2008,41 @@ public partial class MainWindow : Window
         GroupToggleCheck.IsChecked = !GroupToggleCheck.IsChecked;
     }
 
+    private void SystemFilter_Checked(object sender, RoutedEventArgs e)
+    {
+        if (!_syncingSystemFilter)
+        {
+            SetSystemFilterControls(SystemFilterCheck.IsChecked == true);
+        }
+    }
+
+    private void SystemFilterLabel_Click(object sender, MouseButtonEventArgs e)
+    {
+        SystemFilterCheck.IsChecked = !SystemFilterCheck.IsChecked;
+    }
+
+    private void SetSystemFilterControls(bool enabled)
+    {
+        var changed = App.Settings.HideSystemProcesses != enabled;
+        App.Settings.HideSystemProcesses = enabled;
+
+        _syncingSystemFilter = true;
+        try
+        {
+            SystemFilterCheck.IsChecked = enabled;
+        }
+        finally
+        {
+            _syncingSystemFilter = false;
+        }
+
+        if (changed)
+        {
+            ThrottledSaveSettings();
+            ApplySortingAndFilter();
+        }
+    }
+
     private void ProcGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var source = sender as DataGrid ?? ProcGrid;
@@ -2736,6 +2775,8 @@ public partial class MainWindow : Window
             LoaderTitle.Text = Strings.T("CollectingProcesses");
             LoaderSub.Text = Strings.T("InitializingNtEngine");
             GroupToggleLabel.Text = Strings.T("GroupByApp");
+            SystemFilterLabel.Text = Strings.T("HideSystemProcesses");
+            AutomationProperties.SetName(SystemFilterCheck, Strings.T("HideSystemProcesses"));
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             PauseDetectionBtn.ToolTip = _detectionPaused

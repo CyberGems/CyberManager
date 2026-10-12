@@ -30,7 +30,14 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     private bool _dimWhenSuspended;
     private bool _isContextTarget;
 
-    public int Pid { get => _pid; set => Set(ref _pid, value); }
+    public int Pid
+    {
+        get => _pid;
+        set
+        {
+            if (Set(ref _pid, value)) OnPropertyChanged(nameof(IsSystemProcess));
+        }
+    }
     public int ParentPid { get => _parentPid; set => Set(ref _parentPid, value); }
     public string Name
     {
@@ -50,7 +57,14 @@ public sealed class ProcessInfo : INotifyPropertyChanged
         }
     }
 
-    public string ExePath { get => _exePath; set => Set(ref _exePath, value); }
+    public string ExePath
+    {
+        get => _exePath;
+        set
+        {
+            if (Set(ref _exePath, value)) OnPropertyChanged(nameof(IsSystemProcess));
+        }
+    }
     public string UserName { get => _userName; set => Set(ref _userName, value); }
     public string Status
     {
@@ -104,6 +118,13 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     }
 
     public bool HasWindow => !string.IsNullOrWhiteSpace(MainWindowTitle);
+
+    /// <summary>
+    /// True when the process belongs to the Windows system category (kernel idle/system
+    /// tasks, driver backed components without an image path, or images under the Windows
+    /// installation directory). See <see cref="ProcessClassifier"/> for the exact rules.
+    /// </summary>
+    public bool IsSystemProcess => ProcessClassifier.IsSystemProcess(this);
 
     public bool IsGroupParent
     {

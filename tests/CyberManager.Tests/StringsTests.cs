@@ -79,6 +79,7 @@ public class StringsTests
             "CompactModeTitle", "CompactModeDesc", "CompactMode", "MoreDetails", "CompactModeHeader", "CompactContextHint",
             "SettingsTitle", "SettingsSubtitle", "ShowIdleProcessTitle", "ShowIdleProcessDesc",
             "GroupByAppTitle", "GroupByAppDesc", "HighlightSuspendedTitle", "HighlightSuspendedDesc",
+            "HideSystemProcesses", "HideSystemProcessesTitle", "HideSystemProcessesDesc",
             "RefreshIntervalTitle", "RefreshIntervalDesc", "RefreshFast", "RefreshNormal", "RefreshSlow",
             "StartWithWindowsTitle", "MinimizeToTrayTitle", "AlwaysOnTopTitle", "AutoCheckUpdatesTitle",
             "GlobalHotkeyTitle", "ResetDefaults", "SettingsSaved",
