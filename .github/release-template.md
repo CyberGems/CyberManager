@@ -19,7 +19,7 @@ Batch process control arrives: select many processes and end them together, rest
 
 - 🧰 **Batch Process Control**:
   - **Multi-Select**: Ctrl+click, Shift+click, and rubber-band selection with a live count and a single "End selected" confirmation.
-  - **Restart Process**: Relaunch an app from its executable path, with packaged (UWP / Store) apps refused with a clear message. `Ctrl+R`.
+  - **Restart Process**: Relaunch an app from its executable path, with packaged (UWP / Store) apps refused with a clear message.
   - **Pause Detection**: Freeze the process list snapshot while CPU, RAM, totals, and sparklines keep updating. `Ctrl+P`.
 
 - 🔎 **Finding and Reading the List**:
@@ -51,7 +51,7 @@ Llega el control de procesos por lotes: selecciona varios procesos y finalízalo
 
 - 🧰 **Control de procesos por lotes**:
   - **Multi-selección**: Ctrl+clic, Shift+clic y lazo de arrastre, con contador en vivo y una única confirmación para "Finalizar selección".
-  - **Reiniciar proceso**: Relanza una app desde su ejecutable; las apps empaquetadas (UWP / Store) se rechazan con un mensaje claro. `Ctrl+R`.
+  - **Reiniciar proceso**: Relanza una app desde su ejecutable; las apps empaquetadas (UWP / Store) se rechazan con un mensaje claro.
   - **Pausar detección**: Congela la lista de procesos mientras la CPU, la RAM, los totales y las gráficas siguen actualizándose. `Ctrl+P`.
 
 - 🔎 **Encontrar y leer la lista**:

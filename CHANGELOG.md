@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Multi-Select and Batch End**: Select several processes with Ctrl+click, Shift+click, or a rubber-band drag, see the live selection count, and end the whole batch from a single confirmation. The count is also exposed to accessibility tools.
-- **Restart Process**: Relaunch a process from its executable path, starting the replacement before terminating the original so a failed relaunch never leaves you without the app. Packaged (UWP / Microsoft Store) apps are refused with a clear message instead of a raw access error. Available from the context menu, the toolbars, and `Ctrl+R`.
+- **Restart Process**: Relaunch a process from its executable path, starting the replacement before terminating the original so a failed relaunch never leaves you without the app. Packaged (UWP / Microsoft Store) apps are refused with a clear message instead of a raw access error. Available from the context menu and the toolbars.
 - **Pause Process Detection**: Freeze the process list snapshot while system gauges, totals, and sparklines keep updating. Available from both toolbars and `Ctrl+P`.
 - **Hide System Processes**: A toggle that filters out Windows system processes (kernel tasks, driver images, and anything running from the Windows directory) while keeping the desktop shell visible.
 - **Column Visibility Menu**: Right-click any column header to show or hide columns, with the layout remembered across restarts. The last visible column cannot be hidden.
