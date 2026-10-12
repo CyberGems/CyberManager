@@ -178,7 +178,8 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Ctrl+F` / `Ctrl+E` | Enfocar el cuadro de búsqueda | Aplicación |
 | `Ctrl+G` | Alternar la agrupación de procesos | Aplicación |
 | `Ctrl+I` | Abrir Información del Sistema | Aplicación |
-| `F5` / `Ctrl+R` | Actualizar la lista de procesos | Aplicación |
+| `F5` | Actualizar la lista de procesos | Aplicación |
+| `Ctrl+R` | Reiniciar el proceso seleccionado | Aplicación |
 | `Ctrl+P` | Pausar / reanudar la detección de procesos | Aplicación |
 | `Delete` | Finalizar la tarea o tareas seleccionadas | Aplicación |
 | `Shift+Delete` | Finalizar árbol de procesos | Aplicación |
@@ -214,11 +215,11 @@ Si te gustaría apoyar las futuras actualizaciones, te lo agradecería de verdad
 
 | Activo | Dirección | QR |
 |---|---|---|
-| **BTC** | <pre><code>bc1q5mxzz05nmvsheqzx7970euswta3fksxzcfzag4</code></pre> | <img src="docs/donate/qr-btc.png" width="90" height="90" alt="QR de BTC" /> |
-| **ETH** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="docs/donate/qr-eth.png" width="90" height="90" alt="QR de ETH" /> |
-| **USDT (ERC20 / BEP20)** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="docs/donate/qr-eth.png" width="90" height="90" alt="QR de USDT" /> |
-| **USDT (TRC20)** | <pre><code>TSVbSk1HSyZ1NprCnAYiw56ECwXgH887mD</code></pre> | <img src="docs/donate/qr-usdt-tron.png" width="90" height="90" alt="QR de USDT TRC20" /> |
-| **LTC** | <pre><code>LWGnEHgcFCE2BRkzLnsdPDD8Y8ZeDK577X</code></pre> | <img src="docs/donate/qr-ltc.png" width="90" height="90" alt="QR de LTC" /> |
+| **BTC** | <pre><code>bc1q5mxzz05nmvsheqzx7970euswta3fksxzcfzag4</code></pre> | <img src="assets/donate/qr-btc.png" width="90" height="90" alt="QR de BTC" /> |
+| **ETH** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="assets/donate/qr-eth.png" width="90" height="90" alt="QR de ETH" /> |
+| **USDT (ERC20 / BEP20)** | <pre><code>0x79b703Ec0f77493679Fcd280aF3b983E20c580B8</code></pre> | <img src="assets/donate/qr-eth.png" width="90" height="90" alt="QR de USDT" /> |
+| **USDT (TRC20)** | <pre><code>TSVbSk1HSyZ1NprCnAYiw56ECwXgH887mD</code></pre> | <img src="assets/donate/qr-usdt-tron.png" width="90" height="90" alt="QR de USDT TRC20" /> |
+| **LTC** | <pre><code>LWGnEHgcFCE2BRkzLnsdPDD8Y8ZeDK577X</code></pre> | <img src="assets/donate/qr-ltc.png" width="90" height="90" alt="QR de LTC" /> |
 
 > ⚠️ Envía solo el activo seleccionado en la red indicada. Usar la red incorrecta provocará la pérdida permanente de fondos.
 

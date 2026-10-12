@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Restart Shortcut**: `Ctrl+R` now restarts the selected process. It was previously swallowed by the refresh handler at the window level, so the shortcut never fired. Refresh remains on `F5`.
 
+### Changed
+- **Repository Layout**: Donation QR assets moved from `docs/donate` to `assets/donate`, and the obsolete `docs` folder was removed because the local wiki now lives in its own repository.
+
 ## [1.4.0] - 2026-10-12
 
 ### Added
