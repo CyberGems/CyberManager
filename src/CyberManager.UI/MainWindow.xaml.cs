@@ -237,7 +237,7 @@ public partial class MainWindow : Window
         StateChanged += OnWindowStateChanged;
         Closed += OnClosed;
         _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
-        _timer.Tick += (_, _) => _ = RefreshAsync(_lifetimeCts.Token);
+        _timer.Tick += (_, _) => _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
         _searchDebounceTimer.Interval = TimeSpan.FromMilliseconds(150);
         _searchDebounceTimer.Tick += (_, _) => { _searchDebounceTimer.Stop(); ApplySortingAndFilter(); };
         _searchHistoryTimer.Interval = TimeSpan.FromMilliseconds(750);
@@ -309,7 +309,7 @@ public partial class MainWindow : Window
                 this,
                 ToggleTrayVisibility,
                 OpenSystemInfoFromTray,
-                () => _ = RefreshAsync(_lifetimeCts.Token),
+                () => _ = RefreshAsync(force: true, cancellationToken: _lifetimeCts.Token),
                 OpenSettingsFromTray,
                 OpenAboutFromTray,
                 ExitApplication);
@@ -349,7 +349,7 @@ public partial class MainWindow : Window
                 });
             }
 
-            _ = RefreshAsync(_lifetimeCts.Token);
+            _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
             if (IsVisible && WindowState != WindowState.Minimized) _timer.Start();
         }
         catch (Exception ex)
@@ -460,7 +460,7 @@ public partial class MainWindow : Window
         if (IsVisible && WindowState != WindowState.Minimized)
         {
             _timer.Start();
-            _ = RefreshAsync(_lifetimeCts.Token);
+            _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
         }
         else
         {
@@ -485,7 +485,7 @@ public partial class MainWindow : Window
         if (IsVisible && WindowState != WindowState.Minimized)
         {
             _timer.Start();
-            _ = RefreshAsync(_lifetimeCts.Token);
+            _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
         }
         else
         {
@@ -754,14 +754,16 @@ public partial class MainWindow : Window
         CompactView.SetStatusToolTip(toolTip);
     }
 
-    private async Task RefreshAsync(CancellationToken cancellationToken = default)
+    private async Task RefreshAsync(bool force = false, CancellationToken cancellationToken = default)
     {
         if (_isClosed || Interlocked.Exchange(ref _refreshInFlight, 1) == 1) return;
         try
         {
             // When detection is frozen the process list keeps its last snapshot, but the
-            // system metrics (CPU / RAM) must keep updating so the gauges stay live.
-            if (!_detectionPaused)
+            // system metrics (CPU / RAM) must keep updating so the gauges stay live. An
+            // explicit refresh (button, F5, tray menu) passes force: true so it always
+            // collects the current state, even while frozen.
+            if (force || !_detectionPaused)
             {
                 if (_all.Count == 0)
                 {
@@ -1912,13 +1914,14 @@ public partial class MainWindow : Window
         ApplySortingAndFilter();
     }
 
-    private void Refresh_Click(object sender, RoutedEventArgs e) => _ = RefreshAsync();
+    private void Refresh_Click(object sender, RoutedEventArgs e) => _ = RefreshAsync(force: true);
 
     private void PauseDetection_Click(object sender, RoutedEventArgs e) => SetDetectionPaused(!_detectionPaused);
 
     /// <summary>
     /// Freezes or resumes automatic process detection. While frozen the list keeps its last
-    /// snapshot and only system metrics keep updating, so the gauges stay live.
+    /// snapshot and only system metrics keep updating, so the gauges stay live. An explicit
+    /// refresh (button, F5, tray menu) still collects the current state on demand.
     /// </summary>
     private void SetDetectionPaused(bool paused)
     {
@@ -3066,7 +3069,7 @@ public partial class MainWindow : Window
         if (e.Key == Key.F5)
         {
             e.Handled = true;
-            _ = RefreshAsync();
+            _ = RefreshAsync(force: true);
             return;
         }
 
