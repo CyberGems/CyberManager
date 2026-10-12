@@ -24,7 +24,7 @@
 
 ## ¿Qué es CyberManager?
 
-CyberManager es una alternativa ligera y de alta capacidad al Administrador de Tareas de Windows, diseñada para mantenerse rápido incluso con miles de procesos activos. Su interfaz virtualizada y su motor nativo de NT ofrecen búsqueda instantánea, refrescos receptivos, telemetría de CPU y memoria en vivo y controles directos para terminar, suspender, reanudar o cambiar la prioridad de los procesos. Un modo compacto, acceso a la bandeja del sistema, un atajo global y información detallada del sistema mantienen la monitorización esencial a mano sin saturar el escritorio.
+CyberManager es una alternativa ligera y de alta capacidad al Administrador de Tareas de Windows, diseñada para mantenerse rápido incluso con miles de procesos activos. Su interfaz virtualizada y su motor nativo de NT ofrecen búsqueda instantánea, refrescos receptivos, telemetría de CPU y memoria en vivo y controles directos para terminar, reiniciar, suspender, reanudar o cambiar la prioridad de los procesos, incluidas acciones por lotes sobre una multi-selección. Un modo compacto, acceso a la bandeja del sistema, un atajo global y información detallada del sistema mantienen la monitorización esencial a mano sin saturar el escritorio.
 
 *Gratuito y de código abierto (GPLv3): sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
 
@@ -40,8 +40,10 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 | Refresco instantáneo de procesos | Motor nativo NT: llamadas directas a la API, cero sobrecarga de WMI |
 | Identifica procesos consumidores | Mapa térmico adaptativo de CPU/RAM y filtro de los 10 procesos más pesados |
 | Monitoriza la salud del sistema | Sparklines en vivo + ventana de Información del Sistema con 4 pestañas |
-| Controla los procesos | Finalizar, finalizar árbol, suspender, reanudar, establecer prioridad |
+| Controla los procesos | Finalizar, finalizar árbol, reiniciar, suspender, reanudar, establecer prioridad |
+| Actúa sobre varios a la vez | Multi-selección con Ctrl/Shift+clic y "Finalizar selección" de un solo toque |
 | Entiende los procesos | Nombres amigables, metadatos y un detallado diálogo de Propiedades |
+| Lee la lista a tu manera | Menú de visibilidad de columnas, orden recordado, ocultar procesos del sistema |
 | Mantente fuera del camino | Bandeja del sistema + atajo global (`Alt+Shift+M`) + inicio automático |
 | Hazlo tuyo | 3 temas, bilingüe EN/ES, siempre visible |
 
@@ -58,10 +60,16 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 - **Agrupación de procesos**: agrupa por aplicación con jerarquía de árbol expandible
 - **Mapa térmico de recursos**: tintado térmico adaptativo de CPU/RAM (verde → amarillo → rojo)
 - **Filtro de procesos pesados**: muestra los 10 procesos con mayor uso combinado de CPU/RAM
+- **Menú de visibilidad de columnas**: clic derecho en un encabezado para mostrar u ocultar columnas; el diseño se recuerda
+- **Orden recordado**: la columna y la dirección de orden se conservan entre sesiones
+- **Ocultar procesos del sistema**: filtra los procesos del sistema de Windows manteniendo visible el shell de escritorio
+- **Pausar detección**: congela la lista de procesos mientras la CPU, la RAM y las gráficas siguen actualizándose
 
 ### 🎛️ Control de procesos
 - **Finalizar tarea**: termina el proceso seleccionado
 - **Finalizar árbol**: termina el proceso y todos sus hijos
+- **Multi-selección y finalización por lotes**: selecciona varios procesos con Ctrl+clic, Shift+clic o un lazo de arrastre y finalízalos juntos
+- **Reiniciar proceso**: relanza un proceso desde su ejecutable; las apps empaquetadas (UWP/Store) se rechazan con un mensaje claro
 - **Suspender / Reanudar**: pausa y reanuda la ejecución del proceso
 - **Establecer prioridad**: Tiempo real, Alta, Superior normal, Normal, Inferior normal, Baja / Inactiva
 - **Copiar ruta**: copia la ruta del ejecutable al portapapeles
@@ -79,6 +87,7 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 
 ### 🖥️ Integración con escritorio
 - **Bandeja del sistema**: comportamiento separado de bandeja para minimizar y cerrar, acciones rápidas e información de versión
+- **Confirmación al cerrar**: elige minimizar a la bandeja del sistema o salir al cerrar, con opción de recordar la decisión
 - **Atajo global**: atajo de alternancia configurable (predeterminado: `Alt+Shift+M`)
 - **Siempre visible**: fija la ventana sobre otras aplicaciones
 - **Inicio automático**: inicio fiable al iniciar sesión en Windows mediante registro de tarea programada, con respaldo en el registro
@@ -164,11 +173,14 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | Tecla | Acción | Ámbito |
 |---|---|---|
 | `Alt+Shift+M` | Mostrar/ocultar CyberManager | Global |
+| `Ctrl+Shift+M` | Alternar el modo compacto | Aplicación |
+| `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Cambiar a Procesos / Rendimiento / Configuración | Aplicación |
 | `Ctrl+F` / `Ctrl+E` | Enfocar el cuadro de búsqueda | Aplicación |
 | `Ctrl+G` | Alternar la agrupación de procesos | Aplicación |
 | `Ctrl+I` | Abrir Información del Sistema | Aplicación |
 | `F5` / `Ctrl+R` | Actualizar la lista de procesos | Aplicación |
-| `Delete` | Finalizar la tarea seleccionada | Aplicación |
+| `Ctrl+P` | Pausar / reanudar la detección de procesos | Aplicación |
+| `Delete` | Finalizar la tarea o tareas seleccionadas | Aplicación |
 | `Shift+Delete` | Finalizar árbol de procesos | Aplicación |
 | `Ctrl+C` | Copiar la ruta del proceso | Aplicación |
 | `Espacio` / `Intro` | Contraer/extender grupo | Aplicación |

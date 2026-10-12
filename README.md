@@ -24,7 +24,7 @@
 
 ## What is CyberManager?
 
-CyberManager is a lightweight, high-capacity alternative to Windows Task Manager, designed to remain fast even when thousands of processes are active. Its virtualized interface and native NT engine provide instant search, responsive refreshes, live CPU and memory telemetry, and direct controls for ending, suspending, resuming, or reprioritizing processes. A compact mode, system tray access, global hotkey, and detailed system information keep essential monitoring close without filling the desktop.
+CyberManager is a lightweight, high-capacity alternative to Windows Task Manager, designed to remain fast even when thousands of processes are active. Its virtualized interface and native NT engine provide instant search, responsive refreshes, live CPU and memory telemetry, and direct controls for ending, restarting, suspending, resuming, or reprioritizing processes, including batch actions over a multi-selection. A compact mode, system tray access, global hotkey, and detailed system information keep essential monitoring close without filling the desktop.
 
 *Free and open source (GPLv3): no ads, no tracking, and no data collection. Just enjoy it.*
 
@@ -40,8 +40,10 @@ Most task managers either freeze under heavy load or bury basic features behind 
 | Instant process refresh | NT-native engine — direct API calls, zero WMI overhead |
 | Identify resource hogs | Adaptive CPU/RAM heatmap and top-10 heavy-process filter |
 | Monitor system health | Live sparklines + System Information window with 4 tabs |
-| Control processes | End, end tree, suspend, resume, set priority |
+| Control processes | End, end tree, restart, suspend, resume, set priority |
+| Act on many at once | Multi-select with Ctrl/Shift+click and one-touch "End selected" |
 | Understand processes | Friendly names, metadata, and a detailed Properties dialog |
+| Read the list your way | Column visibility menu, remembered sorting, hide system processes |
 | Stay out of the way | System tray + global hotkey (`Alt+Shift+M`) + auto-start |
 | Make it yours | 3 themes, bilingual EN/ES, always-on-top |
 
@@ -58,10 +60,16 @@ Most task managers either freeze under heavy load or bury basic features behind 
 - **Process Grouping** — Group by application with expandable tree hierarchy
 - **Resource Heatmap** — Adaptive CPU/RAM thermal tinting (green → yellow → red)
 - **Heavy Process Filter** — Show the 10 processes with the highest combined CPU/RAM usage
+- **Column Visibility Menu** — Right-click a column header to show or hide columns; the layout is remembered
+- **Remembered Sorting** — The sorted column and direction persist between sessions
+- **Hide System Processes** — Filter out Windows system processes while keeping the desktop shell visible
+- **Pause Detection** — Freeze the process list snapshot while CPU, RAM, and sparklines keep updating
 
 ### 🎛️ Process Control
 - **End Task** — Terminate selected process
 - **End Process Tree** — Terminate process and all children
+- **Multi-Select & Batch End** — Select several processes with Ctrl+click, Shift+click, or a rubber-band drag and end them together
+- **Restart Process** — Relaunch a process from its executable path, with packaged (UWP/Store) apps refused with a clear message
 - **Suspend / Resume** — Pause and resume process execution
 - **Set Priority** — Real Time, High, Above Normal, Normal, Below Normal, Idle
 - **Copy Path** — Copy executable path to clipboard
@@ -79,6 +87,7 @@ Most task managers either freeze under heavy load or bury basic features behind 
 
 ### 🖥️ Desktop Integration
 - **System Tray** — Separate tray behavior for minimizing and closing, quick actions, version info
+- **Close Confirmation** — Choose to minimize to the notification area or exit when closing, with an option to remember the decision
 - **Global Hotkey** — Configurable toggle shortcut (default: `Alt+Shift+M`)
 - **Always on Top** — Pin window above other applications
 - **Auto-Start** — Reliable Windows sign-in startup through scheduled task registration with a registry fallback
@@ -167,11 +176,14 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | Key | Action | Scope |
 |---|---|---|
 | `Alt+Shift+M` | Toggle CyberManager | Global |
+| `Ctrl+Shift+M` | Toggle compact mode | Application |
+| `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Switch to Processes / Performance / Settings | Application |
 | `Ctrl+F` / `Ctrl+E` | Focus search box | Application |
 | `Ctrl+G` | Toggle process grouping | Application |
 | `Ctrl+I` | Open System Information | Application |
 | `F5` / `Ctrl+R` | Refresh process list | Application |
-| `Delete` | End selected task | Application |
+| `Ctrl+P` | Pause / resume process detection | Application |
+| `Delete` | End selected task(s) | Application |
 | `Shift+Delete` | End process tree | Application |
 | `Ctrl+C` | Copy process path | Application |
 | `Space` / `Enter` | Expand/collapse group | Application |
