@@ -2152,7 +2152,7 @@ public partial class MainWindow : Window
     /// collapse a multi-selection down to that single row, so each additional row is added to
     /// <c>SelectedItems</c> explicitly.
     /// </summary>
-    private void MirrorSelection(IReadOnlyList<ProcessInfo> selection)
+    private void MirrorSelection(List<ProcessInfo> selection)
     {
         var last = selection.Count > 0 ? selection[^1] : null;
         foreach (var grid in new[] { ProcGrid, CompactView.ProcessGrid })
@@ -2183,7 +2183,7 @@ public partial class MainWindow : Window
     /// process identity (PID plus start time) so a recycled row does not inherit another
     /// process's selection when PIDs are reused.
     /// </summary>
-    private void RestoreSelection(IReadOnlyList<ProcessInfo> previousSelection)
+    private void RestoreSelection(List<ProcessInfo> previousSelection)
     {
         if (previousSelection.Count == 0)
         {

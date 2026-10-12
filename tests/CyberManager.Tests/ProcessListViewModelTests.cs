@@ -7,6 +7,21 @@ namespace CyberManager.Tests;
 
 public class ProcessListViewModelTests
 {
+    private static readonly string[] ExpectedNamesAscending =
+    {
+        "Acrobat.exe", "chrome.exe", "explorer.exe", "winword.exe", "Zoom.exe"
+    };
+
+    private static readonly string[] ExpectedNamesDescending =
+    {
+        "Zoom.exe", "winword.exe", "explorer.exe", "chrome.exe", "Acrobat.exe"
+    };
+
+    private static readonly string[] ExpectedFriendlyNamesAscending =
+    {
+        "Adobe Acrobat", "Google Chrome", "Microsoft Edge"
+    };
+
     [Fact]
     public void HeavyFilter_RanksCpuAndMemoryTogether()
     {
@@ -64,7 +79,7 @@ public class ProcessListViewModelTests
         var result = ProcessListViewModel.Build(processes, CreateNameQuery(ListSortDirection.Ascending));
 
         Assert.Equal(
-            new[] { "Acrobat.exe", "chrome.exe", "explorer.exe", "winword.exe", "Zoom.exe" },
+            ExpectedNamesAscending,
             result.Select(process => process.Name));
     }
 
@@ -83,7 +98,7 @@ public class ProcessListViewModelTests
         var result = ProcessListViewModel.Build(processes, CreateNameQuery(ListSortDirection.Descending));
 
         Assert.Equal(
-            new[] { "Zoom.exe", "winword.exe", "explorer.exe", "chrome.exe", "Acrobat.exe" },
+            ExpectedNamesDescending,
             result.Select(process => process.Name));
     }
 
@@ -100,7 +115,7 @@ public class ProcessListViewModelTests
         var result = ProcessListViewModel.Build(processes, CreateNameQuery(ListSortDirection.Ascending));
 
         Assert.Equal(
-            new[] { "Adobe Acrobat", "Google Chrome", "Microsoft Edge" },
+            ExpectedFriendlyNamesAscending,
             result.Select(process => process.FriendlyName));
     }
 

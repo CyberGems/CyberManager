@@ -180,8 +180,8 @@ public static class ProcessActions
         // the WindowsApps folder is ACL-protected and these apps must be activated through
         // their Application User Model ID. Relaunching them this way always fails with
         // "Access is denied", so refuse early instead of showing a raw system error.
-        var packagePath = exePath.IndexOf(@"\WindowsApps\", StringComparison.OrdinalIgnoreCase);
-        if (packagePath >= 0 || IsPackagedApp(pid))
+        var isWindowsAppsPath = exePath.Contains(@"\WindowsApps\", StringComparison.OrdinalIgnoreCase);
+        if (isWindowsAppsPath || IsPackagedApp(pid))
         {
             return Failure(PackagedAppRestartMessage);
         }
