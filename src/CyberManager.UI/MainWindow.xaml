@@ -385,6 +385,10 @@
         </Style>
         <Style TargetType="DataGridRow">
             <Setter Property="Background" Value="{DynamicResource CardBrush}"/><Setter Property="Foreground" Value="{DynamicResource TextBrush}"/><Setter Property="MinHeight" Value="30"/>
+            <!-- Rows must be focusable: this grid uses SelectionUnit=FullRow with a custom row
+                 template and non-focusable cells, so the row is the only element that can take
+                 keyboard focus. Without it arrow-key navigation silently does nothing. -->
+            <Setter Property="Focusable" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="DataGridRow">

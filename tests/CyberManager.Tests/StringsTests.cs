@@ -74,6 +74,7 @@ public class StringsTests
             "GroupByApp", "Ungroup", "KillGroupConfirm", "SuspendGroupConfirm", "ResumeGroupConfirm",
             "KillSelectionConfirm", "KillSelectionDone", "SelectionCount", "SelectionCountShort",
             "EndSelected", "EndSelectedTooltip", "EndTaskTooltip", "ClearSelection",
+            "PropertiesSingleOnly",
             "MainProcess", "WorkerProcess", "PriorityIdle", "PriorityBelowNormal", "TextSize",
             "CompactModeTitle", "CompactModeDesc", "CompactMode", "MoreDetails", "CompactModeHeader", "CompactContextHint",
             "SettingsTitle", "SettingsSubtitle", "ShowIdleProcessTitle", "ShowIdleProcessDesc",

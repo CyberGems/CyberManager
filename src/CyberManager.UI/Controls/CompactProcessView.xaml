@@ -113,6 +113,10 @@
             <Setter Property="MinHeight" Value="26"/>
             <Setter Property="Height" Value="26"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <!-- Rows must be focusable: this grid uses SelectionUnit=FullRow with non-focusable
+                 cells, so the row is the only element that can take keyboard focus. Without it
+                 arrow-key navigation silently does nothing. -->
+            <Setter Property="Focusable" Value="True"/>
             <Style.Triggers>
                 <Trigger Property="AlternationIndex" Value="1">
                     <Setter Property="Background" Value="{DynamicResource GridAltBrush}"/>

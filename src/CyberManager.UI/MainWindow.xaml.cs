@@ -1420,7 +1420,11 @@ public partial class MainWindow : Window
         var hasExecutablePath = !string.IsNullOrWhiteSpace(process.ExePath);
 
         ContextKillItem.IsEnabled = process.Pid > 0;
-        var selection = GetMultiSelection(_isCompactMode ? CompactView.ProcessGrid : ProcGrid);
+
+        // Derive the batch state from the same grid the menu was opened on (the compact grid is
+        // also mirrored into the full grid, so either one is authoritative). Using the visible
+        // grid would be wrong while a view switch is still settling.
+        var selection = GetActiveSelection();
         var batch = selection.Count > 1;
         ContextKillSelectionItem.Visibility = batch ? Visibility.Visible : Visibility.Collapsed;
         ContextKillSelectionItem.IsEnabled = batch;
@@ -1429,7 +1433,11 @@ public partial class MainWindow : Window
             ContextKillSelectionItem.Header = Strings.T("EndSelected", selection.Count);
         }
 
-        ContextPropertiesItem.IsEnabled = process.Pid > 0 || hasExecutablePath;
+        // "Properties" only ever describes one process, so with several rows selected it would
+        // silently show the properties of whichever row happened to be the target. Disable it
+        // instead of presenting a misleading dialog.
+        ContextPropertiesItem.IsEnabled = !batch && (process.Pid > 0 || hasExecutablePath);
+        ContextPropertiesItem.ToolTip = batch ? Strings.T("PropertiesSingleOnly") : null;
         ContextKillTreeItem.IsEnabled = hasProcessTree;
         var restartReason = GetRestartDisabledReason(process);
         ContextRestartItem.IsEnabled = restartReason == null;
