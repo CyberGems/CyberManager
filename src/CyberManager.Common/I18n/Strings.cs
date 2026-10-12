@@ -75,7 +75,7 @@ public static class Strings
         ["EndSelectedTooltip"] = ("End the {0} selected processes", "Finalizar los {0} procesos seleccionados"),
         ["EndTaskTooltip"] = ("End Task (Del)", "Finalizar tarea (Supr)"),
         ["ClearSelection"] = ("Clear selection", "Limpiar selección"),
-        ["PropertiesSingleOnly"] = ("Available for a single process only", "Disponible solo para un proceso"),
+        ["SingleProcessOnly"] = ("Available for a single process only", "Disponible solo para un proceso"),
         ["SuspendConfirm"] = ("Suspend {0} (PID {1})?", "¿Suspender {0} (PID {1})?"),
         ["SuspendGroupConfirm"] = ("Suspend all {0} instances of {1}?", "¿Suspender las {0} instancias de {1}?"),
         ["ResumeConfirm"] = ("Resume {0} (PID {1})?", "¿Reanudar {0} (PID {1})?"),

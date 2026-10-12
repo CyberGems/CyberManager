@@ -178,6 +178,12 @@ public partial class MainWindow : Window
     private bool _suppressSelectionMirror;
     private bool _syncingHeavyFilter;
 
+    // Row the current Shift+Arrow run is anchored to. Stored as a process identity rather than a
+    // ProcessInfo reference because the list is rebuilt on every refresh (default 800 ms), which
+    // replaces the item objects. Null means the next arrow key starts a new run from the row that
+    // is selected at that moment.
+    private ProcessIdentity? _selectionAnchor;
+
     // Left-button press on the branding: About opens only if the pointer does not move
     // beyond the drag threshold, so dragging the window from the branding keeps working.
     private Point _brandingPressPoint;
@@ -953,6 +959,10 @@ public partial class MainWindow : Window
 
     private void SetSelectedProcess(ProcessInfo? process)
     {
+        // A click or programmatic selection starts a new navigation run, so the previous
+        // Shift+Arrow anchor must not carry over.
+        _selectionAnchor = process == null ? null : new ProcessIdentity(process.Pid, process.StartTime);
+
         _syncingSelection = true;
         try
         {
@@ -1437,17 +1447,44 @@ public partial class MainWindow : Window
         // silently show the properties of whichever row happened to be the target. Disable it
         // instead of presenting a misleading dialog.
         ContextPropertiesItem.IsEnabled = !batch && (process.Pid > 0 || hasExecutablePath);
-        ContextPropertiesItem.ToolTip = batch ? Strings.T("PropertiesSingleOnly") : null;
-        ContextKillTreeItem.IsEnabled = hasProcessTree;
+        ContextPropertiesItem.ToolTip = batch ? Strings.T("SingleProcessOnly") : null;
+
+        ContextKillTreeItem.IsEnabled = !batch && hasProcessTree;
         var restartReason = GetRestartDisabledReason(process);
-        ContextRestartItem.IsEnabled = restartReason == null;
-        ContextRestartItem.ToolTip = restartReason;
-        ContextSuspendItem.IsEnabled = hasRunningProcesses;
-        ContextResumeItem.IsEnabled = hasSuspendedProcesses;
-        ContextSetPriorityItem.IsEnabled = process.Pid > 0;
-        ContextCopyPathItem.IsEnabled = hasExecutablePath;
-        ContextOpenFolderItem.IsEnabled = hasExecutablePath;
-        ContextSearchOnlineItem.IsEnabled = !string.IsNullOrWhiteSpace(process.Name);
+        ContextRestartItem.IsEnabled = !batch && restartReason == null;
+        ContextRestartItem.ToolTip = batch ? Strings.T("SingleProcessOnly") : restartReason;
+        ContextSuspendItem.IsEnabled = !batch && hasRunningProcesses;
+        ContextResumeItem.IsEnabled = !batch && hasSuspendedProcesses;
+
+        // The remaining actions each open a dialog or a shell window for exactly one process.
+        // Running them against a batch would fire off several windows at once, which is both
+        // confusing and hard to undo, so they are single-selection only as well.
+        ContextSetPriorityItem.IsEnabled = !batch && process.Pid > 0;
+        ContextCopyPathItem.IsEnabled = !batch && hasExecutablePath;
+        ContextOpenFolderItem.IsEnabled = !batch && hasExecutablePath;
+        ContextSearchOnlineItem.IsEnabled = !batch && !string.IsNullOrWhiteSpace(process.Name);
+
+        if (batch)
+        {
+            var tooltip = Strings.T("SingleProcessOnly");
+            ContextKillTreeItem.ToolTip = tooltip;
+            ContextSuspendItem.ToolTip = tooltip;
+            ContextResumeItem.ToolTip = tooltip;
+            ContextSetPriorityItem.ToolTip = tooltip;
+            ContextCopyPathItem.ToolTip = tooltip;
+            ContextOpenFolderItem.ToolTip = tooltip;
+            ContextSearchOnlineItem.ToolTip = tooltip;
+        }
+        else
+        {
+            ContextKillTreeItem.ToolTip = null;
+            ContextSuspendItem.ToolTip = null;
+            ContextResumeItem.ToolTip = null;
+            ContextSetPriorityItem.ToolTip = null;
+            ContextCopyPathItem.ToolTip = null;
+            ContextOpenFolderItem.ToolTip = null;
+            ContextSearchOnlineItem.ToolTip = null;
+        }
     }
 
     private static bool IsSuspended(ProcessInfo process) =>
@@ -2011,6 +2048,23 @@ public partial class MainWindow : Window
         {
             ApplySelection(grid, selection, last);
         }
+    }
+
+    /// <summary>
+    /// Mirrors a selection onto the grid that is not currently being driven.
+    /// </summary>
+    /// <remarks>
+    /// Used by arrow navigation: the source grid has just been updated row by row and holds the
+    /// authoritative range plus the current cell, so re-applying the selection to it would clear
+    /// and rebuild the very collection we just built. Only the other grid needs to follow.
+    /// </remarks>
+    private void MirrorSelectionToOther(DataGrid source, IReadOnlyList<ProcessInfo> selection)
+    {
+        var other = ReferenceEquals(source, ProcGrid) ? CompactView.ProcessGrid : ProcGrid;
+        if (ReferenceEquals(other, source)) return;
+
+        var last = selection.Count > 0 ? selection[^1] : null;
+        ApplySelection(other, selection, last);
     }
 
     /// <summary>
@@ -2958,6 +3012,19 @@ public partial class MainWindow : Window
     {
         var grid = sender as DataGrid ?? ProcGrid;
 
+        if (e.Key == Key.Up || e.Key == Key.Down)
+        {
+            // The grid's built-in navigation only moves the current cell (the focus rectangle),
+            // leaving the selection behind, so Up/Down would visibly do nothing. Take over the
+            // gesture and move the selection itself: plain arrows select a single row, Shift
+            // extends the range from the existing anchor.
+            if (MoveSelectionByArrow(grid, e.Key == Key.Down ? 1 : -1))
+            {
+                e.Handled = true;
+                return;
+            }
+        }
+
         if (e.Key == Key.Right)
         {
             if (Selected is { IsGroupParent: true, IsExpanded: false } p)
@@ -3062,6 +3129,112 @@ public partial class MainWindow : Window
                 FocusSearchBox();
             }
         }
+    }
+
+    /// <summary>
+    /// Moves the selection one row up or down, the way a list control is expected to behave.
+    /// </summary>
+    /// <remarks>
+    /// The grid's own navigation moves only the current cell, which is why arrow keys used to
+    /// leave the selection untouched. Plain arrows collapse the selection onto the new row; while
+    /// Shift is held the range is extended from the anchor that started the run, matching the
+    /// usual Shift+Arrow contract. Returns false when there is nothing to move onto (empty grid or
+    /// already at the end), so the caller can let the event fall through instead of swallowing it.
+    /// </remarks>
+    private bool MoveSelectionByArrow(DataGrid grid, int delta)
+    {
+        var items = grid.Items.OfType<ProcessInfo>().ToList();
+        if (items.Count == 0) return false;
+
+        var extending = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
+
+        // Plain arrows move from the row that is selected right now, so the caret follows the
+        // selection. A Shift run instead grows from the row it started on, which is why the anchor
+        // is only consulted while extending. Rows are matched by process identity because the
+        // periodic refresh replaces the item objects and the default CPU sort reorders them.
+        var from = grid.SelectedItem as ProcessInfo;
+        if (extending && _selectionAnchor is { } identity)
+        {
+            from = items.FirstOrDefault(item => SameProcessIdentity(item, identity)) ?? from;
+        }
+
+        from ??= items[0];
+
+        var fromIndex = items.IndexOf(from);
+        if (fromIndex < 0) fromIndex = 0;
+
+        var targetIndex = fromIndex + delta;
+        if (targetIndex < 0 || targetIndex >= items.Count) return false;
+
+        var target = items[targetIndex];
+
+        if (!extending)
+        {
+            // Plain arrow: the new row becomes the whole selection and the fresh anchor.
+            _selectionAnchor = new ProcessIdentity(target.Pid, target.StartTime);
+            _syncingSelection = true;
+            try
+            {
+                grid.SelectedItems.Clear();
+                grid.SelectedItems.Add(target);
+                EnsureCurrentCell(grid, target);
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
+
+            MirrorSelectionToOther(grid, new[] { target });
+            SyncSelectionDependentUi(target, new[] { target });
+        }
+        else
+        {
+            // Shift+Arrow: keep the existing range and add or drop the row we just reached. The
+            // anchor stays put so the selection grows and shrinks under the moving edge.
+            _selectionAnchor ??= new ProcessIdentity(from.Pid, from.StartTime);
+            var current = GetMultiSelection(grid);
+
+            _syncingSelection = true;
+            try
+            {
+                if (current.Contains(target))
+                {
+                    // Walking back onto a row that is already part of the range removes it, so
+                    // shrinking the selection does not require releasing Shift.
+                    if (current.Count > 1) grid.SelectedItems.Remove(target);
+                }
+                else
+                {
+                    grid.SelectedItems.Add(target);
+                }
+
+                EnsureCurrentCell(grid, target);
+            }
+            finally
+            {
+                _syncingSelection = false;
+            }
+
+            var updated = GetMultiSelection(grid);
+            var displayOrder = items.Where(updated.Contains).ToList();
+            MirrorSelectionToOther(grid, displayOrder);
+            SyncSelectionDependentUi(target, displayOrder);
+        }
+
+        grid.ScrollIntoView(target);
+        return true;
+    }
+
+    /// <summary>
+    /// Refreshes the controls that depend on what is selected, without going through
+    /// <see cref="ProcGrid_SelectionChanged"/> (which is suppressed while we drive the grid).
+    /// </summary>
+    private void SyncSelectionDependentUi(ProcessInfo? selected, IReadOnlyList<ProcessInfo> selection)
+    {
+        KillBtn.IsEnabled = selected != null;
+        CompactView.SetEndTaskEnabled(selected != null);
+        UpdateRestartControls(selected);
+        UpdateSelectionSummary(selection);
     }
 
     #endregion
