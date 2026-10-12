@@ -168,11 +168,14 @@ public partial class MainWindow : Window
     private int _refreshInFlight;
     private ContextMenuTarget? _contextMenuTarget;
     private bool _contextMenuOpen;
+    private bool _contextMenuKeepsSelection;
+    private ProcessInfo? _primarySelection;
     private bool _refreshAfterContextMenu;
     private bool _contextMenuClosePending;
     private string? _pendingContextMenuMessage;
     private bool _isCompactMode;
     private bool _syncingSelection;
+    private bool _suppressSelectionMirror;
     private bool _syncingHeavyFilter;
 
     // Left-button press on the branding: About opens only if the pointer does not move
@@ -955,6 +958,8 @@ public partial class MainWindow : Window
         {
             ProcGrid.SelectedItem = process;
             CompactView.SelectedItem = process;
+            EnsureCurrentCell(ProcGrid, process);
+            EnsureCurrentCell(CompactView.ProcessGrid, process);
         }
         finally
         {
@@ -967,6 +972,29 @@ public partial class MainWindow : Window
         UpdateSelectionSummary(process == null
             ? Array.Empty<ProcessInfo>()
             : new[] { process });
+    }
+
+    /// <summary>
+    /// Gives the grid a current cell for <paramref name="process"/>. A DataGrid whose
+    /// <c>CurrentCell</c> is unset silently ignores every keyboard gesture aimed at its rows —
+    /// arrow navigation, Shift+Arrow range extension and Ctrl+A all bail out early — so whenever
+    /// the application programmatically chooses a row it must also anchor the current cell.
+    /// Assigning <c>SelectedItem</c> alone is not enough, because that path does not touch
+    /// <c>CurrentCell</c>.
+    /// </summary>
+    private static void EnsureCurrentCell(DataGrid grid, ProcessInfo? process)
+    {
+        if (process == null) return;
+        if (grid.Columns.Count == 0) return;
+        if (grid.ItemContainerGenerator.ContainerFromItem(process) is not DataGridRow) return;
+
+        var column = grid.CurrentColumn ?? grid.Columns[0];
+        if (!column.Visibility.Equals(Visibility.Visible))
+        {
+            column = grid.Columns.FirstOrDefault(c => c.Visibility == Visibility.Visible) ?? column;
+        }
+
+        grid.CurrentCell = new DataGridCellInfo(process, column);
     }
 
     private void CompactView_ToggleRequested(object? sender, RoutedEventArgs e) =>
@@ -1291,6 +1319,21 @@ public partial class MainWindow : Window
 
     private void ProcContextMenu_Closed(object sender, RoutedEventArgs e)
     {
+        ProcessInfo? primary = null;
+        if (_contextMenuKeepsSelection && _primarySelection is { } pinned)
+        {
+            primary = _view.FirstOrDefault(item => SameProcessIdentity(item, new ProcessIdentity(pinned.Pid, pinned.StartTime)));
+        }
+
+        primary ??= Selected;
+
+        if (primary == _contextMenuTarget?.Item || primary == null || !ReferenceEquals(ProcGrid.SelectedItem, primary))
+        {
+            SetSelectedProcess(primary);
+        }
+
+        _contextMenuKeepsSelection = false;
+        _primarySelection = null;
         _contextMenuOpen = false;
         _contextMenuClosePending = false;
         ClearContextMenuTarget();
@@ -1312,6 +1355,11 @@ public partial class MainWindow : Window
     {
         sourceGrid ??= ProcGrid;
 
+        // Right-clicking a row that is already part of a multi-selection must keep that
+        // selection intact (Explorer behaviour) so batch items such as "End selected" can act on
+        // the whole group. Assigning SelectedItem here would collapse it to the clicked row.
+        _contextMenuKeepsSelection = IsPartOfMultiSelection(sourceGrid, process);
+
         if (_contextMenuTarget is { } previous && !ReferenceEquals(previous.Item, process))
         {
             previous.Item.IsContextTarget = false;
@@ -1330,8 +1378,19 @@ public partial class MainWindow : Window
                     .ToArray()
                 : Array.Empty<ProcessIdentity>());
 
-        SetSelectedProcess(process);
-        sourceGrid.Focus();
+        if (_contextMenuKeepsSelection)
+        {
+            // Keep the batch but make the clicked row the primary target so keyboard actions and
+            // the single-target context items still resolve to what the user pointed at.
+            _primarySelection = process;
+            sourceGrid.Focus();
+            row.Focus();
+        }
+        else
+        {
+            SetSelectedProcess(process);
+        }
+
         sourceGrid.ScrollIntoView(process);
         sourceGrid.UpdateLayout();
 
@@ -1341,6 +1400,13 @@ public partial class MainWindow : Window
         ProcContextMenu.DataContext = process;
         UpdateContextMenuAvailability(process);
     }
+
+    /// <summary>
+    /// True when <paramref name="process"/> is one of several rows flagged as selected in
+    /// <paramref name="grid"/>.
+    /// </summary>
+    private static bool IsPartOfMultiSelection(DataGrid grid, ProcessInfo process) =>
+        grid.SelectedItems.Count > 1 && grid.SelectedItems.Contains(process);
 
     private void UpdateContextMenuAvailability(ProcessInfo process)
     {
@@ -1899,8 +1965,14 @@ public partial class MainWindow : Window
         var selected = source.SelectedItem as ProcessInfo ?? Selected;
         var multiple = GetMultiSelection(source);
 
-        if (!_syncingSelection)
+        // Shift+Arrow, rubber-band drag and Ctrl+A update the selection directly inside the grid.
+        // Mirroring those back is unnecessary and actively harmful: ApplySelection replaces the
+        // whole SelectedItems collection, which cancels the DataGrid's in-progress selection
+        // tracking, so re-entrant changes are ignored. Only a change that the application itself
+        // initiated (SetSelectedProcess / RestoreSelection) needs to be propagated.
+        if (!_syncingSelection && !_suppressSelectionMirror)
         {
+            _suppressSelectionMirror = true;
             _syncingSelection = true;
             try
             {
@@ -1909,6 +1981,7 @@ public partial class MainWindow : Window
             finally
             {
                 _syncingSelection = false;
+                _suppressSelectionMirror = false;
             }
         }
 
@@ -2002,6 +2075,7 @@ public partial class MainWindow : Window
                 grid.SelectedItem = last;
             }
 
+            EnsureCurrentCell(grid, last);
             return;
         }
 
@@ -2027,7 +2101,8 @@ public partial class MainWindow : Window
     /// operate on. A group parent stands for every instance it aggregates, and any group child
     /// that is already covered by a selected parent is not added twice.
     /// </summary>
-    private static List<int> ResolveSelectionPids(IReadOnlyList<ProcessInfo> selection)    {
+    private static List<int> ResolveSelectionPids(IReadOnlyList<ProcessInfo> selection)
+    {
         var pids = new HashSet<int>();
         foreach (var process in selection)
         {
@@ -2118,6 +2193,15 @@ public partial class MainWindow : Window
 
     private async void Kill_Click(object sender, RoutedEventArgs e)
     {
+        // The context-menu batch item is only shown for a multi-selection, so it always routes
+        // through the batch path even though the click itself targets a single row.
+        var batch = ReferenceEquals(sender, ContextKillSelectionItem) ? GetActiveSelection() : null;
+        if (batch is { Count: > 1 })
+        {
+            await KillSelectionAsync(batch);
+            return;
+        }
+
         var selection = GetActiveSelection();
         if (selection.Count > 1)
         {
@@ -2186,7 +2270,15 @@ public partial class MainWindow : Window
     private List<ProcessInfo> GetActiveSelection()
     {
         var grid = _isCompactMode ? CompactView.ProcessGrid : ProcGrid;
-        if (grid.IsKeyboardFocusWithin || grid.SelectedItems.Count > 0)
+
+        // A panel that lost keyboard focus (an open context menu, for instance) still holds the
+        // authoritative selection, so a non-empty selection wins over the focus heuristic.
+        if (grid.SelectedItems.Count > 0)
+        {
+            return GetMultiSelection(grid);
+        }
+
+        if (grid.IsKeyboardFocusWithin)
         {
             return GetMultiSelection(grid);
         }
@@ -2952,8 +3044,10 @@ public partial class MainWindow : Window
             }
         }
 
-        // Type-to-Search auto-focus
-        if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && !Keyboard.Modifiers.HasFlag(ModifierKeys.Alt) && !Keyboard.Modifiers.HasFlag(ModifierKeys.Windows))
+        // Type-to-Search auto-focus. Shift must be excluded as well as Ctrl/Alt/Win: holding
+        // Shift while pressing an arrow key extends the selection, and Shift+A..Z / Shift+digits
+        // are selection gestures too, so they must reach the grid untouched.
+        if (Keyboard.Modifiers == ModifierKeys.None)
         {
             if ((e.Key >= Key.A && e.Key <= Key.Z) || (e.Key >= Key.D0 && e.Key <= Key.D9) || (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9))
             {
