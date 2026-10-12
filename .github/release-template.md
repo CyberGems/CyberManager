@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-Compact mode is now more polished and informative, with richer process identity, clearer at-a-glance metrics, reliable Windows startup, editable global shortcuts, and a more complete settings experience.
+Batch process control arrives: select many processes and end them together, restart a process from its executable, or pause detection while gauges keep updating. The grid now remembers sorting, hides system processes on request, and offers a column visibility menu, with a clearer close confirmation.
 <!-- changelog-summary:end -->
 
 > **New to CyberManager?** A lightweight Windows task manager with instant search, process insight, and a focused compact mode.
@@ -17,29 +17,26 @@ Compact mode is now more polished and informative, with richer process identity,
 
 ### ✨ Key Features & Highlights
 
-- 🖥️ **Refined Compact Monitor**:
-  - **Clear At-a-Glance Metrics**: CPU, RAM, PID, and process badges with informative tooltips.
-  - **Responsive Controls**: Improved title bar dragging, taskbar-aware maximize/restore, column resizing, header hover states, and process selection.
-  - **Heavy Process Filter**: Show the 10 processes with the highest combined CPU and RAM usage.
+- 🧰 **Batch Process Control**:
+  - **Multi-Select**: Ctrl+click, Shift+click, and rubber-band selection with a live count and a single "End selected" confirmation.
+  - **Restart Process**: Relaunch an app from its executable path, with packaged (UWP / Store) apps refused with a clear message. `Ctrl+R`.
+  - **Pause Detection**: Freeze the process list snapshot while CPU, RAM, totals, and sparklines keep updating. `Ctrl+P`.
 
-- ⌨️ **Editable Global Hotkey**:
-  - **Live Capture**: Record modifier combinations as they are pressed, with conflict feedback.
-  - **Default Shortcut**: `Alt+Shift+M`, with icon-only reset and clear controls.
+- 🔎 **Finding and Reading the List**:
+  - **Column Visibility Menu**: Right-click a column header to show or hide columns, with the layout remembered across restarts.
+  - **Remembered Sorting**: The sorted column and direction persist between sessions.
+  - **Hide System Processes**: Filter out Windows system processes while keeping the desktop shell visible.
 
-- 🔎 **Search and Process Insight**:
-  - **Persistent Search History**: Recent searches are shared between Full and Compact modes.
-  - **Properties Dialog**: Inspect friendly names, file metadata, runtime state, parent PID, and resource usage.
-  - **Modern Identity Display**: Friendly process names and vector icons make system processes easier to recognize.
+- 🪟 **Window and Interaction Polish**:
+  - **Close Confirmation**: Choose to minimize to the notification area or exit, with an option to remember the decision.
+  - **Keyboard Navigation**: Arrow keys move the actual selection, and Shift+arrow extends the range.
+  - **Compact Mode**: Fixed click handling and window dragging, and added the pause and More controls.
 
-- ⚙️ **Reliable Settings and Windows Integration**:
-  - **Factory Reset**: Restore all preferences, window state, tray behavior, confirmations, and hotkey settings.
-  - **Separate Tray Behaviors**: Choose independently whether minimizing or closing sends the app to the tray.
-  - **Reliable Auto-Start**: Uses Windows Task Scheduler with a registry fallback when appropriate.
-
-- 🎨 **Interface and Theme Polish**:
-  - **Bilingual Experience**: Updated English and Spanish labels, helpers, tooltips, and modal actions.
-  - **Refined Default Theme**: Softer row contrast, calibrated saturation, and modern system-process icons.
-  - **Branded Loading and About Surfaces**: Animated startup loader and clickable CyberGems branding.
+- 🎨 **Refinements and Fixes**:
+  - **Alphabetical Sorting**: The Process column now sorts by the friendly name shown, case-insensitively.
+  - **Cleaner Scrollbar**: Removed the hover frame around the vertical scrollbar thumb.
+  - **Window Placement**: A window saved off-screen is recentered.
+  - **Bilingual**: Updated English and Spanish labels, tooltips, and dialogs.
 
 ---
 

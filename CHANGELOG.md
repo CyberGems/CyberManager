@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-12
+
+### Added
+- **Multi-Select and Batch End**: Select several processes with Ctrl+click, Shift+click, or a rubber-band drag, see the live selection count, and end the whole batch from a single confirmation. The count is also exposed to accessibility tools.
+- **Restart Process**: Relaunch a process from its executable path, starting the replacement before terminating the original so a failed relaunch never leaves you without the app. Packaged (UWP / Microsoft Store) apps are refused with a clear message instead of a raw access error. Available from the context menu, the toolbars, and `Ctrl+R`.
+- **Pause Process Detection**: Freeze the process list snapshot while system gauges, totals, and sparklines keep updating. Available from both toolbars and `Ctrl+P`.
+- **Hide System Processes**: A toggle that filters out Windows system processes (kernel tasks, driver images, and anything running from the Windows directory) while keeping the desktop shell visible.
+- **Column Visibility Menu**: Right-click any column header to show or hide columns, with the layout remembered across restarts. The last visible column cannot be hidden.
+- **Remembered Sorting**: The sorted column and direction persist between sessions.
+- **Close Confirmation Dialog**: Closing the window (X button, `Alt+F4`, or the compact close button) now asks whether to minimize to the notification area or exit, with an option to remember the choice.
+- **More Menu in Compact Mode**: The title-bar More menu is now available in compact mode as well as full mode.
+
+### Changed
+- **Keyboard Navigation**: Arrow keys now move the actual selection instead of only the focus rectangle, and Shift+arrow extends the range. Process rows are focusable so navigation works from the grid.
+- **Compact Mode**: Fixed click handling and window dragging, aligned the toolbar and column headers, and added the pause and More controls.
+- **Column Layout**: PID moved to the fourth position.
+- **Branding and Header Interaction**: The title-bar logo works as a drag handle in both modes (About opens only on a click without movement), and right-clicking the empty strip after the last header opens the column menu.
+
+### Fixed
+- **Process Column Sorting**: Alphabetical order now follows the displayed friendly name with a case-insensitive comparison, so ascending and descending produce a real A-Z / Z-A order.
+- **Scrollbar Artifact**: Removed the hover frame that drew a block around the vertical scrollbar thumb.
+- **Off-screen Window**: A window whose saved position no longer matches any monitor is recentered instead of opening off-screen.
+- **Right-click Selection**: Right-clicking a row that is part of a multi-selection keeps the batch instead of collapsing it to a single row.
+- **Single-Process Actions**: Properties, restart, suspend, resume, priority, and the other single-process actions are disabled while a batch is selected instead of silently acting on one row.
+
 ## [1.3.0] - 2026-09-18
 
 ### Added
@@ -61,7 +86,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory leak in icon generation** — Fixed `Icon.FromHandle` handle leak by properly destroying the original handle after cloning.
 - **Double-click kills process** — Removed dangerous double-click-to-kill behavior.
 
-[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/CyberGems/CyberManager/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/CyberGems/CyberManager/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/CyberGems/CyberManager/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/CyberGems/CyberManager/releases/tag/v1.1.0
