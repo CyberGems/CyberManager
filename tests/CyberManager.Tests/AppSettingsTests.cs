@@ -136,6 +136,12 @@ public class AppSettingsTests
             StartMinimized = true,
             AutoCheckForUpdates = false,
             GlobalHotkey = "Ctrl+Shift+P",
+            WidgetHotkey = "Ctrl+Shift+W",
+            WidgetVisible = true,
+            WidgetAlwaysOnTop = false,
+            WidgetBoundsSaved = true,
+            WidgetLeft = 400,
+            WidgetTop = 300,
             CompactMode = true,
             MainWindowBoundsSaved = true,
             CompactWindowBoundsSaved = true
@@ -162,8 +168,25 @@ public class AppSettingsTests
         Assert.False(settings.StartMinimized);
         Assert.True(settings.AutoCheckForUpdates);
         Assert.Equal("Alt+Shift+M", settings.GlobalHotkey);
+        Assert.Equal("Alt+Shift+W", settings.WidgetHotkey);
+        Assert.False(settings.WidgetVisible);
+        Assert.True(settings.WidgetAlwaysOnTop);
+        Assert.False(settings.WidgetBoundsSaved);
+        Assert.Equal(0, settings.WidgetLeft);
+        Assert.Equal(0, settings.WidgetTop);
         Assert.False(settings.CompactMode);
         Assert.False(settings.MainWindowBoundsSaved);
         Assert.False(settings.CompactWindowBoundsSaved);
+    }
+
+    [Fact]
+    public void AppSettings_WidgetDefaults_StartHiddenAndPinned()
+    {
+        var settings = new AppSettings();
+
+        Assert.Equal("Alt+Shift+W", settings.WidgetHotkey);
+        Assert.False(settings.WidgetVisible);
+        Assert.True(settings.WidgetAlwaysOnTop);
+        Assert.False(settings.WidgetBoundsSaved);
     }
 }

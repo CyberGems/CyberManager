@@ -13,17 +13,21 @@ namespace CyberManager.UI.Views;
 public partial class SettingsView : UserControl
 {
     private const string DefaultGlobalHotkey = "Alt+Shift+M";
+    private const string DefaultWidgetHotkey = "Alt+Shift+W";
 
     public event Action? SettingsChanged;
     public event Action? DefaultsReset;
     public event Func<string, bool>? HotkeyChangeRequested;
+    public event Func<string, bool>? WidgetHotkeyChangeRequested;
     public event RoutedEventHandler? AboutRequested;
 
     private bool _initializing = true;
     private bool _syncingStartup;
     private bool _capturingHotkey;
     private ModifierKeys _heldHotkeyModifiers;
+    private TextBox? _activeHotkeyBox;
     private string _committedHotkey = DefaultGlobalHotkey;
+    private string _committedWidgetHotkey = DefaultWidgetHotkey;
     private readonly DispatcherTimer _saveDebounceTimer = new();
 
     public SettingsView()
@@ -95,6 +99,8 @@ public partial class SettingsView : UserControl
         AutoUpdatesSwitch.IsChecked = App.Settings.AutoCheckForUpdates;
         _committedHotkey = App.Settings.GlobalHotkey;
         HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
+        _committedWidgetHotkey = App.Settings.WidgetHotkey;
+        WidgetHotkeyBox.Text = FormatStoredHotkey(_committedWidgetHotkey);
 
         RefreshLocalization();
         _initializing = false;
@@ -187,6 +193,7 @@ public partial class SettingsView : UserControl
     {
         _initializing = true;
         var previousHotkey = App.Settings.GlobalHotkey;
+        var previousWidgetHotkey = App.Settings.WidgetHotkey;
         App.Settings.ResetToDefaults();
         Strings.Current = App.Settings.Language;
         ThemeManager.Apply(App.Settings.Theme);
@@ -194,6 +201,12 @@ public partial class SettingsView : UserControl
         if (HotkeyChangeRequested?.Invoke(App.Settings.GlobalHotkey) == false)
         {
             App.Settings.GlobalHotkey = previousHotkey;
+            ShowToast(Strings.T("GlobalHotkeyUnavailable"));
+        }
+
+        if (WidgetHotkeyChangeRequested?.Invoke(App.Settings.WidgetHotkey) == false)
+        {
+            App.Settings.WidgetHotkey = previousWidgetHotkey;
             ShowToast(Strings.T("GlobalHotkeyUnavailable"));
         }
 
@@ -229,24 +242,28 @@ public partial class SettingsView : UserControl
 
     private void HotkeyBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
+        if (sender is not TextBox box) return;
+
         _capturingHotkey = true;
+        _activeHotkeyBox = box;
         _heldHotkeyModifiers = ModifierKeys.None;
-        HotkeyBox.Text = Strings.T("GlobalHotkeyCaptureHint");
-        HotkeyBox.SelectAll();
+        box.Text = Strings.T("GlobalHotkeyCaptureHint");
+        box.SelectAll();
     }
 
     private void HotkeyBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
-        if (!_capturingHotkey) return;
+        if (!_capturingHotkey || sender is not TextBox box) return;
 
         _capturingHotkey = false;
+        _activeHotkeyBox = null;
         _heldHotkeyModifiers = ModifierKeys.None;
-        HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
+        box.Text = FormatStoredHotkey(CommittedHotkeyFor(box));
     }
 
     private void HotkeyBox_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (!_capturingHotkey) return;
+        if (!_capturingHotkey || sender is not TextBox box) return;
 
         e.Handled = true;
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
@@ -268,17 +285,11 @@ public partial class SettingsView : UserControl
 
         var modifiers = _heldHotkeyModifiers | Keyboard.Modifiers;
         var candidate = GlobalHotkeyService.FormatHotkey(modifiers, key);
-        HotkeyBox.Text = candidate;
+        box.Text = candidate;
         if (modifiers == ModifierKeys.None) return;
 
-        if (TryApplyHotkey(candidate))
-        {
-            Keyboard.ClearFocus();
-        }
-        else
-        {
-            Keyboard.ClearFocus();
-        }
+        TryApplyHotkey(box, candidate);
+        Keyboard.ClearFocus();
     }
 
     private void HotkeyBox_PreviewKeyUp(object sender, KeyEventArgs e)
@@ -293,17 +304,21 @@ public partial class SettingsView : UserControl
         e.Handled = true;
     }
 
-    private void HotkeyResetBtn_Click(object sender, RoutedEventArgs e)
-    {
-        if (TryApplyHotkey(DefaultGlobalHotkey))
-        {
-            ShowToast(Strings.T("SettingsSaved"));
-        }
-    }
+    private void HotkeyResetBtn_Click(object sender, RoutedEventArgs e) =>
+        ApplyPresetHotkey(HotkeyBox, DefaultGlobalHotkey);
 
-    private void HotkeyClearBtn_Click(object sender, RoutedEventArgs e)
+    private void HotkeyClearBtn_Click(object sender, RoutedEventArgs e) =>
+        ApplyPresetHotkey(HotkeyBox, "");
+
+    private void WidgetHotkeyResetBtn_Click(object sender, RoutedEventArgs e) =>
+        ApplyPresetHotkey(WidgetHotkeyBox, DefaultWidgetHotkey);
+
+    private void WidgetHotkeyClearBtn_Click(object sender, RoutedEventArgs e) =>
+        ApplyPresetHotkey(WidgetHotkeyBox, "");
+
+    private void ApplyPresetHotkey(TextBox box, string hotkey)
     {
-        if (TryApplyHotkey(""))
+        if (TryApplyHotkey(box, hotkey))
         {
             ShowToast(Strings.T("SettingsSaved"));
         }
@@ -327,26 +342,43 @@ public partial class SettingsView : UserControl
         FooterCopyrightText.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
     }
 
-    private bool TryApplyHotkey(string hotkey)
+    private bool TryApplyHotkey(TextBox box, string hotkey)
     {
-        if (HotkeyChangeRequested?.Invoke(hotkey) == false)
+        var isWidget = ReferenceEquals(box, WidgetHotkeyBox);
+        var requested = isWidget ? WidgetHotkeyChangeRequested : HotkeyChangeRequested;
+
+        if (requested?.Invoke(hotkey) == false)
         {
-            HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
+            box.Text = FormatStoredHotkey(CommittedHotkeyFor(box));
             ShowToast(Strings.T("GlobalHotkeyUnavailable"));
             return false;
         }
 
-        App.Settings.GlobalHotkey = hotkey;
-        _committedHotkey = hotkey;
-        HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
+        if (isWidget)
+        {
+            App.Settings.WidgetHotkey = hotkey;
+            _committedWidgetHotkey = hotkey;
+        }
+        else
+        {
+            App.Settings.GlobalHotkey = hotkey;
+            _committedHotkey = hotkey;
+        }
+
+        box.Text = FormatStoredHotkey(CommittedHotkeyFor(box));
         SaveAndNotify();
         return true;
     }
 
+    private string CommittedHotkeyFor(TextBox box) =>
+        ReferenceEquals(box, WidgetHotkeyBox) ? _committedWidgetHotkey : _committedHotkey;
+
     private void UpdateHotkeyPreview()
     {
+        if (_activeHotkeyBox == null) return;
+
         var modifiers = _heldHotkeyModifiers | Keyboard.Modifiers;
-        HotkeyBox.Text = modifiers == ModifierKeys.None
+        _activeHotkeyBox.Text = modifiers == ModifierKeys.None
             ? Strings.T("GlobalHotkeyCaptureHint")
             : GlobalHotkeyService.FormatHotkey(modifiers, Key.None) + " + ...";
     }
@@ -404,6 +436,12 @@ public partial class SettingsView : UserControl
         HotkeyClearBtn.ToolTip = Strings.T("GlobalHotkeyClear");
         HotkeyBox.ToolTip = Strings.T("GlobalHotkeyCaptureHint");
         AutomationProperties.SetName(HotkeyBox, Strings.T("GlobalHotkeyTitle"));
+        WidgetHotkeyTitleLbl.Text = Strings.T("WidgetHotkeyTitle");
+        WidgetHotkeyDescLbl.Text = Strings.T("WidgetHotkeyDesc");
+        WidgetHotkeyResetBtn.ToolTip = Strings.T("GlobalHotkeyReset");
+        WidgetHotkeyClearBtn.ToolTip = Strings.T("GlobalHotkeyClear");
+        WidgetHotkeyBox.ToolTip = Strings.T("GlobalHotkeyCaptureHint");
+        AutomationProperties.SetName(WidgetHotkeyBox, Strings.T("WidgetHotkeyTitle"));
         AutomationProperties.SetName(HotkeyClearBtn, Strings.T("GlobalHotkeyClear"));
         AutomationProperties.SetName(HotkeyResetBtn, Strings.T("GlobalHotkeyReset"));
         FooterVersionText.Text = $"CyberManager {UpdateService.GetCurrentVersionLabel()}";

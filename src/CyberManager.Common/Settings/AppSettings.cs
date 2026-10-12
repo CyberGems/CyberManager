@@ -51,6 +51,12 @@ public sealed class AppSettings
     public bool StartMinimized { get; set; }
     public bool AutoCheckForUpdates { get; set; } = true;
     public string GlobalHotkey { get; set; } = "Alt+Shift+M";
+    public string WidgetHotkey { get; set; } = "Alt+Shift+W";
+    public bool WidgetVisible { get; set; }
+    public bool WidgetAlwaysOnTop { get; set; } = true;
+    public bool WidgetBoundsSaved { get; set; }
+    public double WidgetLeft { get; set; }
+    public double WidgetTop { get; set; }
     public bool ShowIdleProcess { get; set; }
     public bool CompactMode { get; set; }
     /// <summary>
@@ -184,11 +190,14 @@ public sealed class AppSettings
         MainWindowTop = NormalizeCoordinate(MainWindowTop);
         CompactWindowLeft = NormalizeCoordinate(CompactWindowLeft);
         CompactWindowTop = NormalizeCoordinate(CompactWindowTop);
+        WidgetLeft = NormalizeCoordinate(WidgetLeft);
+        WidgetTop = NormalizeCoordinate(WidgetTop);
         SearchText ??= "";
         SortColumn = NormalizeSortColumn(SortColumn);
         RecentSearches = NormalizeSearchHistory(RecentSearches);
         SuppressedConfirmations ??= new(StringComparer.OrdinalIgnoreCase);
         GlobalHotkey = GlobalHotkey?.Trim() ?? "";
+        WidgetHotkey = WidgetHotkey?.Trim() ?? "";
     }
 
     public void ResetToDefaults()
@@ -230,6 +239,12 @@ public sealed class AppSettings
         CompactWindowTop = defaults.CompactWindowTop;
         CompactWindowWidth = defaults.CompactWindowWidth;
         CompactWindowHeight = defaults.CompactWindowHeight;
+        WidgetHotkey = defaults.WidgetHotkey;
+        WidgetVisible = defaults.WidgetVisible;
+        WidgetAlwaysOnTop = defaults.WidgetAlwaysOnTop;
+        WidgetBoundsSaved = defaults.WidgetBoundsSaved;
+        WidgetLeft = defaults.WidgetLeft;
+        WidgetTop = defaults.WidgetTop;
     }
 
     public bool IsConfirmationSuppressed(string key) =>

@@ -87,6 +87,7 @@ public sealed class TrayIconService : IDisposable
     private MenuItem? _showMenuItem;
     private MenuItem? _sysInfoMenuItem;
     private MenuItem? _refreshMenuItem;
+    private MenuItem? _widgetMenuItem;
     private MenuItem? _helpMenuItem;
     private MenuItem? _subHelpItem;
     private MenuItem? _subFaqItem;
@@ -102,6 +103,8 @@ public sealed class TrayIconService : IDisposable
     private Action? _onToggleShow;
     private Action? _onOpenSystemInfo;
     private Action? _onRefresh;
+    private Action? _onToggleWidget;
+    private bool _widgetChecked;
     private Action? _onOpenSettings;
     private Action<bool>? _onOpenAbout;
     private Action? _onExit;
@@ -111,6 +114,7 @@ public sealed class TrayIconService : IDisposable
         Action onToggleShow,
         Action onOpenSystemInfo,
         Action onRefresh,
+        Action onToggleWidget,
         Action onOpenSettings,
         Action<bool> onOpenAbout,
         Action onExit)
@@ -119,6 +123,7 @@ public sealed class TrayIconService : IDisposable
         _onToggleShow = onToggleShow;
         _onOpenSystemInfo = onOpenSystemInfo;
         _onRefresh = onRefresh;
+        _onToggleWidget = onToggleWidget;
         _onOpenSettings = onOpenSettings;
         _onOpenAbout = onOpenAbout;
         _onExit = onExit;
@@ -220,6 +225,18 @@ public sealed class TrayIconService : IDisposable
         };
         if (miStyle != null) _refreshMenuItem.Style = miStyle;
         _refreshMenuItem.Click += (_, _) => _onRefresh?.Invoke();
+
+        // 5. Floating Widget
+        _widgetMenuItem = new MenuItem
+        {
+            Header = Strings.T("FloatingWidget"),
+            IsCheckable = true,
+            IsChecked = _widgetChecked,
+            InputGestureText = App.Settings.WidgetHotkey,
+            Icon = CreatePathIcon("M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z")
+        };
+        if (miStyle != null) _widgetMenuItem.Style = miStyle;
+        _widgetMenuItem.Click += (_, _) => _onToggleWidget?.Invoke();
 
         // 8b. Settings
         _settingsMenuItem = new MenuItem
@@ -326,6 +343,7 @@ public sealed class TrayIconService : IDisposable
         _contextMenu.Items.Add(_showMenuItem);
         _contextMenu.Items.Add(_sysInfoMenuItem);
         _contextMenu.Items.Add(_refreshMenuItem);
+        _contextMenu.Items.Add(_widgetMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
         _contextMenu.Items.Add(_settingsMenuItem);
         _contextMenu.Items.Add(_helpMenuItem);
@@ -388,6 +406,11 @@ public sealed class TrayIconService : IDisposable
         {
             _refreshMenuItem.Header = Strings.T("RefreshProcesses");
         }
+        if (_widgetMenuItem != null)
+        {
+            _widgetMenuItem.Header = Strings.T("FloatingWidget");
+            _widgetMenuItem.InputGestureText = App.Settings.WidgetHotkey;
+        }
         if (_settingsMenuItem != null) _settingsMenuItem.Header = $"{Strings.T("Settings")}...";
         if (_helpMenuItem != null) _helpMenuItem.Header = Strings.T("Help");
         if (_subHelpItem != null) _subHelpItem.Header = Strings.T("Help");
@@ -398,6 +421,13 @@ public sealed class TrayIconService : IDisposable
         if (_subAboutItem != null) _subAboutItem.Header = $"{Strings.T("AboutSubtitle")}...";
         if (_subCheckUpdateItem != null) _subCheckUpdateItem.Header = Strings.T("CheckForUpdates");
         if (_exitMenuItem != null) _exitMenuItem.Header = Strings.T("Exit");
+    }
+
+    /// <summary>Keeps the check mark on the floating widget entry in sync with the widget.</summary>
+    public void SetWidgetChecked(bool isChecked)
+    {
+        _widgetChecked = isChecked;
+        if (_widgetMenuItem != null) _widgetMenuItem.IsChecked = isChecked;
     }
 
     public void UpdateTheme()

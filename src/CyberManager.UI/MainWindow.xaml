@@ -798,6 +798,12 @@
                                   Fill="{DynamicResource AccentBrush}"
                                   Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
                         </ToggleButton>
+                        <ToggleButton x:Name="WidgetToggleBtn" Width="38" Height="38" Margin="8,0,0,0" Padding="0" Style="{StaticResource HeavyFilterToggleStyle}" Click="WidgetToggle_Click" ToolTip="Floating Widget" AutomationProperties.Name="Floating Widget">
+                            <Path Data="M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z"
+                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Fill="Transparent"/>
+                        </ToggleButton>
                         <ToggleButton x:Name="HeavyFilterToggle"
                                       Width="38"
                                       Height="38"

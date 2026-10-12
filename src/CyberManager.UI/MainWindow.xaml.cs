@@ -156,6 +156,7 @@ public partial class MainWindow : Window
     private readonly System.Collections.Concurrent.ConcurrentDictionary<int, DateTime> _terminatedPids = new();
     private readonly GlobalHotkeyService _hotkeyService = new();
     private readonly TrayIconService _trayService = new();
+    private FloatingMetricsWindow? _metricsWidget;
     private bool _isExplicitExit;
     private bool _isCloseDialogOpen;
     private bool _isLoaded;
@@ -256,6 +257,7 @@ public partial class MainWindow : Window
         };
         PathToIconConverter.IconReady += OnIconReady;
         SettingsTabContent.HotkeyChangeRequested += SettingsView_HotkeyChangeRequested;
+        SettingsTabContent.WidgetHotkeyChangeRequested += SettingsView_WidgetHotkeyChangeRequested;
         SettingsTabContent.DefaultsReset += SettingsView_DefaultsReset;
         SettingsTabContent.SettingsChanged += () =>
         {
@@ -312,16 +314,25 @@ public partial class MainWindow : Window
                 ToggleTrayVisibility,
                 OpenSystemInfoFromTray,
                 () => _ = RefreshAsync(force: true, cancellationToken: _lifetimeCts.Token),
+                ToggleMetricsWidget,
                 OpenSettingsFromTray,
                 OpenAboutFromTray,
                 ExitApplication);
 
-            // Register Global Hotkey
-            if (!_hotkeyService.Register(this, App.Settings.GlobalHotkey))
+            // Register Global Hotkeys. The widget shortcut is best-effort: failing to claim it
+            // must not stop the app, so unlike the main one it does not report a status.
+            if (!_hotkeyService.Register(this, GlobalHotkeyService.MainHotkeyId, App.Settings.GlobalHotkey))
             {
                 SetStatus(Strings.T("GlobalHotkeyUnavailable"));
             }
+            _hotkeyService.Register(this, GlobalHotkeyService.WidgetHotkeyId, App.Settings.WidgetHotkey);
             _hotkeyService.HotkeyPressed += OnGlobalHotkeyPressed;
+
+            // Restore the floating widget when it was left open.
+            if (App.Settings.WidgetVisible)
+            {
+                SetMetricsWidgetVisible(true);
+            }
 
             // Start Minimized Check
             var args = Environment.GetCommandLineArgs();
@@ -352,7 +363,7 @@ public partial class MainWindow : Window
             }
 
             _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
-            if (IsVisible && WindowState != WindowState.Minimized) _timer.Start();
+            UpdateTimerState();
         }
         catch (Exception ex)
         {
@@ -461,14 +472,12 @@ public partial class MainWindow : Window
 
         if (IsVisible && WindowState != WindowState.Minimized)
         {
-            _timer.Start();
             _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
         }
-        else
-        {
-            // There is no useful UI to update while the app is in the tray.
-            _timer.Stop();
-        }
+
+        // The process list has nothing to show while hidden, but the floating widget may still
+        // be on screen, so the timer state is recomputed rather than unconditionally stopped.
+        UpdateTimerState();
     }
 
     private void OnWindowStateChanged(object? sender, EventArgs e)
@@ -486,13 +495,10 @@ public partial class MainWindow : Window
         UpdateMaximizeButtonIcon();
         if (IsVisible && WindowState != WindowState.Minimized)
         {
-            _timer.Start();
             _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
         }
-        else
-        {
-            _timer.Stop();
-        }
+
+        UpdateTimerState();
     }
 
     private void OnClosed(object? sender, EventArgs e)
@@ -503,6 +509,7 @@ public partial class MainWindow : Window
         _searchHistoryTimer.Stop();
         _settingsSaveTimer.Stop();
         _lifetimeCts.Cancel();
+        _metricsWidget?.Close();
         PathToIconConverter.IconReady -= OnIconReady;
         _lifetimeCts.Dispose();
     }
@@ -769,6 +776,95 @@ public partial class MainWindow : Window
             : hint;
     }
 
+    /// <summary>
+    /// The metrics timer must run whenever something on screen is showing the samples: the main
+    /// window itself, or the floating widget while the main window sits in the tray.
+    /// </summary>
+    private bool ShouldSampleMetrics =>
+        (IsVisible && WindowState != WindowState.Minimized) || _metricsWidget?.IsVisible == true;
+
+    private void UpdateTimerState()
+    {
+        if (_isClosed) return;
+
+        if (ShouldSampleMetrics) _timer.Start();
+        else _timer.Stop();
+    }
+
+    private void ToggleMetricsWidget() => SetMetricsWidgetVisible(_metricsWidget?.IsVisible != true);
+
+    /// <summary>
+    /// Shows or hides the floating widget and keeps the button, the tray check mark and the
+    /// persisted setting in sync.
+    /// </summary>
+    private void SetMetricsWidgetVisible(bool visible)
+    {
+        if (_isClosed) return;
+
+        if (visible)
+        {
+            EnsureMetricsWidget();
+            _metricsWidget!.Show();
+        }
+        else
+        {
+            _metricsWidget?.Hide();
+        }
+
+        App.Settings.WidgetVisible = visible;
+        WidgetToggleBtn.IsChecked = visible;
+        _trayService.SetWidgetChecked(visible);
+        ThrottledSaveSettings();
+        UpdateTimerState();
+
+        // Seed the widget right away instead of waiting for the next timer tick. With the main
+        // window hidden this only refreshes the metrics, not the process list.
+        if (visible) _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
+    }
+
+    private void EnsureMetricsWidget()
+    {
+        if (_metricsWidget != null) return;
+
+        var widget = new FloatingMetricsWindow();
+        widget.CloseRequested += () => SetMetricsWidgetVisible(false);
+        widget.AlwaysOnTopChanged += onTop =>
+        {
+            if (_isClosed) return;
+
+            App.Settings.WidgetAlwaysOnTop = onTop;
+            widget.ApplyAlwaysOnTop(onTop);
+            ThrottledSaveSettings();
+        };
+        widget.PositionChanged += (left, top) =>
+        {
+            if (_isClosed) return;
+
+            App.Settings.WidgetLeft = left;
+            App.Settings.WidgetTop = top;
+            App.Settings.WidgetBoundsSaved = true;
+            ThrottledSaveSettings();
+        };
+
+        if (App.Settings.WidgetBoundsSaved)
+        {
+            widget.SetPosition(App.Settings.WidgetLeft, App.Settings.WidgetTop);
+        }
+        else
+        {
+            // First run: park it near the bottom-right corner of the work area.
+            var area = SystemParameters.WorkArea;
+            widget.SetPosition(area.Right - widget.Width - 24, area.Bottom - 200);
+        }
+
+        _metricsWidget = widget;
+    }
+
+    private static string FormatHotkeyForDisplay(string hotkey) =>
+        string.Join(
+            " + ",
+            hotkey.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+
     private async Task RefreshAsync(bool force = false, CancellationToken cancellationToken = default)
     {
         if (_isClosed || Interlocked.Exchange(ref _refreshInFlight, 1) == 1) return;
@@ -778,7 +874,11 @@ public partial class MainWindow : Window
             // system metrics (CPU / RAM) must keep updating so the gauges stay live. An
             // explicit refresh (button, F5, tray menu) passes force: true so it always
             // collects the current state, even while frozen.
-            if (force || !_detectionPaused)
+            //
+            // Collecting the process list is also wasted work while it is off screen, which is
+            // the case when the app sits in the tray with only the floating widget visible.
+            var listOnScreen = IsVisible && WindowState != WindowState.Minimized;
+            if (force || (!_detectionPaused && listOnScreen))
             {
                 if (_all.Count == 0)
                 {
@@ -821,6 +921,19 @@ public partial class MainWindow : Window
             _lastUsedRamGb = sysMetrics.UsedRamGb;
             _lastTotalRamGb = sysMetrics.TotalRamGb;
             UpdateRamToolTip();
+
+            if (_metricsWidget is { IsVisible: true } widget)
+            {
+                widget.UpdateMetrics(
+                    sysMetrics.CpuTotalPercent,
+                    cpuHistory,
+                    cpuKernelHistory,
+                    sysMetrics.MemoryLoadPercent,
+                    ramPctHistory,
+                    sysMetrics.UsedRamGb,
+                    sysMetrics.TotalRamGb,
+                    sysMetrics.CpuModelName);
+            }
 
             StatsText.Text = $"{Strings.T("ProcessesCount", _all.Count)}  •  {Strings.T("CpuTotal", sysMetrics.CpuTotalPercent)}  •  {Strings.T("MemTotal", sysMetrics.UsedRamGb)}";
         }
@@ -1768,20 +1881,53 @@ public partial class MainWindow : Window
     private bool SettingsView_HotkeyChangeRequested(string hotkey)
     {
         var previousHotkey = App.Settings.GlobalHotkey;
-        if (_hotkeyService.Register(this, hotkey))
+        if (_hotkeyService.Register(this, GlobalHotkeyService.MainHotkeyId, hotkey))
         {
             App.Settings.GlobalHotkey = hotkey;
             _trayService.UpdateLocalization();
+            UpdateWidgetToggleHint();
             return true;
         }
 
         if (!string.IsNullOrWhiteSpace(previousHotkey))
         {
-            _hotkeyService.Register(this, previousHotkey);
+            _hotkeyService.Register(this, GlobalHotkeyService.MainHotkeyId, previousHotkey);
         }
 
         SetStatus(Strings.T("GlobalHotkeyUnavailable"));
         return false;
+    }
+
+    private bool SettingsView_WidgetHotkeyChangeRequested(string hotkey)
+    {
+        var previousHotkey = App.Settings.WidgetHotkey;
+        if (_hotkeyService.Register(this, GlobalHotkeyService.WidgetHotkeyId, hotkey))
+        {
+            App.Settings.WidgetHotkey = hotkey;
+            UpdateWidgetToggleHint();
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(previousHotkey))
+        {
+            _hotkeyService.Register(this, GlobalHotkeyService.WidgetHotkeyId, previousHotkey);
+        }
+
+        SetStatus(Strings.T("GlobalHotkeyUnavailable"));
+        return false;
+    }
+
+    /// <summary>
+    /// Refreshes the toolbar widget button's accessible name and its shortcut hint, which is the
+    /// only place the widget shortcut is surfaced outside the settings page.
+    /// </summary>
+    private void UpdateWidgetToggleHint()
+    {
+        var label = Strings.T("FloatingWidget");
+        WidgetToggleBtn.ToolTip = string.IsNullOrWhiteSpace(App.Settings.WidgetHotkey)
+            ? label
+            : $"{label} ({FormatHotkeyForDisplay(App.Settings.WidgetHotkey)})";
+        AutomationProperties.SetName(WidgetToggleBtn, label);
     }
 
     private void SettingsView_DefaultsReset()
@@ -1793,6 +1939,17 @@ public partial class MainWindow : Window
         CompactView.SetPinned(Topmost);
         _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
         ApplyStoredSorting();
+
+        // Resetting the settings also clears the widget preferences, so the widget itself has to
+        // follow instead of keeping a state the settings no longer describe.
+        if (_metricsWidget is { } widget)
+        {
+            widget.ApplyAlwaysOnTop(App.Settings.WidgetAlwaysOnTop);
+            if (widget.IsVisible != App.Settings.WidgetVisible)
+            {
+                SetMetricsWidgetVisible(App.Settings.WidgetVisible);
+            }
+        }
     }
 
     private void FullModeToggle_Click(object sender, RoutedEventArgs e) =>
@@ -1937,6 +2094,8 @@ public partial class MainWindow : Window
     private void Refresh_Click(object sender, RoutedEventArgs e) => _ = RefreshAsync(force: true);
 
     private void PauseDetection_Click(object sender, RoutedEventArgs e) => SetDetectionPaused(!_detectionPaused);
+
+    private void WidgetToggle_Click(object sender, RoutedEventArgs e) => ToggleMetricsWidget();
 
     /// <summary>
     /// Freezes or resumes automatic process detection. While frozen the list keeps its last
@@ -2874,6 +3033,8 @@ public partial class MainWindow : Window
             AutomationProperties.SetName(SystemFilterCheck, Strings.T("HideSystemProcesses"));
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
+            UpdateWidgetToggleHint();
+            _metricsWidget?.ApplyLocalization();
             PauseDetectionBtn.ToolTip = _detectionPaused
                 ? $"{Strings.T("ResumeDetection")} (Ctrl+P)"
                 : $"{Strings.T("PauseDetection")} (Ctrl+P)";
@@ -3426,8 +3587,14 @@ public partial class MainWindow : Window
         FocusSearchBox();
     }
 
-    private void OnGlobalHotkeyPressed()
+    private void OnGlobalHotkeyPressed(int id)
     {
+        if (id == GlobalHotkeyService.WidgetHotkeyId)
+        {
+            ToggleMetricsWidget();
+            return;
+        }
+
         ToggleWindowVisibility();
     }
 

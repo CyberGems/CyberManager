@@ -581,6 +581,85 @@
                         </StackPanel>
                     </Grid>
                 </Border>
+                <!-- SECTION 5b: FLOATING WIDGET HOTKEY -->
+                <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="16,12" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <Path Data="M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <TextBlock x:Name="WidgetHotkeyTitleLbl" Text="Atajo del widget flotante" FontWeight="SemiBold" FontSize="13.5" Foreground="{DynamicResource TextBrush}"/>
+                            <TextBlock x:Name="WidgetHotkeyDescLbl" Text="Muestra u oculta el widget flotante de métricas." FontSize="12" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Background="{DynamicResource HeaderBgBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="6"
+                                    Padding="8,2"
+                                    VerticalAlignment="Center">
+                                <TextBox x:Name="WidgetHotkeyBox"
+                                         Text="Alt + Shift + W"
+                                         Width="125"
+                                         Height="28"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Foreground="{DynamicResource AccentBrush}"
+                                         FontWeight="Bold"
+                                         FontSize="12"
+                                         HorizontalContentAlignment="Center"
+                                         VerticalContentAlignment="Center"
+                                         IsReadOnly="True"
+                                         Focusable="True"
+                                         Cursor="IBeam"
+                                         PreviewKeyDown="HotkeyBox_PreviewKeyDown"
+                                         PreviewKeyUp="HotkeyBox_PreviewKeyUp"
+                                         GotKeyboardFocus="HotkeyBox_GotKeyboardFocus"
+                                         LostKeyboardFocus="HotkeyBox_LostKeyboardFocus"/>
+                            </Border>
+                            <Button x:Name="WidgetHotkeyClearBtn"
+                                    Style="{StaticResource SecondaryActionBtn}"
+                                    Width="32"
+                                    Height="32"
+                                    Margin="6,0,0,0"
+                                    Padding="0"
+                                    ToolTip="Clear shortcut"
+                                    Click="WidgetHotkeyClearBtn_Click">
+                                <Path Data="M 5 5 L 19 19 M 19 5 L 5 19"
+                                      Stroke="{DynamicResource TextBrush}"
+                                      StrokeThickness="1.7"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Width="14"
+                                      Height="14"
+                                      Stretch="Uniform"/>
+                            </Button>
+                            <Button x:Name="WidgetHotkeyResetBtn"
+                                    Style="{StaticResource SecondaryActionBtn}"
+                                    Width="32"
+                                    Height="32"
+                                    Margin="6,0,0,0"
+                                    Padding="0"
+                                    ToolTip="Restore shortcut"
+                                    Click="WidgetHotkeyResetBtn_Click">
+                                <Path Data="M 4 8 A 8 8 0 1 1 6 17 M 4 8 V 3 M 4 8 H 9"
+                                      Stroke="{DynamicResource TextBrush}"
+                                      StrokeThickness="1.5"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      StrokeLineJoin="Round"
+                                      Width="14"
+                                      Height="14"
+                                      Stretch="Uniform"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
                 <Grid Margin="0,0,0,16">
                     <TextBlock x:Name="ToastText"
                                Text=""

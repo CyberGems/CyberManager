@@ -6,9 +6,18 @@ using System.Windows.Interop;
 
 namespace CyberManager.UI.Services;
 
+/// <summary>
+/// Registers system-wide hotkeys on a single window. Several hotkeys can be registered at once;
+/// each one is identified by an id so re-registering one does not disturb the others.
+/// </summary>
 public sealed class GlobalHotkeyService : IDisposable
 {
-    private const int HotkeyId = 9001;
+    /// <summary>Hotkey that shows and hides the main window.</summary>
+    public const int MainHotkeyId = 9001;
+
+    /// <summary>Hotkey that shows and hides the floating metrics widget.</summary>
+    public const int WidgetHotkeyId = 9002;
+
     private const int WM_HOTKEY = 0x0312;
 
     private const uint MOD_ALT = 0x0001;
@@ -20,59 +29,73 @@ public sealed class GlobalHotkeyService : IDisposable
 
     private IntPtr _hwnd;
     private HwndSource? _source;
-    private bool _isRegistered;
+    private readonly HashSet<int> _registeredIds = new();
 
-    public event Action? HotkeyPressed;
+    /// <summary>Raised with the id of the hotkey that was pressed.</summary>
+    public event Action<int>? HotkeyPressed;
 
-    public bool Register(Window window, string hotkeyString = "Alt+Shift+M")
+    /// <summary>Registers the main-window hotkey. Kept for the common single-hotkey case.</summary>
+    public bool Register(Window window, string hotkeyString = "Alt+Shift+M") =>
+        Register(window, MainHotkeyId, hotkeyString);
+
+    /// <summary>
+    /// Registers (or replaces) the hotkey identified by <paramref name="id"/>. An empty or blank
+    /// string clears that hotkey and is reported as success, which is how the settings UI
+    /// represents "no shortcut".
+    /// </summary>
+    public bool Register(Window window, int id, string hotkeyString)
     {
         try
         {
-            Unregister();
+            if (!EnsureHook(window)) return false;
+
+            Unregister(id);
 
             if (string.IsNullOrWhiteSpace(hotkeyString))
             {
                 return true;
             }
 
-            var helper = new WindowInteropHelper(window);
-            _hwnd = helper.Handle;
-            if (_hwnd == IntPtr.Zero)
-            {
-                helper.EnsureHandle();
-                _hwnd = helper.Handle;
-            }
-
-            _source = HwndSource.FromHwnd(_hwnd);
-            _source?.AddHook(HwndHook);
-
             if (!TryParseHotkey(hotkeyString, out var modifiers, out var vk))
             {
-                Unregister();
                 return false;
             }
 
-            _isRegistered = RegisterHotKey(_hwnd, HotkeyId, modifiers | MOD_NOREPEAT, vk);
-            if (!_isRegistered) Unregister();
-            return _isRegistered;
+            if (!RegisterHotKey(_hwnd, id, modifiers | MOD_NOREPEAT, vk))
+            {
+                return false;
+            }
+
+            _registeredIds.Add(id);
+            return true;
         }
         catch
         {
-            Unregister();
+            Unregister(id);
             return false;
         }
     }
 
-    public void Unregister()
+    /// <summary>True when the hotkey with the given id currently owns a system registration.</summary>
+    public bool IsRegistered(int id) => _registeredIds.Contains(id);
+
+    public void Unregister(int id)
     {
-        if (_isRegistered && _hwnd != IntPtr.Zero)
+        if (!_registeredIds.Remove(id) || _hwnd == IntPtr.Zero) return;
+
+        try
         {
-            try
-            {
-                UnregisterHotKey(_hwnd, HotkeyId);
-            }
-            catch { }
-            _isRegistered = false;
+            UnregisterHotKey(_hwnd, id);
+        }
+        catch { }
+    }
+
+    /// <summary>Releases every hotkey and detaches the window hook.</summary>
+    public void UnregisterAll()
+    {
+        foreach (var id in _registeredIds.ToArray())
+        {
+            Unregister(id);
         }
 
         if (_source != null)
@@ -84,14 +107,42 @@ public sealed class GlobalHotkeyService : IDisposable
             catch { }
             _source = null;
         }
+
+        _hwnd = IntPtr.Zero;
+    }
+
+    /// <summary>Releases every hotkey and detaches the window hook.</summary>
+    public void Unregister() => UnregisterAll();
+
+    private bool EnsureHook(Window window)
+    {
+        if (_source != null && _hwnd != IntPtr.Zero) return true;
+
+        var helper = new WindowInteropHelper(window);
+        _hwnd = helper.Handle;
+        if (_hwnd == IntPtr.Zero)
+        {
+            helper.EnsureHandle();
+            _hwnd = helper.Handle;
+        }
+
+        if (_hwnd == IntPtr.Zero) return false;
+
+        _source = HwndSource.FromHwnd(_hwnd);
+        _source?.AddHook(HwndHook);
+        return _source != null;
     }
 
     private IntPtr HwndHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg == WM_HOTKEY && wParam.ToInt32() == HotkeyId)
+        if (msg == WM_HOTKEY)
         {
-            handled = true;
-            HotkeyPressed?.Invoke();
+            var id = wParam.ToInt32();
+            if (_registeredIds.Contains(id))
+            {
+                handled = true;
+                HotkeyPressed?.Invoke(id);
+            }
         }
         return IntPtr.Zero;
     }
@@ -209,7 +260,7 @@ public sealed class GlobalHotkeyService : IDisposable
 
     public void Dispose()
     {
-        Unregister();
+        UnregisterAll();
     }
 
     [DllImport("user32.dll", SetLastError = true)]

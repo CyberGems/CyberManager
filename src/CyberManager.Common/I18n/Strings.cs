@@ -62,6 +62,8 @@ public static class Strings
         ["ResumeDetection"] = ("Resume", "Reanudar"),
         ["DetectionPaused"] = ("Process detection paused", "Detección de procesos en pausa"),
         ["AlwaysOnTop"] = ("Always on top", "Siempre visible"),
+        ["FloatingWidget"] = ("Floating Widget", "Widget flotante"),
+        ["CloseWidget"] = ("Close widget", "Cerrar widget"),
         ["GroupByApp"] = ("Group by application", "Agrupar por aplicación"),
         ["HideSystemProcesses"] = ("Hide system processes", "Ocultar procesos del sistema"),
         ["Ungroup"] = ("Flat process list", "Lista plana de procesos"),
@@ -291,6 +293,8 @@ public static class Strings
         ["SettingsSaved"] = ("Settings saved", "Configuración guardada"),
         ["AutoStartFailed"] = ("Could not update Windows startup settings.", "No se pudo actualizar el inicio automático de Windows."),
         ["GlobalHotkeyUnavailable"] = ("The global hotkey could not be registered. It may already be in use.", "No se pudo registrar el atajo global. Puede que ya esté en uso."),
+        ["WidgetHotkeyTitle"] = ("Floating widget hotkey", "Atajo del widget flotante"),
+        ["WidgetHotkeyDesc"] = ("Shows or hides the floating metrics widget.", "Muestra u oculta el widget flotante de métricas."),
     };
 
     public static string T(string key, params object[] args)
