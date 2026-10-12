@@ -166,6 +166,8 @@ public partial class MainWindow : Window
     private List<ProcessInfo> _view = new();
     private string _pendingSearch = "";
     private int _refreshInFlight;
+    private double _lastUsedRamGb;
+    private double _lastTotalRamGb;
     private ContextMenuTarget? _contextMenuTarget;
     private bool _contextMenuOpen;
     private bool _contextMenuKeepsSelection;
@@ -754,6 +756,19 @@ public partial class MainWindow : Window
         CompactView.SetStatusToolTip(toolTip);
     }
 
+    /// <summary>
+    /// Builds the memory card tooltip. The card shows the usage percentage, so the absolute
+    /// amounts are exposed here together with the click affordance that opens System Information.
+    /// Falls back to the hint alone until the first sample provides real values.
+    /// </summary>
+    private void UpdateRamToolTip()
+    {
+        var hint = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
+        RamSparklineBorder.ToolTip = _lastTotalRamGb > 0
+            ? $"{hint}\n{Strings.T("MemTotal", _lastUsedRamGb)}\n{Strings.T("TotalRam", _lastTotalRamGb)}"
+            : hint;
+    }
+
     private async Task RefreshAsync(bool force = false, CancellationToken cancellationToken = default)
     {
         if (_isClosed || Interlocked.Exchange(ref _refreshInFlight, 1) == 1) return;
@@ -795,12 +810,17 @@ public partial class MainWindow : Window
             CpuSparklineText.Text = $"{sysMetrics.CpuTotalPercent:F1}%";
             CompactView.SetSystemMetrics(
                 sysMetrics.CpuTotalPercent,
+                sysMetrics.MemoryLoadPercent,
                 sysMetrics.UsedRamGb,
                 sysMetrics.CpuModelName,
                 sysMetrics.TotalRamGb);
 
             RamSparkline.Values = ramPctHistory;
-            RamSparklineText.Text = $"{sysMetrics.UsedRamGb:F1} GB";
+            RamSparklineText.Text = $"{sysMetrics.MemoryLoadPercent:F1}%";
+
+            _lastUsedRamGb = sysMetrics.UsedRamGb;
+            _lastTotalRamGb = sysMetrics.TotalRamGb;
+            UpdateRamToolTip();
 
             StatsText.Text = $"{Strings.T("ProcessesCount", _all.Count)}  •  {Strings.T("CpuTotal", sysMetrics.CpuTotalPercent)}  •  {Strings.T("MemTotal", sysMetrics.UsedRamGb)}";
         }
@@ -2892,7 +2912,7 @@ public partial class MainWindow : Window
             UpdateMaximizeButtonIcon();
             StatsBorder.ToolTip = Strings.T("OpenSystemInfoTip");
             CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
-            RamSparklineBorder.ToolTip = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
+            UpdateRamToolTip();
             SetStatus(Strings.T("Ready"));
             CompactView.ApplyLanguage();
             CompactView.SetPinned(Topmost);

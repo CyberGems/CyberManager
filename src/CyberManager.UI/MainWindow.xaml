@@ -746,7 +746,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
                                 <TextBlock Text="RAM" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}" Margin="0,0,0,1"/>
-                                <TextBlock x:Name="RamSparklineText" Text="0.0 GB" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource RamBrush}"/>
+                                <TextBlock x:Name="RamSparklineText" Text="0.0%" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource RamBrush}"/>
                             </StackPanel>
                             <controls:SparklineControl x:Name="RamSparkline" Grid.Column="1" Width="100" Height="28"
                                                       StrokeBrush="{DynamicResource RamBrush}"

@@ -178,7 +178,7 @@ public partial class CompactProcessView : UserControl
     public void SetStatus(string value) => StatusText.Text = value;
     public void SetStatusToolTip(string? value) => StatusText.ToolTip = value;
 
-    public void SetSystemMetrics(double cpuPercent, double usedRamGb, string? cpuModelName, double totalRamGb)
+    public void SetSystemMetrics(double cpuPercent, double ramPercent, double usedRamGb, string? cpuModelName, double totalRamGb)
     {
         _cpuPercent = cpuPercent;
         _usedRamGb = usedRamGb;
@@ -186,7 +186,7 @@ public partial class CompactProcessView : UserControl
         _totalRamGb = totalRamGb;
 
         CompactCpuText.Text = $"{cpuPercent:F1}%";
-        CompactRamText.Text = $"{usedRamGb:F1} GB";
+        CompactRamText.Text = $"{ramPercent:F1}%";
         UpdateMetricToolTips();
     }
 
