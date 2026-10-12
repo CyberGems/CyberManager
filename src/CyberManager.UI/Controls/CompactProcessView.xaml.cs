@@ -583,7 +583,7 @@ public partial class CompactProcessView : UserControl
         DragRequested?.Invoke(this, e);
     }
 
-    public bool IsTitleBarDragSource(DependencyObject? source) =>
+    private bool IsTitleBarDragSource(DependencyObject? source) =>
         IsDescendantOf(source, CompactTitleBar) &&
         FindVisualParent<Button>(source) == null &&
         FindVisualParent<TextBox>(source) == null &&

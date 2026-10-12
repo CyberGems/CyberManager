@@ -1481,10 +1481,12 @@ public partial class MainWindow : Window
 
         if (!_isCompactMode || e.ChangedButton != MouseButton.Left) return;
 
-        // The compact view owns its title bar and branding: it must be the one to decide between
-        // "click opens About" and "drag moves the window". Let its handlers run for those hits
-        // instead of starting a drag here, which would swallow the click.
-        if (IsDescendantOf(source, CompactView) && CompactView.IsTitleBarDragSource(source))
+        // The compact view owns its whole surface: its title bar decides "click opens About"
+        // vs "drag moves the window", and its buttons, search box, grid and footer must keep
+        // receiving their own clicks. Starting a drag here (this is a preview handler, so it
+        // runs first) would swallow every one of those, so leave anything inside the compact
+        // view to the control itself.
+        if (IsDescendantOf(source, CompactView))
         {
             return;
         }
