@@ -160,6 +160,7 @@ public static class Strings
         ["IdleDesc"] = ("Processors idle / sleep time", "Tiempo de inactividad de los procesadores del sistema"),
         ["ProtectedSystemProcess"] = ("Protected Windows system process", "Proceso protegido del sistema de Windows"),
         ["ShowCyberManager"] = ("Show", "Mostrar"),
+        ["ShowMainWindow"] = ("Show CyberManager", "Mostrar CyberManager"),
         ["HideCyberManager"] = ("Hide", "Ocultar"),
         ["MinimizeToTray"] = ("Minimize to tray", "Minimizar a la bandeja"),
         ["StartWithWindows"] = ("Start with Windows", "Iniciar con Windows"),

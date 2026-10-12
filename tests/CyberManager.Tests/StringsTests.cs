@@ -83,7 +83,7 @@ public class StringsTests
             "RefreshIntervalTitle", "RefreshIntervalDesc", "RefreshFast", "RefreshNormal", "RefreshSlow",
             "StartWithWindowsTitle", "MinimizeToTrayTitle", "AlwaysOnTopTitle", "AutoCheckUpdatesTitle",
             "GlobalHotkeyTitle", "ResetDefaults", "SettingsSaved",
-            "FloatingWidget", "CloseWidget", "WidgetHotkeyTitle", "WidgetHotkeyDesc",
+            "FloatingWidget", "CloseWidget", "WidgetHotkeyTitle", "WidgetHotkeyDesc", "ShowMainWindow",
             "MoreOptions", "DocumentationWiki", "AboutCyberManager", "Description",
             "Unknown", "CpuModel", "TotalRam"
         };

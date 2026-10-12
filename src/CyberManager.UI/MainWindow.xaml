@@ -634,6 +634,16 @@
                                                   Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                                         </MenuItem.Icon>
                                     </MenuItem>
+
+                                    <Separator Style="{StaticResource ModernMenuSeparator}"/>
+
+                                    <MenuItem x:Name="MoreExitItem" Header="Exit" Style="{StaticResource ModernMenuItem}" Click="MoreExit_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M 18.36 6.64 A 9 9 0 1 1 5.63 6.64 M 12 2 V 12"
+                                                  Stroke="#F87171" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
                                 </ContextMenu>
                             </Button.ContextMenu>
                             <Path Data="M 5,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3 M 12,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3 M 19,10.5 a 1.5,1.5 0 1 0 0,3 a 1.5,1.5 0 1 0 0,-3"
@@ -719,6 +729,25 @@
 
                     <!-- CPU Sparkline Widget -->
                     <Border Grid.Column="1" x:Name="CpuSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="38" Margin="10,0,0,0" Padding="10,3,10,3" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="CPU History (Click to open System Information)">
+                        <Border.ContextMenu>
+                            <ContextMenu Style="{StaticResource ModernContextMenu}" Opened="MetricsCardMenu_Opened">
+                                <MenuItem x:Name="CpuMenuWidgetItem" Header="Floating Widget" IsCheckable="True" Style="{StaticResource ModernMenuItem}" Click="MetricsWidgetItem_Click">
+                                    <MenuItem.Icon>
+                                        <Path Data="M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z"
+                                              Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator Style="{StaticResource ModernMenuSeparator}"/>
+                                <MenuItem x:Name="CpuMenuSysInfoItem" Header="System Information..." Style="{StaticResource ModernMenuItem}" Click="CpuCardSysInfo_Click">
+                                    <MenuItem.Icon>
+                                        <Path Data="M 2 12 L 6 12 L 9 5 L 14 19 L 17 12 L 22 12"
+                                              Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Border.ContextMenu>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -739,6 +768,25 @@
 
                     <!-- RAM Sparkline Widget -->
                     <Border Grid.Column="2" x:Name="RamSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="38" Margin="8,0,0,0" Padding="10,3,10,3" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="Memory History (Click to open System Information)">
+                        <Border.ContextMenu>
+                            <ContextMenu Style="{StaticResource ModernContextMenu}" Opened="MetricsCardMenu_Opened">
+                                <MenuItem x:Name="RamMenuWidgetItem" Header="Floating Widget" IsCheckable="True" Style="{StaticResource ModernMenuItem}" Click="MetricsWidgetItem_Click">
+                                    <MenuItem.Icon>
+                                        <Path Data="M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z"
+                                              Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator Style="{StaticResource ModernMenuSeparator}"/>
+                                <MenuItem x:Name="RamMenuSysInfoItem" Header="System Information..." Style="{StaticResource ModernMenuItem}" Click="RamCardSysInfo_Click">
+                                    <MenuItem.Icon>
+                                        <Path Data="M 2 12 L 6 12 L 9 5 L 14 19 L 17 12 L 22 12"
+                                              Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                              Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </Border.ContextMenu>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

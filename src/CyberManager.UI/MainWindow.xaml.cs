@@ -105,44 +105,14 @@ public partial class MainWindow : Window
             }
         }
     }
-    private const uint MONITOR_DEFAULTTONEAREST = 0x00000002;
     private const int WM_NCLBUTTONDOWN = 0x00A1;
     private const int HTCAPTION = 0x0002;
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct NativeRect
-    {
-        public int Left;
-        public int Top;
-        public int Right;
-        public int Bottom;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MonitorInfo
-    {
-        public int Size;
-        public NativeRect Monitor;
-        public NativeRect Work;
-        public uint Flags;
-    }
 
     [DllImport("user32.dll")]
     private static extern bool ReleaseCapture();
 
     [DllImport("user32.dll")]
     private static extern IntPtr SendMessage(IntPtr hWnd, int message, IntPtr wParam, IntPtr lParam);
-
-    [DllImport("user32.dll")]
-    private static extern IntPtr MonitorFromWindow(IntPtr hWnd, uint flags);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MonitorInfo monitorInfo);
-
-    private delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdc, ref NativeRect rect, IntPtr data);
-
-    [DllImport("user32.dll")]
-    private static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr clip, MonitorEnumProc callback, IntPtr data);
 
     private readonly ProcessCollector _collector = new();
     private readonly DispatcherTimer _timer = new();
@@ -591,7 +561,7 @@ public partial class MainWindow : Window
         // A saved position may point at a monitor that is gone (unplugged, rearranged, or a
         // different DPI layout). When the top-left corner no longer falls on any monitor, recenter
         // on the primary one so the window cannot open where the user cannot reach it.
-        if (!IsPointOnAnyMonitor(Left, Top))
+        if (!MonitorPlacement.IsPointOnAnyMonitor(this, Left, Top))
         {
             var primary = SystemParameters.WorkArea;
             Width = Math.Min(Width, primary.Width);
@@ -601,7 +571,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        var workArea = GetCurrentWorkArea();
+        var workArea = MonitorPlacement.GetNearestWorkArea(this);
         if (workArea.Width <= 0 || workArea.Height <= 0) return;
 
         // A minimum size larger than the current monitor can make it impossible
@@ -613,60 +583,6 @@ public partial class MainWindow : Window
 
         Left = Math.Clamp(Left, workArea.Left, Math.Max(workArea.Left, workArea.Right - Width));
         Top = Math.Clamp(Top, workArea.Top, Math.Max(workArea.Top, workArea.Bottom - Height));
-    }
-
-    /// <summary>
-    /// True when the given device-independent point falls inside a monitor. Used to detect a stale
-    /// saved position after the display layout changed.
-    /// </summary>
-    private bool IsPointOnAnyMonitor(double left, double top)
-    {
-        if (!double.IsFinite(left) || !double.IsFinite(top)) return false;
-
-        // WPF coordinates are device independent; monitor bounds are physical pixels.
-        var toDevice = PresentationSource.FromVisual(this)?
-            .CompositionTarget?.TransformToDevice
-            ?? Matrix.Identity;
-        var devicePoint = toDevice.Transform(new Point(left, top));
-
-        var result = false;
-        EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero,
-            (IntPtr hMonitor, IntPtr hdc, ref NativeRect rect, IntPtr data) =>
-            {
-                if (devicePoint.X >= rect.Left && devicePoint.X < rect.Right &&
-                    devicePoint.Y >= rect.Top && devicePoint.Y < rect.Bottom)
-                {
-                    result = true;
-                    return false;
-                }
-
-                return true;
-            },
-            IntPtr.Zero);
-        return result;
-    }
-
-    private Rect GetCurrentWorkArea()
-    {
-        var hwnd = new WindowInteropHelper(this).Handle;
-        var monitor = hwnd == IntPtr.Zero
-            ? IntPtr.Zero
-            : MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
-        if (monitor != IntPtr.Zero)
-        {
-            var monitorInfo = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
-            if (GetMonitorInfo(monitor, ref monitorInfo))
-            {
-                var fromDevice = PresentationSource.FromVisual(this)?
-                    .CompositionTarget?.TransformFromDevice
-                    ?? Matrix.Identity;
-                var topLeft = fromDevice.Transform(new Point(monitorInfo.Work.Left, monitorInfo.Work.Top));
-                var bottomRight = fromDevice.Transform(new Point(monitorInfo.Work.Right, monitorInfo.Work.Bottom));
-                return new Rect(topLeft, bottomRight);
-            }
-        }
-
-        return SystemParameters.WorkArea;
     }
 
     private void RestoreWindowBounds(bool compact)
@@ -845,19 +761,34 @@ public partial class MainWindow : Window
             App.Settings.WidgetBoundsSaved = true;
             ThrottledSaveSettings();
         };
-
-        if (App.Settings.WidgetBoundsSaved)
-        {
-            widget.SetPosition(App.Settings.WidgetLeft, App.Settings.WidgetTop);
-        }
-        else
-        {
-            // First run: park it near the bottom-right corner of the work area.
-            var area = SystemParameters.WorkArea;
-            widget.SetPosition(area.Right - widget.Width - 24, area.Bottom - 200);
-        }
+        widget.MenuActionRequested += OnMetricsWidgetMenuAction;
 
         _metricsWidget = widget;
+    }
+
+    private void OnMetricsWidgetMenuAction(WidgetMenuAction action)
+    {
+        switch (action)
+        {
+            case WidgetMenuAction.ShowMainWindow:
+                ShowFromTray();
+                break;
+            case WidgetMenuAction.Refresh:
+                _ = RefreshAsync(force: true, cancellationToken: _lifetimeCts.Token);
+                break;
+            case WidgetMenuAction.SystemInformation:
+                OpenSystemInfoFromTray();
+                break;
+            case WidgetMenuAction.Settings:
+                OpenSettingsFromTray();
+                break;
+            case WidgetMenuAction.About:
+                OpenAboutFromTray(false);
+                break;
+            case WidgetMenuAction.Exit:
+                ExitApplication();
+                break;
+        }
     }
 
     private static string FormatHotkeyForDisplay(string hotkey) =>
@@ -961,6 +892,25 @@ public partial class MainWindow : Window
         if (sender == CpuSparklineBorder || sender == CpuSparkline) sub = "Cpu";
         else if (sender == RamSparklineBorder || sender == RamSparkline) sub = "Memory";
         NavigateToTab(MainTab.Performance, sub);
+    }
+
+    private void CpuCardSysInfo_Click(object sender, RoutedEventArgs e) =>
+        NavigateToTab(MainTab.Performance, "Cpu");
+
+    private void RamCardSysInfo_Click(object sender, RoutedEventArgs e) =>
+        NavigateToTab(MainTab.Performance, "Memory");
+
+    private void MetricsWidgetItem_Click(object sender, RoutedEventArgs e) => ToggleMetricsWidget();
+
+    /// <summary>
+    /// Reflects the widget state each time one of the metrics card menus opens. A checkable menu
+    /// item keeps its own state, so it has to be resynced from the real window instead of trusted.
+    /// </summary>
+    private void MetricsCardMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        var visible = _metricsWidget?.IsVisible == true;
+        CpuMenuWidgetItem.IsChecked = visible;
+        RamMenuWidgetItem.IsChecked = visible;
     }
 
     private void SystemInfoBorder_KeyDown(object sender, KeyEventArgs e)
@@ -1976,6 +1926,8 @@ public partial class MainWindow : Window
     }
 
     private void MoreBtn_Click(object sender, RoutedEventArgs e) => ToggleMoreMenu(MoreBtn);
+
+    private void MoreExit_Click(object sender, RoutedEventArgs e) => ExitApplication();
 
     private void CompactView_MoreRequested(object sender, RoutedEventArgs e) =>
         ToggleMoreMenu(sender as Button ?? MoreBtn);
@@ -3035,6 +2987,10 @@ public partial class MainWindow : Window
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             UpdateWidgetToggleHint();
             _metricsWidget?.ApplyLocalization();
+            CpuMenuWidgetItem.Header = Strings.T("FloatingWidget");
+            RamMenuWidgetItem.Header = Strings.T("FloatingWidget");
+            CpuMenuSysInfoItem.Header = $"{Strings.T("SystemInformation")}...";
+            RamMenuSysInfoItem.Header = $"{Strings.T("SystemInformation")}...";
             PauseDetectionBtn.ToolTip = _detectionPaused
                 ? $"{Strings.T("ResumeDetection")} (Ctrl+P)"
                 : $"{Strings.T("PauseDetection")} (Ctrl+P)";
@@ -3066,6 +3022,7 @@ public partial class MainWindow : Window
                 MoreWebsiteItem.Header = Strings.T("Website");
                 MoreCheckUpdatesItem.Header = Strings.T("CheckForUpdates");
                 MoreAboutItem.Header = Strings.T("AboutCyberManager");
+                MoreExitItem.Header = Strings.T("Exit");
             }
             MinimizeBtn.ToolTip = Strings.T("Minimize");
             MaximizeBtn.ToolTip = Strings.T("Maximize");
@@ -3598,36 +3555,37 @@ public partial class MainWindow : Window
         ToggleWindowVisibility();
     }
 
-    private void OpenSystemInfoFromTray()
+    /// <summary>
+    /// Brings the main window back from the tray, restoring it when it was minimized. Shared by
+    /// every entry point that has to surface the window (tray menu and floating widget) so they
+    /// all behave the same.
+    /// </summary>
+    private void ShowFromTray()
     {
         if (!IsVisible)
         {
             Show();
             if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
-            Activate();
         }
+
+        Activate();
+    }
+
+    private void OpenSystemInfoFromTray()
+    {
+        ShowFromTray();
         NavigateToTab(MainTab.Performance);
     }
 
     private void OpenSettingsFromTray()
     {
-        if (!IsVisible)
-        {
-            Show();
-            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
-            Activate();
-        }
+        ShowFromTray();
         NavigateToTab(MainTab.Settings);
     }
 
     private void OpenAboutFromTray(bool checkUpdatesNow)
     {
-        if (!IsVisible)
-        {
-            Show();
-            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
-            Activate();
-        }
+        ShowFromTray();
         var dlg = new AboutWindow(checkUpdatesNow) { Owner = this };
         dlg.ShowDialog();
     }
