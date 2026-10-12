@@ -537,9 +537,20 @@
                                   Width="16" Height="16" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.6"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
                         </Button>
-                        <Button x:Name="MoreBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}"
+                        <Button x:Name="MoreBtn" Margin="4,0,0,0"
                                 PreviewMouseLeftButtonDown="MoreBtn_PreviewMouseLeftButtonDown"
                                 Click="MoreBtn_Click" ToolTip="More options" AutomationProperties.Name="More options">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource TitleBtn}">
+                                    <Style.Triggers>
+                                        <!-- Keep the button highlighted while its menu is open so the menu never looks detached from it. -->
+                                        <DataTrigger Binding="{Binding ContextMenu.IsOpen, RelativeSource={RelativeSource Self}}" Value="True">
+                                            <Setter Property="Background" Value="{DynamicResource HeaderBgBrush}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <Button.ContextMenu>
                                 <ContextMenu x:Name="MoreOptionsMenu" Style="{StaticResource ModernContextMenu}">
                                     <MenuItem x:Name="MoreDonateItem" Header="Donate" Style="{StaticResource ModernMenuItem}" Click="MoreDonate_Click">
