@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Restart Shortcut**: `Ctrl+R` now restarts the selected process. It was previously swallowed by the refresh handler at the window level, so the shortcut never fired. Refresh remains on `F5`.
+
 ## [1.4.0] - 2026-10-12
 
 ### Added

@@ -3060,7 +3060,10 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (e.Key == Key.F5 || (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.R))
+        // Refresh is F5 only. Ctrl+R belongs to the process grid, where it restarts the
+        // selected process. Consuming it here would shadow that handler, because Preview
+        // events tunnel from the window down to the grid before reaching it.
+        if (e.Key == Key.F5)
         {
             e.Handled = true;
             _ = RefreshAsync();
@@ -3200,6 +3203,8 @@ public partial class MainWindow : Window
         }
         else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.R)
         {
+            // Ctrl+R restarts the selected process. The window-level handler deliberately
+            // leaves this gesture alone so it reaches the grid, and refresh stays on F5.
             if (Selected != null)
             {
                 Restart_Click(sender, e);
