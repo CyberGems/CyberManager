@@ -773,9 +773,6 @@ public partial class MainWindow : Window
             case WidgetMenuAction.ShowMainWindow:
                 ShowFromTray();
                 break;
-            case WidgetMenuAction.Refresh:
-                _ = RefreshAsync(force: true, cancellationToken: _lifetimeCts.Token);
-                break;
             case WidgetMenuAction.SystemInformation:
                 OpenSystemInfoFromTray();
                 break;

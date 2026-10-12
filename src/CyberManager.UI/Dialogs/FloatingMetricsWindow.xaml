@@ -87,14 +87,6 @@
 
             <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
-            <MenuItem x:Name="WidgetRefreshItem" Header="Refresh Processes" InputGestureText="F5" Style="{StaticResource ModernMenuItem}" Click="WidgetRefreshItem_Click">
-                <MenuItem.Icon>
-                    <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15"
-                          Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
-                          Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
-                </MenuItem.Icon>
-            </MenuItem>
-
             <MenuItem x:Name="WidgetSysInfoItem" Header="System Information..." InputGestureText="Ctrl+I" Style="{StaticResource ModernMenuItem}" Click="WidgetSysInfoItem_Click">
                 <MenuItem.Icon>
                     <Path Data="M 2 12 L 6 12 L 9 5 L 14 19 L 17 12 L 22 12"

@@ -12,7 +12,6 @@ namespace CyberManager.UI.Dialogs;
 public enum WidgetMenuAction
 {
     ShowMainWindow,
-    Refresh,
     SystemInformation,
     Settings,
     About,
@@ -68,7 +67,6 @@ public partial class FloatingMetricsWindow : Window
         WidgetPinItem.Header = Strings.T("AlwaysOnTop");
         WidgetShowItem.Header = Strings.T("ShowMainWindow");
         WidgetShowItem.InputGestureText = App.Settings.GlobalHotkey;
-        WidgetRefreshItem.Header = Strings.T("RefreshProcesses");
         WidgetSysInfoItem.Header = $"{Strings.T("SystemInformation")}...";
         WidgetSettingsItem.Header = $"{Strings.T("Settings")}...";
         WidgetAboutItem.Header = Strings.T("AboutCyberManager");
@@ -204,9 +202,6 @@ public partial class FloatingMetricsWindow : Window
 
     private void WidgetShowItem_Click(object sender, RoutedEventArgs e) =>
         MenuActionRequested?.Invoke(WidgetMenuAction.ShowMainWindow);
-
-    private void WidgetRefreshItem_Click(object sender, RoutedEventArgs e) =>
-        MenuActionRequested?.Invoke(WidgetMenuAction.Refresh);
 
     private void WidgetSysInfoItem_Click(object sender, RoutedEventArgs e) =>
         MenuActionRequested?.Invoke(WidgetMenuAction.SystemInformation);
