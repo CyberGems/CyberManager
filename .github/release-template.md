@@ -38,6 +38,40 @@ Batch process control arrives: select many processes and end them together, rest
   - **Window Placement**: A window saved off-screen is recentered.
   - **Bilingual**: Updated English and Spanish labels, tooltips, and dialogs.
 
+<details>
+<summary><b>🌐 Ver notas de la versión en Español</b></summary>
+
+### 🚀 Novedades de esta versión
+
+Llega el control de procesos por lotes: selecciona varios procesos y finalízalos juntos, reinicia un proceso desde su ejecutable o pausa la detección mientras los indicadores siguen actualizándose. La cuadrícula ahora recuerda el orden, oculta procesos del sistema a petición y ofrece un menú de visibilidad de columnas, con un cierre más claro.
+
+---
+
+### ✨ Novedades destacadas
+
+- 🧰 **Control de procesos por lotes**:
+  - **Multi-selección**: Ctrl+clic, Shift+clic y lazo de arrastre, con contador en vivo y una única confirmación para "Finalizar selección".
+  - **Reiniciar proceso**: Relanza una app desde su ejecutable; las apps empaquetadas (UWP / Store) se rechazan con un mensaje claro. `Ctrl+R`.
+  - **Pausar detección**: Congela la lista de procesos mientras la CPU, la RAM, los totales y las gráficas siguen actualizándose. `Ctrl+P`.
+
+- 🔎 **Encontrar y leer la lista**:
+  - **Menú de visibilidad de columnas**: Clic derecho en un encabezado para mostrar u ocultar columnas; el diseño se recuerda entre sesiones.
+  - **Orden recordado**: La columna y la dirección de orden se conservan entre sesiones.
+  - **Ocultar procesos del sistema**: Filtra los procesos del sistema de Windows manteniendo visible el shell de escritorio.
+
+- 🪟 **Ventana e interacción**:
+  - **Confirmación al cerrar**: Elige minimizar a la bandeja del sistema o salir, con opción de recordar la decisión.
+  - **Navegación con teclado**: Las flechas mueven la selección real y Shift+flecha amplía el rango.
+  - **Modo compacto**: Clics y arrastre corregidos, y controles de pausa y More añadidos.
+
+- 🎨 **Ajustes y correcciones**:
+  - **Orden alfabético**: La columna Proceso ahora ordena por el nombre reconocible mostrado, sin distinguir mayúsculas.
+  - **Barra de desplazamiento más limpia**: Se eliminó el marco que aparecía al pasar el ratón por el pulgar.
+  - **Ubicación de la ventana**: Una ventana guardada fuera de pantalla se recentra.
+  - **Bilingüe**: Etiquetas, tooltips y diálogos actualizados en inglés y español.
+
+</details>
+
 ---
 
 ### 📦 Downloads & Packages
