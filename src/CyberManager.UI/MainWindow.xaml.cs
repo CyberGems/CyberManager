@@ -682,11 +682,11 @@ public partial class MainWindow : Window
         }, DispatcherPriority.Background);
     }
 
-    private void SetStatus(string status, string? toolTip = null)
+    private void SetStatus(string status, string? toolTip = null, string? compactStatus = null)
     {
         FooterText.Text = status;
         FooterText.ToolTip = toolTip;
-        CompactView.SetStatus(status);
+        CompactView.SetStatus(compactStatus ?? status);
         CompactView.SetStatusToolTip(toolTip);
     }
 
@@ -1068,12 +1068,17 @@ public partial class MainWindow : Window
         string timeStr = DateTime.Now.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
         string status;
         string toolTip;
+        // The compact footer is the only status line in that mode, and its pill-free layout
+        // hides the process count otherwise visible in the full window, so it always gets
+        // the live list count prepended.
+        string compactStatus = $"{Strings.T("ProcessesCount", _view.Count)}  •  {Strings.T("Updated")} {timeStr}";
         if (!_hasLoadedOnce)
         {
             // Nothing has been collected yet, so the footer must not claim the list was just
             // updated: the loader is still on screen.
             status = Strings.T("CollectingProcesses");
             toolTip = status;
+            compactStatus = status;
         }
         else if (!string.IsNullOrEmpty(q))
         {
@@ -1088,7 +1093,7 @@ public partial class MainWindow : Window
                 : Strings.T("NormalProcessesTip", _all.Count, timeStr);
         }
 
-        SetStatus(status, toolTip);
+        SetStatus(status, toolTip, compactStatus);
     }
 
     /// <summary>
@@ -1285,7 +1290,11 @@ public partial class MainWindow : Window
         var clearItem = new MenuItem
         {
             Header = Strings.T("ClearSearchHistory"),
-            Style = (Style)FindResource("SearchHistoryMenuItem")
+            Style = (Style)FindResource("SearchHistoryMenuItem"),
+            // Nothing to clear yet: keep the action visible but inert instead of letting a
+            // tap wipe an already empty history.
+            IsEnabled = App.Settings.RecentSearches.Count > 0,
+            Icon = CreateSearchHistoryBroomIcon()
         };
         clearItem.Click += ClearSearchHistory_Click;
         menu.Items.Add(clearItem);
@@ -1303,6 +1312,25 @@ public partial class MainWindow : Window
         var icon = new Path
         {
             Data = Geometry.Parse("M 12,2 A 10,10 0 1 0 22,12 A 10,10 0 0 0 12,2 M 12,6 V 12 L 16,14"),
+            StrokeThickness = 1.3,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
+            StrokeLineJoin = PenLineJoin.Round,
+            Width = 13,
+            Height = 13,
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        icon.SetResourceReference(Path.StrokeProperty, "SubTextBrush");
+        return icon;
+    }
+
+    private static Path CreateSearchHistoryBroomIcon()
+    {
+        var icon = new Path
+        {
+            Data = Geometry.Parse("M 15.5 2.5 L 11 7 M 11 7 L 4.8 13.2 C 3.9 14.1 3.9 15.4 4.8 16.3 C 5.7 17.2 7 17.2 7.9 16.3 L 14.1 10.1"),
             StrokeThickness = 1.3,
             StrokeStartLineCap = PenLineCap.Round,
             StrokeEndLineCap = PenLineCap.Round,

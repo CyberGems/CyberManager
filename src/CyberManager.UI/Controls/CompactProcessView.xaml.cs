@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Automation;
@@ -7,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using CyberManager.Common.I18n;
 
 namespace CyberManager.UI.Controls;
@@ -18,7 +20,7 @@ public partial class CompactProcessView : UserControl
             nameof(ItemsSource),
             typeof(IEnumerable),
             typeof(CompactProcessView),
-            new PropertyMetadata(null));
+            new PropertyMetadata(null, OnItemsSourceChanged));
 
     public static readonly DependencyProperty SelectedItemProperty =
         DependencyProperty.Register(
@@ -52,6 +54,48 @@ public partial class CompactProcessView : UserControl
         InitializeComponent();
         ApplyLanguage();
     }
+
+    private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is not CompactProcessView view) return;
+        if (e.OldValue is INotifyCollectionChanged oldCollection)
+            oldCollection.CollectionChanged -= view.OnSourceCollectionChanged;
+        if (e.NewValue is INotifyCollectionChanged newCollection)
+            newCollection.CollectionChanged += view.OnSourceCollectionChanged;
+        view.QueueListFit();
+    }
+
+    private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+        QueueListFit();
+
+    private void QueueListFit() =>
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(UpdateListFit));
+
+    private void CompactGrid_SizeChanged(object sender, SizeChangedEventArgs e) => UpdateListFit();
+
+    /// <summary>
+    /// Keeps the compact list from hugging the top of the window when it holds fewer rows
+    /// than fit: with few processes (a quiet system or an active filter) the rows used to
+    /// sit at the very top and leave an empty void below them, which read as broken layout.
+    /// When the content is shorter than the available height the grid shrinks to its rows
+    /// and centers itself vertically; otherwise it stretches and scrolls as usual.
+    /// </summary>
+    private void UpdateListFit()
+    {
+        if (!IsLoaded) return;
+
+        int rows = CompactGrid.Items?.Count ?? 0;
+        double available = CompactGrid.ActualHeight;
+        if (rows == 0 || available <= 0) return;
+
+        // 26 matches the DataGridRow Height setter in this view's row style.
+        double content = CompactGrid.ColumnHeaderHeight + (rows * CompactRowHeight) + 2;
+        bool fits = available > content + 8;
+        CompactGrid.Height = fits ? content : double.NaN;
+        CompactGrid.VerticalAlignment = fits ? VerticalAlignment.Center : VerticalAlignment.Stretch;
+    }
+
+    private const double CompactRowHeight = 26;
 
     public IEnumerable? ItemsSource
     {

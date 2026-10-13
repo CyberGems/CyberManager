@@ -680,6 +680,7 @@
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                       SelectionMode="Extended"
                       SelectionUnit="FullRow"
+                      SizeChanged="CompactGrid_SizeChanged"
                       AutomationProperties.Name="Compact process list">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Process" Width="*" SortMemberPath="Name">
