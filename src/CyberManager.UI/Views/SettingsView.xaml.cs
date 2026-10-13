@@ -434,6 +434,7 @@ public partial class SettingsView : UserControl
         AutoUpdatesDescLbl.Text = Strings.T("AutoCheckUpdatesDesc");
         SuiteSuggestionsTitleLbl.Text = Strings.T("SuiteSuggestionsTitle");
         SuiteSuggestionsDescLbl.Text = Strings.T("SuiteSuggestionsDesc");
+        AutomationProperties.SetName(SuiteSuggestionsSwitch, Strings.T("SuiteSuggestionsTitle"));
         HotkeyTitleLbl.Text = Strings.T("GlobalHotkeyTitle");
         HotkeyDescLbl.Text = Strings.T("GlobalHotkeyDesc");
         HotkeyResetBtn.ToolTip = Strings.T("GlobalHotkeyReset");

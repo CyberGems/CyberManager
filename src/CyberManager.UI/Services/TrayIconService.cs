@@ -5,9 +5,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using CyberManager.Common.I18n;
 using CyberManager.Common.Settings;
+using CyberManager.UI;
 
 namespace CyberManager.UI.Services;
 
@@ -89,6 +91,7 @@ public sealed class TrayIconService : IDisposable
     private MenuItem? _refreshMenuItem;
     private MenuItem? _widgetMenuItem;
     private MenuItem? _helpMenuItem;
+    private MenuItem? _suiteMenuItem;
     private MenuItem? _subHelpItem;
     private MenuItem? _subFaqItem;
     private MenuItem? _subChangelogItem;
@@ -327,6 +330,8 @@ public sealed class TrayIconService : IDisposable
         _helpMenuItem.Items.Add(_subAboutItem);
         _helpMenuItem.Items.Add(_subCheckUpdateItem);
 
+        _suiteMenuItem = BuildSuiteMenu(miStyle, sepStyle);
+
         // 10. Exit Application
         _exitMenuItem = new MenuItem
         {
@@ -347,8 +352,99 @@ public sealed class TrayIconService : IDisposable
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
         _contextMenu.Items.Add(_settingsMenuItem);
         _contextMenu.Items.Add(_helpMenuItem);
+        _contextMenu.Items.Add(_suiteMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
         _contextMenu.Items.Add(_exitMenuItem);
+    }
+
+    private static MenuItem BuildSuiteMenu(Style? menuItemStyle, Style? separatorStyle)
+    {
+        var suiteMenu = new MenuItem
+        {
+            Header = Strings.T("MoreFromCyberGems"),
+            Icon = CreatePathIcon("M 6 3 H 18 L 22 9 L 12 21 L 2 9 Z M 2 9 H 22 M 10 3 L 8 9 L 12 21 L 16 9 L 14 3"),
+            Tag = "suite",
+            Visibility = App.Settings.ShowSuiteRecommendations ? Visibility.Visible : Visibility.Collapsed
+        };
+        System.Windows.Automation.AutomationProperties.SetName(suiteMenu, Strings.T("MoreFromCyberGems"));
+        if (menuItemStyle != null) suiteMenu.Style = menuItemStyle;
+
+        foreach (var app in SuiteCatalog.Others)
+        {
+            var appMenuItem = new MenuItem
+            {
+                Header = CreateSuiteMenuHeader(app),
+                Icon = CreateSuiteMenuIcon(app),
+                Tag = app
+            };
+            if (menuItemStyle != null) appMenuItem.Style = menuItemStyle;
+            appMenuItem.Click += (_, _) => OpenUrl(app.Site);
+            suiteMenu.Items.Add(appMenuItem);
+        }
+
+        suiteMenu.Items.Add(new Separator { Style = separatorStyle });
+        var moreItem = new MenuItem
+        {
+            Header = Strings.T("SuiteMoreOnline"),
+            Icon = CreatePathIcon("M 5 12 H 19 M 13 6 L 19 12 L 13 18"),
+            Tag = "suite-more"
+        };
+        if (menuItemStyle != null) moreItem.Style = menuItemStyle;
+        moreItem.Click += (_, _) => OpenUrl("https://cybergems.org/#apps");
+        suiteMenu.Items.Add(moreItem);
+
+        return suiteMenu;
+    }
+
+    private static StackPanel CreateSuiteMenuHeader(SuiteApp app)
+    {
+        var title = new TextBlock
+        {
+            Text = app.Name,
+            FontSize = 12.5,
+            FontWeight = FontWeights.SemiBold
+        };
+        title.SetResourceReference(TextBlock.ForegroundProperty, "TextBrush");
+
+        var description = new TextBlock
+        {
+            Text = Strings.Current == Lang.Es ? app.PitchEs : app.PitchEn,
+            FontSize = 10.5,
+            Opacity = 0.78
+        };
+        description.SetResourceReference(TextBlock.ForegroundProperty, "SubTextBrush");
+
+        var header = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        header.Children.Add(title);
+        header.Children.Add(description);
+        return header;
+    }
+
+    private static Image CreateSuiteMenuIcon(SuiteApp app)
+    {
+        var image = new Image
+        {
+            Width = 18,
+            Height = 18,
+            Stretch = Stretch.Uniform
+        };
+        try
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri($"pack://application:,,,/Assets/Suite/{app.Slug}.png", UriKind.Absolute);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            image.Source = bitmap;
+            RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.HighQuality);
+        }
+        catch
+        {
+            // Keep the labeled entry available if an optional suite icon cannot be decoded.
+        }
+
+        return image;
     }
 
     private static void OpenUrl(string url)
@@ -420,6 +516,22 @@ public sealed class TrayIconService : IDisposable
         if (_subDonateItem != null) _subDonateItem.Header = Strings.T("Donate");
         if (_subAboutItem != null) _subAboutItem.Header = $"{Strings.T("AboutSubtitle")}...";
         if (_subCheckUpdateItem != null) _subCheckUpdateItem.Header = Strings.T("CheckForUpdates");
+        if (_suiteMenuItem != null)
+        {
+            _suiteMenuItem.Header = Strings.T("MoreFromCyberGems");
+            System.Windows.Automation.AutomationProperties.SetName(_suiteMenuItem, Strings.T("MoreFromCyberGems"));
+            _suiteMenuItem.Visibility = App.Settings.ShowSuiteRecommendations
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            foreach (var item in _suiteMenuItem.Items)
+            {
+                if (item is not MenuItem suiteAppItem) continue;
+                if (suiteAppItem.Tag is SuiteApp suiteApp)
+                    suiteAppItem.Header = CreateSuiteMenuHeader(suiteApp);
+                else if (Equals(suiteAppItem.Tag, "suite-more"))
+                    suiteAppItem.Header = Strings.T("SuiteMoreOnline");
+            }
+        }
         if (_exitMenuItem != null) _exitMenuItem.Header = Strings.T("Exit");
     }
 

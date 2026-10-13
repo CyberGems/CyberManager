@@ -42,6 +42,13 @@ public class AppSettingsTests
     }
 
     [Fact]
+    public void AppSettings_DefaultSuiteRecommendations_AreEnabled()
+    {
+        var settings = new AppSettings();
+        Assert.True(settings.ShowSuiteRecommendations);
+    }
+
+    [Fact]
     public void AppSettings_DefaultStartWithWindows_IsTrue()
     {
         var settings = new AppSettings();
@@ -135,6 +142,7 @@ public class AppSettingsTests
             StartWithWindows = false,
             StartMinimized = true,
             AutoCheckForUpdates = false,
+            ShowSuiteRecommendations = false,
             GlobalHotkey = "Ctrl+Shift+P",
             WidgetHotkey = "Ctrl+Shift+W",
             WidgetVisible = true,
@@ -167,6 +175,7 @@ public class AppSettingsTests
         Assert.True(settings.StartWithWindows);
         Assert.False(settings.StartMinimized);
         Assert.True(settings.AutoCheckForUpdates);
+        Assert.True(settings.ShowSuiteRecommendations);
         Assert.Equal("Alt+Shift+M", settings.GlobalHotkey);
         Assert.Equal("Alt+Shift+W", settings.WidgetHotkey);
         Assert.False(settings.WidgetVisible);
