@@ -1327,54 +1327,40 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Builds the broom glyph for "Clear search history". Two earlier attempts failed to read as
-    /// a broom at menu size (the first looked like a paperclip, the second like an ice-cream cone:
-    /// narrow tall head + stubby handle). This is the canonical silhouette: a long handle that
-    /// descends INTO a wide, flat bristle head, with three short bristle feet under it.
-    /// Draw order matters: head, then handle over it, then the bristle ticks.
+    /// Builds the broom glyph for "Clear search history". It MUST be a single Path with explicit
+    /// Width/Height (like the clock icon in the same menu): a wrapper Grid with several Paths
+    /// renders each one at natural size and the pieces end up scrambled at 15px. The filled
+    /// silhouette (long handle that merges into a wide, flat head with two bristle notches) is
+    /// what stays readable at menu size.
     /// </summary>
-    private static Grid CreateSearchHistoryBroomIcon()
+    private static Path CreateSearchHistoryBroomIcon()
     {
-        var icon = new Grid
+        var icon = new Path
         {
+            // Single filled silhouette (see CreateBroomGeometry): no FillRule games needed.
+            Data = CreateBroomGeometry(),
             Width = 15,
             Height = 15,
+            Stretch = Stretch.Uniform,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
-
-        var head = new Path
-        {
-            Data = Geometry.Parse("M 9 12 L 5.2 20 L 16.8 20 L 13 12 Z"),
-            Stretch = Stretch.Uniform
-        };
-        head.SetResourceReference(Path.FillProperty, "SubTextBrush");
-
-        var handle = new Path
-        {
-            Data = Geometry.Parse("M 19.5 2.5 L 11.2 14.8"),
-            StrokeThickness = 2.1,
-            StrokeStartLineCap = PenLineCap.Round,
-            StrokeEndLineCap = PenLineCap.Round,
-            Stretch = Stretch.Uniform
-        };
-        handle.SetResourceReference(Path.StrokeProperty, "SubTextBrush");
-
-        var bristles = new Path
-        {
-            Data = Geometry.Parse("M 7.6 20.3 L 7.6 22.6 M 11 20.3 L 11 22.8 M 14.4 20.3 L 14.4 22.6"),
-            StrokeThickness = 1.2,
-            StrokeStartLineCap = PenLineCap.Round,
-            StrokeEndLineCap = PenLineCap.Round,
-            Stretch = Stretch.Uniform
-        };
-        bristles.SetResourceReference(Path.StrokeProperty, "SubTextBrush");
-
-        icon.Children.Add(head);
-        icon.Children.Add(handle);
-        icon.Children.Add(bristles);
+        icon.SetResourceReference(Path.FillProperty, "SubTextBrush");
         return icon;
     }
+
+    /// <summary>
+    /// Broom silhouette in a 24x24 design box: a long handle bar that meets a wide, flat head
+    /// whose bottom edge carries two V notches (three bristle fingers). The handle's bottom cut is
+    /// horizontal and sits exactly on the head's top edge: the subpaths must only TOUCH, never
+    /// overlap, because Geometry.Parse yields a frozen StreamGeometry that fills with EvenOdd (an
+    /// overlap would punch a dark hole where the handle enters the head).
+    /// </summary>
+    private static Geometry CreateBroomGeometry() =>
+        Geometry.Parse(
+            "M 18.5 1.9 L 20.5 3.1 L 14.04 12 L 12.14 12 Z " +
+            "M 9 12 L 13.4 12 L 17.2 19.6 L 14.9 19.6 L 13.8 17.4 L 12.7 19.6 " +
+            "L 10 19.6 L 8.9 17.4 L 7.8 19.6 L 5.2 19.6 Z");
 
     private void SearchHistoryItem_Click(object sender, RoutedEventArgs e)
     {
