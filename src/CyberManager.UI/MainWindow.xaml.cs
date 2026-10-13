@@ -214,7 +214,7 @@ public partial class MainWindow : Window
         CompactView.ProcessGrid.Sorting += ProcGrid_Sorting;
         CompactView.ProcessGrid.PreviewMouseRightButtonDown += CompactGrid_PreviewMouseRightButtonDown;
         CompactView.ProcessGrid.PreviewKeyDown += ProcGrid_PreviewKeyDown;
-        CyberManagerWindowChrome.Apply(this, 12);
+        CyberManagerWindowChrome.Apply(this, 8);
         Loaded += OnLoaded;
         Closing += OnClosing;
         IsVisibleChanged += OnVisibilityChanged;
@@ -1326,22 +1326,40 @@ public partial class MainWindow : Window
         return icon;
     }
 
-    private static Path CreateSearchHistoryBroomIcon()
+    /// <summary>
+    /// Builds the broom glyph for "Clear search history". The previous single stroked path read
+    /// like a paperclip at menu size, so this version pairs a thick diagonal handle with a filled
+    /// trapezoid bristle head — the silhouette that makes a broom recognizable at 14px.
+    /// </summary>
+    private static Grid CreateSearchHistoryBroomIcon()
     {
-        var icon = new Path
+        var icon = new Grid
         {
-            Data = Geometry.Parse("M 15.5 2.5 L 11 7 M 11 7 L 4.8 13.2 C 3.9 14.1 3.9 15.4 4.8 16.3 C 5.7 17.2 7 17.2 7.9 16.3 L 14.1 10.1"),
-            StrokeThickness = 1.3,
-            StrokeStartLineCap = PenLineCap.Round,
-            StrokeEndLineCap = PenLineCap.Round,
-            StrokeLineJoin = PenLineJoin.Round,
-            Width = 13,
-            Height = 13,
-            Stretch = Stretch.Uniform,
+            Width = 14,
+            Height = 14,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
-        icon.SetResourceReference(Path.StrokeProperty, "SubTextBrush");
+
+        var handle = new Path
+        {
+            Data = Geometry.Parse("M 17 3 L 12.4 7.2"),
+            StrokeThickness = 1.9,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
+            Stretch = Stretch.Uniform
+        };
+        handle.SetResourceReference(Path.StrokeProperty, "SubTextBrush");
+
+        var head = new Path
+        {
+            Data = Geometry.Parse("M 11.4 7.8 L 7.6 17 L 15.6 17 L 13.4 7.8 Z"),
+            Stretch = Stretch.Uniform
+        };
+        head.SetResourceReference(Path.FillProperty, "SubTextBrush");
+
+        icon.Children.Add(handle);
+        icon.Children.Add(head);
         return icon;
     }
 

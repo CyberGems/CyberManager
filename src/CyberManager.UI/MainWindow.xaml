@@ -474,9 +474,12 @@
             <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
     </Window.Resources>
-    <Border Margin="5" CornerRadius="12">
+    <!-- No outer margin: with AllowsTransparency the window bounds ARE the client area, so any
+         inset shows up as a dead "inflated" ring around the visible rounded rect and pushes the
+         8px resize/corner hit-test bands (WindowChrome) out of the visible pixels. -->
+    <Border>
         <Border x:Name="OuterBorder"
-                CornerRadius="12"
+                CornerRadius="8"
                 BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="1"
                 Background="{DynamicResource BgBrush}"
@@ -1373,7 +1376,10 @@
             <views:SettingsView x:Name="SettingsTabContent" Grid.Row="1" Visibility="Collapsed"/>
 
             <!-- Compact View Host -->
-            <Grid x:Name="CompactViewHost" Grid.Row="0" Grid.RowSpan="2" Visibility="Collapsed" Panel.ZIndex="10">
+            <!-- Margin="0" overrides the 20/14/20/16 layout padding of the shared grid: in compact
+                 mode that dead frame pushed the footer and list away from the real window edge
+                 (the "inflated border" effect). The compact view brings its own 6px padding. -->
+            <Grid x:Name="CompactViewHost" Grid.Row="0" Grid.RowSpan="2" Margin="0" Visibility="Collapsed" Panel.ZIndex="10">
                 <controls:CompactProcessView x:Name="CompactView"/>
             </Grid>
             </Grid>
