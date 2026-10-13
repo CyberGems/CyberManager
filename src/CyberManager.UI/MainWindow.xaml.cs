@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
@@ -1264,6 +1265,7 @@ public partial class MainWindow : Window
                 {
                     Header = query,
                     Tag = query,
+                    Icon = CreateSearchHistoryClockIcon(),
                     Style = (Style)FindResource("SearchHistoryMenuItem")
                 };
                 item.Click += SearchHistoryItem_Click;
@@ -1271,7 +1273,10 @@ public partial class MainWindow : Window
             }
         }
 
-        menu.Items.Add(new Separator());
+        menu.Items.Add(new Separator
+        {
+            Style = (Style)FindResource("SearchHistorySeparator")
+        });
         var clearItem = new MenuItem
         {
             Header = Strings.T("ClearSearchHistory"),
@@ -1282,6 +1287,29 @@ public partial class MainWindow : Window
 
         menu.IsOpen = true;
         e.Handled = true;
+    }
+
+    /// <summary>
+    /// Builds the small clock glyph shown next to each recent search entry. Each item needs its
+    /// own instance because a visual can only have one logical parent.
+    /// </summary>
+    private static Path CreateSearchHistoryClockIcon()
+    {
+        var icon = new Path
+        {
+            Data = Geometry.Parse("M 12,2 A 10,10 0 1 0 22,12 A 10,10 0 0 0 12,2 M 12,6 V 12 L 16,14"),
+            StrokeThickness = 1.3,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
+            StrokeLineJoin = PenLineJoin.Round,
+            Width = 13,
+            Height = 13,
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        icon.SetResourceReference(Path.StrokeProperty, "SubTextBrush");
+        return icon;
     }
 
     private void SearchHistoryItem_Click(object sender, RoutedEventArgs e)

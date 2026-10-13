@@ -252,7 +252,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <!-- Search history popup items: no icon gutter and tighter metrics than
+        <!-- Search history popup items: clock icon gutter and tighter metrics than
              ModernMenuItem, so the recent-searches list stays compact in both windows. -->
         <Style x:Key="SearchHistoryMenuItem" TargetType="{x:Type MenuItem}">
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
@@ -264,7 +264,14 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type MenuItem}">
                         <Border x:Name="Bd" Background="Transparent" CornerRadius="6" Padding="10,3" SnapsToDevicePixels="True">
-                            <ContentPresenter ContentSource="Header" Margin="0" VerticalAlignment="Center"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="20"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter ContentSource="Icon" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <ContentPresenter Grid.Column="1" ContentSource="Header" Margin="0" VerticalAlignment="Center"/>
+                            </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
@@ -282,6 +289,20 @@
             <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <!-- Thin, low-opacity rule aligned with the text column of the history items. -->
+        <Style x:Key="SearchHistorySeparator" TargetType="{x:Type Separator}">
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Margin" Value="34,5,14,5"/>
+            <Setter Property="Opacity" Value="0.45"/>
+            <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Separator}">
+                        <Border Height="1" Background="{TemplateBinding Background}" SnapsToDevicePixels="True"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Application.Resources>
 </Application>
