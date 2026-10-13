@@ -47,6 +47,8 @@ public static class Strings
         ["SearchOnline"] = ("Search online", "Buscar en línea"),
         ["Priority"] = ("Priority", "Prioridad"),
         ["NoProcesses"] = ("No processes found", "No se encontraron procesos"),
+        ["NoSearchMatches"] = ("No matches for \"{0}\"", "Sin coincidencias para \"{0}\""),
+        ["NoProcessesFiltered"] = ("No processes match the active filters", "Ningún proceso coincide con los filtros activos"),
         ["Unknown"] = ("Unknown", "Desconocido"),
         ["ProcessesCount"] = ("{0} processes", "{0} procesos"),
         ["ProcessesShown"] = ("{0} of {1} shown", "{0} de {1} mostrados"),

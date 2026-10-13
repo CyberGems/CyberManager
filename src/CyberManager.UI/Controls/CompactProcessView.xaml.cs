@@ -138,6 +138,7 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(CompactGrid, Strings.T("Processes"));
         ContextHintText.Text = Strings.T("CompactContextHint");
         EmptyStateText.Text = Strings.T("NoProcesses");
+        LoaderOverlay.RefreshLocalization();
         // Localize by sort key instead of column index, so hiding or reordering columns
         // never mislabels a header.
         LocalizeColumn("Name", "Process");
@@ -203,6 +204,13 @@ public partial class CompactProcessView : UserControl
         CompactGrid.Visibility = empty ? Visibility.Collapsed : Visibility.Visible;
         EmptyStateText.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    /// <summary>
+    /// Shows or hides the loading overlay. The main window drives this together with the full
+    /// view's overlay, so both modes always agree on whether the list is still loading.
+    /// </summary>
+    public void SetLoading(bool loading) =>
+        LoaderOverlay.Visibility = loading ? Visibility.Visible : Visibility.Collapsed;
 
     public void SetEndTaskEnabled(bool enabled) => EndTaskButton.IsEnabled = enabled;
 

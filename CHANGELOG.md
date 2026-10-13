@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Restart Shortcut**: `Ctrl+R` now restarts the selected process. It was previously swallowed by the refresh handler at the window level, so the shortcut never fired. Refresh remains on `F5`.
+- **Startup Loader vs. Empty State**: The list no longer shows "No processes found" while the first collection is still running. The loader and the empty message were two independent signals, so a slow start could leave the message where the loader belonged. The list area now belongs to the loader until a collection completes, and a failed first refresh shows the error instead of spinning forever.
+- **Loader in Compact Mode**: The branded startup loader is now shared by both layouts, so compact mode shows it too instead of an empty list. The loader overlay previously lived inside the full-mode panel, which is collapsed in compact mode.
+- **Clearer Empty List**: An empty list now says whether the search matched nothing, the filters hid everything, or the refresh failed, instead of always claiming there are no processes.
 
 ### Changed
 - **Repository Layout**: Donation QR assets moved from `docs/donate` to `assets/donate`, and the obsolete `docs` folder was removed because the local wiki now lives in its own repository.

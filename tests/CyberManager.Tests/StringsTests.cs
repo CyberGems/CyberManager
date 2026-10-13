@@ -66,7 +66,7 @@ public class StringsTests
             "AppTitle", "AppSubtitle", "SearchPlaceholder", "Process", "Pid", "Cpu", "Memory",
             "Threads", "Path", "Status", "Running", "Suspended", "Kill", "KillTree",
             "Suspend", "Resume", "Restart", "RestartConfirm", "RestartUnavailable", "RestartPackagedUnsupported", "RestartFailed", "RestartHintSuspended", "RestartHintNoPath", "RestartHintPackaged", "RestartShortcutHint", "CopyPath", "OpenFolder", "SearchOnline", "Priority",
-            "NoProcesses", "Refresh", "AlwaysOnTop", "KillConfirm", "KillTreeConfirm",
+            "NoProcesses", "NoSearchMatches", "NoProcessesFiltered", "Refresh", "AlwaysOnTop", "KillConfirm", "KillTreeConfirm",
             "PauseDetection", "ResumeDetection", "DetectionPaused",
             "Settings", "About", "ThemeCyberManager", "ThemeDark", "ThemeLight",
             "Ok", "Cancel", "DoNotShowAgain", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",

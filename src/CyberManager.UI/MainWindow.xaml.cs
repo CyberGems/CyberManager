@@ -152,6 +152,16 @@ public partial class MainWindow : Window
     private bool _syncingHeavyFilter;
     private bool _syncingSystemFilter;
 
+    // The list has no rows until the first collection completes, which takes noticeably longer
+    // than a refresh on a cold start. Until then the branded loader owns the list area: without
+    // this flag the empty state and the loader are two independent signals and the slower one
+    // wins, which is how "No processes found" ended up replacing the loader on some starts.
+    private bool _hasLoadedOnce;
+
+    // Message of the last failed refresh, so an empty list can explain itself instead of
+    // claiming there are no processes. Cleared as soon as a collection succeeds.
+    private string? _lastLoadError;
+
     // Row the current Shift+Arrow run is anchored to. Stored as a process identity rather than a
     // ProcessInfo reference because the list is rebuilt on every refresh (default 800 ms), which
     // replaces the item objects. Null means the next arrow key starts a new run from the row that
@@ -821,12 +831,10 @@ public partial class MainWindow : Window
 
                 var data = await _collector.CollectAsync(cancellationToken);
                 _all = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
+                _lastLoadError = null;
+                _hasLoadedOnce = true;
                 ApplySortingAndFilter();
-
-                if (LoaderOverlay.Visibility == Visibility.Visible)
-                {
-                    LoaderOverlay.Visibility = Visibility.Collapsed;
-                }
+                SetListLoading(false);
             }
 
             var sysMetrics = SystemMetricsCollector.Instance.Sample(_all.Count);
@@ -871,10 +879,15 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             // Keep the last valid snapshot visible instead of showing a blank list
-            // when a transient NT query or permission error occurs.
+            // when a transient NT query or permission error occurs. The loader is dismissed
+            // either way: a failure is an answer, and leaving the spinner running would hide
+            // the error behind an endless "collecting processes" message.
             var message = $"{Strings.T("RefreshFailed")}: {ex.Message}";
+            _lastLoadError = message;
+            _hasLoadedOnce = true;
+            SetListLoading(false);
+            UpdateEmptyState();
             SetStatus(message, message);
-            CompactView.SetEmptyState(_view.Count == 0, message);
             Debug.WriteLine($"Refresh error: {ex}");
         }
         finally
@@ -1043,9 +1056,7 @@ public partial class MainWindow : Window
 
         RestoreSelection(previousSelection);
 
-        EmptyStateText.Visibility = _view.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        ProcGrid.Visibility = _view.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
-        CompactView.SetEmptyState(_view.Count == 0);
+        UpdateEmptyState();
         KillBtn.IsEnabled = Selected != null;
         CompactView.SetEndTaskEnabled(Selected != null);
         UpdateRestartControls(Selected);
@@ -1053,7 +1064,14 @@ public partial class MainWindow : Window
         string timeStr = DateTime.Now.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
         string status;
         string toolTip;
-        if (!string.IsNullOrEmpty(q))
+        if (!_hasLoadedOnce)
+        {
+            // Nothing has been collected yet, so the footer must not claim the list was just
+            // updated: the loader is still on screen.
+            status = Strings.T("CollectingProcesses");
+            toolTip = status;
+        }
+        else if (!string.IsNullOrEmpty(q))
         {
             status = Strings.T("ProcessesShown", _view.Count, _all.Count) + $" • {Strings.T("Updated")} {timeStr}";
             toolTip = Strings.T("ProcessesFilterTip", _view.Count, _all.Count, timeStr);
@@ -1067,6 +1085,47 @@ public partial class MainWindow : Window
         }
 
         SetStatus(status, toolTip);
+    }
+
+    /// <summary>
+    /// Shows or hides the branded loading overlay on both process lists. Each mode hosts its own
+    /// instance, so routing every change through this single call is what stops a mode switch from
+    /// exposing a list that is still loading.
+    /// </summary>
+    private void SetListLoading(bool loading)
+    {
+        LoaderOverlay.Visibility = loading ? Visibility.Visible : Visibility.Collapsed;
+        CompactView.SetLoading(loading);
+    }
+
+    /// <summary>
+    /// Single decision point for the "nothing to show" state of both lists. The message is only
+    /// allowed to appear once a collection has completed: before that the loader owns the list
+    /// area, which is what previously let the empty state race the loader on a slow start.
+    /// </summary>
+    private void UpdateEmptyState()
+    {
+        if (!_hasLoadedOnce)
+        {
+            EmptyStateText.Visibility = Visibility.Collapsed;
+            ProcGrid.Visibility = Visibility.Collapsed;
+            CompactView.SetEmptyState(false);
+            return;
+        }
+
+        var message = ProcessListEmptyState.Resolve(_all.Count, _view.Count, _pendingSearch, _lastLoadError);
+        if (message is null)
+        {
+            EmptyStateText.Visibility = Visibility.Collapsed;
+            ProcGrid.Visibility = Visibility.Visible;
+            CompactView.SetEmptyState(false);
+            return;
+        }
+
+        EmptyStateText.Text = message;
+        EmptyStateText.Visibility = Visibility.Visible;
+        ProcGrid.Visibility = Visibility.Collapsed;
+        CompactView.SetEmptyState(true, message);
     }
 
     private ProcessInfo? Selected => ProcGrid.SelectedItem as ProcessInfo;
@@ -2974,9 +3033,7 @@ public partial class MainWindow : Window
             FullBrandingPanel.ToolTip = Strings.T("About");
             AutomationProperties.SetName(FullBrandingPanel, Strings.T("About"));
             SearchHint.Text = Strings.T("SearchPlaceholder");
-            EmptyStateText.Text = Strings.T("NoProcesses");
-            LoaderTitle.Text = Strings.T("CollectingProcesses");
-            LoaderSub.Text = Strings.T("InitializingNtEngine");
+            LoaderOverlay.RefreshLocalization();
             GroupToggleLabel.Text = Strings.T("GroupByApp");
             SystemFilterLabel.Text = Strings.T("HideSystemProcesses");
             AutomationProperties.SetName(SystemFilterCheck, Strings.T("HideSystemProcesses"));
@@ -3030,6 +3087,10 @@ public partial class MainWindow : Window
             UpdateRamToolTip();
             SetStatus(Strings.T("Ready"));
             CompactView.ApplyLanguage();
+            // Runs after the compact view re-localizes its own labels, so the resolved
+            // empty-state message (no matches, filters, or a load error) is the one left on
+            // screen instead of the generic "no processes found".
+            UpdateEmptyState();
             CompactView.SetPinned(Topmost);
             _trayService.UpdateLocalization();
 
