@@ -22,6 +22,7 @@ public partial class AboutWindow : Window, IModalAttentionWindow
     private const string DonateUrl = "https://github.com/CyberGems/CyberManager#%EF%B8%8F-donate";
 
     private const double SuiteIdleOpacity = 0.38;
+    private const double MonitorEdgeMargin = 16;
 
     private bool _suppressAutoCheckUpdateChange;
     private DateTime _lastAttentionTime = DateTime.MinValue;
@@ -38,11 +39,31 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         InitializeComponent();
         Icon = AppIconHelper.CreateManagerImageSource(64) as System.Windows.Media.ImageSource;
         CyberManagerWindowChrome.Apply(this, 12);
+        SourceInitialized += AboutWindow_SourceInitialized;
         LoadContent();
         if (checkUpdatesNow)
         {
             Loaded += (_, _) => UpdateCheckButton_Click(this, new RoutedEventArgs());
         }
+    }
+
+    private void AboutWindow_SourceInitialized(object? sender, EventArgs e)
+    {
+        var workArea = MonitorPlacement.GetNearestWorkArea(Owner ?? this);
+        if (workArea.Width <= 0 || workArea.Height <= 0)
+            return;
+
+        var maxWidth = Math.Max(1, workArea.Width - MonitorEdgeMargin * 2);
+        var maxHeight = Math.Max(1, workArea.Height - MonitorEdgeMargin * 2);
+
+        // Lower the minimums before assigning maximums so even very small work areas
+        // can constrain the window without violating WPF's Min/Max size relationship.
+        MinWidth = Math.Min(MinWidth, maxWidth);
+        MinHeight = Math.Min(MinHeight, maxHeight);
+        MaxWidth = maxWidth;
+        MaxHeight = maxHeight;
+        Width = Math.Min(Width, maxWidth);
+        Height = Math.Min(Height, maxHeight);
     }
 
     private void LoadContent()
