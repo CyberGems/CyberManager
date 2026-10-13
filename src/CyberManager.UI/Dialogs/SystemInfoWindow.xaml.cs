@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Input;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
@@ -49,10 +50,16 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
     {
         Title = $"{Strings.T("SystemInformation")} ᐧ CyberManager";
         TitleText.Text = Strings.T("SystemInformation");
-        TabSummary.Content = Strings.T("Summary");
-        TabCpu.Content = Strings.T("Cpu");
-        TabMemory.Content = Strings.T("Memory");
-        TabIo.Content = Strings.T("IoHistory");
+        // Tab content now carries an icon next to the label, so localization writes the
+        // TextBlock leaves instead of replacing the whole Content (that would drop the icons).
+        TabSummaryLabel.Text = Strings.T("Summary");
+        TabCpuLabel.Text = Strings.T("Cpu");
+        TabMemoryLabel.Text = Strings.T("Memory");
+        TabIoLabel.Text = Strings.T("IoHistory");
+        AutomationProperties.SetName(TabSummary, Strings.T("Summary"));
+        AutomationProperties.SetName(TabCpu, Strings.T("Cpu"));
+        AutomationProperties.SetName(TabMemory, Strings.T("Memory"));
+        AutomationProperties.SetName(TabIo, Strings.T("IoHistory"));
 
         CpuHistoryTitle.Text = Strings.T("CpuHistory");
         CpuLegend.Text = Strings.T("CpuLegend");

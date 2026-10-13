@@ -66,10 +66,44 @@
             <!-- Sub-Tab Navigation Bar -->
             <Border Grid.Column="0" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" Padding="6,4">
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton x:Name="TabSummary" Content="Resumen" Style="{StaticResource SubTabNavButton}" IsChecked="True" Checked="SubTab_Checked"/>
-                    <RadioButton x:Name="TabCpu" Content="CPU" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked"/>
-                    <RadioButton x:Name="TabMemory" Content="Memoria" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked"/>
-                    <RadioButton x:Name="TabIo" Content="Actividad" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked"/>
+                    <!-- Tab icons follow the button's own Foreground so they share the idle,
+                         hover and checked colors of their labels. -->
+                    <RadioButton x:Name="TabSummary" Style="{StaticResource SubTabNavButton}" IsChecked="True" Checked="SubTab_Checked">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M 5 5 H 11 V 11 H 5 Z M 13 5 H 19 V 11 H 13 Z M 5 13 H 11 V 19 H 5 Z M 13 13 H 19 V 19 H 13 Z"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TabSummaryLabel" Text="Resumen" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton x:Name="TabCpu" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M 6 6 H 18 V 18 H 6 Z M 9 3 V 6 M 15 3 V 6 M 9 18 V 21 M 15 18 V 21 M 3 9 H 6 M 18 9 H 21 M 3 15 H 6 M 18 15 H 21"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TabCpuLabel" Text="CPU" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton x:Name="TabMemory" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M 4 7 H 20 V 12 H 4 Z M 4 15 H 20 V 20 H 4 Z M 8 12 V 15 M 16 12 V 15"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TabMemoryLabel" Text="Memoria" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton x:Name="TabIo" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="M 2 12 H 6.5 L 9.5 5.5 L 13.5 18.5 L 16.5 9 L 18 12 H 22"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TabIoLabel" Text="Actividad" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </RadioButton>
                 </StackPanel>
             </Border>
 
@@ -77,7 +111,7 @@
             <Border Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Path Data="M 4 4 H 20 V 20 H 4 Z M 9 2 V 4 M 15 2 V 4 M 9 20 V 22 M 15 20 V 22 M 2 9 H 4 M 20 9 H 22 M 2 15 H 4 M 20 15 H 22"
-                          Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.3" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                          Stroke="{DynamicResource TextBrush}" StrokeThickness="1.4" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock x:Name="CpuModelSubtitle" Text="NT Kernel Engine • Telemetría en tiempo real" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
             </Border>
@@ -108,7 +142,10 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Margin="2,0,0,6">
-                                <TextBlock Text="📈" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <Path Data="M 4 5 V 19 H 20 M 4 15 L 9.5 10 L 13 12.5 L 20 5.5"
+                                      Stroke="{DynamicResource TextBrush}" StrokeThickness="1.4"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="CpuHistoryTitle" Text="Historial de CPU" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="CpuLegend" Text="(Usuario / Kernel)" FontSize="10" Foreground="{DynamicResource SubTextBrush}" Margin="8,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
@@ -124,7 +161,10 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <StackPanel Orientation="Horizontal" Margin="2,0,0,6">
-                                <TextBlock Text="🧠" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <Path Data="M 4 7 H 20 V 12 H 4 Z M 4 15 H 20 V 20 H 4 Z M 8 12 V 15 M 16 12 V 15"
+                                      Stroke="{DynamicResource TextBrush}" StrokeThickness="1.4"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="MemHistoryTitle" Text="Historial de Memoria" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                                 <TextBlock x:Name="MemLegend" Text="(En uso / Commit)" FontSize="10" Foreground="{DynamicResource SubTextBrush}" Margin="8,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
@@ -201,8 +241,11 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <StackPanel Orientation="Horizontal" Margin="2,0,0,6">
-                            <TextBlock Text="📈" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="FullCpuHistoryTitle" Text="Historial de actividad de CPU (tiempo de usuario y kernel)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                                <Path Data="M 4 5 V 19 H 20 M 4 15 L 9.5 10 L 13 12.5 L 20 5.5"
+                                      Stroke="{DynamicResource TextBrush}" StrokeThickness="1.4"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="FullCpuHistoryTitle" Text="Historial de actividad de CPU (tiempo de usuario y kernel)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <controls:LargeHistoryGraphControl x:Name="FullCpuGraph" Grid.Row="1" Title="CPU %" UnitSuffix="%" PrimaryColor="#10B981" SecondaryColor="#EF4444"/>
                     </Grid>
@@ -249,8 +292,11 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <StackPanel Orientation="Horizontal" Margin="2,0,0,6">
-                            <TextBlock Text="🧠" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="FullMemHistoryTitle" Text="Historial de memoria física y Commit" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                                <Path Data="M 4 7 H 20 V 12 H 4 Z M 4 15 H 20 V 20 H 4 Z M 8 12 V 15 M 16 12 V 15"
+                                      Stroke="{DynamicResource TextBrush}" StrokeThickness="1.4"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="FullMemHistoryTitle" Text="Historial de memoria física y Commit" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                         </StackPanel>
                         <controls:LargeHistoryGraphControl x:Name="FullMemGraph" Grid.Row="1" Title="RAM %" UnitSuffix="%" PrimaryColor="{DynamicResource RamColor}" SecondaryColor="#A855F7"/>
                     </Grid>
