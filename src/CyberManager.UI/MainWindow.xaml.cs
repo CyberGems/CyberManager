@@ -1327,39 +1327,52 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Builds the broom glyph for "Clear search history". The previous single stroked path read
-    /// like a paperclip at menu size, so this version pairs a thick diagonal handle with a filled
-    /// trapezoid bristle head — the silhouette that makes a broom recognizable at 14px.
+    /// Builds the broom glyph for "Clear search history". Two earlier attempts failed to read as
+    /// a broom at menu size (the first looked like a paperclip, the second like an ice-cream cone:
+    /// narrow tall head + stubby handle). This is the canonical silhouette: a long handle that
+    /// descends INTO a wide, flat bristle head, with three short bristle feet under it.
+    /// Draw order matters: head, then handle over it, then the bristle ticks.
     /// </summary>
     private static Grid CreateSearchHistoryBroomIcon()
     {
         var icon = new Grid
         {
-            Width = 14,
-            Height = 14,
+            Width = 15,
+            Height = 15,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
 
+        var head = new Path
+        {
+            Data = Geometry.Parse("M 9 12 L 5.2 20 L 16.8 20 L 13 12 Z"),
+            Stretch = Stretch.Uniform
+        };
+        head.SetResourceReference(Path.FillProperty, "SubTextBrush");
+
         var handle = new Path
         {
-            Data = Geometry.Parse("M 17 3 L 12.4 7.2"),
-            StrokeThickness = 1.9,
+            Data = Geometry.Parse("M 19.5 2.5 L 11.2 14.8"),
+            StrokeThickness = 2.1,
             StrokeStartLineCap = PenLineCap.Round,
             StrokeEndLineCap = PenLineCap.Round,
             Stretch = Stretch.Uniform
         };
         handle.SetResourceReference(Path.StrokeProperty, "SubTextBrush");
 
-        var head = new Path
+        var bristles = new Path
         {
-            Data = Geometry.Parse("M 11.4 7.8 L 7.6 17 L 15.6 17 L 13.4 7.8 Z"),
+            Data = Geometry.Parse("M 7.6 20.3 L 7.6 22.6 M 11 20.3 L 11 22.8 M 14.4 20.3 L 14.4 22.6"),
+            StrokeThickness = 1.2,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
             Stretch = Stretch.Uniform
         };
-        head.SetResourceReference(Path.FillProperty, "SubTextBrush");
+        bristles.SetResourceReference(Path.StrokeProperty, "SubTextBrush");
 
-        icon.Children.Add(handle);
         icon.Children.Add(head);
+        icon.Children.Add(handle);
+        icon.Children.Add(bristles);
         return icon;
     }
 

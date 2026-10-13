@@ -485,7 +485,7 @@
                 Background="{DynamicResource BgBrush}"
                 ClipToBounds="True"
                 PreviewMouseLeftButtonDown="OuterBorder_MouseLeftButtonDown">
-            <Grid Margin="20,14,20,16">
+            <Grid Margin="10,7,10,8">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Row 0: TitleBar -->
                     <RowDefinition Height="*"/>    <!-- Row 1: Tab Content Host -->
