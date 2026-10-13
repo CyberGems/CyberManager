@@ -872,7 +872,10 @@ public partial class MainWindow : Window
                     sysMetrics.CpuModelName);
             }
 
-            StatsText.Text = $"{Strings.T("ProcessesCount", _all.Count)}  •  {Strings.T("CpuTotal", sysMetrics.CpuTotalPercent)}  •  {Strings.T("MemTotal", sysMetrics.UsedRamGb)}";
+            // The footer pill shows the process count only. CPU and RAM already have their own
+            // cards and sparklines above, so repeating them here (with a different RAM unit)
+            // was redundant and crowded the status line into the controls on the right.
+            StatsText.Text = Strings.T("ProcessesCount", _all.Count);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -3111,6 +3114,7 @@ public partial class MainWindow : Window
             CloseBtn.ToolTip = Strings.T("Close");
             UpdateMaximizeButtonIcon();
             StatsBorder.ToolTip = Strings.T("OpenSystemInfoTip");
+            AutomationProperties.SetName(StatsBorder, Strings.T("SystemInformation"));
             CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
             UpdateRamToolTip();
             SetStatus(Strings.T("Ready"));
