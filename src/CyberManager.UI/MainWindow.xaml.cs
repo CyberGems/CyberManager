@@ -1244,15 +1244,10 @@ public partial class MainWindow : Window
             Placement = PlacementMode.Bottom
         };
 
-        menu.Items.Add(new MenuItem
-        {
-            Header = Strings.T("RecentSearches"),
-            IsEnabled = false,
-            Style = (Style)FindResource("SearchHistoryHeaderItem")
-        });
-
         if (App.Settings.RecentSearches.Count == 0)
         {
+            // The placeholder itself already says there are no recent searches, so adding a
+            // "Recent searches" header above it was redundant noise.
             menu.Items.Add(new MenuItem
             {
                 Header = Strings.T("NoRecentSearches"),
@@ -1262,6 +1257,13 @@ public partial class MainWindow : Window
         }
         else
         {
+            menu.Items.Add(new MenuItem
+            {
+                Header = Strings.T("RecentSearches"),
+                IsEnabled = false,
+                Style = (Style)FindResource("SearchHistoryHeaderItem")
+            });
+
             foreach (var query in App.Settings.RecentSearches)
             {
                 var item = new MenuItem
