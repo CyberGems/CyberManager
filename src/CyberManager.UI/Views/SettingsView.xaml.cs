@@ -97,6 +97,7 @@ public partial class SettingsView : UserControl
         MinimizeToTrayOnCloseSwitch.IsChecked = App.Settings.MinimizeToTrayOnClose;
         AlwaysOnTopSwitch.IsChecked = App.Settings.AlwaysOnTop;
         AutoUpdatesSwitch.IsChecked = App.Settings.AutoCheckForUpdates;
+        SuiteSuggestionsSwitch.IsChecked = App.Settings.ShowSuiteRecommendations;
         _committedHotkey = App.Settings.GlobalHotkey;
         HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
         _committedWidgetHotkey = App.Settings.WidgetHotkey;
@@ -119,6 +120,7 @@ public partial class SettingsView : UserControl
         App.Settings.MinimizeToTrayOnClose = MinimizeToTrayOnCloseSwitch.IsChecked == true;
         App.Settings.AlwaysOnTop = AlwaysOnTopSwitch.IsChecked == true;
         App.Settings.AutoCheckForUpdates = AutoUpdatesSwitch.IsChecked == true;
+        App.Settings.ShowSuiteRecommendations = SuiteSuggestionsSwitch.IsChecked == true;
 
         // Sync Start with Windows Registry
         if (sender == StartWithWinSwitch)
@@ -430,6 +432,8 @@ public partial class SettingsView : UserControl
         AlwaysOnTopDescLbl.Text = Strings.T("AlwaysOnTopDesc");
         AutoUpdatesTitleLbl.Text = Strings.T("AutoCheckUpdatesTitle");
         AutoUpdatesDescLbl.Text = Strings.T("AutoCheckUpdatesDesc");
+        SuiteSuggestionsTitleLbl.Text = Strings.T("SuiteSuggestionsTitle");
+        SuiteSuggestionsDescLbl.Text = Strings.T("SuiteSuggestionsDesc");
         HotkeyTitleLbl.Text = Strings.T("GlobalHotkeyTitle");
         HotkeyDescLbl.Text = Strings.T("GlobalHotkeyDesc");
         HotkeyResetBtn.ToolTip = Strings.T("GlobalHotkeyReset");

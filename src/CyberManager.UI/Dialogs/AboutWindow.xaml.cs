@@ -1,8 +1,13 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using CyberManager.Common.I18n;
 using CyberManager.Common.Settings;
 using CyberManager.UI.Services;
@@ -16,8 +21,12 @@ public partial class AboutWindow : Window, IModalAttentionWindow
     private const string WikiUrl = "https://github.com/CyberGems/CyberManager/wiki";
     private const string DonateUrl = "https://github.com/CyberGems/CyberManager#%EF%B8%8F-donate";
 
+    private const double SuiteIdleOpacity = 0.38;
+
     private bool _suppressAutoCheckUpdateChange;
     private DateTime _lastAttentionTime = DateTime.MinValue;
+    private bool _suiteBuilt;
+    private DispatcherTimer? _diagTipTimer;
 
     public void TriggerAttention()
     {
@@ -43,6 +52,8 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         {
             AutoCheckUpdateCheck.IsChecked = App.Settings.AutoCheckForUpdates;
             RefreshLocalization();
+            EnsureSuiteApps();
+            ApplySuiteVisibility();
         }
         finally
         {
@@ -72,6 +83,13 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         AboutFooterIssuesBtn.ToolTip = Strings.T("Issues");
         AboutFooterReleasesBtn.ToolTip = Strings.T("OpenReleases");
         AboutFooterDonateBtn.ToolTip = Strings.T("DonateProject");
+        AboutFooterDiagBtn.ToolTip = Strings.T("DiagnosticInfo");
+        SuiteSectionLbl.Text = Strings.T("MoreAppsFromCyberGems");
+        SuiteMoreBtn.Content = Strings.T("SeeMore");
+        SuiteMoreBtn.ToolTip = Strings.T("VisitCyberGems");
+        System.Windows.Automation.AutomationProperties.SetName(SuiteMoreBtn, Strings.T("SeeMore"));
+        RefreshSuiteTooltips();
+        ApplySuiteVisibility();
     }
 
     private void AutoCheckUpdateCheck_Changed(object sender, RoutedEventArgs e)
@@ -242,6 +260,164 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         OpenUrl(DonateUrl);
     }
 
+    private void AboutFooterDiag_Click(object sender, MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        try
+        {
+            Clipboard.SetText(BuildDiagnosticReport());
+        }
+        catch
+        {
+            return;
+        }
+
+        AboutFooterDiagBtn.ToolTip = Strings.T("DiagnosticInfoCopied");
+        _diagTipTimer?.Stop();
+        _diagTipTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.2) };
+        _diagTipTimer.Tick += (_, _) =>
+        {
+            _diagTipTimer?.Stop();
+            AboutFooterDiagBtn.ToolTip = Strings.T("DiagnosticInfo");
+        };
+        _diagTipTimer.Start();
+    }
+
+    private void SuiteMoreBtn_Click(object sender, RoutedEventArgs e) => OpenUrl(WebsiteUrl);
+
+    /// <summary>Shows or hides the sister-app row from the current setting.</summary>
+    public void ApplySuiteVisibility()
+    {
+        SuiteSection.Visibility = App.Settings.ShowSuiteRecommendations
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    private void EnsureSuiteApps()
+    {
+        if (_suiteBuilt)
+        {
+            RefreshSuiteTooltips();
+            return;
+        }
+
+        _suiteBuilt = true;
+        SuiteAppsHost.Children.Clear();
+        if (FindResource("SuiteAppButton") is not Style style)
+            return;
+
+        foreach (var app in SuiteCatalog.Pick(5))
+        {
+            BitmapImage bitmap;
+            try
+            {
+                bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri($"pack://application:,,,/Assets/Suite/{app.Slug}.png", UriKind.Absolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+            }
+            catch
+            {
+                continue;
+            }
+
+            var image = new System.Windows.Controls.Image
+            {
+                Width = 30,
+                Height = 30,
+                Stretch = Stretch.Uniform,
+                Opacity = SuiteIdleOpacity,
+                IsHitTestVisible = false,
+                Source = bitmap
+            };
+            RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.HighQuality);
+
+            var button = new System.Windows.Controls.Button
+            {
+                Style = style,
+                Content = image,
+                Tag = app
+            };
+            System.Windows.Automation.AutomationProperties.SetName(button, app.Name);
+            button.ToolTip = SuiteTooltip(app);
+            button.MouseEnter += (_, _) => FadeSuiteIcon(image, 1);
+            button.MouseLeave += (_, _) => FadeSuiteIcon(image, SuiteIdleOpacity);
+            button.Click += (_, _) => OpenUrl(app.Site);
+            SuiteAppsHost.Children.Add(button);
+        }
+    }
+
+    private void RefreshSuiteTooltips()
+    {
+        foreach (var child in SuiteAppsHost.Children)
+        {
+            if (child is System.Windows.Controls.Button button && button.Tag is SuiteApp app)
+                button.ToolTip = SuiteTooltip(app);
+        }
+    }
+
+    private static string SuiteTooltip(SuiteApp app)
+    {
+        var pitch = Strings.Current == Lang.Es ? app.PitchEs : app.PitchEn;
+        return $"{app.Name}: {pitch}";
+    }
+
+    private static void FadeSuiteIcon(System.Windows.Controls.Image image, double to)
+    {
+        image.BeginAnimation(OpacityProperty, new DoubleAnimation
+        {
+            To = to,
+            Duration = TimeSpan.FromMilliseconds(140),
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+        });
+    }
+
+    private string BuildDiagnosticReport()
+    {
+        var dpi = VisualTreeHelper.GetDpi(this);
+        return string.Join(Environment.NewLine,
+            "CyberManager diagnostic report",
+            "",
+            $"- Version: {UpdateService.GetCurrentVersionLabel()}",
+            $"- Install: {DescribeInstall()}",
+            $"- OS: {RuntimeInformation.OSDescription}",
+            $"- Display: {SystemParameters.PrimaryScreenWidth:0}x{SystemParameters.PrimaryScreenHeight:0}, DPI {dpi.PixelsPerInchX:0} ({dpi.DpiScaleX * 100:0}%)",
+            $"- Language: {App.Settings.Language}",
+            $"- Theme: {App.Settings.Theme}",
+            $"- Check for updates on startup: {OnOff(App.Settings.AutoCheckForUpdates)}",
+            $"- Suite suggestions: {OnOff(App.Settings.ShowSuiteRecommendations)}",
+            $"- Global hotkey: {DescribeHotkey(App.Settings.GlobalHotkey)}",
+            $"- Widget hotkey: {DescribeHotkey(App.Settings.WidgetHotkey)}",
+            $"- Refresh interval: {App.Settings.RefreshIntervalMs:0} ms",
+            $"- Runtime: {RuntimeInformation.FrameworkDescription}",
+            $"- Local time: {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz} ({TimeZoneInfo.Local.DisplayName})");
+    }
+
+    private static string DescribeHotkey(string hotkey) =>
+        string.IsNullOrWhiteSpace(hotkey) ? "not set" : hotkey;
+
+    private static string OnOff(bool value) => value ? "on" : "off";
+
+    private static string DescribeInstall()
+    {
+        try
+        {
+            var dir = AppContext.BaseDirectory;
+            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+            var installed =
+                (!string.IsNullOrEmpty(programFiles) && dir.StartsWith(programFiles, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(programFilesX86) && dir.StartsWith(programFilesX86, StringComparison.OrdinalIgnoreCase));
+            return installed ? "installed" : "portable or development";
+        }
+        catch
+        {
+            return "unknown";
+        }
+    }
+
     private void AboutFooterCopyright_MouseEnter(object sender, MouseEventArgs e)
     {
         AboutFooterCopyright.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, "TextBrush");
@@ -293,6 +469,12 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         {
             AboutFooterTagBody.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
             AboutFooterTagDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, brushKey);
+        }
+        else if (border == AboutFooterDiagBtn)
+        {
+            AboutFooterDiagBody.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            AboutFooterDiagClip.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            AboutFooterDiagLines.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
         }
     }
 

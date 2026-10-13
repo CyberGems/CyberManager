@@ -28,6 +28,38 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Suite app button (More apps from CyberGems) -->
+        <Style x:Key="SuiteAppButton" TargetType="Button">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Custom Title Close Button -->
         <Style x:Key="TitleCloseButton" TargetType="Button">
             <Setter Property="Width" Value="38"/>
@@ -227,6 +259,17 @@
                                 </StackPanel>
                             </StackPanel>
                         </Border>
+
+                        <!-- More apps from CyberGems -->
+                        <StackPanel x:Name="SuiteSection" Margin="0,4,0,0">
+                            <TextBlock x:Name="SuiteSectionLbl" Text="Más aplicaciones de CyberGems" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" FontSize="13.5" Margin="0,0,0,8"/>
+                            <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="18,14" Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <StackPanel x:Name="SuiteAppsHost" Orientation="Horizontal" VerticalAlignment="Center"/>
+                                    <Button x:Name="SuiteMoreBtn" Content="Ver más..." Style="{StaticResource ModernButton}" Margin="14,0,0,0" MinWidth="96" Height="34" Padding="14,0" Click="SuiteMoreBtn_Click"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
 
@@ -252,7 +295,7 @@
                                    MouseEnter="AboutFooterCopyright_MouseEnter"
                                    MouseLeave="AboutFooterCopyright_MouseLeave"/>
 
-                        <!-- Action Icons: Globe, Docs, GitHub, Issues, Releases, Donate -->
+                        <!-- Action Icons: Globe, Docs, GitHub, Issues, Diagnostics, Releases, Donate -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <!-- 1. Website (Globe) -->
                             <Border x:Name="AboutFooterWebsiteBtn"
@@ -324,7 +367,29 @@
                                 </Viewbox>
                             </Border>
 
-                            <!-- 5. Releases (Tag) -->
+                            <!-- 5. Diagnostics (Clipboard) -->
+                            <Border x:Name="AboutFooterDiagBtn"
+                                    Style="{StaticResource AboutFooterIconButton}"
+                                    ToolTip="Copiar información de diagnóstico"
+                                    MouseLeftButtonUp="AboutFooterDiag_Click"
+                                    MouseEnter="AboutFooterIcon_MouseEnter"
+                                    MouseLeave="AboutFooterIcon_MouseLeave"
+                                    Margin="4,0,0,0">
+                                <Viewbox Width="15" Height="15" Stretch="Uniform">
+                                    <Canvas Width="24" Height="24">
+                                        <Rectangle x:Name="AboutFooterDiagBody" Canvas.Left="5" Canvas.Top="4" Width="14" Height="17" RadiusX="2" RadiusY="2"
+                                                   Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.6" Fill="Transparent"/>
+                                        <Path x:Name="AboutFooterDiagClip" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.6"
+                                              StrokeLineJoin="Round" Fill="Transparent"
+                                              Data="M9 2h6v3H9z"/>
+                                        <Path x:Name="AboutFooterDiagLines" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.6"
+                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                              Data="M9 10h6 M9 14h4"/>
+                                    </Canvas>
+                                </Viewbox>
+                            </Border>
+
+                            <!-- 6. Releases (Tag) -->
                             <Border x:Name="AboutFooterReleasesBtn"
                                     Style="{StaticResource AboutFooterIconButton}"
                                     ToolTip="Ver versiones y notas de cambios"
@@ -343,7 +408,7 @@
                                 </Viewbox>
                             </Border>
 
-                            <!-- 6. Donate (Heart) -->
+                            <!-- 7. Donate (Heart) -->
                             <Border x:Name="AboutFooterDonateBtn"
                                     Style="{StaticResource AboutFooterIconButton}"
                                     ToolTip="Donar al proyecto"

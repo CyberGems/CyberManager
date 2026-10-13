@@ -50,6 +50,10 @@ public sealed class AppSettings
     public bool StartWithWindows { get; set; } = true;
     public bool StartMinimized { get; set; }
     public bool AutoCheckForUpdates { get; set; } = true;
+    /// <summary>
+    /// Shows the "More apps from CyberGems" row in the About window.
+    /// </summary>
+    public bool ShowSuiteRecommendations { get; set; } = true;
     public string GlobalHotkey { get; set; } = "Alt+Shift+M";
     public string WidgetHotkey { get; set; } = "Alt+Shift+W";
     public bool WidgetVisible { get; set; }
@@ -223,6 +227,7 @@ public sealed class AppSettings
         StartWithWindows = defaults.StartWithWindows;
         StartMinimized = defaults.StartMinimized;
         AutoCheckForUpdates = defaults.AutoCheckForUpdates;
+        ShowSuiteRecommendations = defaults.ShowSuiteRecommendations;
         GlobalHotkey = defaults.GlobalHotkey;
         ShowIdleProcess = defaults.ShowIdleProcess;
         CompactMode = defaults.CompactMode;

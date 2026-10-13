@@ -18,6 +18,7 @@
   <ItemGroup>
     <Resource Include="Assets\CyberManager.ico" />
     <Resource Include="Assets\CyberManager.png" />
+    <Resource Include="Assets\Suite\*.png" />
     <None Update="Assets\CyberManager.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
