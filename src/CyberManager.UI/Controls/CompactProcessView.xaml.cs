@@ -286,14 +286,9 @@ public partial class CompactProcessView : UserControl
 
     public void SetPinned(bool pinned)
     {
+        // Borderless buttons: the pinned state is conveyed by icon opacity and the tooltip,
+        // not by a colored plate painted behind the icon.
         PinButton.Opacity = pinned ? 1.0 : 0.65;
-        PinButtonHost.Background = pinned
-            ? new SolidColorBrush(Color.FromArgb(0x42, 0xE8, 0x11, 0x23))
-            : Brushes.Transparent;
-        PinButtonHost.BorderBrush = pinned
-            ? new SolidColorBrush(Color.FromRgb(0xE8, 0x11, 0x23))
-            : Brushes.Transparent;
-        PinButtonHost.BorderThickness = pinned ? new Thickness(1) : new Thickness(0);
         PinButton.ToolTip = pinned
             ? $"{Strings.T("AlwaysOnTop")} ✓"
             : Strings.T("AlwaysOnTop");
