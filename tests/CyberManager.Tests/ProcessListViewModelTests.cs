@@ -23,45 +23,68 @@ public class ProcessListViewModelTests
     };
 
     [Fact]
-    public void HeavyFilter_RanksCpuAndMemoryTogether()
+    public void HeavyFilter_IncludesEveryProcessWithAHighlightedCpuOrMemoryValue()
     {
-        var processes = new[]
-        {
-            CreateProcess("CpuHeavy", cpu: 80, memoryMb: 10),
-            CreateProcess("MemoryHeavy", cpu: 10, memoryMb: 90),
-            CreateProcess("BalancedLow", cpu: 20, memoryMb: 20)
-        };
-        var query = CreateHeavyQuery(groupProcesses: false, limit: 2);
+        var processes = Enumerable.Range(0, 12)
+            .Select(index => CreateProcess($"MemoryHeavy{index}", cpu: 1, memoryMb: 300 + index))
+            .ToList();
+        processes.Add(CreateProcess("CpuColored", cpu: 1.01, memoryMb: 299));
+        processes.Add(CreateProcess("BothColored", cpu: 5.01, memoryMb: 299));
+        processes.Add(CreateProcess("Uncolored", cpu: 1, memoryMb: 299));
 
-        var result = ProcessListViewModel.Build(processes, query);
+        var result = ProcessListViewModel.Build(processes, CreateHeavyQuery(groupProcesses: false));
 
-        Assert.Equal(2, result.Count);
-        Assert.Contains(result, process => process.Name == "MemoryHeavy");
-        Assert.Contains(result, process => process.Name == "CpuHeavy");
-        Assert.DoesNotContain(result, process => process.Name == "BalancedLow");
+        Assert.Equal(14, result.Count);
+        Assert.Contains(result, process => process.Name == "CpuColored");
+        Assert.Contains(result, process => process.Name == "BothColored");
+        Assert.DoesNotContain(result, process => process.Name == "Uncolored");
+        Assert.Equal(12, result.Count(process => process.Name.StartsWith("MemoryHeavy", StringComparison.Ordinal)));
     }
 
     [Fact]
-    public void HeavyFilter_RanksAggregatedGroups()
+    public void HeavyFilter_UsesAggregatedValuesForGroupedProcesses()
     {
         var processes = new[]
         {
-            CreateProcess("AppA", cpu: 30, memoryMb: 100),
-            CreateProcess("AppA", cpu: 30, memoryMb: 100),
-            CreateProcess("AppB", cpu: 90, memoryMb: 20),
-            CreateProcess("AppC", cpu: 10, memoryMb: 300)
+            CreateProcess("AppA", cpu: 0.2, memoryMb: 160),
+            CreateProcess("AppA", cpu: 0.2, memoryMb: 160),
+            CreateProcess("AppB", cpu: 1, memoryMb: 299),
+            CreateProcess("AppC", cpu: 1.01, memoryMb: 10)
         };
-        var query = CreateHeavyQuery(groupProcesses: true, limit: 2);
 
-        var result = ProcessListViewModel.Build(processes, query);
+        var result = ProcessListViewModel.Build(processes, CreateHeavyQuery(groupProcesses: true));
 
         Assert.Collection(
             result,
-            process => Assert.Equal("AppA", process.Name),
-            process => Assert.Equal("AppC", process.Name));
+            process => Assert.Equal("AppC", process.Name),
+            process => Assert.Equal("AppA", process.Name));
+        Assert.True(result[1].IsGroupParent);
+        Assert.Equal(0.4, result[1].CpuPercent);
+        Assert.Equal(320 * 1024L * 1024L, result[1].WorkingSetBytes);
+    }
+
+    [Fact]
+    public void HeavyFilter_ExpandedGroupsOnlyShowChildrenWithHighlightedValues()
+    {
+        var processes = new[]
+        {
+            CreateProcess("AppA", cpu: 0.2, memoryMb: 310),
+            CreateProcess("AppA", cpu: 0.2, memoryMb: 250),
+            CreateProcess("AppA", cpu: 0.2, memoryMb: 40),
+            CreateProcess("AppB", cpu: 1, memoryMb: 100)
+        };
+
+        var result = ProcessListViewModel.Build(
+            processes,
+            CreateHeavyQuery(groupProcesses: true, expandedGroups: ["AppA"]));
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("AppA", result[0].Name);
         Assert.True(result[0].IsGroupParent);
-        Assert.Equal(60, result[0].CpuPercent);
-        Assert.Equal(200 * 1024L * 1024L, result[0].WorkingSetBytes);
+        Assert.True(result[0].IsExpanded);
+        Assert.Equal(600 * 1024L * 1024L, result[0].WorkingSetBytes);
+        Assert.Equal(310 * 1024L * 1024L, result[1].WorkingSetBytes);
+        Assert.True(result[1].IsGroupChild);
     }
 
     [Fact]
@@ -195,7 +218,7 @@ public class ProcessListViewModelTests
             FriendlyName = friendlyName ?? name
         };
 
-    private static ProcessListQuery CreateHeavyQuery(bool groupProcesses, int limit) =>
+    private static ProcessListQuery CreateHeavyQuery(bool groupProcesses, string[]? expandedGroups = null) =>
         new(
             Search: "",
             ShowIdleProcess: true,
@@ -203,9 +226,8 @@ public class ProcessListViewModelTests
             DimSuspended: true,
             SortColumn: "CpuPercent",
             SortDirection: ListSortDirection.Descending,
-            ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase),
-            HeavyProcessesOnly: true,
-            HeavyProcessLimit: limit);
+            ExpandedGroups: new HashSet<string>(expandedGroups ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase),
+            HeavyProcessesOnly: true);
 
     private static ProcessInfo CreateProcess(string name, double cpu, int memoryMb) =>
         new()

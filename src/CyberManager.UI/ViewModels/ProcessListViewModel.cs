@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CyberManager.Common.Models;
+using CyberManager.UI.Services;
 
 namespace CyberManager.UI.ViewModels;
 
@@ -13,7 +14,6 @@ public sealed record ProcessListQuery(
     ListSortDirection SortDirection,
     IReadOnlySet<string> ExpandedGroups,
     bool HeavyProcessesOnly = false,
-    int HeavyProcessLimit = 10,
     bool HideSystemProcesses = false);
 
 public sealed class ProcessListViewModel
@@ -56,7 +56,7 @@ public sealed class ProcessListViewModel
 
             if (query.HeavyProcessesOnly)
             {
-                filtered = TakeHeaviest(filtered, query.HeavyProcessLimit);
+                filtered = filtered.Where(HasHighlightedMetric);
             }
 
             return ApplySorting(filtered, query).ToList();
@@ -119,7 +119,7 @@ public sealed class ProcessListViewModel
         }
 
         var candidates = query.HeavyProcessesOnly
-            ? TakeHeaviest(topLevel, query.HeavyProcessLimit)
+            ? topLevel.Where(HasHighlightedMetric)
             : topLevel;
         var result = new List<ProcessInfo>();
         foreach (var item in ApplySorting(candidates, query))
@@ -127,48 +127,18 @@ public sealed class ProcessListViewModel
             result.Add(item);
             if (item.IsGroupParent && item.IsExpanded)
             {
-                result.AddRange(item.Children);
+                result.AddRange(query.HeavyProcessesOnly
+                    ? item.Children.Where(HasHighlightedMetric)
+                    : item.Children);
             }
         }
 
         return result;
     }
 
-    private static IEnumerable<ProcessInfo> TakeHeaviest(
-        IEnumerable<ProcessInfo> processes,
-        int limit)
-    {
-        var candidates = processes.ToList();
-        if (limit <= 0 || candidates.Count <= limit) return candidates;
-
-        var maxCpu = candidates.Max(process => NormalizeCpu(process.CpuPercent));
-        var maxMemory = candidates.Max(process => Math.Max(0L, process.WorkingSetBytes));
-
-        return candidates
-            .Select(process =>
-            {
-                var cpuScore = maxCpu > 0
-                    ? NormalizeCpu(process.CpuPercent) / maxCpu
-                    : 0;
-                var memoryScore = maxMemory > 0
-                    ? Math.Max(0L, process.WorkingSetBytes) / (double)maxMemory
-                    : 0;
-                return new
-                {
-                    Process = process,
-                    Score = (cpuScore + memoryScore) / 2
-                };
-            })
-            .OrderByDescending(item => item.Score)
-            .ThenByDescending(item => item.Process.CpuPercent)
-            .ThenByDescending(item => item.Process.WorkingSetBytes)
-            .ThenBy(item => item.Process.Name, StringComparer.OrdinalIgnoreCase)
-            .Take(limit)
-            .Select(item => item.Process);
-    }
-
-    private static double NormalizeCpu(double value) =>
-        double.IsFinite(value) ? Math.Max(0, value) : 0;
+    private static bool HasHighlightedMetric(ProcessInfo process) =>
+        HeatmapThresholds.CpuBucket(process.CpuPercent) > 0 ||
+        HeatmapThresholds.MemoryBucket(process.WorkingSetBytes) > 0;
 
     public void Update(IReadOnlyList<ProcessInfo> next)
     {

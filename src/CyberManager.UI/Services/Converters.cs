@@ -103,17 +103,34 @@ internal static class HeatRamp
     }
 }
 
+internal static class HeatmapThresholds
+{
+    public static int CpuBucket(double cpuPercent)
+    {
+        if (cpuPercent <= 1.0) return 0;
+        if (cpuPercent <= 5.0) return 1;
+        if (cpuPercent <= 15.0) return 2;
+        if (cpuPercent <= 30.0) return 3;
+        return 4;
+    }
+
+    public static int MemoryBucket(long workingSetBytes)
+    {
+        double mb = workingSetBytes / (1024.0 * 1024.0);
+        if (mb < 300) return 0;
+        if (mb < 700) return 1;
+        if (mb < 1500) return 2;
+        if (mb < 3000) return 3;
+        return 4;
+    }
+}
+
 public sealed class CpuHeatmapBrushConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var ramp = HeatRamp.Current;
-        if (value is not double cpu) return ramp[0];
-        if (cpu <= 1.0) return ramp[0];
-        if (cpu <= 5.0) return ramp[1];
-        if (cpu <= 15.0) return ramp[2];
-        if (cpu <= 30.0) return ramp[3];
-        return ramp[4];
+        return value is double cpu ? ramp[HeatmapThresholds.CpuBucket(cpu)] : ramp[0];
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
@@ -124,14 +141,7 @@ public sealed class MemoryHeatmapBrushConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var ramp = HeatRamp.Current;
-        if (value is not long bytes) return ramp[0];
-
-        double mb = bytes / (1024.0 * 1024.0);
-        if (mb < 300) return ramp[0];
-        if (mb < 700) return ramp[1];
-        if (mb < 1500) return ramp[2];
-        if (mb < 3000) return ramp[3];
-        return ramp[4];
+        return value is long bytes ? ramp[HeatmapThresholds.MemoryBucket(bytes)] : ramp[0];
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
