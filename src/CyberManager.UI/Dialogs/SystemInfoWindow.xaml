@@ -476,17 +476,88 @@
 
                     <!-- TAB 4: I/O VIEW -->
                     <Grid x:Name="ViewIo" Visibility="Collapsed">
-                        <Border Style="{StaticResource StatCard}" VerticalAlignment="Top" Padding="16,14">
-                            <StackPanel>
-                                <TextBlock x:Name="IoTitle" Text="System Activity Overview" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,12"/>
-                                <Grid Margin="0,4"><TextBlock x:Name="IoProcessesLbl" Text="Total Active System Processes" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoProcessesVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
-                                <Grid Margin="0,4"><TextBlock x:Name="IoThreadsLbl" Text="Total Active System Threads" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoThreadsVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
-                                <Grid Margin="0,4"><TextBlock x:Name="IoHandlesLbl" Text="Total System Handles" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoHandlesVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
-                                <Separator Margin="0,8" Background="{DynamicResource BorderBrush}"/>
-                                <Grid Margin="0,4"><TextBlock x:Name="IoPagedLbl" Text="System Paged Memory Pool" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoPagedVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
-                                <Grid Margin="0,4"><TextBlock x:Name="IoNonPagedLbl" Text="System Non-Paged Memory Pool" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoNonPagedVal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
-                            </StackPanel>
-                        </Border>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/> <!-- Section header -->
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock x:Name="IoTitle" Text="System Activity Overview" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,10"/>
+
+                        <Grid Grid.Row="1" Margin="0,0,0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Card 1: System overview, headline process count -->
+                            <Border Grid.Column="0" Style="{StaticResource StatCard}" Padding="18,16">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock x:Name="IoSystemTitle" Text="System" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}"/>
+                                    <StackPanel Grid.Row="1" Margin="0,10,0,14">
+                                        <TextBlock x:Name="IoProcessesVal" Text="—" FontSize="30" FontWeight="Bold" Foreground="{DynamicResource TextBrush}"/>
+                                        <TextBlock x:Name="IoProcessesLbl" Text="Total Active System Processes" FontSize="10.5" Foreground="{DynamicResource SubTextBrush}" Margin="0,3,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="2" VerticalAlignment="Bottom">
+                                        <Grid Margin="0,6">
+                                            <TextBlock x:Name="IoThreadsLbl" Text="Threads" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/>
+                                            <TextBlock x:Name="IoThreadsVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid Margin="0,6">
+                                            <TextBlock x:Name="IoHandlesLbl" Text="Handles" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/>
+                                            <TextBlock x:Name="IoHandlesVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                        <Grid Margin="0,6">
+                                            <TextBlock x:Name="IoUptimeLbl" Text="System Up Time" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/>
+                                            <TextBlock x:Name="IoUptimeVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Card 2: Kernel memory -->
+                            <Border Grid.Column="2" Style="{StaticResource StatCard}" Padding="18,16">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock x:Name="IoKernelTitle" Text="Kernel Memory (MB)" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,12"/>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoPagedLbl" Text="Paged Pool" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoPagedVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoNonPagedLbl" Text="Non-Paged Pool" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoNonPagedVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoCacheLbl" Text="File Cache" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoCacheVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Grid Grid.Row="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Card 3: Commit charge -->
+                            <Border Grid.Column="0" Style="{StaticResource StatCard}" Padding="18,16">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock x:Name="IoCommitTitle" Text="Commit Charge (GB)" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,12"/>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoCommitTotalLbl" Text="Committed" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoCommitTotalVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoCommitLimitLbl" Text="Limit" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoCommitLimitVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoCommitPeakLbl" Text="Peak" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoCommitPeakVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Card 4: Physical memory at a glance -->
+                            <Border Grid.Column="2" Style="{StaticResource StatCard}" Padding="18,16">
+                                <StackPanel VerticalAlignment="Top">
+                                    <TextBlock x:Name="IoPhysicalTitle" Text="Physical Memory" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,12"/>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoInUseLbl" Text="In Use" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoInUseVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource RamBrush}" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoAvailLbl" Text="Available" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoAvailVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,7"><TextBlock x:Name="IoLoadLbl" Text="Memory Load" FontSize="12" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="IoLoadVal" Text="—" FontWeight="SemiBold" FontSize="12" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Grid>
 

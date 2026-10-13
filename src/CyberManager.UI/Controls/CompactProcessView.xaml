@@ -394,9 +394,14 @@
                             MouseLeave="InteractiveControl_MouseLeave"
                             ToolTip="Más detalles"
                             AutomationProperties.Name="Más detalles">
-                            <Path Data="M 3,8 L 3,3 L 8,3 M 3,3 L 8,8 M 13,16 L 16,16 L 16,11 M 16,16 L 11,11"
-                                  Width="15" Height="15" Stretch="Uniform" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.6"
-                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                            <!-- Window-in-window icon (CyberClock mini-mode style): matches the
+                                 full-window toggle in the main toolbar, so both directions of the
+                                 switch read as "compact mode" and not as maximize/restore. -->
+                            <Grid Width="15" Height="15">
+                                <Rectangle RadiusX="4" RadiusY="4" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Fill="Transparent"/>
+                                <Rectangle RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentBrush}" Opacity="0.45"
+                                           Width="7.5" Height="6" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2.2,2.2"/>
+                            </Grid>
                         </Button>
                     </Border>
                     <Button x:Name="SettingsButton"

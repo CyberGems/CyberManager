@@ -21,6 +21,7 @@ public sealed class SystemMetricsSnapshot
 
     public long PagedPoolBytes { get; set; }
     public long NonPagedPoolBytes { get; set; }
+    public long SystemCacheBytes { get; set; }
 
     public int HandleCount { get; set; }
     public int ProcessCount { get; set; }
@@ -41,6 +42,9 @@ public sealed class SystemMetricsSnapshot
 
     public double PagedPoolMb => PagedPoolBytes / (1024.0 * 1024.0);
     public double NonPagedPoolMb => NonPagedPoolBytes / (1024.0 * 1024.0);
+    public double SystemCacheMb => SystemCacheBytes / (1024.0 * 1024.0);
+
+    public static TimeSpan SystemUptime => TimeSpan.FromMilliseconds(Environment.TickCount64);
 }
 
 public sealed class SystemMetricsCollector
@@ -175,6 +179,7 @@ public sealed class SystemMetricsCollector
 
             snap.PagedPoolBytes = (long)perfInfo.KernelPaged * pageSize;
             snap.NonPagedPoolBytes = (long)perfInfo.KernelNonpaged * pageSize;
+            snap.SystemCacheBytes = (long)perfInfo.SystemCache * pageSize;
             snap.CommitTotalBytes = (long)perfInfo.CommitTotal * pageSize;
             snap.CommitLimitBytes = (long)perfInfo.CommitLimit * pageSize;
             snap.CommitPeakBytes = (long)perfInfo.CommitPeak * pageSize;

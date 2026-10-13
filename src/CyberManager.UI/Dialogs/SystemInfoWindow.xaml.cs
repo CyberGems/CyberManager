@@ -158,11 +158,23 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         FullHandlesLbl.Text = Strings.T("TotalHandles");
 
         IoTitle.Text = Strings.T("SystemActivityOverview");
+        IoSystemTitle.Text = Strings.T("SystemOverviewTitle");
         IoProcessesLbl.Text = Strings.T("TotalActiveProcesses");
-        IoThreadsLbl.Text = Strings.T("TotalActiveThreads");
-        IoHandlesLbl.Text = Strings.T("TotalSystemHandles");
-        IoPagedLbl.Text = Strings.T("SystemPagedPool");
-        IoNonPagedLbl.Text = Strings.T("SystemNonPagedPool");
+        IoThreadsLbl.Text = Strings.T("Threads");
+        IoHandlesLbl.Text = Strings.T("Handles");
+        IoUptimeLbl.Text = Strings.T("SystemUptime");
+        IoKernelTitle.Text = Strings.T("KernelPool");
+        IoPagedLbl.Text = Strings.T("PagedPool");
+        IoNonPagedLbl.Text = Strings.T("NonPagedPool");
+        IoCacheLbl.Text = Strings.T("SystemFileCache");
+        IoCommitTitle.Text = Strings.T("CommitCharge");
+        IoCommitTotalLbl.Text = Strings.T("CommitTotalLabel");
+        IoCommitLimitLbl.Text = Strings.T("CommitLimitLabel");
+        IoCommitPeakLbl.Text = Strings.T("CommitPeakLabel");
+        IoPhysicalTitle.Text = Strings.T("PhysicalMemory");
+        IoInUseLbl.Text = Strings.T("InUseMemory");
+        IoAvailLbl.Text = Strings.T("AvailableMemory");
+        IoLoadLbl.Text = Strings.T("MemoryLoadPercent");
         TelemetryFooter.Text = Strings.T("TelemetryFooter");
 
         // 5. Full Memory Tab
@@ -187,8 +199,16 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         IoProcessesVal.Text = $"{snap.ProcessCount:N0}";
         IoThreadsVal.Text = $"{snap.ThreadCount:N0}";
         IoHandlesVal.Text = $"{snap.HandleCount:N0}";
+        IoUptimeVal.Text = FormatUptime(SystemMetricsSnapshot.SystemUptime);
         IoPagedVal.Text = $"{snap.PagedPoolMb:F0} MB";
         IoNonPagedVal.Text = $"{snap.NonPagedPoolMb:F0} MB";
+        IoCacheVal.Text = $"{snap.SystemCacheMb:F0} MB";
+        IoCommitTotalVal.Text = $"{snap.CommitTotalGb:F2} GB";
+        IoCommitLimitVal.Text = $"{snap.CommitLimitGb:F2} GB";
+        IoCommitPeakVal.Text = $"{snap.CommitPeakGb:F2} GB";
+        IoInUseVal.Text = $"{snap.UsedRamGb:F2} GB";
+        IoAvailVal.Text = $"{snap.AvailableRamGb:F2} GB";
+        IoLoadVal.Text = $"{snap.MemoryLoadPercent:F0}%";
     }
 
     private void Tab_Checked(object sender, RoutedEventArgs e)
@@ -221,4 +241,11 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
+    /// <summary>Compact up time: "3d 04h 12m", "4h 12m" or "12m".</summary>
+    private static string FormatUptime(TimeSpan uptime) => uptime.TotalDays >= 1
+        ? $"{(int)uptime.TotalDays}d {uptime.Hours}h {uptime.Minutes}m"
+        : uptime.Hours > 0
+            ? $"{uptime.Hours}h {uptime.Minutes}m"
+            : $"{uptime.Minutes}m";
 }
