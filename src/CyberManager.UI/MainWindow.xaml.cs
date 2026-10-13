@@ -1244,7 +1244,7 @@ public partial class MainWindow : Window
         {
             Header = Strings.T("RecentSearches"),
             IsEnabled = false,
-            Style = (Style)FindResource("ModernMenuItem")
+            Style = (Style)FindResource("SearchHistoryHeaderItem")
         });
 
         if (App.Settings.RecentSearches.Count == 0)
@@ -1253,7 +1253,7 @@ public partial class MainWindow : Window
             {
                 Header = Strings.T("NoRecentSearches"),
                 IsEnabled = false,
-                Style = (Style)FindResource("ModernMenuItem")
+                Style = (Style)FindResource("SearchHistoryHeaderItem")
             });
         }
         else
@@ -1264,7 +1264,7 @@ public partial class MainWindow : Window
                 {
                     Header = query,
                     Tag = query,
-                    Style = (Style)FindResource("ModernMenuItem")
+                    Style = (Style)FindResource("SearchHistoryMenuItem")
                 };
                 item.Click += SearchHistoryItem_Click;
                 menu.Items.Add(item);
@@ -1275,7 +1275,7 @@ public partial class MainWindow : Window
         var clearItem = new MenuItem
         {
             Header = Strings.T("ClearSearchHistory"),
-            Style = (Style)FindResource("ModernMenuItem")
+            Style = (Style)FindResource("SearchHistoryMenuItem")
         };
         clearItem.Click += ClearSearchHistory_Click;
         menu.Items.Add(clearItem);
