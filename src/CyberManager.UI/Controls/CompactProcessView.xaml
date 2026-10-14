@@ -11,6 +11,7 @@
         <conv:MemoryHeatmapBrushConverter x:Key="MemoryHeatmapBrushConverter"/>
         <conv:HighCpuWeightConverter x:Key="HighCpuWeightConverter"/>
         <conv:HighMemoryWeightConverter x:Key="HighMemoryWeightConverter"/>
+        <conv:RoundedClipConverter x:Key="RoundedClipConverter"/>
 
         <Style TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="{DynamicResource HeaderBgBrush}"/>
@@ -682,6 +683,15 @@
                       SelectionUnit="FullRow"
                       SizeChanged="CompactGrid_SizeChanged"
                       AutomationProperties.Name="Compact process list">
+                <!-- Round the list panel to the compact card's radius (6) so the header band's
+                     ends curve like they do in full mode instead of ending in hard square
+                     corners. Border.ClipToBounds only clips to a rectangle, hence the geometry. -->
+                <DataGrid.Clip>
+                    <MultiBinding Converter="{StaticResource RoundedClipConverter}" ConverterParameter="6">
+                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/>
+                        <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}"/>
+                    </MultiBinding>
+                </DataGrid.Clip>
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Process" Width="*" SortMemberPath="Name">
                         <DataGridTemplateColumn.CellTemplate>
