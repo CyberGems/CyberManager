@@ -66,6 +66,7 @@
         <conv:HighMemoryWeightConverter x:Key="HighMemoryWeightConverter"/>
         <conv:SystemProcessIconConverter x:Key="SystemProcessIconConverter"/>
         <conv:ProcessDescriptionConverter x:Key="ProcessDescriptionConverter"/>
+        <conv:RoundedClipConverter x:Key="RoundedClipConverter"/>
 
         <Style x:Key="TitleBtn" TargetType="Button">
             <Setter Property="Width" Value="42"/><Setter Property="Height" Value="32"/>
@@ -915,6 +916,16 @@
                                   ContextMenuOpening="ProcGrid_ContextMenuOpening"
                                   SelectionChanged="ProcGrid_SelectionChanged"
                                   PreviewKeyDown="ProcGrid_PreviewKeyDown">
+                            <!-- Follow FullProcessListBorder's rounded corners (CornerRadius 10 minus its
+                                 1px border). ClipToBounds on the Border only clips to a rectangle, so
+                                 without this the grid background, rows and header band square off the
+                                 card's rounded corners. -->
+                            <DataGrid.Clip>
+                                <MultiBinding Converter="{StaticResource RoundedClipConverter}" ConverterParameter="9">
+                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/>
+                                    <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}"/>
+                                </MultiBinding>
+                            </DataGrid.Clip>
                             <DataGrid.ContextMenu>
                                 <ContextMenu x:Name="ProcContextMenu" Style="{StaticResource ModernContextMenu}"
                                              Opened="ProcContextMenu_Opened" Closed="ProcContextMenu_Closed">

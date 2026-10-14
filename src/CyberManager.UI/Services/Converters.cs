@@ -46,6 +46,32 @@ public sealed class WorkerBadgeVisibilityConverter : IValueConverter
 }
 
 /// <summary>
+/// Builds a rounded <see cref="RectangleGeometry"/> from an element's actual size so it can be used
+/// as a <c>UIElement.Clip</c>. WPF's <c>ClipToBounds</c> only clips to the rectangular bounds and
+/// ignores <c>CornerRadius</c>, so a rounded container still shows square corners painted by its
+/// children (the grid background, the rows, the header band). Binding the grid's Clip to this
+/// geometry makes its content follow the container's rounded shape exactly. Values are
+/// [ActualWidth, ActualHeight]; the radius comes from <c>ConverterParameter</c>.
+/// </summary>
+public sealed class RoundedClipConverter : IMultiValueConverter
+{
+    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (values.Length < 2 || values[0] is not double w || values[1] is not double h || w <= 0 || h <= 0)
+            return Binding.DoNothing;
+
+        var radius = 0.0;
+        if (parameter is string s)
+            double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out radius);
+
+        radius = Math.Max(0, Math.Min(radius, Math.Min(w, h) / 2.0));
+        return new RectangleGeometry(new Rect(0, 0, w, h), radius, radius);
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => throw new NotImplementedException();
+}
+
+/// <summary>
 /// Five-step heat ramp shared by the CPU and memory columns: transparent for the lowest bucket,
 /// three increasing strengths of the theme accent, then red for the top one.
 /// <para>
