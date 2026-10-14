@@ -27,10 +27,66 @@ public static class UpdateService
     private const string RepoOwner = "CyberGems";
     private const string RepoName = "CyberManager";
 
+    /// <summary>
+    /// Result of the most recent completed check, or <c>null</c> when no check has finished yet.
+    /// The titlebar update button reads this on creation, so a surface built after the background
+    /// check already ran still shows the notice instead of waiting for the next event.
+    /// </summary>
+    public static UpdateCheckResult? LastCheckResult { get; private set; }
+
+    /// <summary>
+    /// Raised after every completed check (update found, up to date, or failure), on the calling
+    /// thread. Subscribers that touch UI must marshal to their own dispatcher.
+    /// </summary>
+    public static event Action<UpdateCheckResult>? UpdateAvailabilityChanged;
+
+    private static UpdateCheckResult RecordResult(UpdateCheckResult result)
+    {
+        LastCheckResult = result;
+        try { UpdateAvailabilityChanged?.Invoke(result); } catch { }
+        return result;
+    }
+
     public static Version GetCurrentVersion()
     {
         var v = Assembly.GetExecutingAssembly().GetName().Version;
-        return v is null ? new Version(1, 0, 0) : new Version(v.Major, v.Minor, Math.Max(v.Build, 0), Math.Max(v.Revision, 0));
+        return v is null ? new Version(1, 0, 0) : Normalize(v);
+    }
+
+    /// <summary>
+    /// Brings a version to the four-part shape the assembly version always has, so comparisons
+    /// against a three-part release tag ("v1.2.3" carries Revision -1) stay meaningful.
+    /// </summary>
+    private static Version Normalize(Version v) =>
+        new(v.Major, v.Minor, Math.Max(v.Build, 0), Math.Max(v.Revision, 0));
+
+    /// <summary>
+    /// Parses a GitHub release tag into a comparable version.
+    /// <see cref="Version.TryParse"/> rejects any tag carrying a prerelease or build suffix
+    /// ("v1.2.3-beta.1"), and a tag it cannot parse used to be reported as "up to date", which
+    /// hides a real release. The numeric core is extracted first so those tags still compare.
+    /// Returns <c>false</c> when the tag holds no numeric version at all, which is a genuinely
+    /// unknown state the caller must report instead of assuming the build is current.
+    /// </summary>
+    public static bool TryParseReleaseTag(string? tag, out Version? version)
+    {
+        version = null;
+        if (string.IsNullOrWhiteSpace(tag)) return false;
+
+        var span = tag.Trim();
+        if (span.Length > 0 && (span[0] == 'v' || span[0] == 'V')) span = span[1..];
+
+        // The numeric core is the leading run of digits and dots; everything after it is a
+        // prerelease or build label that must not take part in the comparison.
+        var end = 0;
+        while (end < span.Length && (char.IsAsciiDigit(span[end]) || span[end] == '.')) end++;
+
+        var core = span[..end].TrimEnd('.');
+        if (core.Length == 0) return false;
+
+        if (!Version.TryParse(core, out var parsed)) return false;
+        version = Normalize(parsed);
+        return true;
     }
 
     public static string GetCurrentVersionLabel()
@@ -59,7 +115,15 @@ public static class UpdateService
         GitHubHttp.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
     }
 
-    public static async Task<UpdateCheckResult> CheckForUpdatesAsync(CancellationToken ct = default)
+    /// <summary>
+    /// Runs a check and publishes the result to <see cref="LastCheckResult"/> and
+    /// <see cref="UpdateAvailabilityChanged"/>. Every surface that needs to react to an update
+    /// goes through here, so a check started from one place also lights up the others.
+    /// </summary>
+    public static async Task<UpdateCheckResult> CheckForUpdatesAsync(CancellationToken ct = default) =>
+        RecordResult(await CheckCoreAsync(ct).ConfigureAwait(false));
+
+    private static async Task<UpdateCheckResult> CheckCoreAsync(CancellationToken ct)
     {
         var cur = GetCurrentVersion();
         var curLabel = GetCurrentVersionLabel();
@@ -96,9 +160,23 @@ public static class UpdateService
             var releaseUrl = root.TryGetProperty("html_url", out var u) ? (u.GetString() ?? fallbackReleaseUrl) : fallbackReleaseUrl;
             DateTimeOffset? pub = root.TryGetProperty("published_at", out var p) ? p.GetDateTimeOffset() : null;
 
-            var verStr = tag.TrimStart('v');
-            Version? latest = Version.TryParse(verStr, out var lv) ? lv : null;
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                // A release without a tag cannot be compared or downloaded.
+                return new UpdateCheckResult(
+                    cur,
+                    null,
+                    curLabel,
+                    releaseUrl,
+                    null,
+                    null,
+                    null,
+                    pub,
+                    false,
+                    Strings.T("UnexpectedResponse"));
+            }
 
+            var tagIsComparable = TryParseReleaseTag(tag, out var latest);
             string? downloadUrl = null;
             string? assetName = null;
             string? sha256 = null;
@@ -134,13 +212,17 @@ public static class UpdateService
                 }
             }
 
-            bool newerVersion = latest != null && latest > cur;
+            bool newerVersion = latest is not null && latest > cur;
             bool isAvailable = newerVersion && downloadUrl != null;
-            var status = !newerVersion
-                ? Strings.T("UpToDate", curLabel)
-                : isAvailable
-                    ? Strings.T("UpdateAvailable", tag)
-                    : Strings.T("UpdatePackageUnavailable");
+            // An unparsable tag is reported as unknown rather than as "up to date": claiming the
+            // build is current when the comparison never happened would hide a real release.
+            var status = !tagIsComparable
+                ? Strings.T("UpdateTagUnrecognized", tag)
+                : !newerVersion
+                    ? Strings.T("UpToDate", curLabel)
+                    : isAvailable
+                        ? Strings.T("UpdateAvailable", tag)
+                        : Strings.T("UpdatePackageUnavailable");
 
             return new UpdateCheckResult(
                 cur,

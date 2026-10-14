@@ -550,6 +550,10 @@
 
                     <!-- Right: Window Controls -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- Sits first so the notice is the leftmost thing the eye meets on the
+                             right cluster, and stays hidden until a check finds a newer version. -->
+                        <controls:UpdateAvailableButton x:Name="UpdatePill"
+                                                        UpdateRequested="UpdatePill_UpdateRequested"/>
                         <Button x:Name="FullModeToggleBtn" Width="42" Margin="4,0,0,0" Style="{StaticResource ModeToggleButton}" Click="FullModeToggle_Click" ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto">
                             <!-- Window-in-window icon (CyberClock mini-mode style): a window with a
                                  smaller window inside it. Reads as "compact mode" instead of being

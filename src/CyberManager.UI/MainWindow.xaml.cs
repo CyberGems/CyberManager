@@ -223,6 +223,8 @@ public partial class MainWindow : Window
         CompactView.ClearSelectionRequested += ClearSelectionBtn_Click;
         CompactView.HeavyFilterChanged += CompactView_HeavyFilterChanged;
         CompactView.MoreRequested += CompactView_MoreRequested;
+        // Both titlebars show the same notice and share one confirm/download flow.
+        CompactView.UpdateRequested += UpdatePill_UpdateRequested;
         CompactView.ProcessGrid.SelectionChanged += ProcGrid_SelectionChanged;
         CompactView.ProcessGrid.Sorting += ProcGrid_Sorting;
         CompactView.ProcessGrid.PreviewMouseRightButtonDown += CompactGrid_PreviewMouseRightButtonDown;
@@ -311,7 +313,15 @@ public partial class MainWindow : Window
                 ToggleMetricsWidget,
                 OpenSettingsFromTray,
                 OpenAboutFromTray,
+                CheckForUpdatesFromShell,
                 ExitApplication);
+
+            // Keep the tray notice in step with the titlebar pills, so a user running minimized
+            // still learns about a release instead of only seeing it when the window is restored.
+            UpdateService.UpdateAvailabilityChanged += OnUpdateAvailabilityChanged;
+            _trayService.SetUpdateAvailable(UpdateService.LastCheckResult is { IsUpdateAvailable: true } known
+                ? known.LatestVersionLabel
+                : null);
 
             // Register Global Hotkeys. The widget shortcut is best-effort: failing to claim it
             // must not stop the app, so unlike the main one it does not report a status.
@@ -335,7 +345,10 @@ public partial class MainWindow : Window
                 Hide();
             }
 
-            // Background update check
+            // Background update check. Nothing is painted here: the result is published through
+            // UpdateService and both titlebars own an update pill that listens for it. Writing the
+            // notice to the footer instead was pointless, because the refresh loop rewrites that
+            // line every 800 ms, so the notice vanished almost before it could be read.
             if (App.Settings.AutoCheckForUpdates)
             {
                 _ = Task.Run(async () =>
@@ -343,16 +356,14 @@ public partial class MainWindow : Window
                     try
                     {
                         await Task.Delay(3000);
-                        var r = await UpdateService.CheckForUpdatesAsync();
-                        if (r.IsUpdateAvailable)
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                SetStatus($"⭐ {Strings.T("UpdateAvailable", r.LatestVersionLabel)}");
-                            });
-                        }
+                        await UpdateService.CheckForUpdatesAsync();
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        // The service already turns connection problems into a check status, so
+                        // this only covers an unexpected bug, which must not vanish without a trace.
+                        Debug.WriteLine($"Update check error: {ex}");
+                    }
                 });
             }
 
@@ -396,6 +407,7 @@ public partial class MainWindow : Window
             _searchHistoryTimer.Stop();
             _settingsSaveTimer.Stop();
             _lifetimeCts.Cancel();
+            UpdateService.UpdateAvailabilityChanged -= OnUpdateAvailabilityChanged;
             _hotkeyService.Dispose();
             _trayService.Dispose();
         }
@@ -818,7 +830,7 @@ public partial class MainWindow : Window
                 OpenSettingsFromTray();
                 break;
             case WidgetMenuAction.About:
-                OpenAboutFromTray(false);
+                OpenAboutFromTray();
                 break;
             case WidgetMenuAction.Exit:
                 ExitApplication();
@@ -2166,17 +2178,100 @@ public partial class MainWindow : Window
     private void MoreWebsite_Click(object sender, RoutedEventArgs e)
         => OpenExternalUrl("https://cybergems.org");
 
-    private void MoreCheckUpdates_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new AboutWindow(checkUpdatesNow: true) { Owner = this };
-        dlg.ShowDialog();
-    }
+    private void MoreCheckUpdates_Click(object sender, RoutedEventArgs e) =>
+        CheckForUpdatesFromShell();
 
     private void About_Click(object sender, RoutedEventArgs e)
     {
         var w = new AboutWindow { Owner = this };
         w.ShowDialog();
     }
+
+    /// <summary>
+    /// Explicit "check for updates", shared by the tray menu and the window's More menu. A version
+    /// already known to be available goes straight to the confirm flow, so the user is not made to
+    /// wait for a second network round trip they already have the answer to.
+    /// </summary>
+    private async void CheckForUpdatesFromShell()
+    {
+        if (UpdateService.LastCheckResult is { IsUpdateAvailable: true } known)
+        {
+            await PromptAndStartUpdateAsync(known);
+            return;
+        }
+
+        var result = await UpdateService.CheckForUpdatesAsync();
+
+        if (result.IsUpdateAvailable)
+        {
+            await PromptAndStartUpdateAsync(result);
+            return;
+        }
+
+        // Reported in place. Opening the whole About window just to say the build is current made
+        // an explicit check feel heavier than the answer it carries.
+        ConfirmDialog.Show(
+            this,
+            Strings.T("CheckUpdatesAction"),
+            result.StatusMessage,
+            Strings.T("Ok"),
+            null,
+            ConfirmIconType.Check);
+    }
+
+    /// <summary>
+    /// The titlebar update pill was activated. The pill only exists while a check reported a newer
+    /// version, so the flow starts from the last result rather than re-running the check.
+    /// </summary>
+    private async void UpdatePill_UpdateRequested(object? sender, EventArgs e)
+    {
+        var result = UpdateService.LastCheckResult;
+        if (result is not { IsUpdateAvailable: true })
+        {
+            // The result vanished between painting the pill and clicking it; re-check rather than
+            // leaving the click unanswered.
+            CheckForUpdatesFromShell();
+            return;
+        }
+
+        await PromptAndStartUpdateAsync(result);
+    }
+
+    /// <summary>
+    /// Confirms an available update and, on acceptance, downloads and installs it. Every surface
+    /// that offers the update funnels through here, so the wording, the progress window and the
+    /// failure handling stay identical no matter where the user started.
+    /// </summary>
+    private async Task PromptAndStartUpdateAsync(UpdateCheckResult result)
+    {
+        var message = $"{Strings.T("Current")} {UpdateService.GetCurrentVersionLabel()}\n" +
+                      $"{Strings.T("Latest")} {result.LatestVersionLabel}\n\n" +
+                      Strings.T("UpdatePrompt");
+
+        var choice = ConfirmDialog.Show(
+            this,
+            Strings.T("UpdateAvailable", result.LatestVersionLabel),
+            message,
+            Strings.T("Download"),
+            Strings.T("Later"),
+            ConfirmIconType.Info);
+
+        if (!choice) return;
+
+        // The About window owns the download progress bar, so it is opened non-modally and driven
+        // from here. Keeping it non-modal is what stops an update prompt from freezing the app.
+        var about = new AboutWindow { Owner = this };
+        about.Show();
+        await about.StartUpdateDownloadAsync(result);
+    }
+
+    /// <summary>
+    /// Mirrors a completed check onto the tray surfaces. Marshalled to the UI thread because the
+    /// startup check runs on a background task.
+    /// </summary>
+    private void OnUpdateAvailabilityChanged(UpdateCheckResult result) =>
+        Dispatcher.BeginInvoke(() => _trayService.SetUpdateAvailable(
+            result.IsUpdateAvailable ? result.LatestVersionLabel : null));
 
     private void SyncSearchFromSettings()
     {
@@ -3153,6 +3248,7 @@ public partial class MainWindow : Window
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
             UpdateWidgetToggleHint();
+            UpdatePill.ApplyLanguage();
             _metricsWidget?.ApplyLocalization();
             CpuMenuWidgetItem.Header = Strings.T("FloatingWidget");
             RamMenuWidgetItem.Header = Strings.T("FloatingWidget");
@@ -3754,10 +3850,10 @@ public partial class MainWindow : Window
         NavigateToTab(MainTab.Settings);
     }
 
-    private void OpenAboutFromTray(bool checkUpdatesNow)
+    private void OpenAboutFromTray()
     {
         ShowFromTray();
-        var dlg = new AboutWindow(checkUpdatesNow) { Owner = this };
+        var dlg = new AboutWindow { Owner = this };
         dlg.ShowDialog();
     }
 

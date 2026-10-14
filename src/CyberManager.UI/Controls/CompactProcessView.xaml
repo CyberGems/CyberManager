@@ -372,6 +372,11 @@
                 <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             VerticalAlignment="Center">
+                    <!-- Same notice as the full titlebar, shrunk to the compact bar's 26px controls. -->
+                    <controls:UpdateAvailableButton x:Name="UpdatePill"
+                                                    PillHeight="26"
+                                                    Margin="0,0,2,0"
+                                                    UpdateRequested="UpdatePill_UpdateRequested"/>
                     <Border x:Name="PinButtonHost"
                             Width="32"
                             Height="30"

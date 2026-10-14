@@ -81,8 +81,9 @@ public class StringsTests
             "GroupByAppTitle", "GroupByAppDesc", "HighlightSuspendedTitle", "HighlightSuspendedDesc",
             "HideSystemProcesses", "HideSystemProcessesTitle", "HideSystemProcessesDesc",
             "RefreshIntervalTitle", "RefreshIntervalDesc", "RefreshFast", "RefreshNormal", "RefreshSlow",
-            "StartWithWindowsTitle", "MinimizeToTrayTitle", "AlwaysOnTopTitle", "AutoCheckUpdatesTitle",
+            "StartWithWindowsTitle", "MinimizeToTrayTitle", "AlwaysOnTopTitle",
             "GlobalHotkeyTitle", "ResetDefaults", "SettingsSaved",
+            "Update", "UpdateTagUnrecognized", "UpdateAvailable", "UpToDate",
             "FloatingWidget", "CloseWidget", "WidgetHotkeyTitle", "WidgetHotkeyDesc", "ShowMainWindow",
             "MoreOptions", "DocumentationWiki", "AboutCyberManager", "Description",
             "Unknown", "CpuModel", "TotalRam"

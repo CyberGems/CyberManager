@@ -96,7 +96,6 @@ public partial class SettingsView : UserControl
         MinimizeToTrayOnMinimizeSwitch.IsChecked = App.Settings.MinimizeToTrayOnMinimize;
         MinimizeToTrayOnCloseSwitch.IsChecked = App.Settings.MinimizeToTrayOnClose;
         AlwaysOnTopSwitch.IsChecked = App.Settings.AlwaysOnTop;
-        AutoUpdatesSwitch.IsChecked = App.Settings.AutoCheckForUpdates;
         SuiteSuggestionsSwitch.IsChecked = App.Settings.ShowSuiteRecommendations;
         _committedHotkey = App.Settings.GlobalHotkey;
         HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
@@ -119,7 +118,6 @@ public partial class SettingsView : UserControl
         App.Settings.MinimizeToTrayOnMinimize = MinimizeToTrayOnMinimizeSwitch.IsChecked == true;
         App.Settings.MinimizeToTrayOnClose = MinimizeToTrayOnCloseSwitch.IsChecked == true;
         App.Settings.AlwaysOnTop = AlwaysOnTopSwitch.IsChecked == true;
-        App.Settings.AutoCheckForUpdates = AutoUpdatesSwitch.IsChecked == true;
         App.Settings.ShowSuiteRecommendations = SuiteSuggestionsSwitch.IsChecked == true;
 
         // Sync Start with Windows Registry
@@ -430,8 +428,6 @@ public partial class SettingsView : UserControl
         MinimizeToTrayOnCloseDescLbl.Text = Strings.T("MinimizeToTrayOnCloseDesc");
         AlwaysOnTopTitleLbl.Text = Strings.T("AlwaysOnTopTitle");
         AlwaysOnTopDescLbl.Text = Strings.T("AlwaysOnTopDesc");
-        AutoUpdatesTitleLbl.Text = Strings.T("AutoCheckUpdatesTitle");
-        AutoUpdatesDescLbl.Text = Strings.T("AutoCheckUpdatesDesc");
         SuiteSuggestionsTitleLbl.Text = Strings.T("SuiteSuggestionsTitle");
         SuiteSuggestionsDescLbl.Text = Strings.T("SuiteSuggestionsDesc");
         AutomationProperties.SetName(SuiteSuggestionsSwitch, Strings.T("SuiteSuggestionsTitle"));

@@ -154,6 +154,9 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? DragRequested;
     public event RoutedEventHandler? ClearSelectionRequested;
 
+    /// <summary>Raised when the update pill is activated. The host owns the confirm/download flow.</summary>
+    public event EventHandler? UpdateRequested;
+
     public void ApplyLanguage()
     {
         EndTaskButton.ToolTip = Strings.T("Kill");
@@ -171,6 +174,7 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(ModeButton, Strings.T("MoreDetails"));
         BrandingPanel.ToolTip = Strings.T("About");
         AutomationProperties.SetName(BrandingPanel, Strings.T("About"));
+        UpdatePill.ApplyLanguage();
         SettingsButton.ToolTip = Strings.T("Settings");
         MoreButton.ToolTip = Strings.T("MoreOptions");
         CloseButton.ToolTip = Strings.T("Close");
@@ -449,6 +453,9 @@ public partial class CompactProcessView : UserControl
 
     private void MoreDetailsButton_Click(object sender, RoutedEventArgs e) =>
         ToggleRequested?.Invoke(sender, e);
+
+    private void UpdatePill_UpdateRequested(object? sender, EventArgs e) =>
+        UpdateRequested?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
     /// Attaches an empty, per-header context menu as soon as a header is realized. WPF resolves

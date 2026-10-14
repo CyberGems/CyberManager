@@ -109,8 +109,13 @@ public sealed class TrayIconService : IDisposable
     private Action? _onToggleWidget;
     private bool _widgetChecked;
     private Action? _onOpenSettings;
-    private Action<bool>? _onOpenAbout;
+    private Action? _onOpenAbout;
+    private Action? _onCheckForUpdates;
     private Action? _onExit;
+
+    /// <summary>Version the last completed check found, or null when the build is current.</summary>
+    private string? _updateVersionLabel;
+    private MenuItem? _updateMenuItem;
 
     public void Initialize(
         Window ownerWindow,
@@ -119,7 +124,8 @@ public sealed class TrayIconService : IDisposable
         Action onRefresh,
         Action onToggleWidget,
         Action onOpenSettings,
-        Action<bool> onOpenAbout,
+        Action onOpenAbout,
+        Action onCheckForUpdates,
         Action onExit)
     {
         _ownerWindow = ownerWindow;
@@ -129,6 +135,7 @@ public sealed class TrayIconService : IDisposable
         _onToggleWidget = onToggleWidget;
         _onOpenSettings = onOpenSettings;
         _onOpenAbout = onOpenAbout;
+        _onCheckForUpdates = onCheckForUpdates;
         _onExit = onExit;
 
         var helper = new WindowInteropHelper(ownerWindow);
@@ -157,7 +164,7 @@ public sealed class TrayIconService : IDisposable
             uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP,
             uCallbackMessage = WM_TRAYICON,
             hIcon = _hIcon,
-            szTip = $"CyberManager {UpdateService.GetCurrentVersionLabel()}"
+            szTip = BuildTooltip()
         };
 
         _isAdded = AddTrayIcon();
@@ -197,7 +204,20 @@ public sealed class TrayIconService : IDisposable
         };
         _headerMenuItem.SetResourceReference(Control.ForegroundProperty, "AccentBrush");
         if (miStyle != null) _headerMenuItem.Style = miStyle;
-        _headerMenuItem.Click += (_, _) => _onOpenAbout?.Invoke(false);
+        _headerMenuItem.Click += (_, _) => _onOpenAbout?.Invoke();
+
+        // 1b. Update notice: the tray counterpart of the titlebar pill, so the announcement still
+        // reaches the user when the window is hidden or minimized to the tray. Collapsed until a
+        // check actually finds a newer version.
+        _updateMenuItem = new MenuItem
+        {
+            Header = Strings.T("Update"),
+            Icon = CreatePathIcon("M 12 4 V 15 M 7 10 L 12 15 L 17 10 M 5 20 H 19"),
+            Visibility = Visibility.Collapsed
+        };
+        _updateMenuItem.SetResourceReference(Control.ForegroundProperty, "AccentBrush");
+        if (miStyle != null) _updateMenuItem.Style = miStyle;
+        _updateMenuItem.Click += (_, _) => _onCheckForUpdates?.Invoke();
 
         // 2. Show / Hide CyberManager
         _showMenuItem = new MenuItem
@@ -310,7 +330,7 @@ public sealed class TrayIconService : IDisposable
             Icon = CreatePathIcon("M 12 22 A 10 10 0 1 0 12 2 A 10 10 0 0 0 12 22 M 12 16 V 12 M 12 8 H 12.01")
         };
         if (miStyle != null) _subAboutItem.Style = miStyle;
-        _subAboutItem.Click += (_, _) => _onOpenAbout?.Invoke(false);
+        _subAboutItem.Click += (_, _) => _onOpenAbout?.Invoke();
 
         // Submenu: Check for Updates
         _subCheckUpdateItem = new MenuItem
@@ -319,7 +339,7 @@ public sealed class TrayIconService : IDisposable
             Icon = CreatePathIcon("M 12 4 V 15 M 7 10 L 12 15 L 17 10 M 5 20 H 19")
         };
         if (miStyle != null) _subCheckUpdateItem.Style = miStyle;
-        _subCheckUpdateItem.Click += (_, _) => _onOpenAbout?.Invoke(true);
+        _subCheckUpdateItem.Click += (_, _) => _onCheckForUpdates?.Invoke();
 
         _helpMenuItem.Items.Add(_subHelpItem);
         _helpMenuItem.Items.Add(_subFaqItem);
@@ -345,6 +365,7 @@ public sealed class TrayIconService : IDisposable
         // Assemble Menu in CyberFeeds Standard Order
         _contextMenu.Items.Add(_headerMenuItem);
         _contextMenu.Items.Add(new Separator { Style = sepStyle });
+        _contextMenu.Items.Add(_updateMenuItem);
         _contextMenu.Items.Add(_showMenuItem);
         _contextMenu.Items.Add(_sysInfoMenuItem);
         _contextMenu.Items.Add(_refreshMenuItem);
@@ -482,6 +503,56 @@ public sealed class TrayIconService : IDisposable
         return icon;
     }
 
+    /// <summary>
+    /// Announces (or clears) an available update on the tray surfaces. The tray is the only
+    /// surface left when the window is hidden or minimized to the tray, so without this the notice
+    /// would never reach a user who runs the app minimized.
+    /// </summary>
+    public void SetUpdateAvailable(string? versionLabel)
+    {
+        _updateVersionLabel = string.IsNullOrEmpty(versionLabel) ? null : versionLabel;
+
+        if (_updateMenuItem != null)
+        {
+            if (_updateVersionLabel is null)
+            {
+                _updateMenuItem.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                _updateMenuItem.Header = Strings.T("UpdateAvailable", _updateVersionLabel);
+                System.Windows.Automation.AutomationProperties.SetName(
+                    _updateMenuItem, Strings.T("UpdateAvailable", _updateVersionLabel));
+                _updateMenuItem.Visibility = Visibility.Visible;
+            }
+        }
+
+        ApplyTooltip();
+    }
+
+    /// <summary>
+    /// Hover text of the tray icon. The update notice is appended here as well, because hovering
+    /// the icon is the one signal that needs no menu to be opened first.
+    /// </summary>
+    private string BuildTooltip()
+    {
+        var text = $"CyberManager {UpdateService.GetCurrentVersionLabel()}";
+        return _updateVersionLabel is null
+            ? text
+            : $"{text} — {Strings.T("UpdateAvailable", _updateVersionLabel)}";
+    }
+
+    private void ApplyTooltip()
+    {
+        if (!_isAdded) return;
+
+        // NOTIFYICONDATA.szTip is a fixed 128-character buffer, so the text is clamped before it
+        // reaches the marshaller rather than being silently truncated (or rejected) there.
+        var tip = BuildTooltip();
+        _nid.szTip = tip.Length > 127 ? tip[..127] : tip;
+        Shell_NotifyIcon(NIM_MODIFY, ref _nid);
+    }
+
     public void UpdateLocalization()
     {
         if (_headerMenuItem != null)
@@ -516,6 +587,9 @@ public sealed class TrayIconService : IDisposable
         if (_subDonateItem != null) _subDonateItem.Header = Strings.T("Donate");
         if (_subAboutItem != null) _subAboutItem.Header = $"{Strings.T("AboutSubtitle")}...";
         if (_subCheckUpdateItem != null) _subCheckUpdateItem.Header = Strings.T("CheckForUpdates");
+        // Re-derives the notice from the stored version so a language switch relabels it instead
+        // of leaving the previous language behind.
+        SetUpdateAvailable(_updateVersionLabel);
         if (_suiteMenuItem != null)
         {
             _suiteMenuItem.Header = Strings.T("MoreFromCyberGems");

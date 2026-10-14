@@ -34,17 +34,13 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         ModalAttentionHelper.Trigger(this, OuterBorder, WindowScale, WindowGlow, ref _lastAttentionTime);
     }
 
-    public AboutWindow(bool checkUpdatesNow = false)
+    public AboutWindow()
     {
         InitializeComponent();
         Icon = AppIconHelper.CreateManagerImageSource(64) as System.Windows.Media.ImageSource;
         CyberManagerWindowChrome.Apply(this, 12);
         SourceInitialized += AboutWindow_SourceInitialized;
         LoadContent();
-        if (checkUpdatesNow)
-        {
-            Loaded += (_, _) => UpdateCheckButton_Click(this, new RoutedEventArgs());
-        }
     }
 
     private void AboutWindow_SourceInitialized(object? sender, EventArgs e)
