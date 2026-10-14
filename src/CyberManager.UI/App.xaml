@@ -23,8 +23,10 @@
         <SolidColorBrush x:Key="InputBgBrush" Color="#111A27"/>
         <Color x:Key="AccentColor">#24A6B5</Color>
         <Color x:Key="RamColor">#24A6B5</Color>
+        <Color x:Key="CpuColor">#10B981</Color>
         <SolidColorBrush x:Key="RamBrush" Color="#24A6B5"/>
         <SolidColorBrush x:Key="RamFillBrush" Color="#2024A6B5"/>
+        <SolidColorBrush x:Key="CpuBrush" Color="#10B981"/>
         <SolidColorBrush x:Key="SwitchActiveBrush" Color="#24A6B5"/>
         <SolidColorBrush x:Key="SwitchTrackBrush" Color="#29394D"/>
         <Style TargetType="Window">

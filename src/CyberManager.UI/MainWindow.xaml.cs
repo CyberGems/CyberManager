@@ -16,6 +16,7 @@ using CyberManager.Common.I18n;
 using CyberManager.Common.Models;
 using CyberManager.Common.Settings;
 using CyberManager.Core.Engine;
+using CyberManager.UI.Controls;
 using CyberManager.UI.Dialogs;
 using CyberManager.UI.Services;
 using CyberManager.UI.ViewModels;
@@ -140,6 +141,16 @@ public partial class MainWindow : Window
     private int _refreshInFlight;
     private double _lastUsedRamGb;
     private double _lastTotalRamGb;
+    private double _lastRamPercent;
+    private double _lastCpuPercent;
+    private string _lastCpuModel = "";
+
+    // Fallbacks for the theme colours: only used if the resource is missing (design time, tests).
+    private static readonly Color CpuFallback = Color.FromRgb(0x10, 0xB9, 0x81);
+    private static readonly Color RamFallback = Color.FromRgb(0x24, 0xA6, 0xB5);
+
+    private readonly MetricToolTipContent _cpuTip;
+    private readonly MetricToolTipContent _ramTip;
     private ContextMenuTarget? _contextMenuTarget;
     private bool _contextMenuOpen;
     private bool _contextMenuKeepsSelection;
@@ -191,6 +202,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        CpuSparklineBorder.ToolTip = MetricToolTipContent.Create(out _cpuTip);
+        RamSparklineBorder.ToolTip = MetricToolTipContent.Create(out _ramTip);
         ProcGrid.ItemsSource = _processList.Items;
         CompactView.ItemsSource = _processList.Items;
         CompactView.ToggleRequested += CompactView_ToggleRequested;
@@ -691,16 +704,30 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Builds the memory card tooltip. The card shows the usage percentage, so the absolute
-    /// amounts are exposed here together with the click affordance that opens System Information.
-    /// Falls back to the hint alone until the first sample provides real values.
+    /// Refreshes both metric card tooltips. The cards show a percentage and a sparkline, so the
+    /// tooltip carries the absolute figures the cards cannot fit — the CPU model, the installed and
+    /// used memory — plus the click affordance that opens System Information. The content is
+    /// updated in place rather than rebuilt, so a tooltip that is already open keeps ticking along.
     /// </summary>
-    private void UpdateRamToolTip()
+    private void UpdateMetricToolTips()
     {
-        var hint = $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})";
-        RamSparklineBorder.ToolTip = _lastTotalRamGb > 0
-            ? $"{hint}\n{Strings.T("MemTotal", _lastUsedRamGb)}\n{Strings.T("TotalRam", _lastTotalRamGb)}"
-            : hint;
+        var cpuModel = string.IsNullOrWhiteSpace(_lastCpuModel) ? Strings.T("Unknown") : _lastCpuModel;
+        var hint = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
+        _cpuTip.SetContent(
+            Strings.T("Cpu"),
+            $"{_lastCpuPercent:F1}%",
+            UsageHeat.Solid(_lastCpuPercent, UsageHeat.FromResource("CpuColor", CpuFallback)),
+            $"{Strings.T("CpuModel")}: {cpuModel}",
+            hint);
+
+        _ramTip.SetContent(
+            Strings.T("Ram"),
+            $"{_lastRamPercent:F1}%",
+            UsageHeat.Solid(_lastRamPercent, UsageHeat.FromResource("RamColor", RamFallback)),
+            _lastTotalRamGb > 0
+                ? $"{Strings.T("TotalRam", _lastTotalRamGb)}\n{Strings.T("MemTotal", _lastUsedRamGb)}"
+                : string.Empty,
+            $"{Strings.T("MemoryHistory")} ({Strings.T("OpenSystemInfoTip")})");
     }
 
     /// <summary>
@@ -857,7 +884,15 @@ public partial class MainWindow : Window
 
             _lastUsedRamGb = sysMetrics.UsedRamGb;
             _lastTotalRamGb = sysMetrics.TotalRamGb;
-            UpdateRamToolTip();
+            _lastRamPercent = sysMetrics.MemoryLoadPercent;
+            _lastCpuPercent = sysMetrics.CpuTotalPercent;
+            _lastCpuModel = sysMetrics.CpuModelName ?? "";
+
+            // Heat tint over each card's theme background, so the cards warm up towards red as the
+            // machine fills instead of staying a flat colour. The compact pills share the ramp.
+            CpuHeatOverlay.Background = UsageHeat.Tint(_lastCpuPercent, UsageHeat.FromResource("CpuColor", CpuFallback));
+            RamHeatOverlay.Background = UsageHeat.Tint(_lastRamPercent, UsageHeat.FromResource("RamColor", RamFallback));
+            UpdateMetricToolTips();
 
             if (_metricsWidget is { IsVisible: true } widget)
             {
@@ -3162,8 +3197,7 @@ public partial class MainWindow : Window
             UpdateMaximizeButtonIcon();
             StatsBorder.ToolTip = Strings.T("OpenSystemInfoTip");
             AutomationProperties.SetName(StatsBorder, Strings.T("SystemInformation"));
-            CpuSparklineBorder.ToolTip = $"{Strings.T("CpuHistory")} ({Strings.T("OpenSystemInfoTip")})";
-            UpdateRamToolTip();
+            UpdateMetricToolTips();
             SetStatus(Strings.T("Ready"));
             CompactView.ApplyLanguage();
             // Runs after the compact view re-localizes its own labels, so the resolved

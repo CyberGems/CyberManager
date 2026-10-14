@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
+using CyberManager.UI.Services;
 
 namespace CyberManager.UI.Controls;
 
@@ -39,9 +40,17 @@ public partial class CompactProcessView : UserControl
     private bool _syncingSearch;
     private bool _syncingHeavyFilter;
     private double _cpuPercent;
+    private double _ramPercent;
     private double _usedRamGb;
     private double _totalRamGb;
     private string _cpuModelName = "";
+
+    // Fallbacks for the theme colours: only used if the resource is missing (design time, tests).
+    private static readonly Color CpuFallback = Color.FromRgb(0x10, 0xB9, 0x81);
+    private static readonly Color RamFallback = Color.FromRgb(0x24, 0xA6, 0xB5);
+
+    private readonly MetricToolTipContent _cpuTip;
+    private readonly MetricToolTipContent _ramTip;
 
     // Left-button press on the branding: About opens only if the pointer does not move beyond
     // the drag threshold, so dragging the window from the branding keeps working.
@@ -52,6 +61,8 @@ public partial class CompactProcessView : UserControl
     public CompactProcessView()
     {
         InitializeComponent();
+        CompactCpuMetricHost.ToolTip = MetricToolTipContent.Create(out _cpuTip);
+        CompactRamMetricHost.ToolTip = MetricToolTipContent.Create(out _ramTip);
         ApplyLanguage();
     }
 
@@ -226,20 +237,35 @@ public partial class CompactProcessView : UserControl
     public void SetSystemMetrics(double cpuPercent, double ramPercent, double usedRamGb, string? cpuModelName, double totalRamGb)
     {
         _cpuPercent = cpuPercent;
+        _ramPercent = ramPercent;
         _usedRamGb = usedRamGb;
         _cpuModelName = cpuModelName?.Trim() ?? "";
         _totalRamGb = totalRamGb;
 
         CompactCpuText.Text = $"{cpuPercent:F1}%";
         CompactRamText.Text = $"{ramPercent:F1}%";
+
+        // Tint layered over each pill's theme background: the badges stay recognisable at rest and
+        // warm up towards red as the machine fills, the same ramp the metric cards and rows use.
+        CompactCpuHeat.Background = UsageHeat.Tint(cpuPercent, UsageHeat.FromResource("CpuColor", CpuFallback));
+        CompactRamHeat.Background = UsageHeat.Tint(ramPercent, UsageHeat.FromResource("RamColor", RamFallback));
+
         UpdateMetricToolTips();
     }
 
     private void UpdateMetricToolTips()
     {
         var cpuModel = string.IsNullOrWhiteSpace(_cpuModelName) ? Strings.T("Unknown") : _cpuModelName;
-        CompactCpuMetricHost.ToolTip = $"{Strings.T("CpuModel")}: {cpuModel}\n{Strings.T("CpuTotal", _cpuPercent)}";
-        CompactRamMetricHost.ToolTip = $"{Strings.T("TotalRam", _totalRamGb)}\n{Strings.T("MemTotal", _usedRamGb)}";
+        _cpuTip.SetContent(
+            Strings.T("Cpu"),
+            $"{_cpuPercent:F1}%",
+            UsageHeat.Solid(_cpuPercent, UsageHeat.FromResource("CpuColor", CpuFallback)),
+            $"{Strings.T("CpuModel")}: {cpuModel}");
+        _ramTip.SetContent(
+            Strings.T("Ram"),
+            $"{_ramPercent:F1}%",
+            UsageHeat.Solid(_ramPercent, UsageHeat.FromResource("RamColor", RamFallback)),
+            $"{Strings.T("TotalRam", _totalRamGb)}\n{Strings.T("MemTotal", _usedRamGb)}");
     }
 
     public void SetEmptyState(bool empty, string? message = null)

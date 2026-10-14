@@ -310,49 +310,62 @@
                 <StackPanel x:Name="CompactMetricsPanel"
                             Grid.Column="1"
                             Orientation="Horizontal"
-                            HorizontalAlignment="Right"
+                            HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Margin="0,0,8,0">
+                    <!-- Both pills layer their tint over the theme background instead of replacing it,
+                         so a theme switch keeps working and the metric colour only warms up as the
+                         machine fills. Tint and tooltip are driven from SetSystemMetrics. -->
                     <Border x:Name="CompactCpuMetricHost"
-                            Background="{DynamicResource CardSecondaryBrush}"
-                            CornerRadius="4"
-                            Padding="5,2"
-                            Margin="0,0,4,0"
+                            CornerRadius="5"
+                            Margin="0,0,5,0"
+                            ToolTipService.InitialShowDelay="120"
+                            ToolTipService.BetweenShowDelay="0"
+                            ToolTipService.ShowDuration="20000"
                             MouseEnter="InteractiveControl_MouseEnter"
                             MouseLeave="InteractiveControl_MouseLeave">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock x:Name="CompactCpuLabel"
-                                       Text="CPU"
-                                       Foreground="{DynamicResource SubTextBrush}"
-                                       FontSize="9"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,4,0"/>
-                            <TextBlock x:Name="CompactCpuText"
-                                       Text="0.0%"
-                                       Foreground="{DynamicResource TextBrush}"
-                                       FontSize="10"
-                                       FontWeight="Bold"/>
-                        </StackPanel>
+                        <Grid>
+                            <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="5"/>
+                            <Border x:Name="CompactCpuHeat" CornerRadius="5" IsHitTestVisible="False"/>
+                            <StackPanel Orientation="Horizontal" Margin="7,3.5">
+                                <TextBlock x:Name="CompactCpuLabel"
+                                           Text="CPU"
+                                           Foreground="{DynamicResource SubTextBrush}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,5,0"/>
+                                <TextBlock x:Name="CompactCpuText"
+                                           Text="0.0%"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           FontSize="12"
+                                           FontWeight="Bold"/>
+                            </StackPanel>
+                        </Grid>
                     </Border>
                     <Border x:Name="CompactRamMetricHost"
-                            Background="{DynamicResource CardSecondaryBrush}"
-                            CornerRadius="4"
-                            Padding="5,2"
+                            CornerRadius="5"
+                            ToolTipService.InitialShowDelay="120"
+                            ToolTipService.BetweenShowDelay="0"
+                            ToolTipService.ShowDuration="20000"
                             MouseEnter="InteractiveControl_MouseEnter"
                             MouseLeave="InteractiveControl_MouseLeave">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock x:Name="CompactRamLabel"
-                                       Text="RAM"
-                                       Foreground="{DynamicResource SubTextBrush}"
-                                       FontSize="9"
-                                       FontWeight="SemiBold"
-                                       Margin="0,0,4,0"/>
-                            <TextBlock x:Name="CompactRamText"
-                                       Text="0.0%"
-                                       Foreground="{DynamicResource TextBrush}"
-                                       FontSize="10"
-                                       FontWeight="Bold"/>
-                        </StackPanel>
+                        <Grid>
+                            <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="5"/>
+                            <Border x:Name="CompactRamHeat" CornerRadius="5" IsHitTestVisible="False"/>
+                            <StackPanel Orientation="Horizontal" Margin="7,3.5">
+                                <TextBlock x:Name="CompactRamLabel"
+                                           Text="RAM"
+                                           Foreground="{DynamicResource SubTextBrush}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,5,0"/>
+                                <TextBlock x:Name="CompactRamText"
+                                           Text="0.0%"
+                                           Foreground="{DynamicResource TextBrush}"
+                                           FontSize="12"
+                                           FontWeight="Bold"/>
+                            </StackPanel>
+                        </Grid>
                     </Border>
                 </StackPanel>
 

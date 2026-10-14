@@ -745,7 +745,8 @@
                     </Border>
 
                     <!-- CPU Sparkline Widget -->
-                    <Border Grid.Column="1" x:Name="CpuSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="38" Margin="10,0,0,0" Padding="10,3,10,3" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="CPU History (Click to open System Information)">
+                    <Border Grid.Column="1" x:Name="CpuSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="38" Margin="10,0,0,0" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click"
+                            ToolTipService.InitialShowDelay="120" ToolTipService.BetweenShowDelay="0" ToolTipService.ShowDuration="20000">
                         <Border.ContextMenu>
                             <ContextMenu Style="{StaticResource ModernContextMenu}" Opened="MetricsCardMenu_Opened">
                                 <MenuItem x:Name="CpuMenuWidgetItem" Header="Floating Widget" IsCheckable="True" Style="{StaticResource ModernMenuItem}" Click="MetricsWidgetItem_Click">
@@ -766,25 +767,31 @@
                             </ContextMenu>
                         </Border.ContextMenu>
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
-                                <TextBlock Text="CPU" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}" Margin="0,0,0,1"/>
-                                <TextBlock x:Name="CpuSparklineText" Text="0.0%" FontSize="13.5" FontWeight="Bold" Foreground="#10B981"/>
-                            </StackPanel>
-                            <controls:SparklineControl x:Name="CpuSparkline" Grid.Column="1" Width="100" Height="28"
-                                                      StrokeBrush="#10B981"
-                                                      FillBrush="#2010B981"
-                                                      SecondaryStrokeBrush="#EF4444"
-                                                      SecondaryFillBrush="#40EF4444"
-                                                      Click="SystemInfo_Click"/>
+                            <!-- Usage tint over the card's theme background, driven from the metrics
+                                 timer. Radius 7 = the card's 8 minus its 1px border. -->
+                            <Border x:Name="CpuHeatOverlay" CornerRadius="7" IsHitTestVisible="False"/>
+                            <Grid Margin="10,3,10,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <TextBlock Text="CPU" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}" Margin="0,0,0,1"/>
+                                    <TextBlock x:Name="CpuSparklineText" Text="0.0%" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource CpuBrush}"/>
+                                </StackPanel>
+                                <controls:SparklineControl x:Name="CpuSparkline" Grid.Column="1" Width="100" Height="28"
+                                                          StrokeBrush="{DynamicResource CpuBrush}"
+                                                          FillBrush="#2010B981"
+                                                          SecondaryStrokeBrush="#EF4444"
+                                                          SecondaryFillBrush="#40EF4444"
+                                                          Click="SystemInfo_Click"/>
+                            </Grid>
                         </Grid>
                     </Border>
 
                     <!-- RAM Sparkline Widget -->
-                    <Border Grid.Column="2" x:Name="RamSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="38" Margin="8,0,0,0" Padding="10,3,10,3" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click" ToolTip="Memory History (Click to open System Information)">
+                    <Border Grid.Column="2" x:Name="RamSparklineBorder" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Height="38" Margin="8,0,0,0" Cursor="Hand" MouseLeftButtonUp="SystemInfo_Click"
+                            ToolTipService.InitialShowDelay="120" ToolTipService.BetweenShowDelay="0" ToolTipService.ShowDuration="20000">
                         <Border.ContextMenu>
                             <ContextMenu Style="{StaticResource ModernContextMenu}" Opened="MetricsCardMenu_Opened">
                                 <MenuItem x:Name="RamMenuWidgetItem" Header="Floating Widget" IsCheckable="True" Style="{StaticResource ModernMenuItem}" Click="MetricsWidgetItem_Click">
@@ -805,18 +812,21 @@
                             </ContextMenu>
                         </Border.ContextMenu>
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
-                                <TextBlock Text="RAM" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}" Margin="0,0,0,1"/>
-                                <TextBlock x:Name="RamSparklineText" Text="0.0%" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource RamBrush}"/>
-                            </StackPanel>
-                            <controls:SparklineControl x:Name="RamSparkline" Grid.Column="1" Width="100" Height="28"
-                                                      StrokeBrush="{DynamicResource RamBrush}"
-                                                      FillBrush="{DynamicResource RamFillBrush}"
-                                                      Click="SystemInfo_Click"/>
+                            <Border x:Name="RamHeatOverlay" CornerRadius="7" IsHitTestVisible="False"/>
+                            <Grid Margin="10,3,10,3">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <TextBlock Text="RAM" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource SubTextBrush}" Margin="0,0,0,1"/>
+                                    <TextBlock x:Name="RamSparklineText" Text="0.0%" FontSize="13.5" FontWeight="Bold" Foreground="{DynamicResource RamBrush}"/>
+                                </StackPanel>
+                                <controls:SparklineControl x:Name="RamSparkline" Grid.Column="1" Width="100" Height="28"
+                                                          StrokeBrush="{DynamicResource RamBrush}"
+                                                          FillBrush="{DynamicResource RamFillBrush}"
+                                                          Click="SystemInfo_Click"/>
+                            </Grid>
                         </Grid>
                     </Border>
 

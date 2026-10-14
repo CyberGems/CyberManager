@@ -151,6 +151,66 @@ internal static class HeatmapThresholds
     }
 }
 
+/// <summary>
+/// Heat tint for a system-wide percentage (0-100), shared by the CPU and RAM badges in both
+/// windows: the title bar pills, the compact window and the metrics cards all warm up the same way.
+/// <para>
+/// The opacity scales smoothly with the value while the hue switches to red once usage turns
+/// critical. The two are kept apart on purpose: blending green or cyan into red passes through
+/// olive and grey, and a translucent warm hue over the dark card is exactly what used to read as
+/// muddy brown. Each metric keeps its own base colour (CPU green, RAM from the palette), so the
+/// badge still looks like itself at rest and only changes as it fills.
+/// </para>
+/// </summary>
+public static class UsageHeat
+{
+    private static readonly Color HotColor = Color.FromRgb(0xEF, 0x44, 0x44);
+
+    /// <summary>Usage at which the hue flips to red. Opacity stays continuous across the flip.</summary>
+    private const double HotFrom = 0.80;
+
+    private const double MinAlpha = 0.06;
+    private const double MaxAlpha = 0.58;
+    private const double Curve = 1.8;
+
+    public static double Alpha(double percent)
+    {
+        // Math.Clamp passes NaN through, and a NaN would reach Math.Pow and poison the brush.
+        if (double.IsNaN(percent)) return MinAlpha;
+
+        var t = Math.Clamp(percent / 100.0, 0, 1);
+        return MinAlpha + (MaxAlpha - MinAlpha) * Math.Pow(t, Curve);
+    }
+
+    /// <summary>Solid colour for text and glyphs: the metric's colour, red once usage is critical.</summary>
+    public static Color ColorFor(double percent, Color baseColor) =>
+        Math.Clamp(percent / 100.0, 0, 1) >= HotFrom ? HotColor : baseColor;
+
+    /// <summary>Frozen solid brush of <see cref="ColorFor"/>, for values and glyphs.</summary>
+    public static SolidColorBrush Solid(double percent, Color baseColor)
+    {
+        var brush = new SolidColorBrush(ColorFor(percent, baseColor));
+        brush.Freeze();
+        return brush;
+    }
+
+    /// <summary>
+    /// Translucent overlay meant to be painted on top of the badge's own theme background, so a
+    /// theme switch keeps working without rebuilding the brush.
+    /// </summary>
+    public static SolidColorBrush Tint(double percent, Color baseColor)
+    {
+        var c = ColorFor(percent, baseColor);
+        var brush = new SolidColorBrush(Color.FromArgb((byte)Math.Round(Alpha(percent) * 255), c.R, c.G, c.B));
+        brush.Freeze();
+        return brush;
+    }
+
+    /// <summary>Reads a <see cref="Color"/> from the theme resources, falling back when it is missing.</summary>
+    public static Color FromResource(string key, Color fallback) =>
+        Application.Current?.TryFindResource(key) is Color c ? c : fallback;
+}
+
 public sealed class CpuHeatmapBrushConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
