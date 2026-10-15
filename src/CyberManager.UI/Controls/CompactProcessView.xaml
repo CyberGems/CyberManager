@@ -729,7 +729,8 @@
                                     </Grid.ColumnDefinitions>
                                     <Grid Width="18" Height="18" HorizontalAlignment="Center">
                                         <Image x:Name="ProcessIcon"
-                                               Source="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"
+                                               DataContext="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"
+                                               Source="{Binding Source}"
                                                Width="16"
                                                Height="16"
                                                RenderOptions.BitmapScalingMode="HighQuality">

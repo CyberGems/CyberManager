@@ -962,7 +962,8 @@
                                             <Image Width="16"
                                                    Height="16"
                                                    Stretch="Uniform"
-                                                   Source="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"/>
+                                                   DataContext="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"
+                                                   Source="{Binding Source}"/>
                                         </MenuItem.Icon>
                                         <MenuItem.Header>
                                             <StackPanel>
@@ -1178,7 +1179,8 @@
 
                                                 <!-- Process Icon Slot with fallback to system/diamond glyph -->
                                                 <Grid Grid.Column="1" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                    <Image x:Name="ProcIcon" Source="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"
+                                                    <Image x:Name="ProcIcon" DataContext="{Binding ExePath, Converter={StaticResource PathToIconConverter}}"
+                                                           Source="{Binding Source}"
                                                            Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center"
                                                            RenderOptions.BitmapScalingMode="HighQuality">
                                                         <Image.Style>

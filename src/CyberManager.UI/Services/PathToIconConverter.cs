@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -13,50 +12,17 @@ namespace CyberManager.UI.Services;
 
 public sealed class PathToIconConverter : IValueConverter
 {
-    private const int MaxCacheEntries = 512;
-    private static readonly TimeSpan NegativeCacheLifetime = TimeSpan.FromSeconds(10);
-    private static readonly ConcurrentDictionary<string, CacheEntry> Cache = new(StringComparer.OrdinalIgnoreCase);
-    private static readonly ConcurrentDictionary<string, byte> Pending = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ProcessIconCache SharedCache = new(LoadIcon, GetLastWriteTime);
+    private readonly ProcessIconCache _cache;
 
-    public static event Action? IconReady;
+    public PathToIconConverter() : this(SharedCache) { }
+
+    internal PathToIconConverter(ProcessIconCache cache) => _cache = cache;
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string path || string.IsNullOrWhiteSpace(path)) return null;
-        path = path.Trim();
-        var lastWrite = GetLastWriteTime(path);
-
-        if (Cache.TryGetValue(path, out var cached) &&
-            cached.LastWriteUtc == lastWrite &&
-            (cached.Source != null || DateTime.UtcNow - cached.LastAccessUtc < NegativeCacheLifetime))
-        {
-            cached.LastAccessUtc = DateTime.UtcNow;
-            return cached.Source;
-        }
-
-        _ = PrefetchAsync(path);
-        return null;
-    }
-
-    public static async Task PrefetchAsync(string path, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(path) || !Pending.TryAdd(path, 0)) return;
-
-        try
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var entry = await Task.Run(() => LoadIcon(path), cancellationToken).ConfigureAwait(false);
-            Cache[path] = new CacheEntry(entry, GetLastWriteTime(path), DateTime.UtcNow);
-            EvictIfNeeded();
-            IconReady?.Invoke();
-        }
-        catch
-        {
-        }
-        finally
-        {
-            Pending.TryRemove(path, out _);
-        }
+        return _cache.Get(path);
     }
 
     private static BitmapSource? LoadIcon(string path)
@@ -110,26 +76,6 @@ public sealed class PathToIconConverter : IValueConverter
     {
         try { return File.Exists(path) ? File.GetLastWriteTimeUtc(path) : DateTime.MinValue; }
         catch (IOException) { return DateTime.MinValue; }
-    }
-
-    private static void EvictIfNeeded()
-    {
-        if (Cache.Count <= MaxCacheEntries) return;
-        foreach (var key in Cache
-                     .OrderBy(pair => pair.Value.LastAccessUtc)
-                     .Take(Math.Max(1, Cache.Count - MaxCacheEntries))
-                     .Select(pair => pair.Key)
-                     .ToList())
-        {
-            Cache.TryRemove(key, out _);
-        }
-    }
-
-    private sealed class CacheEntry(ImageSource? source, DateTime lastWriteUtc, DateTime lastAccessUtc)
-    {
-        public ImageSource? Source { get; } = source;
-        public DateTime LastWriteUtc { get; } = lastWriteUtc;
-        public DateTime LastAccessUtc { get; set; } = lastAccessUtc;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();

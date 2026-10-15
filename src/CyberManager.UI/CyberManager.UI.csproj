@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <InternalsVisibleTo Include="CyberManager.Tests" />
     <ProjectReference Include="..\CyberManager.Common\CyberManager.Common.csproj" />
     <ProjectReference Include="..\CyberManager.Core\CyberManager.Core.csproj" />
   </ItemGroup>

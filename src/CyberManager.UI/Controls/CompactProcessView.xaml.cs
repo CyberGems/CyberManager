@@ -369,8 +369,6 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
     }
 
-    public void RefreshItems() => CompactGrid.Items.Refresh();
-
     public void FocusSearchBox()
     {
         SearchBox.Focus();

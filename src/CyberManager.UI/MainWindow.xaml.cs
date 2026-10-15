@@ -130,7 +130,6 @@ public partial class MainWindow : Window
     private bool _isLoaded;
     private bool _isClosed;
     private bool _detectionPaused;
-    private int _iconRefreshPending;
     private List<ProcessInfo> _all = new();
     private List<ProcessInfo> _view = new();
     private string _pendingSearch = "";
@@ -252,7 +251,6 @@ public partial class MainWindow : Window
             _settingsSaveTimer.Stop();
             await App.Settings.SaveAsync(_lifetimeCts.Token);
         };
-        PathToIconConverter.IconReady += OnIconReady;
         SettingsTabContent.HotkeyChangeRequested += SettingsView_HotkeyChangeRequested;
         SettingsTabContent.WidgetHotkeyChangeRequested += SettingsView_WidgetHotkeyChangeRequested;
         SettingsTabContent.DefaultsReset += SettingsView_DefaultsReset;
@@ -523,7 +521,6 @@ public partial class MainWindow : Window
         _settingsSaveTimer.Stop();
         _lifetimeCts.Cancel();
         _metricsWidget?.Close();
-        PathToIconConverter.IconReady -= OnIconReady;
         _lifetimeCts.Dispose();
     }
 
@@ -698,20 +695,6 @@ public partial class MainWindow : Window
         }
 
         App.Settings.MainWindowBoundsSaved = true;
-    }
-
-    private void OnIconReady()
-    {
-        if (!_isLoaded || _isClosed || Interlocked.Exchange(ref _iconRefreshPending, 1) == 1) return;
-        Dispatcher.BeginInvoke(() =>
-        {
-            Volatile.Write(ref _iconRefreshPending, 0);
-            if (!_isClosed)
-            {
-                ProcGrid.Items.Refresh();
-                CompactView.RefreshItems();
-            }
-        }, DispatcherPriority.Background);
     }
 
     private void SetStatus(string status, string? toolTip = null, string? compactStatus = null)
