@@ -70,19 +70,28 @@ public class ProcessListScrollBehaviorTests
     });
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(33)]
-    public Task MouseWheelTakesOverWithTheSameResultAsNativeScrolling(int elapsedMilliseconds) => OnDispatcher(async () =>
+    [InlineData(0, true)]
+    [InlineData(33, true)]
+    [InlineData(0, false)]
+    [InlineData(33, false)]
+    public Task MouseWheelTakesOverWithTheSameResultAsNativeScrolling(int elapsedMilliseconds, bool smoothChevrons) => OnDispatcher(async () =>
     {
         using var native = new ScrollFixture(30, smooth: false);
-        using var smooth = new ScrollFixture(30);
+        using var smooth = new ScrollFixture(30, smooth: smoothChevrons);
         await Task.Delay(150);
 
+        var animates = smoothChevrons && SystemParameters.ClientAreaAnimation;
+        // Without animation, WPF queues the line command until layout. Replay that
+        // command on the reference too, including when wheel input arrives immediately.
+        if (!animates) ScrollBar.LineDownCommand.Execute(null, native.Bar);
         ScrollBar.LineDownCommand.Execute(null, smooth.Bar);
         if (elapsedMilliseconds > 0) await Task.Delay(elapsedMilliseconds);
         var beforeWheel = RaiseWheel(smooth);
-        native.Viewer.ScrollToVerticalOffset(beforeWheel);
-        await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+        if (animates)
+        {
+            native.Viewer.ScrollToVerticalOffset(beforeWheel);
+            await Dispatcher.Yield(DispatcherPriority.ApplicationIdle);
+        }
         RaiseWheel(native);
         await Task.Delay(200);
 
