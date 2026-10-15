@@ -39,7 +39,7 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 | Gestiona miles de procesos | UI virtualizada: solo se renderizan las filas visibles, 3000+ a 144 fps |
 | Refresco instantáneo de procesos | Motor nativo NT: llamadas directas a la API, cero sobrecarga de WMI |
 | Identifica procesos consumidores | Mapa térmico adaptativo de CPU/RAM y filtro de los 10 procesos más pesados |
-| Monitoriza la salud del sistema | Sparklines en vivo + ventana de Información del Sistema con 4 pestañas |
+| Monitoriza la salud del sistema | Sparklines en vivo, widget flotante de CPU/RAM e Información del Sistema con 4 pestañas |
 | Controla los procesos | Finalizar, finalizar árbol, reiniciar, suspender, reanudar, establecer prioridad |
 | Actúa sobre varios a la vez | Multi-selección con Ctrl/Shift+clic y "Finalizar selección" de un solo toque |
 | Entiende los procesos | Nombres amigables, metadatos y un detallado diálogo de Propiedades |
@@ -79,6 +79,8 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 
 ### 📊 Monitorización del sistema
 - **Sparklines en vivo**: gráficos de historial de CPU y RAM en tiempo real en el pie de la ventana principal
+- **Widget flotante de métricas**: mantén visibles las lecturas e historial de CPU y RAM en una ventana móvil y fijable, con tooltips detallados
+- **Avisos persistentes de actualización**: las nuevas versiones permanecen visibles desde ambas barras de título o el menú de la bandeja del sistema
 - **Ventana de Información del Sistema**: ventana dedicada con 4 pestañas:
   - **Resumen**: doble sparkline + totales del sistema + topología del hardware
   - **CPU**: gráfico de historial completo + nombre del modelo + recuentos de núcleos e hilos

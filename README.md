@@ -39,7 +39,7 @@ Most task managers either freeze under heavy load or bury basic features behind 
 | Manage thousands of processes | UI virtualization — only visible rows rendered, 3000+ at 144fps |
 | Instant process refresh | NT-native engine — direct API calls, zero WMI overhead |
 | Identify resource hogs | Adaptive CPU/RAM heatmap and top-10 heavy-process filter |
-| Monitor system health | Live sparklines + System Information window with 4 tabs |
+| Monitor system health | Live sparklines, a floating CPU/RAM widget, and System Information with 4 tabs |
 | Control processes | End, end tree, restart, suspend, resume, set priority |
 | Act on many at once | Multi-select with Ctrl/Shift+click and one-touch "End selected" |
 | Understand processes | Friendly names, metadata, and a detailed Properties dialog |
@@ -79,6 +79,8 @@ Most task managers either freeze under heavy load or bury basic features behind 
 
 ### 📊 System Monitoring
 - **Live Sparklines** — Real-time CPU and RAM history graphs in the main window footer
+- **Floating Metrics Widget** — Keep CPU and RAM readings and history visible in a movable, pinnable window with detailed tooltips
+- **Persistent Update Notices** — Available updates stay visible from either title bar or the notification-area menu
 - **System Information Window** — Dedicated window with 4 tabs:
   - **Summary** — Dual sparklines + system totals + hardware topology
   - **CPU** — Full history graph + model name + core/thread counts
