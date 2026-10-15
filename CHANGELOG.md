@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-10-15
+
+### Changed
+- **Animated Metric Histories**: CPU, memory, and system activity graphs now move smoothly between real samples in the main window, Performance views, system information window, and floating widget. Sampling frequency remains unchanged, and animation pauses when the graph is hidden, its host window is minimized, or Windows animations are disabled.
+
+### Fixed
+- **Process List Scrolling**: Process icons load through a bounded background cache and update their own image bindings instead of refreshing the entire list, reducing first-scroll stalls in Full and Compact modes.
+- **Scrollbar Arrows**: Smooth pixel scrolling reduces row flicker when using the navigation arrows, while wheel, keyboard, and scrollbar-thumb input remain responsive.
+- **Single Instance**: Launching CyberManager again restores the existing window within the same session instead of opening a second copy.
+- **Title Bar**: Removed a stray separator beside the close button.
+
 ## [1.5.0] - 2026-10-14
 
 ### Added
@@ -103,7 +114,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory leak in icon generation** — Fixed `Icon.FromHandle` handle leak by properly destroying the original handle after cloning.
 - **Double-click kills process** — Removed dangerous double-click-to-kill behavior.
 
-[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.5.1...HEAD
+[1.5.1]: https://github.com/CyberGems/CyberManager/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/CyberGems/CyberManager/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/CyberGems/CyberManager/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/CyberGems/CyberManager/compare/v1.2.0...v1.3.0
