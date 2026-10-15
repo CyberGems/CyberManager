@@ -317,6 +317,12 @@ public partial class MainWindow : Window
                 CheckForUpdatesFromShell,
                 ExitApplication);
 
+            // Single instance: a second launch broadcasts a wake-up that lands on this
+            // window's message loop. Surfacing through the shared entry point keeps the
+            // behaviour identical to the tray icon, including when minimized or hidden.
+            App.SingleInstance.Attach(this);
+            App.SingleInstance.ActivationRequested += () => Dispatcher.BeginInvoke(ShowFromTray);
+
             // Keep the tray notice in step with the titlebar pills, so a user running minimized
             // still learns about a release instead of only seeing it when the window is restored.
             UpdateService.UpdateAvailabilityChanged += OnUpdateAvailabilityChanged;

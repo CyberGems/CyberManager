@@ -9,11 +9,24 @@ public partial class App : System.Windows.Application
 {
     public static AppSettings Settings { get; private set; } = null!;
 
+    /// <summary>Owns the single-instance mutex for the whole session; also carries the wake-up hook.</summary>
+    public static SingleInstance SingleInstance { get; private set; } = null!;
+
     protected override void OnStartup(System.Windows.StartupEventArgs e)
     {
+        base.OnStartup(e);
+
+        // One instance only: a second launch wakes this window instead of opening another copy.
+        SingleInstance = new SingleInstance();
+        if (!SingleInstance.TryAcquire())
+        {
+            SingleInstance.SignalExistingInstance();
+            Shutdown();
+            return;
+        }
+
         Settings = AppSettings.Load();
         Strings.Current = Settings.Language;
-        base.OnStartup(e);
         ThemeManager.Apply(Settings.Theme);
         _ = Task.Run(() =>
             StartupManager.EnsureAutoStart(Settings.StartWithWindows, startMinimized: true));
