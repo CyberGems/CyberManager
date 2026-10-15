@@ -369,15 +369,25 @@
                     </Border>
                 </StackPanel>
 
-                <StackPanel Grid.Column="2"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center">
+                <Grid Grid.Column="2" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     <!-- Same notice as the full titlebar, shrunk to the compact bar's 26px controls. -->
-                    <controls:UpdateAvailableButton x:Name="UpdatePill"
+                    <controls:UpdateAvailableButton Grid.Column="0" x:Name="UpdatePill"
                                                     PillHeight="26"
                                                     Margin="0,0,2,0"
                                                     UpdateRequested="UpdatePill_UpdateRequested"/>
-                    <Border x:Name="PinButtonHost"
+                    <Border Grid.Column="3" Width="1" Height="16" Margin="5,0" Background="{DynamicResource BorderBrush}" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <Border Grid.Column="4" x:Name="PinButtonHost"
                             Width="32"
                             Height="30"
                             CornerRadius="5"
@@ -398,7 +408,7 @@
                             ToolTip="Always on top"
                             AutomationProperties.Name="Always on top"/>
                     </Border>
-                    <Border x:Name="ModeButtonHost"
+                    <Border Grid.Column="5" x:Name="ModeButtonHost"
                             Width="32"
                             Height="30"
                             Margin="2,0,0,0"
@@ -413,17 +423,15 @@
                             MouseLeave="InteractiveControl_MouseLeave"
                             ToolTip="Más detalles"
                             AutomationProperties.Name="Más detalles">
-                            <!-- Window-in-window icon (CyberClock mini-mode style): matches the
-                                 full-window toggle in the main toolbar, so both directions of the
-                                 switch read as "compact mode" and not as maximize/restore. -->
-                            <Grid Width="15" Height="15">
-                                <Rectangle RadiusX="4" RadiusY="4" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Fill="Transparent"/>
-                                <Rectangle RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentBrush}" Opacity="0.45"
-                                           Width="7.5" Height="6" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2.2,2.2"/>
-                            </Grid>
+                            <!-- Same swapped compact-window glyph as the full titlebar. -->
+                            <Path Data="M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="15" Height="15" Stretch="Uniform" Fill="Transparent"/>
                         </Button>
                     </Border>
-                    <Button x:Name="SettingsButton"
+                    <Button Grid.Column="1" x:Name="SettingsButton"
                         Width="28"
                         Height="26"
                         Margin="2,0,0,0"
@@ -439,7 +447,7 @@
                         <Path Data="M 12 15 C 10.3 15 9 13.7 9 12 C 9 10.3 10.3 9 12 9 C 13.7 9 15 10.3 15 12 C 15 13.7 13.7 15 12 15 Z M 19.4 13 C 19.5 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.5 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10.1 2 C 9.8 2 9.6 2.2 9.6 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.5 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.5 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.6 21.6 C 9.6 21.8 9.8 22 10.1 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z"
                               Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.2" Width="14" Height="14" Stretch="Uniform" Fill="Transparent"/>
                     </Button>
-                    <Button x:Name="MoreButton"
+                    <Button Grid.Column="2" x:Name="MoreButton"
                         Width="28"
                         Height="26"
                         Margin="2,0,0,0"
@@ -455,7 +463,7 @@
                               Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Button>
-                    <Button x:Name="MinimizeButton"
+                    <Button Grid.Column="6" x:Name="MinimizeButton"
                         Width="28"
                         Height="26"
                         Margin="2,0,0,0"
@@ -475,7 +483,8 @@
                               StrokeStartLineCap="Round"
                               StrokeEndLineCap="Round"/>
                     </Button>
-                    <Button x:Name="CloseButton"
+                    <Border Grid.Column="7" Width="1" Height="16" Margin="5,0" Background="{DynamicResource BorderBrush}" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <Button Grid.Column="8" x:Name="CloseButton"
                         Width="28"
                         Height="26"
                         Margin="2,0,0,0"
@@ -486,7 +495,7 @@
                         MouseLeave="InteractiveControl_MouseLeave"
                         ToolTip="Close"
                         AutomationProperties.Name="Close"/>
-                </StackPanel>
+                </Grid>
             </Grid>
 
             <Grid x:Name="CompactActionBar" Grid.Row="1" Margin="2,0,2,7">

@@ -173,7 +173,10 @@
                 </StackPanel>
             </Grid>
 
-            <Grid x:Name="CpuRow" Grid.Row="1">
+            <Grid x:Name="CpuRow" Grid.Row="1"
+                  ToolTipService.InitialShowDelay="120"
+                  ToolTipService.BetweenShowDelay="0"
+                  ToolTipService.ShowDuration="20000">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -188,7 +191,7 @@
                                Text="0.0%"
                                FontSize="19"
                                FontWeight="Bold"
-                               Foreground="#10B981"/>
+                               Foreground="{DynamicResource CpuBrush}"/>
                 </StackPanel>
                 <controls:SparklineControl x:Name="CpuSparkline"
                                            Grid.Column="1"
@@ -201,7 +204,10 @@
 
             <Border Grid.Row="2" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,10"/>
 
-            <Grid x:Name="RamRow" Grid.Row="3">
+            <Grid x:Name="RamRow" Grid.Row="3"
+                  ToolTipService.InitialShowDelay="120"
+                  ToolTipService.BetweenShowDelay="0"
+                  ToolTipService.ShowDuration="20000">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>

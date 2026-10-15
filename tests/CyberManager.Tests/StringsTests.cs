@@ -45,6 +45,26 @@ public class StringsTests
     }
 
     [Fact]
+    public void T_TotalRamLabel_EnglishAndSpanish()
+    {
+        Strings.Current = Lang.En;
+        Assert.Equal("Total RAM", Strings.T("TotalRamLabel"));
+
+        Strings.Current = Lang.Es;
+        Assert.Equal("RAM total", Strings.T("TotalRamLabel"));
+    }
+
+    [Fact]
+    public void T_HistorySamples_EnglishAndSpanish()
+    {
+        Strings.Current = Lang.En;
+        Assert.Equal("History: latest 60 samples", Strings.T("HistorySamples", 60));
+
+        Strings.Current = Lang.Es;
+        Assert.Equal("Historial: últimas 60 muestras", Strings.T("HistorySamples", 60));
+    }
+
+    [Fact]
     public void T_SearchPlaceholder_English()
     {
         Strings.Current = Lang.En;
@@ -86,7 +106,7 @@ public class StringsTests
             "Update", "UpdateTagUnrecognized", "UpdateAvailable", "UpToDate",
             "FloatingWidget", "CloseWidget", "WidgetHotkeyTitle", "WidgetHotkeyDesc", "ShowMainWindow",
             "MoreOptions", "DocumentationWiki", "AboutCyberManager", "Description",
-            "Unknown", "CpuModel", "TotalRam"
+            "Unknown", "CpuModel", "TotalRam", "TotalRamLabel", "HistorySamples"
         };
         foreach (var key in keys)
         {

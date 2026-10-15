@@ -10,18 +10,22 @@
         ResizeMode="CanResize"
         PreviewKeyDown="Window_PreviewKeyDown">
     <Window.Resources>
-        <!-- GlassWire Navigation Tab Button Style -->
+        <!-- Navigation tab button. The selected tab is marked by a filled accent pill, the
+             same idea as the suite's segmented controls, instead of an outlined box.
+
+             The label weight is deliberately identical in every state: the width of the
+             button is derived from the label, so a weight change on selection would resize
+             the label after the button was already measured, and the last glyph would be
+             clipped. Keeping one weight keeps the width stable. -->
         <Style x:Key="GlassWireTabStyle" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="Height" Value="32"/>
-            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Padding" Value="16,0"/>
             <Setter Property="Margin" Value="2,0"/>
             <Setter Property="ToolTipService.InitialShowDelay" Value="300"/>
             <Setter Property="ToolTipService.BetweenShowDelay" Value="0"/>
@@ -32,22 +36,18 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Border x:Name="TabBd" Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8" Padding="{TemplateBinding Padding}"
-                                SnapsToDevicePixels="True">
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="TabBd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                                <Setter TargetName="TabBd" Property="Background" Value="{DynamicResource SelectionBgBrush}"/>
                                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
                             </Trigger>
+                            <!-- Listed last so the pill wins while the pointer is over it. -->
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="TabBd" Property="Background" Value="{DynamicResource HeaderBgBrush}"/>
-                                <Setter TargetName="TabBd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
-                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter TargetName="TabBd" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentFgBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -175,11 +175,9 @@
             </Setter>
         </Style>
         <Style x:Key="ModeToggleButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
-            <!-- No permanent highlight: the accent glow fill is a hover-only effect now (a
-                 permanently lit button read as a stuck/pressed state). The base template
-                 already fills the background on hover. -->
+            <!-- Keep the mode glyph neutral like the other titlebar icons. -->
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
             <Setter Property="FontSize" Value="11.5"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Height" Value="32"/>
@@ -491,7 +489,7 @@
                 Background="{DynamicResource BgBrush}"
                 ClipToBounds="True"
                 PreviewMouseLeftButtonDown="OuterBorder_MouseLeftButtonDown">
-            <Grid Margin="10,7,10,8">
+            <Grid Margin="10,12,10,8">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/> <!-- Row 0: TitleBar -->
                     <RowDefinition Height="*"/>    <!-- Row 1: Tab Content Host -->
@@ -526,22 +524,26 @@
                             BorderThickness="1" CornerRadius="10" Padding="3">
                         <StackPanel Orientation="Horizontal">
                             <RadioButton x:Name="TabProcessesBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" IsChecked="True" Click="TabClick" Checked="TabClick" Tag="Processes">
+                                <!-- Tab icons follow the button's own Foreground so they share the
+                                     idle, hover and selected colors of their labels. -->
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Path x:Name="TabProcessesIcon" Data="M 4 4 H 10 V 10 H 4 Z M 14 4 H 20 V 10 H 14 Z M 4 14 H 10 V 20 H 4 Z M 14 14 H 20 V 20 H 14 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <!-- Process list: three rows of bullet + entry, rather than the
+                                         generic app grid used by the summary tabs. -->
+                                    <Path x:Name="TabProcessesIcon" Data="M 3.5 7 H 5 M 8.5 7 H 20.5 M 3.5 12 H 5 M 8.5 12 H 20.5 M 3.5 17 H 5 M 8.5 17 H 20.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
                                     <TextBlock x:Name="TabProcessesText" Text="Procesos" FontSize="11.5" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton x:Name="TabPerformanceBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="Performance">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Path x:Name="TabPerformanceIcon" Data="M 2 13 L 6 13 L 9 5 L 13 19 L 16 11 L 18 13 L 22 13" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <Path x:Name="TabPerformanceIcon" Data="M 2 13 L 6 13 L 9 5 L 13 19 L 16 11 L 18 13 L 22 13" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
                                     <TextBlock x:Name="TabPerformanceText" Text="Rendimiento" FontSize="11.5" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton x:Name="TabSettingsBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="Settings">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Path x:Name="TabSettingsIcon" Data="M 12 15 C 10.3 15 9 13.7 9 12 C 9 10.3 10.3 9 12 9 C 13.7 9 15 10.3 15 12 C 15 13.7 13.7 15 12 15 Z M 19.4 13 C 19.5 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.5 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10.1 2 C 9.8 2 9.6 2.2 9.6 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.5 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.5 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.6 21.6 C 9.6 21.8 9.8 22 10.1 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.2" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <Path x:Name="TabSettingsIcon" Data="M 12 15 C 10.3 15 9 13.7 9 12 C 9 10.3 10.3 9 12 9 C 13.7 9 15 10.3 15 12 C 15 13.7 13.7 15 12 15 Z M 19.4 13 C 19.5 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.5 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10.1 2 C 9.8 2 9.6 2.2 9.6 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.5 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.5 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.6 21.6 C 9.6 21.8 9.8 22 10.1 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.2" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
                                     <TextBlock x:Name="TabSettingsText" Text="Configuración" FontSize="11.5" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
@@ -549,22 +551,30 @@
                     </Border>
 
                     <!-- Right: Window Controls -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Grid Grid.Column="2" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
                         <!-- Sits first so the notice is the leftmost thing the eye meets on the
                              right cluster, and stays hidden until a check finds a newer version. -->
-                        <controls:UpdateAvailableButton x:Name="UpdatePill"
+                        <controls:UpdateAvailableButton Grid.Column="0" x:Name="UpdatePill"
                                                         UpdateRequested="UpdatePill_UpdateRequested"/>
-                        <Button x:Name="FullModeToggleBtn" Width="42" Margin="4,0,0,0" Style="{StaticResource ModeToggleButton}" Click="FullModeToggle_Click" ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto">
-                            <!-- Window-in-window icon (CyberClock mini-mode style): a window with a
-                                 smaller window inside it. Reads as "compact mode" instead of being
-                                 mistaken for the maximize control sitting two buttons to the right. -->
-                            <Grid Width="16" Height="16">
-                                <Rectangle RadiusX="4.5" RadiusY="4.5" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" Fill="Transparent"/>
-                                <Rectangle RadiusX="2" RadiusY="2" Fill="{DynamicResource AccentBrush}" Opacity="0.45"
-                                           Width="8" Height="6.5" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,2.4,2.4"/>
-                            </Grid>
+                        <Button Grid.Column="3" x:Name="FullModeToggleBtn" Width="42" Margin="4,0,0,0" Style="{StaticResource ModeToggleButton}" Click="FullModeToggle_Click" ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto">
+                            <!-- Compact-window glyph, swapped from the widget control. -->
+                            <Path Data="M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="16" Height="16" Stretch="Uniform" Fill="Transparent"/>
                         </Button>
-                        <Button x:Name="MoreBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}"
+                        <Button Grid.Column="1" x:Name="MoreBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}"
                                 Click="MoreBtn_Click" ToolTip="More options" AutomationProperties.Name="More options">
                             <Button.ContextMenu>
                                 <ContextMenu x:Name="MoreOptionsMenu" Style="{StaticResource ModernContextMenu}"
@@ -672,8 +682,9 @@
                                   Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
-                        <Button x:Name="MinimizeBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                        <Button x:Name="MaximizeBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize">
+                        <Border Grid.Column="2" Width="1" Height="18" Margin="6,0" Background="{DynamicResource BorderBrush}" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                        <Button Grid.Column="4" x:Name="MinimizeBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}" Click="Minimize_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize"><TextBlock Text="—" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                        <Button Grid.Column="5" x:Name="MaximizeBtn" Margin="4,0,0,0" Style="{StaticResource TitleBtn}" Click="Maximize_Click" ToolTip="Maximize" AutomationProperties.Name="Maximize">
                             <Path x:Name="MaximizeIconPath"
                                   Data="M 3 7 L 3 3 L 7 3 M 3 3 L 6.5 6.5 M 11 7 L 11 11 L 7 11 M 11 11 L 7.5 7.5"
                                   Stroke="{DynamicResource SubTextBrush}"
@@ -684,8 +695,9 @@
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
                         </Button>
-                        <Button x:Name="CloseBtn" Margin="4,0,0,0" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
-                    </StackPanel>
+                        <Border Grid.Column="6" Width="1" Height="18" Margin="6,0" Background="{DynamicResource BorderBrush}" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                        <Button Grid.Column="7" x:Name="CloseBtn" Margin="4,0,0,0" Style="{StaticResource TitleCloseBtn}" Click="Close_Click" ToolTip="Close" AutomationProperties.Name="Close"><TextBlock Text="✕" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Button>
+                    </Grid>
                 </Grid>
 
                 <!-- Tab 1: Processes View (Toolbar + Virtualized DataGrid + Footer) -->
@@ -878,8 +890,10 @@
                                   Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center"/>
                         </ToggleButton>
                         <ToggleButton x:Name="WidgetToggleBtn" Width="38" Height="38" Margin="8,0,0,0" Padding="0" Style="{StaticResource HeavyFilterToggleStyle}" Click="WidgetToggle_Click" ToolTip="Floating Widget" AutomationProperties.Name="Floating Widget">
-                            <Path Data="M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z"
-                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5"
+                            <!-- Floating metrics widget: a small card with a pulse trace, distinct from
+                                 the nested-window glyph used for compact mode. -->
+                            <Path Data="M 5 3.5 H 19 A 2 2 0 0 1 21 5.5 V 18.5 A 2 2 0 0 1 19 20.5 H 5 A 2 2 0 0 1 3 18.5 V 5.5 A 2 2 0 0 1 5 3.5 Z M 7 7 H 10 M 6.5 15 H 9 L 11 11 L 13 16 L 15 12.5 H 18"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}" StrokeThickness="1.5"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Fill="Transparent"/>
                         </ToggleButton>

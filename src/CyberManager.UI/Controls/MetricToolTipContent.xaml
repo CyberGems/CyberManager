@@ -17,8 +17,8 @@
                    FontWeight="Bold"
                    Margin="0,2,0,0"/>
         <TextBlock x:Name="DetailText"
-                   FontSize="11.5"
-                   Margin="0,4,0,0"
+                   FontSize="13"
+                   Margin="0,6,0,0"
                    TextWrapping="Wrap"
                    Foreground="{DynamicResource SubTextBrush}"/>
         <TextBlock x:Name="HintText"

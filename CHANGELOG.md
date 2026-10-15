@@ -7,14 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-- **Restart Shortcut**: `Ctrl+R` now restarts the selected process. It was previously swallowed by the refresh handler at the window level, so the shortcut never fired. Refresh remains on `F5`.
-- **Startup Loader vs. Empty State**: The list no longer shows "No processes found" while the first collection is still running. The loader and the empty message were two independent signals, so a slow start could leave the message where the loader belonged. The list area now belongs to the loader until a collection completes, and a failed first refresh shows the error instead of spinning forever.
-- **Loader in Compact Mode**: The branded startup loader is now shared by both layouts, so compact mode shows it too instead of an empty list. The loader overlay previously lived inside the full-mode panel, which is collapsed in compact mode.
-- **Clearer Empty List**: An empty list now says whether the search matched nothing, the filters hid everything, or the refresh failed, instead of always claiming there are no processes.
+## [1.5.0] - 2026-10-14
+
+### Added
+- **Floating Metrics Widget**: Keep live CPU and RAM readings and history visible in a separate, draggable window that can stay on top, remembers its position, and remains within the active monitor work area.
+- **Persistent Update Notices**: See available updates from the title bar in either layout or the notification-area menu, with the notice kept visible until acted on.
+- **Detailed Metric Tooltips**: Inspect CPU model, user/kernel time, RAM in use/available/total, and the number of displayed history samples from the metric readings.
 
 ### Changed
-- **Repository Layout**: Donation QR assets moved from `docs/donate` to `assets/donate`, and the obsolete `docs` folder was removed because the local wiki now lives in its own repository.
+- **Usage-Aware Metric Colors**: CPU and RAM readings respond to system load while retaining the active theme palette.
+- **Full and Compact Layouts**: Refined title-bar controls, metric presentation, navigation icons, and layout spacing for consistent behavior across both views.
+- **Donation Assets**: Moved QR images from `docs/donate` to `assets/donate`; removed the obsolete `docs` folder because the local wiki has its own repository.
+
+### Fixed
+- **Restart Shortcut**: `Ctrl+R` now restarts the selected process. It was previously swallowed by the refresh handler at the window level, so the shortcut never fired. Refresh remains on `F5`.
+- **Startup Loader and Empty State**: The loader remains visible in both layouts until the first collection finishes; empty results now distinguish search, filters, and refresh errors.
+- **Window Placement**: Windows saved on a disconnected monitor are clamped to an available work area, including the floating metrics widget.
 
 ## [1.4.0] - 2026-10-12
 
@@ -95,7 +103,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory leak in icon generation** — Fixed `Icon.FromHandle` handle leak by properly destroying the original handle after cloning.
 - **Double-click kills process** — Removed dangerous double-click-to-kill behavior.
 
-[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/CyberGems/CyberManager/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/CyberGems/CyberManager/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/CyberGems/CyberManager/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/CyberGems/CyberManager/compare/v1.1.0...v1.2.0

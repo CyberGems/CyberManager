@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-Batch process control arrives: select many processes and end them together, restart a process from its executable, or pause detection while gauges keep updating. The grid now remembers sorting, hides system processes on request, and offers a column visibility menu, with a clearer close confirmation.
+Keep CPU and memory visible in a floating, pinnable widget with live history and detailed readings. This release also adds persistent update notices in the title bar and tray, improves startup and empty-list feedback, and refines process controls and both layouts.
 <!-- changelog-summary:end -->
 
 > **New to CyberManager?** A lightweight Windows task manager with instant search, process insight, and a focused compact mode.
@@ -17,58 +17,52 @@ Batch process control arrives: select many processes and end them together, rest
 
 ### ✨ Key Features & Highlights
 
-- 🧰 **Batch Process Control**:
-  - **Multi-Select**: Ctrl+click, Shift+click, and rubber-band selection with a live count and a single "End selected" confirmation.
-  - **Restart Process**: Relaunch an app from its executable path, with packaged (UWP / Store) apps refused with a clear message.
-  - **Pause Detection**: Freeze the process list snapshot while CPU, RAM, totals, and sparklines keep updating. `Ctrl+P`.
+- 📊 **Floating Metrics Widget**:
+  - Keep live CPU and RAM readings and history visible in a separate draggable window, with an always-on-top option and a remembered position.
+  - Read CPU model and user/kernel usage, plus RAM in-use, available, and total values from detailed tooltips.
+  - The widget stays on-screen when displays are rearranged or its saved monitor is disconnected.
 
-- 🔎 **Finding and Reading the List**:
-  - **Column Visibility Menu**: Right-click a column header to show or hide columns, with the layout remembered across restarts.
-  - **Remembered Sorting**: The sorted column and direction persist between sessions.
-  - **Hide System Processes**: Filter out Windows system processes while keeping the desktop shell visible.
+- 🔔 **Update Notices and System Metrics**:
+  - Persistent update notices are available in both title bars and the notification-area menu.
+  - CPU and RAM readings respond to system load and retain the colors of the active theme.
+  - Tooltips keep updating in place and explain the displayed metric history.
 
-- 🪟 **Window and Interaction Polish**:
-  - **Close Confirmation**: Choose to minimize to the notification area or exit, with an option to remember the decision.
-  - **Keyboard Navigation**: Arrow keys move the actual selection, and Shift+arrow extends the range.
-  - **Compact Mode**: Fixed click handling and window dragging, and added the pause and More controls.
+- 🪟 **Process List and Window Improvements**:
+  - `Ctrl+R` restarts the selected process; `F5` refreshes the list.
+  - A shared startup loader works in Full and Compact modes, and empty states distinguish search, filters, and refresh errors.
+  - Refined title-bar controls, navigation, metric presentation, and monitor-aware window placement across both layouts.
 
-- 🎨 **Refinements and Fixes**:
-  - **Alphabetical Sorting**: The Process column now sorts by the friendly name shown, case-insensitively.
-  - **Cleaner Scrollbar**: Removed the hover frame around the vertical scrollbar thumb.
-  - **Window Placement**: A window saved off-screen is recentered.
-  - **Bilingual**: Updated English and Spanish labels, tooltips, and dialogs.
+- 🌐 **Bilingual Experience**:
+  - Added English and Spanish labels for the new telemetry details and maintained localized release highlights.
 
 <details>
 <summary><b>🌐 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Llega el control de procesos por lotes: selecciona varios procesos y finalízalos juntos, reinicia un proceso desde su ejecutable o pausa la detección mientras los indicadores siguen actualizándose. La cuadrícula ahora recuerda el orden, oculta procesos del sistema a petición y ofrece un menú de visibilidad de columnas, con un cierre más claro.
+Mantén visibles la CPU y la memoria en un widget flotante y fijable, con historial en vivo y lecturas detalladas. Esta versión también incorpora avisos persistentes de actualización en la barra de título y la bandeja, mejora los estados de inicio y lista vacía, y pule los controles de procesos y ambas vistas.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 🧰 **Control de procesos por lotes**:
-  - **Multi-selección**: Ctrl+clic, Shift+clic y lazo de arrastre, con contador en vivo y una única confirmación para "Finalizar selección".
-  - **Reiniciar proceso**: Relanza una app desde su ejecutable; las apps empaquetadas (UWP / Store) se rechazan con un mensaje claro.
-  - **Pausar detección**: Congela la lista de procesos mientras la CPU, la RAM, los totales y las gráficas siguen actualizándose. `Ctrl+P`.
+- 📊 **Widget flotante de métricas**:
+  - Consulta en una ventana independiente las lecturas y el historial en vivo de CPU y RAM; muévela, fíjala encima de otras ventanas y conserva su posición.
+  - Los tooltips detallan el modelo de CPU, su uso de usuario/kernel y la RAM en uso, disponible y total.
+  - El widget permanece dentro de la pantalla cuando cambian los monitores o se desconecta la pantalla guardada.
 
-- 🔎 **Encontrar y leer la lista**:
-  - **Menú de visibilidad de columnas**: Clic derecho en un encabezado para mostrar u ocultar columnas; el diseño se recuerda entre sesiones.
-  - **Orden recordado**: La columna y la dirección de orden se conservan entre sesiones.
-  - **Ocultar procesos del sistema**: Filtra los procesos del sistema de Windows manteniendo visible el shell de escritorio.
+- 🔔 **Avisos de actualización y métricas**:
+  - Los avisos de nuevas versiones permanecen disponibles en ambas barras de título y en el menú de la bandeja del sistema.
+  - Las lecturas de CPU y RAM responden al uso del sistema y respetan los colores del tema activo.
+  - Los tooltips se actualizan sin cerrarse e indican el historial mostrado.
 
-- 🪟 **Ventana e interacción**:
-  - **Confirmación al cerrar**: Elige minimizar a la bandeja del sistema o salir, con opción de recordar la decisión.
-  - **Navegación con teclado**: Las flechas mueven la selección real y Shift+flecha amplía el rango.
-  - **Modo compacto**: Clics y arrastre corregidos, y controles de pausa y More añadidos.
+- 🪟 **Mejoras de la lista y las ventanas**:
+  - `Ctrl+R` reinicia el proceso seleccionado; `F5` actualiza la lista.
+  - El cargador inicial compartido funciona en modo Completo y Compacto; los estados vacíos distinguen búsquedas, filtros y errores de actualización.
+  - Se pulieron los controles de la barra de título, la navegación, las métricas y la ubicación de ventanas en ambos modos.
 
-- 🎨 **Ajustes y correcciones**:
-  - **Orden alfabético**: La columna Proceso ahora ordena por el nombre reconocible mostrado, sin distinguir mayúsculas.
-  - **Barra de desplazamiento más limpia**: Se eliminó el marco que aparecía al pasar el ratón por el pulgar.
-  - **Ubicación de la ventana**: Una ventana guardada fuera de pantalla se recentra.
-  - **Bilingüe**: Etiquetas, tooltips y diálogos actualizados en inglés y español.
+- 🌐 **Experiencia bilingüe**:
+  - Nuevas etiquetas en inglés y español para los detalles de telemetría y notas localizadas de la versión.
 
 </details>
 

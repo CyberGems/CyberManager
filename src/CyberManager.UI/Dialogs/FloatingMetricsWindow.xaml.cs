@@ -2,8 +2,10 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Shapes;
 using CyberManager.Common.I18n;
+using CyberManager.UI.Controls;
 using CyberManager.UI.Services;
 
 namespace CyberManager.UI.Dialogs;
@@ -31,7 +33,22 @@ public partial class FloatingMetricsWindow : Window
     /// <summary>Gap kept from the work area edge when the widget is placed for the first time.</summary>
     private const double DefaultEdgeMargin = 24;
 
+    private static readonly Color CpuFallback = Color.FromRgb(0x10, 0xB9, 0x81);
+    private static readonly Color RamFallback = Color.FromRgb(0x24, 0xA6, 0xB5);
+
+    private readonly MetricToolTipContent _cpuTip;
+    private readonly MetricToolTipContent _ramTip;
     private bool _positionApplied;
+    private bool _hasMetricSample;
+    private double _cpuPercent;
+    private double _cpuUserPercent;
+    private double _cpuKernelPercent;
+    private double _ramPercent;
+    private double _usedRamGb;
+    private double _availableRamGb;
+    private double _totalRamGb;
+    private string _cpuModelName = string.Empty;
+    private int _historySampleCount;
 
     /// <summary>Raised when the user asks to close the widget.</summary>
     public event Action? CloseRequested;
@@ -48,6 +65,8 @@ public partial class FloatingMetricsWindow : Window
     public FloatingMetricsWindow()
     {
         InitializeComponent();
+        CpuRow.ToolTip = MetricToolTipContent.Create(out _cpuTip);
+        RamRow.ToolTip = MetricToolTipContent.Create(out _ramTip);
         CyberManagerWindowChrome.Apply(this, 12);
         ApplyLocalization();
         ApplyAlwaysOnTop(App.Settings.WidgetAlwaysOnTop);
@@ -71,6 +90,12 @@ public partial class FloatingMetricsWindow : Window
         WidgetSettingsItem.Header = $"{Strings.T("Settings")}...";
         WidgetAboutItem.Header = Strings.T("AboutCyberManager");
         WidgetExitItem.Header = Strings.T("Exit");
+
+        if (_hasMetricSample)
+        {
+            UpdateMetricValueColors();
+            UpdateMetricToolTips();
+        }
     }
 
     public void ApplyAlwaysOnTop(bool onTop)
@@ -84,24 +109,72 @@ public partial class FloatingMetricsWindow : Window
 
     public void UpdateMetrics(
         double cpuPercent,
+        double cpuUserPercent,
+        double cpuKernelPercent,
         float[] cpuHistory,
         float[] cpuKernelHistory,
         double ramPercent,
         float[] ramHistory,
         double usedRamGb,
+        double availableRamGb,
         double totalRamGb,
         string? cpuModelName)
     {
+        _cpuPercent = cpuPercent;
+        _cpuUserPercent = cpuUserPercent;
+        _cpuKernelPercent = cpuKernelPercent;
+        _ramPercent = ramPercent;
+        _usedRamGb = usedRamGb;
+        _availableRamGb = availableRamGb;
+        _totalRamGb = totalRamGb;
+        _cpuModelName = cpuModelName?.Trim() ?? string.Empty;
+        _historySampleCount = Math.Max(cpuHistory.Length, ramHistory.Length);
+        _hasMetricSample = true;
+
         CpuValueText.Text = $"{cpuPercent:F1}%";
+        UpdateMetricValueColors();
         CpuSparkline.Values = cpuHistory;
         CpuSparkline.SecondaryValues = cpuKernelHistory;
 
         RamValueText.Text = $"{ramPercent:F1}%";
         RamSparkline.Values = ramHistory;
 
-        var cpuModel = string.IsNullOrWhiteSpace(cpuModelName) ? Strings.T("Unknown") : cpuModelName;
-        CpuRow.ToolTip = $"{Strings.T("CpuModel")}: {cpuModel}\n{Strings.T("CpuTotal", cpuPercent)}";
-        RamRow.ToolTip = $"{Strings.T("MemTotal", usedRamGb)}\n{Strings.T("TotalRam", totalRamGb)}";
+        UpdateMetricToolTips();
+    }
+
+    /// <summary>
+    /// Keeps the visible readings on the same usage-sensitive colour ramp as the tooltip values.
+    /// Called again after localization/theme changes because the base colours come from the palette.
+    /// </summary>
+    private void UpdateMetricValueColors()
+    {
+        CpuValueText.Foreground = UsageHeat.Solid(_cpuPercent, UsageHeat.FromResource("CpuColor", CpuFallback));
+        RamValueText.Foreground = UsageHeat.Solid(_ramPercent, UsageHeat.FromResource("RamColor", RamFallback));
+    }
+
+    /// <summary>
+    /// Updates the already-open tooltip bodies in place. Replacing ToolTip content on every sample
+    /// closes WPF's popup while the pointer is still over the metric row.
+    /// </summary>
+    private void UpdateMetricToolTips()
+    {
+        var cpuModel = string.IsNullOrWhiteSpace(_cpuModelName) ? Strings.T("Unknown") : _cpuModelName;
+        var historyHint = Strings.T("HistorySamples", _historySampleCount);
+
+        _cpuTip.SetContent(
+            Strings.T("Cpu"),
+            $"{_cpuPercent:F1}%",
+            UsageHeat.Solid(_cpuPercent, UsageHeat.FromResource("CpuColor", CpuFallback)),
+            $"{Strings.T("CpuModel")}: {cpuModel}\n{Strings.T("CpuUserLabel")}: {_cpuUserPercent:F1}%\n{Strings.T("CpuKernelLabel")}: {_cpuKernelPercent:F1}%",
+            historyHint);
+
+        var ramBaseColor = UsageHeat.FromResource("RamColor", RamFallback);
+        _ramTip.SetContent(
+            Strings.T("TotalRamLabel"),
+            $"{_totalRamGb:F1} GB",
+            UsageHeat.Solid(0, ramBaseColor),
+            $"{Strings.T("InUseMemory")}: {_usedRamGb:F1} GB ({_ramPercent:F1}%)\n{Strings.T("AvailableMemory")}: {_availableRamGb:F1} GB",
+            historyHint);
     }
 
     /// <summary>

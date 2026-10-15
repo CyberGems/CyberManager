@@ -50,12 +50,8 @@ public partial class MainWindow : Window
         PerformanceTabContent.Visibility = tab == MainTab.Performance ? Visibility.Visible : Visibility.Collapsed;
         SettingsTabContent.Visibility = tab == MainTab.Settings ? Visibility.Visible : Visibility.Collapsed;
 
-        var accentBrush = (Brush)FindResource("AccentBrush");
-        var subTextBrush = (Brush)FindResource("SubTextBrush");
-
-        TabProcessesIcon.Stroke = tab == MainTab.Processes ? accentBrush : subTextBrush;
-        TabPerformanceIcon.Stroke = tab == MainTab.Performance ? accentBrush : subTextBrush;
-        TabSettingsIcon.Stroke = tab == MainTab.Settings ? accentBrush : subTextBrush;
+        // The tab icons follow their button's Foreground through a binding, so the selected
+        // color is applied by the tab style alone and needs no code here.
 
         if (tab == MainTab.Performance)
         {
@@ -163,6 +159,8 @@ public partial class MainWindow : Window
     private bool _suppressSelectionMirror;
     private bool _syncingHeavyFilter;
     private bool _syncingSystemFilter;
+    private FrameworkElement? _suppressedMinimizeToolTipTarget;
+    private object? _suppressedMinimizeToolTipContent;
 
     // The list has no rows until the first collection completes, which takes noticeably longer
     // than a refresh on a cold start. Until then the branded loader owns the list area: without
@@ -202,6 +200,9 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        StateChanged += MainWindow_StateChanged;
+        IsVisibleChanged += MainWindow_IsVisibleChanged;
+        ApplyNavTabLabels();
         CpuSparklineBorder.ToolTip = MetricToolTipContent.Create(out _cpuTip);
         RamSparklineBorder.ToolTip = MetricToolTipContent.Create(out _ramTip);
         ProcGrid.ItemsSource = _processList.Items;
@@ -910,11 +911,14 @@ public partial class MainWindow : Window
             {
                 widget.UpdateMetrics(
                     sysMetrics.CpuTotalPercent,
+                    sysMetrics.CpuUserPercent,
+                    sysMetrics.CpuKernelPercent,
                     cpuHistory,
                     cpuKernelHistory,
                     sysMetrics.MemoryLoadPercent,
                     ramPctHistory,
                     sysMetrics.UsedRamGb,
+                    sysMetrics.AvailableRamGb,
                     sysMetrics.TotalRamGb,
                     sysMetrics.CpuModelName);
             }
@@ -3207,32 +3211,39 @@ public partial class MainWindow : Window
     }
 
 
+    /// <summary>
+    /// Assigns the navigation tab captions and tooltips.
+    /// <para>
+    /// The tab buttons take their width from the label, so the first layout pass has to see
+    /// the localized caption. This is called from the constructor for that reason: Loaded runs
+    /// inside the first layout pass, and a caption change made from there is not measured
+    /// again, which left the buttons sized for the XAML placeholder and clipped the label.
+    /// </para>
+    /// </summary>
+    private void ApplyNavTabLabels()
+    {
+        TabProcessesText.Text = Strings.T("NavProcesses");
+        TabPerformanceText.Text = Strings.T("NavPerformance");
+        TabSettingsText.Text = Strings.T("NavSettings");
+        TabProcessesBtn.ToolTip = Strings.T("NavProcessesTip");
+        TabPerformanceBtn.ToolTip = Strings.T("NavPerformanceTip");
+        TabSettingsBtn.ToolTip = Strings.T("NavSettingsTip");
+    }
+
     private void ApplyTheme()
     {
         ThemeManager.Apply(App.Settings.Theme);
         _trayService.UpdateTheme();
 
-        var accentBrush = (Brush)FindResource("AccentBrush");
-        var subTextBrush = (Brush)FindResource("SubTextBrush");
-
-        if (TabProcessesIcon != null)
-            TabProcessesIcon.Stroke = CurrentTab == MainTab.Processes ? accentBrush : subTextBrush;
-        if (TabPerformanceIcon != null)
-            TabPerformanceIcon.Stroke = CurrentTab == MainTab.Performance ? accentBrush : subTextBrush;
-        if (TabSettingsIcon != null)
-            TabSettingsIcon.Stroke = CurrentTab == MainTab.Settings ? accentBrush : subTextBrush;
+        // Nothing to re-color on the tabs: their icons are bound to the tab Foreground,
+        // which resolves the theme brushes dynamically.
     }
 
     private void ApplyLanguage()
     {
         try
         {
-            TabProcessesText.Text = Strings.T("NavProcesses");
-            TabPerformanceText.Text = Strings.T("NavPerformance");
-            TabSettingsText.Text = Strings.T("NavSettings");
-            TabProcessesBtn.ToolTip = Strings.T("NavProcessesTip");
-            TabPerformanceBtn.ToolTip = Strings.T("NavPerformanceTip");
-            TabSettingsBtn.ToolTip = Strings.T("NavSettingsTip");
+            ApplyNavTabLabels();
 
             PerformanceTabContent?.RefreshLocalization();
             SettingsTabContent?.RefreshLocalization();
@@ -3866,8 +3877,63 @@ public partial class MainWindow : Window
         Application.Current.Shutdown();
     }
 
+    private void MainWindow_StateChanged(object? sender, EventArgs e) => RestoreMinimizeToolTipIfSafe();
+
+    private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.NewValue is true)
+        {
+            RestoreMinimizeToolTipIfSafe();
+        }
+    }
+
+    /// <summary>
+    /// Minimizing while the pointer is over the button can leave WPF's popup tooltip alive
+    /// across the hide/minimize cycle. Suppress that tooltip until the pointer leaves the button
+    /// after the window is visible again, then restore its original content.
+    /// </summary>
+    private void SuppressMinimizeToolTipUntilPointerLeaves(object? sender)
+    {
+        if (sender is not FrameworkElement target || _suppressedMinimizeToolTipTarget is not null)
+        {
+            return;
+        }
+
+        var content = ToolTipService.GetToolTip(target);
+        if (content is null)
+        {
+            return;
+        }
+
+        _suppressedMinimizeToolTipTarget = target;
+        _suppressedMinimizeToolTipContent = content;
+        ToolTipService.SetIsEnabled(target, false);
+        ToolTipService.SetToolTip(target, null);
+        target.MouseLeave += MinimizeToolTipTarget_MouseLeave;
+    }
+
+    private void MinimizeToolTipTarget_MouseLeave(object sender, MouseEventArgs e) => RestoreMinimizeToolTipIfSafe();
+
+    private void RestoreMinimizeToolTipIfSafe()
+    {
+        var target = _suppressedMinimizeToolTipTarget;
+        if (target is null || !IsVisible || WindowState == WindowState.Minimized ||
+            (target.IsVisible && target.IsMouseOver))
+        {
+            return;
+        }
+
+        target.MouseLeave -= MinimizeToolTipTarget_MouseLeave;
+        ToolTipService.SetToolTip(target, _suppressedMinimizeToolTipContent);
+        ToolTipService.SetIsEnabled(target, true);
+        _suppressedMinimizeToolTipTarget = null;
+        _suppressedMinimizeToolTipContent = null;
+    }
+
     private void Minimize_Click(object sender, RoutedEventArgs e)
     {
+        SuppressMinimizeToolTipUntilPointerLeaves(sender);
+
         if (App.Settings.MinimizeToTrayOnMinimize)
         {
             Hide();
