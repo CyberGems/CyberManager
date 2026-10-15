@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Update Prompts**: A download icon, separate installed/available version cards, and a clearer layout replace the generic warning-style update modal in all update entry points.
+- **Dialog Keyboard Hints**: Confirmation, process properties, and close-window dialogs share centered vector Enter badges, with consistent shortcut chips across themes.
+
 ## [1.5.2] - 2026-10-15
 
 ### Changed

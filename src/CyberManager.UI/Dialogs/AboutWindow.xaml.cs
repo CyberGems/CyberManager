@@ -129,19 +129,8 @@ public partial class AboutWindow : Window, IModalAttentionWindow
 
             if (result.IsUpdateAvailable)
             {
-                var currentLabel = Strings.T("Current");
-                var latestLabel = Strings.T("Latest");
-                var promptMessage = Strings.T("UpdatePrompt");
-                var currentVerLabel = UpdateService.GetCurrentVersionLabel();
-                var msg = $"{currentLabel} {currentVerLabel}\n{latestLabel} {result.LatestVersionLabel}\n\n{promptMessage}";
-
-                var choice = ConfirmDialog.Show(
-                    this,
-                    Strings.T("UpdateAvailable", result.LatestVersionLabel),
-                    msg,
-                    Strings.T("Download"),
-                    Strings.T("Later"),
-                    ConfirmIconType.Info);
+                var choice = ConfirmDialog.ShowUpdate(
+                    this, UpdateService.GetCurrentVersionLabel(), result.LatestVersionLabel);
 
                 if (choice)
                 {

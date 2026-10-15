@@ -2241,17 +2241,8 @@ public partial class MainWindow : Window
     /// </summary>
     private async Task PromptAndStartUpdateAsync(UpdateCheckResult result)
     {
-        var message = $"{Strings.T("Current")} {UpdateService.GetCurrentVersionLabel()}\n" +
-                      $"{Strings.T("Latest")} {result.LatestVersionLabel}\n\n" +
-                      Strings.T("UpdatePrompt");
-
-        var choice = ConfirmDialog.Show(
-            this,
-            Strings.T("UpdateAvailable", result.LatestVersionLabel),
-            message,
-            Strings.T("Download"),
-            Strings.T("Later"),
-            ConfirmIconType.Info);
+        var choice = ConfirmDialog.ShowUpdate(
+            this, UpdateService.GetCurrentVersionLabel(), result.LatestVersionLabel);
 
         if (!choice) return;
 
