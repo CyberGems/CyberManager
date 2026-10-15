@@ -702,6 +702,7 @@
                       VirtualizingPanel.IsVirtualizing="True"
                       VirtualizingPanel.VirtualizationMode="Recycling"
                       VirtualizingPanel.ScrollUnit="Pixel"
+                      conv:ProcessListScrollBehavior.SmoothChevrons="True"
                       ScrollViewer.CanContentScroll="True"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"

@@ -937,6 +937,7 @@
                                   EnableRowVirtualization="True" EnableColumnVirtualization="True"
                                   VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
                                   VirtualizingPanel.ScrollUnit="Pixel" ScrollViewer.CanContentScroll="True"
+                                  conv:ProcessListScrollBehavior.SmoothChevrons="True"
                                   SelectionMode="Extended" SelectionUnit="FullRow" AutomationProperties.Name="Process list"
                                   Sorting="ProcGrid_Sorting"
                                   PreviewMouseRightButtonDown="ProcGrid_PreviewMouseRightButtonDown"
