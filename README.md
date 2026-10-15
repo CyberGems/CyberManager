@@ -36,10 +36,10 @@ Most task managers either freeze under heavy load or bury basic features behind 
 
 | Need | Solution |
 |---|---|
-| Manage thousands of processes | UI virtualization — only visible rows rendered, 3000+ at 144fps |
+| Manage large process lists | Virtualized rows, background icon loading, and smooth scrollbar arrows |
 | Instant process refresh | NT-native engine — direct API calls, zero WMI overhead |
 | Identify resource hogs | Adaptive CPU/RAM heatmap and top-10 heavy-process filter |
-| Monitor system health | Live sparklines, a floating CPU/RAM widget, and System Information with 4 tabs |
+| Monitor system health | Animated histories, a floating CPU/RAM widget, and a Performance view with 4 tabs |
 | Control processes | End, end tree, restart, suspend, resume, set priority |
 | Act on many at once | Multi-select with Ctrl/Shift+click and one-touch "End selected" |
 | Understand processes | Friendly names, metadata, and a detailed Properties dialog |
@@ -52,7 +52,8 @@ Most task managers either freeze under heavy load or bury basic features behind 
 ## ✨ Key Features
 
 ### 🖥️ Process Management
-- **Virtualized Grid** — Renders only visible rows for zero-lag scrolling with 3000+ processes
+- **Virtualized Grid**: Renders visible rows and loads icons in the background without refreshing the entire list
+- **Smooth Scrolling**: Animated scrollbar-arrow movement reduces row flicker in Full and Compact modes
 - **NT-Native Engine** — Direct `NtQuerySystemInformation` + differential snapshots
 - **Real-Time CPU %** — Delta-based per-process calculation, accurate and lightweight
 - **Instant Search & Filter** — By name, PID, or path with zero blocking (150ms debounce)
@@ -78,16 +79,17 @@ Most task managers either freeze under heavy load or bury basic features behind 
 - **Properties** — Inspect friendly name, file metadata, runtime state, and resource usage
 
 ### 📊 System Monitoring
-- **Live Sparklines** — Real-time CPU and RAM history graphs in the main window footer
+- **Animated Metric Histories**: CPU, RAM, and system activity graphs move smoothly between real samples across the main window, Performance views, and floating widget. Sampling frequency is unchanged; animation pauses for hidden graphs or minimized windows and respects Windows animation settings
 - **Floating Metrics Widget** — Keep CPU and RAM readings and history visible in a movable, pinnable window with detailed tooltips
 - **Persistent Update Notices** — Available updates stay visible from either title bar or the notification-area menu
-- **System Information Window** — Dedicated window with 4 tabs:
+- **Performance View**: Integrated view with 4 tabs:
   - **Summary** — Dual sparklines + system totals + hardware topology
   - **CPU** — Full history graph + model name + core/thread counts
   - **Memory** — Physical RAM, commit charge, kernel pools (paged/non-paged)
-  - **I/O History** — Process/thread/handle counts + kernel pool stats
+  - **System Activity**: Process/thread/handle counts + kernel pool stats
 
 ### 🖥️ Desktop Integration
+- **Single Instance**: Launching again restores the existing window within the same session
 - **System Tray** — Separate tray behavior for minimizing and closing, quick actions, version info
 - **Close Confirmation** — Choose to minimize to the notification area or exit when closing, with an option to remember the decision
 - **Global Hotkey** — Configurable toggle shortcut (default: `Alt+Shift+M`)
@@ -158,7 +160,7 @@ CyberManager.slnx
 - **Async Collection** — Process enumeration on thread pool with differential snapshots
 - **UI Virtualization** — Only visible rows rendered in the DataGrid
 - **System Metrics** — `GetSystemTimes` + `GlobalMemoryStatusEx` + `GetPerformanceInfo` for telemetry
-- **Icon Extraction** — `SHGetFileInfo` with path-based fallback and deduplicated cache
+- **Icon Extraction**: Bounded background `SHGetFileInfo` workers, a deduplicated cache, and individual image updates
 
 ### Building from Source (Developers)
 

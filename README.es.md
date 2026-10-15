@@ -36,10 +36,10 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 
 | Necesidad | Solución |
 |---|---|
-| Gestiona miles de procesos | UI virtualizada: solo se renderizan las filas visibles, 3000+ a 144 fps |
+| Gestiona listas grandes de procesos | Filas virtualizadas, iconos en segundo plano y flechas de desplazamiento suaves |
 | Refresco instantáneo de procesos | Motor nativo NT: llamadas directas a la API, cero sobrecarga de WMI |
 | Identifica procesos consumidores | Mapa térmico adaptativo de CPU/RAM y filtro de los 10 procesos más pesados |
-| Monitoriza la salud del sistema | Sparklines en vivo, widget flotante de CPU/RAM e Información del Sistema con 4 pestañas |
+| Monitoriza la salud del sistema | Historiales animados, widget flotante de CPU/RAM y vista Rendimiento con 4 pestañas |
 | Controla los procesos | Finalizar, finalizar árbol, reiniciar, suspender, reanudar, establecer prioridad |
 | Actúa sobre varios a la vez | Multi-selección con Ctrl/Shift+clic y "Finalizar selección" de un solo toque |
 | Entiende los procesos | Nombres amigables, metadatos y un detallado diálogo de Propiedades |
@@ -52,7 +52,8 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 ## ✨ Funciones principales
 
 ### 🖥️ Gestión de procesos
-- **Cuadrícula virtualizada**: renderiza solo las filas visibles para un desplazamiento sin retardo con 3000+ procesos
+- **Cuadrícula virtualizada**: renderiza las filas visibles y carga los iconos en segundo plano sin actualizar toda la lista
+- **Desplazamiento suave**: el movimiento animado de las flechas de la barra reduce el parpadeo entre filas en los modos Completo y Compacto
 - **Motor nativo NT**: llamadas directas a `NtQuerySystemInformation` + instantáneas diferenciales
 - **CPU % en tiempo real**: cálculo por proceso basado en delta, preciso y ligero
 - **Búsqueda y filtro instantáneos**: por nombre, PID o ruta sin bloqueos (debounce de 150 ms)
@@ -78,16 +79,17 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 - **Propiedades**: inspecciona el nombre amigable, los metadatos del archivo, el estado en tiempo de ejecución y el uso de recursos
 
 ### 📊 Monitorización del sistema
-- **Sparklines en vivo**: gráficos de historial de CPU y RAM en tiempo real en el pie de la ventana principal
+- **Historiales de métricas animados**: los gráficos de CPU, RAM y actividad del sistema avanzan suavemente entre muestras reales en la ventana principal, Rendimiento y el widget flotante. Se conserva la frecuencia de muestreo; la animación se pausa cuando el gráfico está oculto o su ventana minimizada y respeta la configuración de animaciones de Windows
 - **Widget flotante de métricas**: mantén visibles las lecturas e historial de CPU y RAM en una ventana móvil y fijable, con tooltips detallados
 - **Avisos persistentes de actualización**: las nuevas versiones permanecen visibles desde ambas barras de título o el menú de la bandeja del sistema
-- **Ventana de Información del Sistema**: ventana dedicada con 4 pestañas:
+- **Vista Rendimiento**: vista integrada con 4 pestañas:
   - **Resumen**: doble sparkline + totales del sistema + topología del hardware
   - **CPU**: gráfico de historial completo + nombre del modelo + recuentos de núcleos e hilos
   - **Memoria**: RAM física, carga de commited, pools del kernel (paginados y no paginados)
-  - **Historial de E/S**: recuentos de procesos, hilos y bandas + estadísticas de pools del kernel
+  - **Actividad del sistema**: recuentos de procesos, hilos y handles + estadísticas de pools del kernel
 
 ### 🖥️ Integración con escritorio
+- **Instancia única**: al abrir de nuevo la aplicación se restaura la ventana existente en la misma sesión
 - **Bandeja del sistema**: comportamiento separado de bandeja para minimizar y cerrar, acciones rápidas e información de versión
 - **Confirmación al cerrar**: elige minimizar a la bandeja del sistema o salir al cerrar, con opción de recordar la decisión
 - **Atajo global**: atajo de alternancia configurable (predeterminado: `Alt+Shift+M`)
@@ -156,7 +158,7 @@ CyberManager.slnx
 - **Recogida asíncrona**: enumeración de procesos en el pool de hilos con instantáneas diferenciales
 - **Virtualización de UI**: solo se renderizan las filas visibles en el DataGrid
 - **Métricas del sistema**: `GetSystemTimes` + `GlobalMemoryStatusEx` + `GetPerformanceInfo` para la telemetría
-- **Extracción de iconos**: `SHGetFileInfo` con respaldo basado en ruta y caché deduplicada
+- **Extracción de iconos**: tareas limitadas de `SHGetFileInfo` en segundo plano, caché deduplicada y actualización individual de imágenes
 
 ### Compilar desde el código fuente (desarrolladores)
 
