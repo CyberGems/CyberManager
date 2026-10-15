@@ -483,7 +483,6 @@
                               StrokeStartLineCap="Round"
                               StrokeEndLineCap="Round"/>
                     </Button>
-                    <Border Grid.Column="7" Width="1" Height="16" Margin="5,0" Background="{DynamicResource BorderBrush}" VerticalAlignment="Center" IsHitTestVisible="False"/>
                     <Button Grid.Column="8" x:Name="CloseButton"
                         Width="28"
                         Height="26"
