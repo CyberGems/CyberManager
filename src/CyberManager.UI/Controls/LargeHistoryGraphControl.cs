@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace CyberManager.UI.Controls;
 
-public class LargeHistoryGraphControl : FrameworkElement
+public class LargeHistoryGraphControl : AnimatedHistoryGraph
 {
     public static readonly DependencyProperty PrimaryValuesProperty =
         DependencyProperty.Register(
@@ -130,6 +130,45 @@ public class LargeHistoryGraphControl : FrameworkElement
 
     private Point? _hoverPos;
     private long _lastHoverRenderTimestamp;
+    private readonly HistorySeriesDrawing _primaryDrawing = new();
+    private readonly HistorySeriesDrawing _secondaryDrawing = new();
+    private readonly ScaleTransform _primaryMeter = new(1, 0);
+    private readonly ScaleTransform _secondaryMeter = new(1, 0);
+    private double _meterStartPrimary;
+    private double _meterStartSecondary;
+    private double _meterTargetPrimary;
+    private double _meterTargetSecondary;
+    private Color? _paintPrimary;
+    private Color? _paintSecondary;
+    private Brush? _primaryMeterBrush;
+    private Brush? _secondaryMeterBrush;
+    private Brush? _primaryFill;
+    private Brush? _secondaryFill;
+    private Pen? _primaryPen;
+    private Pen? _secondaryPen;
+    internal int GeometryBuildCount => _primaryDrawing.BuildCount + _secondaryDrawing.BuildCount;
+
+    public void UpdateHistory(float[] primary, float[]? secondary, object sample, TimeSpan interval)
+    {
+        if (IsCurrentSample(sample)) return;
+        PrimaryValues = primary;
+        SecondaryValues = secondary;
+        BeginSample(sample, interval, primary, secondary, Math.Max(2, MaxSamples));
+    }
+
+    protected override void OnAnimationStarted()
+    {
+        _meterStartPrimary = _primaryMeter.ScaleY;
+        _meterStartSecondary = _secondaryMeter.ScaleY;
+    }
+
+    protected override void OnAnimationFrame(double elapsedSeconds, bool finished)
+    {
+        var progress = finished ? 1 : Math.Clamp(elapsedSeconds / 0.2, 0, 1);
+        var eased = 1 - (1 - progress) * (1 - progress);
+        _primaryMeter.ScaleY = _meterStartPrimary + (_meterTargetPrimary - _meterStartPrimary) * eased;
+        _secondaryMeter.ScaleY = _meterStartSecondary + (_meterTargetSecondary - _meterStartSecondary) * eased;
+    }
 
     private static readonly Typeface GraphTypeface = new(
         new FontFamily("Segoe UI, Arial"),
@@ -188,6 +227,7 @@ public class LargeHistoryGraphControl : FrameworkElement
         double graphHeight = h - 24;
         double graphTop = 8;
         double graphBottom = graphTop + graphHeight;
+        EnsurePaints();
 
         // 1. Draw Left Vertical Meter Box
         var meterRect = new Rect(0, graphTop, meterWidth, graphHeight);
@@ -200,26 +240,24 @@ public class LargeHistoryGraphControl : FrameworkElement
         double curNorm = curVal / max;
         double secNorm = secVal / max;
 
-        double totalBarH = curNorm * (graphHeight - 2);
-        double secBarH = secNorm * (graphHeight - 2);
+        _meterTargetPrimary = curNorm;
+        _meterTargetSecondary = secNorm;
+        _primaryMeter.CenterY = _secondaryMeter.CenterY = graphBottom;
+        if (!IsAnimating)
+        {
+            _primaryMeter.ScaleY = curNorm;
+            _secondaryMeter.ScaleY = secNorm;
+        }
 
         // Draw primary bar fill
-        if (totalBarH > 0)
-        {
-            var pFill = new SolidColorBrush(Color.FromArgb(160, PrimaryColor.R, PrimaryColor.G, PrimaryColor.B));
-            pFill.Freeze();
-            var pRect = new Rect(1, graphBottom - totalBarH, meterWidth - 2, totalBarH);
-            dc.DrawRectangle(pFill, null, pRect);
-        }
+        dc.PushTransform(_primaryMeter);
+        dc.DrawRectangle(_primaryMeterBrush, null, new Rect(1, graphTop + 2, meterWidth - 2, graphHeight - 2));
+        dc.Pop();
 
         // Draw secondary bar fill (kernel)
-        if (secBarH > 0)
-        {
-            var sFill = new SolidColorBrush(Color.FromArgb(210, SecondaryColor.R, SecondaryColor.G, SecondaryColor.B));
-            sFill.Freeze();
-            var sRect = new Rect(1, graphBottom - secBarH, meterWidth - 2, secBarH);
-            dc.DrawRectangle(sFill, null, sRect);
-        }
+        dc.PushTransform(_secondaryMeter);
+        dc.DrawRectangle(_secondaryMeterBrush, null, new Rect(1, graphTop + 2, meterWidth - 2, graphHeight - 2));
+        dc.Pop();
 
         // Meter Title & Value
         var titleFt = new FormattedText(
@@ -258,33 +296,21 @@ public class LargeHistoryGraphControl : FrameworkElement
         dc.PushClip(new RectangleGeometry(new Rect(graphLeft + 1, graphTop + 1, graphWidth - 2, graphHeight - 2)));
 
         int capacity = Math.Max(2, MaxSamples);
+        SetHistoryWidth(graphWidth, capacity);
+        dc.PushTransform(HistoryTransform);
 
         // 3. Draw Primary Series
         var primary = PrimaryValues;
         if (primary != null && primary.Length > 0)
         {
-            var pFillGrad = new LinearGradientBrush(
-                Color.FromArgb(120, PrimaryColor.R, PrimaryColor.G, PrimaryColor.B),
-                Color.FromArgb(25, PrimaryColor.R, PrimaryColor.G, PrimaryColor.B),
-                90.0);
-            pFillGrad.Freeze();
-            var pStroke = new SolidColorBrush(PrimaryColor);
-            pStroke.Freeze();
-            DrawArea(dc, primary, graphLeft, graphTop, graphWidth, graphHeight, max, capacity, pFillGrad, pStroke, 1.6);
+            _primaryDrawing.Draw(dc, primary, graphRect, max, capacity, PrimaryPrefix, _primaryFill, _primaryPen);
         }
 
         // 4. Draw Secondary Series (Kernel / Commit)
         var secondary = SecondaryValues;
         if (secondary != null && secondary.Length > 0)
         {
-            var sFillGrad = new LinearGradientBrush(
-                Color.FromArgb(180, SecondaryColor.R, SecondaryColor.G, SecondaryColor.B),
-                Color.FromArgb(50, SecondaryColor.R, SecondaryColor.G, SecondaryColor.B),
-                90.0);
-            sFillGrad.Freeze();
-            var sStroke = new SolidColorBrush(SecondaryColor);
-            sStroke.Freeze();
-            DrawArea(dc, secondary, graphLeft, graphTop, graphWidth, graphHeight, max, capacity, sFillGrad, sStroke, 1.4);
+            _secondaryDrawing.Draw(dc, secondary, graphRect, max, capacity, SecondaryPrefix, _secondaryFill, _secondaryPen);
         }
 
         // 5. Hover Indicator
@@ -296,7 +322,7 @@ public class LargeHistoryGraphControl : FrameworkElement
                 double stepX = graphWidth / (capacity - 1);
                 int count = primary.Length;
                 double startX = graphLeft + graphWidth - (count - 1) * stepX;
-                int hoverIdx = (int)Math.Round((mx - startX) / stepX);
+                int hoverIdx = (int)Math.Round((mx - HistoryOffset - startX) / stepX);
                 if (hoverIdx >= 0 && hoverIdx < count)
                 {
                     double ptX = startX + hoverIdx * stepX;
@@ -322,7 +348,7 @@ public class LargeHistoryGraphControl : FrameworkElement
                         Brushes.White,
                         VisualTreeHelper.GetDpi(this).PixelsPerDip);
 
-                    double tipX = Math.Min(ptX + 8, graphLeft + graphWidth - tipFt.Width - 12);
+                    double tipX = Math.Min(ptX + 8, graphLeft + graphWidth - HistoryOffset - tipFt.Width - 12);
                     double tipY = graphTop + 8;
                     var tipBg = new Rect(tipX - 4, tipY - 2, tipFt.Width + 8, tipFt.Height + 4);
                     dc.DrawRoundedRectangle(TooltipBackgroundBrush, GraphBorderPen, tipBg, 4, 4);
@@ -331,7 +357,8 @@ public class LargeHistoryGraphControl : FrameworkElement
             }
         }
 
-        dc.Pop(); // pop clip
+        dc.Pop(); // history transform
+        dc.Pop(); // clip
     }
 
     private static SolidColorBrush CreateBrush(Color color)
@@ -348,68 +375,43 @@ public class LargeHistoryGraphControl : FrameworkElement
         return pen;
     }
 
-    private static void DrawArea(
-        DrawingContext dc,
-        float[] data,
-        double left,
-        double top,
-        double width,
-        double height,
-        double max,
-        int capacity,
-        Brush fillBrush,
-        Brush strokeBrush,
-        double strokeThickness)
+    private void EnsurePaints()
     {
-        int count = data.Length;
-        if (count < 1) return;
-
-        double bottom = top + height;
-        double stepX = width / (capacity - 1);
-        double startX = left + width - (count - 1) * stepX;
-
-        var points = new Point[count];
-        for (int i = 0; i < count; i++)
+        if (_paintPrimary != PrimaryColor)
         {
-            double x = startX + i * stepX;
-            double norm = Math.Clamp(data[i] / max, 0.0, 1.0);
-            double y = bottom - (norm * (height - 2.0)) - 1.0;
-            points[i] = new Point(x, y);
+            var color = PrimaryColor;
+            _paintPrimary = color;
+            _primaryMeterBrush = CreateBrush(Color.FromArgb(160, color.R, color.G, color.B));
+            _primaryFill = CreateGradient(color, 120, 25);
+            _primaryPen = CreateSeriesPen(color, 1.6);
         }
-
-        if (count >= 2)
+        if (_paintSecondary != SecondaryColor)
         {
-            var fillGeo = new StreamGeometry();
-            using (var ctx = fillGeo.Open())
-            {
-                ctx.BeginFigure(new Point(points[0].X, bottom), true, true);
-                for (int i = 0; i < count; i++)
-                {
-                    ctx.LineTo(points[i], true, false);
-                }
-                ctx.LineTo(new Point(points[count - 1].X, bottom), true, false);
-            }
-            fillGeo.Freeze();
-            dc.DrawGeometry(fillBrush, null, fillGeo);
+            var color = SecondaryColor;
+            _paintSecondary = color;
+            _secondaryMeterBrush = CreateBrush(Color.FromArgb(210, color.R, color.G, color.B));
+            _secondaryFill = CreateGradient(color, 180, 50);
+            _secondaryPen = CreateSeriesPen(color, 1.4);
         }
+    }
 
-        var lineGeo = new StreamGeometry();
-        using (var ctx = lineGeo.Open())
-        {
-            ctx.BeginFigure(points[0], false, false);
-            for (int i = 1; i < count; i++)
-            {
-                ctx.LineTo(points[i], true, true);
-            }
-        }
-        lineGeo.Freeze();
-        var pen = new Pen(strokeBrush, strokeThickness)
+    private static LinearGradientBrush CreateGradient(Color color, byte topAlpha, byte bottomAlpha)
+    {
+        var gradient = new LinearGradientBrush(Color.FromArgb(topAlpha, color.R, color.G, color.B),
+            Color.FromArgb(bottomAlpha, color.R, color.G, color.B), 90);
+        gradient.Freeze();
+        return gradient;
+    }
+
+    private static Pen CreateSeriesPen(Color color, double thickness)
+    {
+        var pen = new Pen(CreateBrush(color), thickness)
         {
             StartLineCap = PenLineCap.Round,
             EndLineCap = PenLineCap.Round,
             LineJoin = PenLineJoin.Round
         };
         pen.Freeze();
-        dc.DrawGeometry(null, pen, lineGeo);
+        return pen;
     }
 }

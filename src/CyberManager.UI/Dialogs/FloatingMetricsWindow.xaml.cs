@@ -118,7 +118,9 @@ public partial class FloatingMetricsWindow : Window
         double usedRamGb,
         double availableRamGb,
         double totalRamGb,
-        string? cpuModelName)
+        string? cpuModelName,
+        object sample,
+        TimeSpan sampleInterval)
     {
         _cpuPercent = cpuPercent;
         _cpuUserPercent = cpuUserPercent;
@@ -133,11 +135,10 @@ public partial class FloatingMetricsWindow : Window
 
         CpuValueText.Text = $"{cpuPercent:F1}%";
         UpdateMetricValueColors();
-        CpuSparkline.Values = cpuHistory;
-        CpuSparkline.SecondaryValues = cpuKernelHistory;
+        CpuSparkline.UpdateHistory(cpuHistory, cpuKernelHistory, sample, sampleInterval);
 
         RamValueText.Text = $"{ramPercent:F1}%";
-        RamSparkline.Values = ramHistory;
+        RamSparkline.UpdateHistory(ramHistory, null, sample, sampleInterval);
 
         UpdateMetricToolTips();
     }

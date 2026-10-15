@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
-using System.Windows.Threading;
 using CyberManager.Common.I18n;
 using CyberManager.Core.Engine;
 
@@ -10,19 +9,12 @@ namespace CyberManager.UI.Views;
 
 public partial class PerformanceView : UserControl
 {
-    private readonly DispatcherTimer _timer = new();
     private bool _isActive;
 
     public PerformanceView()
     {
         InitializeComponent();
         RefreshLocalization();
-
-        _timer.Interval = TimeSpan.FromMilliseconds(Math.Max(500, App.Settings.RefreshIntervalMs));
-        _timer.Tick += (_, _) =>
-        {
-            if (_isActive) UpdateMetrics();
-        };
 
         Loaded += (_, _) =>
         {
@@ -34,9 +26,6 @@ public partial class PerformanceView : UserControl
     {
         if (_isActive) return;
         _isActive = true;
-        var interval = TimeSpan.FromMilliseconds(Math.Max(500, App.Settings.RefreshIntervalMs));
-        if (_timer.Interval != interval) _timer.Interval = interval;
-        _timer.Start();
         UpdateMetrics();
     }
 
@@ -44,7 +33,6 @@ public partial class PerformanceView : UserControl
     {
         if (!_isActive) return;
         _isActive = false;
-        _timer.Stop();
     }
 
     public void SelectSubTab(string name)
@@ -130,6 +118,7 @@ public partial class PerformanceView : UserControl
 
     public void UpdateMetrics()
     {
+        if (!_isActive) return;
         var snap = SystemMetricsCollector.Instance.Latest;
         var (cpuTotal, cpuKernel) = SystemMetricsCollector.Instance.GetCpuHistory();
         var (_, ramPct) = SystemMetricsCollector.Instance.GetRamHistory();
@@ -139,7 +128,6 @@ public partial class PerformanceView : UserControl
             : Array.Empty<float>();
 
         var refreshInterval = TimeSpan.FromMilliseconds(Math.Max(500, App.Settings.RefreshIntervalMs));
-        if (_timer.Interval != refreshInterval) _timer.Interval = refreshInterval;
 
         // 1. Hardware Overview Chip
         CpuModelSubtitle.Text = $"{snap.CpuModelName} • {snap.PhysicalCores} Cores / {snap.LogicalProcessors} Threads • {snap.TotalRamGb:F1} GB RAM";
@@ -147,13 +135,11 @@ public partial class PerformanceView : UserControl
         // 2. Summary Tab Graphs
         SummaryCpuGraph.CurrentValue = snap.CpuTotalPercent;
         SummaryCpuGraph.SecondaryCurrentValue = snap.CpuKernelPercent;
-        SummaryCpuGraph.PrimaryValues = cpuTotal;
-        SummaryCpuGraph.SecondaryValues = cpuKernel;
+        SummaryCpuGraph.UpdateHistory(cpuTotal, cpuKernel, snap, refreshInterval);
 
         SummaryMemGraph.CurrentValue = snap.MemoryLoadPercent;
         SummaryMemGraph.SecondaryCurrentValue = snap.CommitLimitGb > 0 ? (snap.CommitTotalGb / snap.CommitLimitGb) * 100.0 : 0.0;
-        SummaryMemGraph.PrimaryValues = ramPct;
-        SummaryMemGraph.SecondaryValues = commitPct;
+        SummaryMemGraph.UpdateHistory(ramPct, commitPct, snap, refreshInterval);
 
         // 3. Summary Tab Cards
         HandlesVal.Text = $"{snap.HandleCount:N0}";
@@ -175,8 +161,7 @@ public partial class PerformanceView : UserControl
         // 4. Full CPU Tab
         FullCpuGraph.CurrentValue = snap.CpuTotalPercent;
         FullCpuGraph.SecondaryCurrentValue = snap.CpuKernelPercent;
-        FullCpuGraph.PrimaryValues = cpuTotal;
-        FullCpuGraph.SecondaryValues = cpuKernel;
+        FullCpuGraph.UpdateHistory(cpuTotal, cpuKernel, snap, refreshInterval);
 
         FullCpuTotal.Text = $"{snap.CpuTotalPercent:F1}%";
         FullCpuKernel.Text = $"{snap.CpuKernelPercent:F1}%";
@@ -188,8 +173,7 @@ public partial class PerformanceView : UserControl
         // 5. Full Memory Tab
         FullMemGraph.CurrentValue = snap.MemoryLoadPercent;
         FullMemGraph.SecondaryCurrentValue = snap.CommitLimitGb > 0 ? (snap.CommitTotalGb / snap.CommitLimitGb) * 100.0 : 0.0;
-        FullMemGraph.PrimaryValues = ramPct;
-        FullMemGraph.SecondaryValues = commitPct;
+        FullMemGraph.UpdateHistory(ramPct, commitPct, snap, refreshInterval);
 
         FullMemTotal.Text = $"{snap.TotalRamGb:F1} GB";
         FullMemInUse.Text = $"{snap.UsedRamGb:F1} GB ({snap.MemoryLoadPercent:F0}%)";

@@ -5,7 +5,7 @@ using System.Windows.Media;
 
 namespace CyberManager.UI.Controls;
 
-public class SparklineControl : FrameworkElement
+public class SparklineControl : AnimatedHistoryGraph
 {
     public static readonly DependencyProperty ValuesProperty =
         DependencyProperty.Register(
@@ -140,6 +140,17 @@ public class SparklineControl : FrameworkElement
     private Pen? _cachedSecondaryStrokePen;
     private Brush? _cachedGridBrush;
     private Pen? _cachedGridPen;
+    private readonly HistorySeriesDrawing _primaryDrawing = new();
+    private readonly HistorySeriesDrawing _secondaryDrawing = new();
+    internal int GeometryBuildCount => _primaryDrawing.BuildCount + _secondaryDrawing.BuildCount;
+
+    public void UpdateHistory(float[] primary, float[]? secondary, object sample, TimeSpan interval)
+    {
+        if (IsCurrentSample(sample)) return;
+        Values = primary;
+        SecondaryValues = secondary;
+        BeginSample(sample, interval, primary, secondary, Math.Max(2, MaxSamples));
+    }
 
     public SparklineControl()
     {
@@ -176,13 +187,15 @@ public class SparklineControl : FrameworkElement
 
         double max = MaxValue > 0 ? MaxValue : 100.0;
         int capacity = Math.Max(2, MaxSamples);
+        SetHistoryWidth(w, capacity);
+        dc.PushTransform(HistoryTransform);
 
         // 1. Draw Primary Series (Total / User)
         var values = Values;
         if (values != null && values.Length > 0)
         {
             var strokePen = GetPen(StrokeBrush, 1.4, ref _cachedStrokeBrush, ref _cachedStrokePen);
-            DrawSeries(dc, values, w, h, max, capacity, FillBrush, strokePen);
+            _primaryDrawing.Draw(dc, values, new Rect(0, 0, w, h), max, capacity, PrimaryPrefix, FillBrush, strokePen);
         }
 
         // 2. Draw Secondary Series (e.g. Kernel CPU)
@@ -190,69 +203,11 @@ public class SparklineControl : FrameworkElement
         if (secValues != null && secValues.Length > 0)
         {
             var strokePen = GetPen(SecondaryStrokeBrush, 1.2, ref _cachedSecondaryStrokeBrush, ref _cachedSecondaryStrokePen);
-            DrawSeries(dc, secValues, w, h, max, capacity, SecondaryFillBrush, strokePen);
+            _secondaryDrawing.Draw(dc, secValues, new Rect(0, 0, w, h), max, capacity, SecondaryPrefix, SecondaryFillBrush, strokePen);
         }
 
-        dc.Pop(); // pop clip
-    }
-
-    private static void DrawSeries(
-        DrawingContext dc,
-        float[] data,
-        double w,
-        double h,
-        double max,
-        int capacity,
-        Brush? fillBrush,
-        Pen? strokePen)
-    {
-        int count = data.Length;
-        if (count < 1) return;
-
-        double stepX = w / (capacity - 1);
-        double startX = w - (count - 1) * stepX;
-
-        var points = new Point[count];
-        for (int i = 0; i < count; i++)
-        {
-            double x = startX + i * stepX;
-            double norm = Math.Clamp(data[i] / max, 0.0, 1.0);
-            double y = h - (norm * (h - 2.0)) - 1.0;
-            points[i] = new Point(x, y);
-        }
-
-        // Draw Fill Geometry
-        if (fillBrush != null && count >= 2)
-        {
-            var fillGeo = new StreamGeometry();
-            using (var ctx = fillGeo.Open())
-            {
-                ctx.BeginFigure(new Point(points[0].X, h), true, true);
-                for (int i = 0; i < count; i++)
-                {
-                    ctx.LineTo(points[i], true, false);
-                }
-                ctx.LineTo(new Point(points[count - 1].X, h), true, false);
-            }
-            fillGeo.Freeze();
-            dc.DrawGeometry(fillBrush, null, fillGeo);
-        }
-
-        // Draw Line Stroke
-        if (strokePen != null)
-        {
-            var lineGeo = new StreamGeometry();
-            using (var ctx = lineGeo.Open())
-            {
-                ctx.BeginFigure(points[0], false, false);
-                for (int i = 1; i < count; i++)
-                {
-                    ctx.LineTo(points[i], true, true);
-                }
-            }
-            lineGeo.Freeze();
-            dc.DrawGeometry(null, strokePen, lineGeo);
-        }
+        dc.Pop(); // history transform
+        dc.Pop(); // clip
     }
 
     private static Pen GetPen(

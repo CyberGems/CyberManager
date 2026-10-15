@@ -105,13 +105,11 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         // 2. Summary Tab Graphs
         SummaryCpuGraph.CurrentValue = snap.CpuTotalPercent;
         SummaryCpuGraph.SecondaryCurrentValue = snap.CpuKernelPercent;
-        SummaryCpuGraph.PrimaryValues = cpuTotal;
-        SummaryCpuGraph.SecondaryValues = cpuKernel;
+        SummaryCpuGraph.UpdateHistory(cpuTotal, cpuKernel, snap, refreshInterval);
 
         SummaryMemGraph.CurrentValue = snap.MemoryLoadPercent;
         SummaryMemGraph.SecondaryCurrentValue = snap.CommitLimitGb > 0 ? (snap.CommitTotalGb / snap.CommitLimitGb) * 100.0 : 0.0;
-        SummaryMemGraph.PrimaryValues = ramPct;
-        SummaryMemGraph.SecondaryValues = commitPct;
+        SummaryMemGraph.UpdateHistory(ramPct, commitPct, snap, refreshInterval);
 
         // 3. Summary Tab Cards
         HandlesVal.Text = $"{snap.HandleCount:N0}";
@@ -133,8 +131,7 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         // 4. Full CPU Tab
         FullCpuGraph.CurrentValue = snap.CpuTotalPercent;
         FullCpuGraph.SecondaryCurrentValue = snap.CpuKernelPercent;
-        FullCpuGraph.PrimaryValues = cpuTotal;
-        FullCpuGraph.SecondaryValues = cpuKernel;
+        FullCpuGraph.UpdateHistory(cpuTotal, cpuKernel, snap, refreshInterval);
 
         FullCpuTotal.Text = $"{snap.CpuTotalPercent:F1}%";
         FullCpuKernel.Text = $"{snap.CpuKernelPercent:F1}%";
@@ -180,8 +177,7 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
         // 5. Full Memory Tab
         FullMemGraph.CurrentValue = snap.MemoryLoadPercent;
         FullMemGraph.SecondaryCurrentValue = snap.CommitLimitGb > 0 ? (snap.CommitTotalGb / snap.CommitLimitGb) * 100.0 : 0.0;
-        FullMemGraph.PrimaryValues = ramPct;
-        FullMemGraph.SecondaryValues = commitPct;
+        FullMemGraph.UpdateHistory(ramPct, commitPct, snap, refreshInterval);
 
         FullMemTotal.Text = $"{snap.TotalRamGb:F1} GB";
         FullMemInUse.Text = $"{snap.UsedRamGb:F1} GB ({snap.MemoryLoadPercent:F0}%)";

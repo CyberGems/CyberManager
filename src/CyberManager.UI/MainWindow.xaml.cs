@@ -871,8 +871,7 @@ public partial class MainWindow : Window
             var (cpuHistory, cpuKernelHistory) = SystemMetricsCollector.Instance.GetCpuHistory();
             var (ramGbHistory, ramPctHistory) = SystemMetricsCollector.Instance.GetRamHistory();
 
-            CpuSparkline.Values = cpuHistory;
-            CpuSparkline.SecondaryValues = cpuKernelHistory;
+            CpuSparkline.UpdateHistory(cpuHistory, cpuKernelHistory, sysMetrics, _timer.Interval);
             CpuSparklineText.Text = $"{sysMetrics.CpuTotalPercent:F1}%";
             CompactView.SetSystemMetrics(
                 sysMetrics.CpuTotalPercent,
@@ -881,8 +880,11 @@ public partial class MainWindow : Window
                 sysMetrics.CpuModelName,
                 sysMetrics.TotalRamGb);
 
-            RamSparkline.Values = ramPctHistory;
+            RamSparkline.UpdateHistory(ramPctHistory, null, sysMetrics, _timer.Interval);
             RamSparklineText.Text = $"{sysMetrics.MemoryLoadPercent:F1}%";
+
+            if (CurrentTab == MainTab.Performance && IsVisible && WindowState != WindowState.Minimized)
+                PerformanceTabContent.UpdateMetrics();
 
             _lastUsedRamGb = sysMetrics.UsedRamGb;
             _lastTotalRamGb = sysMetrics.TotalRamGb;
@@ -909,7 +911,9 @@ public partial class MainWindow : Window
                     sysMetrics.UsedRamGb,
                     sysMetrics.AvailableRamGb,
                     sysMetrics.TotalRamGb,
-                    sysMetrics.CpuModelName);
+                    sysMetrics.CpuModelName,
+                    sysMetrics,
+                    _timer.Interval);
             }
 
             // The footer pill shows the process count only. CPU and RAM already have their own
