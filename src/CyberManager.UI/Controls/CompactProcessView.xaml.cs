@@ -165,19 +165,19 @@ public partial class CompactProcessView : UserControl
         ToolTipService.SetShowOnDisabled(RestartButton, true);
         PauseDetectionButton.ToolTip = Strings.T("PauseDetection");
         AutomationProperties.SetName(PauseDetectionButton, Strings.T("PauseDetection"));
-        PinButton.ToolTip = Strings.T("AlwaysOnTop");
+        PinButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("AlwaysOnTop"), TitleBarHotkeys.TogglePin);
         EngineBadgeText.Text = Strings.T("WfpEngineBadge");
         CompactCpuLabel.Text = Strings.T("Cpu");
         CompactRamLabel.Text = Strings.T("Ram");
         UpdateMetricToolTips();
-        ModeButton.ToolTip = Strings.T("MoreDetails");
+        ModeButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("MoreDetails"), TitleBarHotkeys.ToggleCompact);
         AutomationProperties.SetName(ModeButton, Strings.T("MoreDetails"));
-        BrandingPanel.ToolTip = Strings.T("About");
+        BrandingPanel.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("About"), TitleBarHotkeys.About);
         AutomationProperties.SetName(BrandingPanel, Strings.T("About"));
         UpdatePill.ApplyLanguage();
-        SettingsButton.ToolTip = Strings.T("Settings");
-        MoreButton.ToolTip = Strings.T("MoreOptions");
-        CloseButton.ToolTip = Strings.T("Close");
+        SettingsButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Settings"), TitleBarHotkeys.Settings);
+        MoreButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("MoreOptions"), TitleBarHotkeys.More);
+        CloseButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Close"), TitleBarHotkeys.Close);
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");
         SearchHint.Text = Strings.T("SearchPlaceholder");
         ClearSearchButton.ToolTip = Strings.T("Clear");
@@ -186,7 +186,7 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
         AutomationProperties.SetName(SettingsButton, Strings.T("Settings"));
         AutomationProperties.SetName(MoreButton, Strings.T("MoreOptions"));
-        MinimizeButton.ToolTip = Strings.T("Minimize");
+        MinimizeButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Minimize"), TitleBarHotkeys.Minimize);
         AutomationProperties.SetName(MinimizeButton, Strings.T("Minimize"));
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
         AutomationProperties.SetName(SearchBox, Strings.T("SearchProcesses"));
@@ -363,9 +363,8 @@ public partial class CompactProcessView : UserControl
         // Borderless buttons: the pinned state is conveyed by icon opacity and the tooltip,
         // not by a colored plate painted behind the icon.
         PinButton.Opacity = pinned ? 1.0 : 0.65;
-        PinButton.ToolTip = pinned
-            ? $"{Strings.T("AlwaysOnTop")} ✓"
-            : Strings.T("AlwaysOnTop");
+        var label = pinned ? $"{Strings.T("AlwaysOnTop")} ✓" : Strings.T("AlwaysOnTop");
+        PinButton.ToolTip = TitleBarHotkeys.WithShortcut(label, TitleBarHotkeys.TogglePin);
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
     }
 

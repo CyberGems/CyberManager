@@ -2091,8 +2091,21 @@ public partial class MainWindow : Window
     private DateTime _moreMenuDismissedAtUtc = DateTime.MinValue;
     private static readonly TimeSpan MoreMenuReopenGuard = TimeSpan.FromMilliseconds(400);
 
-    private void MoreOptionsMenu_Opened(object sender, RoutedEventArgs e) =>
+    private void MoreOptionsMenu_Opened(object sender, RoutedEventArgs e)
+    {
         _moreMenuDismissedAtUtc = DateTime.MinValue;
+        if (sender is not ContextMenu menu) return;
+
+        // The popup gets its keyboard focus after it has opened, so arrows can continue from
+        // the first action instead of leaving focus on the More button.
+        Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+        {
+            if (!menu.IsOpen) return;
+            var firstItem = menu.Items.OfType<MenuItem>()
+                .FirstOrDefault(item => item.IsEnabled && item.Visibility == Visibility.Visible);
+            if (firstItem is not null) Keyboard.Focus(firstItem);
+        }));
+    }
 
     private void MoreOptionsMenu_Closed(object sender, RoutedEventArgs e)
     {
@@ -3209,9 +3222,9 @@ public partial class MainWindow : Window
         TabProcessesText.Text = Strings.T("NavProcesses");
         TabPerformanceText.Text = Strings.T("NavPerformance");
         TabSettingsText.Text = Strings.T("NavSettings");
-        TabProcessesBtn.ToolTip = Strings.T("NavProcessesTip");
-        TabPerformanceBtn.ToolTip = Strings.T("NavPerformanceTip");
-        TabSettingsBtn.ToolTip = Strings.T("NavSettingsTip");
+        TabProcessesBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("NavProcessesTip"), TitleBarHotkeys.Processes);
+        TabPerformanceBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("NavPerformanceTip"), TitleBarHotkeys.Performance);
+        TabSettingsBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("NavSettingsTip"), TitleBarHotkeys.Settings);
     }
 
     private void ApplyTheme()
@@ -3233,7 +3246,7 @@ public partial class MainWindow : Window
             SettingsTabContent?.RefreshLocalization();
 
             SubtitleText.Text = Strings.T("AppSubtitle");
-            FullBrandingPanel.ToolTip = Strings.T("About");
+            FullBrandingPanel.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("About"), TitleBarHotkeys.About);
             AutomationProperties.SetName(FullBrandingPanel, Strings.T("About"));
             SearchHint.Text = Strings.T("SearchPlaceholder");
             LoaderOverlay.RefreshLocalization();
@@ -3264,9 +3277,9 @@ public partial class MainWindow : Window
             AutomationProperties.SetName(RestartBtn, Strings.T("Restart"));
             AutomationProperties.SetName(ClearBtn, Strings.T("Clear"));
             AutomationProperties.SetName(HeavyFilterToggle, Strings.T("ShowHeavyProcesses"));
-            FullModeToggleBtn.ToolTip = Strings.T("CompactMode");
+            FullModeToggleBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("CompactMode"), TitleBarHotkeys.ToggleCompact);
             AutomationProperties.SetName(FullModeToggleBtn, Strings.T("CompactMode"));
-            MoreBtn.ToolTip = Strings.T("MoreOptions");
+            MoreBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("MoreOptions"), TitleBarHotkeys.More);
             AutomationProperties.SetName(MoreBtn, Strings.T("MoreOptions"));
             if (MoreOptionsMenu != null)
             {
@@ -3282,9 +3295,8 @@ public partial class MainWindow : Window
                 MoreAboutItem.Header = Strings.T("AboutCyberManager");
                 MoreExitItem.Header = Strings.T("Exit");
             }
-            MinimizeBtn.ToolTip = Strings.T("Minimize");
-            MaximizeBtn.ToolTip = Strings.T("Maximize");
-            CloseBtn.ToolTip = Strings.T("Close");
+            MinimizeBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Minimize"), TitleBarHotkeys.Minimize);
+            CloseBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Close"), TitleBarHotkeys.Close);
             UpdateMaximizeButtonIcon();
             StatsBorder.ToolTip = Strings.T("OpenSystemInfoTip");
             AutomationProperties.SetName(StatsBorder, Strings.T("SystemInformation"));
@@ -3369,14 +3381,14 @@ public partial class MainWindow : Window
 
         if (WorkAreaMaximize.IsFilled(this) || WindowState == WindowState.Maximized)
         {
-            MaximizeBtn.ToolTip = Strings.T("Restore");
+            MaximizeBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Restore"), TitleBarHotkeys.Maximize);
             AutomationProperties.SetName(MaximizeBtn, Strings.T("Restore"));
             MaximizeIconPath.Data = Geometry.Parse(
                 "M 6 2 L 6 6 L 2 6 M 6 6 L 2.5 2.5 M 8 12 L 8 8 L 12 8 M 8 8 L 11.5 11.5");
         }
         else
         {
-            MaximizeBtn.ToolTip = Strings.T("Maximize");
+            MaximizeBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Maximize"), TitleBarHotkeys.Maximize);
             AutomationProperties.SetName(MaximizeBtn, Strings.T("Maximize"));
             MaximizeIconPath.Data = Geometry.Parse(
                 "M 3 7 L 3 3 L 7 3 M 3 3 L 6.5 6.5 M 11 7 L 11 11 L 7 11 M 11 11 L 7.5 7.5");
@@ -3400,6 +3412,58 @@ public partial class MainWindow : Window
 
     private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        var key = e.Key == Key.System ? e.SystemKey : e.Key;
+        var modifiers = Keyboard.Modifiers;
+
+        if (modifiers == ModifierKeys.Alt && key == Key.M)
+        {
+            e.Handled = true;
+            ToggleMoreMenu(_isCompactMode ? CompactView.MoreButton : MoreBtn);
+            return;
+        }
+
+        if (modifiers == ModifierKeys.None && key == Key.F1)
+        {
+            e.Handled = true;
+            About_Click(this, new RoutedEventArgs());
+            return;
+        }
+
+        if (modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && key == Key.U)
+        {
+            e.Handled = true;
+            UpdatePill_UpdateRequested(UpdatePill, EventArgs.Empty);
+            return;
+        }
+
+        if (modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && key == Key.P)
+        {
+            e.Handled = true;
+            CompactView_PinRequested(CompactView, new RoutedEventArgs());
+            return;
+        }
+
+        if (modifiers == (ModifierKeys.Control | ModifierKeys.Alt) && key == Key.Down)
+        {
+            e.Handled = true;
+            Minimize_Click(this, new RoutedEventArgs());
+            return;
+        }
+
+        if (modifiers == (ModifierKeys.Control | ModifierKeys.Alt) && key == Key.Up)
+        {
+            e.Handled = true;
+            Maximize_Click(this, new RoutedEventArgs());
+            return;
+        }
+
+        if (modifiers == ModifierKeys.Alt && key == Key.F4)
+        {
+            e.Handled = true;
+            Close_Click(this, new RoutedEventArgs());
+            return;
+        }
+
         if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.M)
         {
             e.Handled = true;
