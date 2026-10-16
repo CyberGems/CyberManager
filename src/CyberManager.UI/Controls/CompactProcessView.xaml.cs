@@ -380,6 +380,8 @@ public partial class CompactProcessView : UserControl
     private int _cachedAppsCount;
     private int _cachedBgCount;
     private ProcessCategoryFilter _currentCategoryFilter = ProcessCategoryFilter.All;
+    private DateTime _categoryFilterMenuDismissedAtUtc = DateTime.MinValue;
+    private static readonly TimeSpan CategoryMenuReopenGuard = TimeSpan.FromMilliseconds(400);
 
     public void UpdateCategoryFilterState(ProcessCategoryFilter filter, int totalCount, int appsCount, int bgCount)
     {
@@ -388,19 +390,9 @@ public partial class CompactProcessView : UserControl
         _cachedAppsCount = appsCount;
         _cachedBgCount = bgCount;
 
-        var isActive = filter != ProcessCategoryFilter.All;
         if (CategoryFilterButton != null)
         {
-            if (isActive)
-            {
-                CategoryFilterButton.Background = TryFindResource("AccentGlowBrush") as Brush ?? new SolidColorBrush(Color.FromArgb(0x22, 0x10, 0xB9, 0x81));
-                CategoryFilterButton.Foreground = TryFindResource("AccentBrush") as Brush;
-            }
-            else
-            {
-                CategoryFilterButton.ClearValue(Button.BackgroundProperty);
-                CategoryFilterButton.ClearValue(Button.ForegroundProperty);
-            }
+            CategoryFilterButton.Tag = filter != ProcessCategoryFilter.All ? "Active" : null;
         }
 
         UpdateCategoryFilterToolTip();
@@ -420,14 +412,48 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(CategoryFilterButton, $"{Strings.T("CategoryFilter")}: {tipText}");
     }
 
+    private void CategoryFilterContextMenu_Opened(object sender, RoutedEventArgs e)
+    {
+        _categoryFilterMenuDismissedAtUtc = DateTime.MinValue;
+        if (sender is not ContextMenu menu) return;
+
+        Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
+        {
+            if (!menu.IsOpen) return;
+            var firstItem = menu.Items.OfType<MenuItem>()
+                .FirstOrDefault(item => item.IsEnabled && item.Visibility == Visibility.Visible);
+            if (firstItem is not null) Keyboard.Focus(firstItem);
+        }));
+    }
+
+    private void CategoryFilterContextMenu_Closed(object sender, RoutedEventArgs e)
+    {
+        if (Mouse.LeftButton == MouseButtonState.Pressed)
+        {
+            _categoryFilterMenuDismissedAtUtc = DateTime.UtcNow;
+        }
+    }
+
     private void CategoryFilterButton_Click(object sender, RoutedEventArgs e)
     {
-        var menu = new ContextMenu
+        if (CategoryFilterContextMenu == null) return;
+
+        if (CategoryFilterContextMenu.IsOpen || DateTime.UtcNow - _categoryFilterMenuDismissedAtUtc < CategoryMenuReopenGuard)
         {
-            PlacementTarget = CategoryFilterButton,
-            Placement = PlacementMode.Bottom,
-            Style = TryFindResource("ModernContextMenu") as Style
-        };
+            _categoryFilterMenuDismissedAtUtc = DateTime.MinValue;
+            CategoryFilterContextMenu.IsOpen = false;
+            return;
+        }
+
+        PopulateCategoryFilterMenu();
+        CategoryFilterContextMenu.PlacementTarget = CategoryFilterButton;
+        CategoryFilterContextMenu.Placement = PlacementMode.Bottom;
+        CategoryFilterContextMenu.IsOpen = true;
+    }
+
+    private void PopulateCategoryFilterMenu()
+    {
+        CategoryFilterContextMenu.Items.Clear();
 
         var allItem = new MenuItem
         {
@@ -437,7 +463,7 @@ public partial class CompactProcessView : UserControl
             Style = TryFindResource("ModernMenuItem") as Style
         };
         allItem.Click += (_, _) => CategoryFilterChanged?.Invoke(this, ProcessCategoryFilter.All);
-        menu.Items.Add(allItem);
+        CategoryFilterContextMenu.Items.Add(allItem);
 
         var appsItem = new MenuItem
         {
@@ -447,7 +473,7 @@ public partial class CompactProcessView : UserControl
             Style = TryFindResource("ModernMenuItem") as Style
         };
         appsItem.Click += (_, _) => CategoryFilterChanged?.Invoke(this, ProcessCategoryFilter.Applications);
-        menu.Items.Add(appsItem);
+        CategoryFilterContextMenu.Items.Add(appsItem);
 
         var bgItem = new MenuItem
         {
@@ -457,9 +483,7 @@ public partial class CompactProcessView : UserControl
             Style = TryFindResource("ModernMenuItem") as Style
         };
         bgItem.Click += (_, _) => CategoryFilterChanged?.Invoke(this, ProcessCategoryFilter.Background);
-        menu.Items.Add(bgItem);
-
-        menu.IsOpen = true;
+        CategoryFilterContextMenu.Items.Add(bgItem);
     }
 
     public void SetPinned(bool pinned)

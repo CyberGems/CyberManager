@@ -224,6 +224,10 @@
                                 <Setter Property="Opacity" Value="0.4"/>
                                 <Setter Property="Cursor" Value="Arrow"/>
                             </Trigger>
+                            <Trigger Property="Tag" Value="Active">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentGlowBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
                             <!-- Keep the icon highlighted while its own context menu is open, so the
                                  menu never looks detached from the button it belongs to. -->
                             <DataTrigger Binding="{Binding ContextMenu.IsOpen, RelativeSource={RelativeSource Self}, FallbackValue=False}" Value="True">
@@ -655,6 +659,12 @@
                           Height="13"
                           Stretch="Uniform"
                           Fill="Transparent"/>
+                    <Button.ContextMenu>
+                        <ContextMenu x:Name="CategoryFilterContextMenu"
+                                     Style="{DynamicResource ModernContextMenu}"
+                                     Opened="CategoryFilterContextMenu_Opened"
+                                     Closed="CategoryFilterContextMenu_Closed"/>
+                    </Button.ContextMenu>
                 </Button>
 
                 <Button x:Name="EndTaskButton"
