@@ -21,7 +21,7 @@ public partial class AboutWindow : Window, IModalAttentionWindow
     private const string WikiUrl = "https://github.com/CyberGems/CyberManager/wiki";
     private const string DonateUrl = "https://github.com/CyberGems/CyberManager#%EF%B8%8F-donate";
 
-    private const double SuiteIdleOpacity = 0.38;
+    private const double SuiteIdleOpacity = 0.7;
     private const double MonitorEdgeMargin = 16;
 
     private bool _suppressAutoCheckUpdateChange;
@@ -331,8 +331,8 @@ public partial class AboutWindow : Window, IModalAttentionWindow
 
             var image = new System.Windows.Controls.Image
             {
-                Width = 30,
-                Height = 30,
+                Width = 28,
+                Height = 28,
                 Stretch = Stretch.Uniform,
                 Opacity = SuiteIdleOpacity,
                 IsHitTestVisible = false,
