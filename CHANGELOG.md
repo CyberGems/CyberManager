@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-16
+
+### Added
+- **Status Column and Exit Highlighting**: A dedicated Status column displays live process lifecycle state ("Running", "Exiting", "Exited") paired with a soft animated crimson fade highlight when a process terminates.
+- **New Process Entry Highlighting**: Newly spawned processes appear with a soft animated emerald fade highlight across both Full and Compact views.
+- **User Name Column**: Optional process owner column displaying the user account running each process via secure token inspection, supported by user-based search and filtering.
+- **Category Filter**: Category chips in Full mode and dropdown filter in Compact mode allow filtering processes by All, Apps, Background, and Windows services.
+- **Glassmorphic Context Menu**: Modernized process row context menu with native Windows Acrylic blur, refined translucency, centered hairline separators, and a high-contrast target header card with PID pill badge.
+- **Ergonomic Action Hierarchy**: Primary actions ("End Task" and "End Process Tree") are positioned directly under the mouse cursor for instant access, while Process Properties is neatly placed at the bottom.
+
+### Fixed
+- **Multi-Process App Grouping**: Process tree grouping now properly groups helper processes and WebView2 runtimes under the parent application even when child workers have slightly earlier start timestamps.
+- **Compact Category Dropdown**: The category filter button remains highlighted while its dropdown is open and toggles closed cleanly on second click.
+
 ## [1.6.0] - 2026-10-16
 
 ### Added
@@ -132,7 +146,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory leak in icon generation** — Fixed `Icon.FromHandle` handle leak by properly destroying the original handle after cloning.
 - **Double-click kills process** — Removed dangerous double-click-to-kill behavior.
 
-[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/CyberGems/CyberManager/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/CyberGems/CyberManager/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/CyberGems/CyberManager/compare/v1.5.0...v1.5.2
 [1.5.0]: https://github.com/CyberGems/CyberManager/compare/v1.4.0...v1.5.0

@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-Monitor disk activity across all drives or a selected disk, jump to live graphs from activity LEDs, and launch tasks with reusable command history. New shortcuts, shortcut badges, roomier settings, and a compact About dialog make navigation more consistent.
+Filter processes by category, inspect process owner user names, and track lifecycle transitions with animated entry highlights and a dedicated Status column. A modernized context menu features native acrylic blur, centered hairline dividers, and instant access to End Task.
 <!-- changelog-summary:end -->
 
 > **New to CyberManager?** A lightweight Windows task manager with instant search, process insight, and a focused compact mode.
@@ -17,54 +17,48 @@ Monitor disk activity across all drives or a selected disk, jump to live graphs 
 
 ### ✨ Key Features & Highlights
 
-- 💽 **Disk Activity and Performance**:
-  - A new Disks tab shows all physical disks combined or an individual disk, with active-time and read/write histories, transfer rates, response time, queue length, and session byte totals.
-  - Samples arrive every 500 ms independently of process refresh. Combined active time is averaged; transfer rates and byte totals are summed.
-  - Live LEDs in Full mode, Compact mode, and the floating widget show reads in green, writes in red, and both in amber. Click an LED or press `Ctrl+4` to open the disk view.
+- 🏷️ **Category Filters and Process User Names**:
+  - Filter processes instantly by category chips (All, Apps, Background, Windows) in Full mode, and via a dedicated dropdown menu in Compact mode.
+  - Inspect process owner accounts directly with the optional User name column, supported by user-based search and filtering.
 
-- ➕ **Run New Task with History**:
-  - Use the plus button beside process actions in either layout, or press `Ctrl+N`, to open programs, folders, documents, and URLs. Arguments and environment variables are supported.
-  - Choose a file with Browse, starting in Program Files, or request administrator privileges when needed.
-  - Reuse the last 20 successful open requests, remove individual entries, or clear the history. Failed and cancelled requests are not saved, and elevation is not remembered.
+- 🔴 **Lifecycle State and Animated Fade Highlights**:
+  - Dedicated Status column displays live process lifecycle state ("Running", "Exiting", "Exited").
+  - Smooth animated crimson fade highlight when a process exits, and soft animated emerald fade highlight when new processes spawn.
 
-- ⌨️ **Keyboard Navigation and Shortcut Badges**:
-  - Title-bar controls, including branding, expose keyboard shortcuts in both layouts. `Alt+M` opens More with the first item focused so you can continue with the arrow keys.
-  - Tooltips show keyboard hints in badges, and dialogs use consistent, centered Enter and Esc hints.
+- 🪟 **Modernized Glassmorphic Context Menu**:
+  - Process row context menu redesigned with native Windows Acrylic blur, refined translucency, and centered hairline dividers.
+  - Primary actions ("End Task" and "End Process Tree") sit directly under the mouse cursor for instant access, with Process Properties placed at the bottom.
+  - Crisp header card highlights the target process name, icon, and PID pill badge.
 
-- 🪟 **More Comfortable Layouts**:
-  - Settings uses more of the available width and larger text at the default window size.
-  - About uses a compact layout integrated with the main window while retaining update actions and links.
-  - Update prompts distinguish installed and available versions, and opening disk performance from the widget restores a minimized main window.
+- 🌳 **Multi-Process Tree Grouping**:
+  - Enhanced grouping correctly associates helper processes and WebView2 runtimes under the parent application even when child workers have earlier start timestamps.
 
 <details>
 <summary><b>🌐 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Observa la actividad de todos los discos o de uno en particular, abre sus gráficas desde los LED y ejecuta tareas con un historial reutilizable. Los nuevos atajos y badges, una Configuración más amplia y un Acerca de compacto facilitan la navegación.
+Filtra procesos por categorías, consulta el usuario propietario y sigue el ciclo de vida con resaltados animados y una columna de Estado. El menú contextual modernizado incorpora desenfoque acrílico nativo, separadores centrados y acceso inmediato a Finalizar tarea.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 💽 **Actividad y rendimiento de discos**:
-  - La nueva pestaña Discos muestra todos los discos físicos combinados o uno individual, con historiales de actividad y lectura/escritura, velocidades, tiempo de respuesta, cola y totales de bytes de la sesión.
-  - Las muestras se toman cada 500 ms, independientemente de los procesos. El tiempo activo combinado es un promedio; las velocidades y los totales de bytes se suman.
-  - Los LED de los modos Completo, Compacto y el widget muestran lectura en verde, escritura en rojo y ambas en ámbar. Pulsa un LED o `Ctrl+4` para abrir la sección.
+- 🏷️ **Filtro de categorías y columna de usuario**:
+  - Filtra procesos al instante mediante chips de categorías (Todos, Aplicaciones, Segundo plano, Windows) en modo Completo y mediante un menú desplegable en modo Compacto.
+  - Consulta qué usuario ejecuta cada proceso con la nueva columna Nombre de usuario, compatible con búsquedas y filtros.
 
-- ➕ **Ejecutar nueva tarea con historial**:
-  - Usa el botón de suma junto a las acciones de Procesos, en ambos modos, o `Ctrl+N` para abrir programas, carpetas, documentos y URL. Admite argumentos y variables de entorno.
-  - El selector de archivos abre Archivos de programa; la opción de administrador solicita permisos cuando hace falta.
-  - Reutiliza las últimas 20 solicitudes de apertura correctas, elimina una entrada o vacía el historial. Las solicitudes fallidas o canceladas no se guardan y la elevación no se recuerda.
+- 🔴 **Estado del ciclo de vida y resaltados con fade**:
+  - Nueva columna Estado ("En ejecución", "Saliendo", "Finalizado").
+  - Suave animación de desvanecimiento carmesí al terminar un proceso y resaltado esmeralda al crearse nuevos procesos.
 
-- ⌨️ **Navegación por teclado y badges**:
-  - Los controles de la barra de título, incluido el branding, tienen atajos en ambos modos. `Alt+M` abre More con el primer elemento enfocado para continuar con las flechas.
-  - Los tooltips muestran los atajos dentro de badges; los diálogos comparten hints Enter y Esc centrados.
+- 🪟 **Menú contextual glassmorphic modernizado**:
+  - Menú contextual con desenfoque Acrylic nativo de Windows, mayor translucidez y separadores centrados ultra-finos.
+  - Acciones principales ("Finalizar tarea" y "Finalizar árbol") ubicadas justo bajo el cursor para acceso inmediato, con Propiedades al final.
+  - Tarjeta de encabezado con nombre del proceso, icono nítido y pastilla badge para el PID.
 
-- 🪟 **Distribución más cómoda**:
-  - Configuración aprovecha mejor el ancho y aumenta el tamaño del texto en la ventana predeterminada.
-  - Acerca de utiliza un diseño compacto e integrado y conserva los enlaces y las acciones de actualización.
-  - Los avisos de actualización distinguen las versiones instalada y disponible; abrir Discos desde el widget restaura la ventana principal minimizada.
+- 🌳 **Agrupación de aplicaciones multiproceso**:
+  - Agrupación mejorada para asociar procesos auxiliares y runtimes de WebView2 bajo la aplicación principal, incluso cuando los procesos hijos reportan marcas de tiempo iniciales anteriores.
 
 </details>
 
