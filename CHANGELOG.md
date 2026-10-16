@@ -7,13 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-16
+
 ### Added
 - **Run New Task**: A plus button on the Full and Compact process toolbars and `Ctrl+N` open an integrated launch dialog for programs, arguments, folders, documents, and URLs. Includes a file picker, optional administrator privileges, and a persistent 20-command history with individual removal and clear-history actions. Failed or cancelled requests are not saved.
 - **Disk Monitoring**: Performance gains a Disks tab with combined and per-physical-disk activity, read/write histories, transfer rates, latency, queue length, and session byte totals from native Windows performance counters. A live activity LED in Full/Compact layouts and the floating widget opens this view, also available through `Ctrl+4`.
+- **Title-Bar Shortcuts**: Branding, navigation, More, update, pin, and window controls have keyboard shortcuts in both layouts. `Alt+M` opens More with the first item focused for arrow-key navigation.
 
 ### Changed
 - **Update Prompts**: A download icon, separate installed/available version cards, and a clearer layout replace the generic warning-style update modal in all update entry points.
 - **Dialog Keyboard Hints**: Confirmation, process properties, and close-window dialogs share centered vector Enter badges, with consistent shortcut chips across themes.
+- **Shortcut Tooltips**: Keyboard hints use the suite's badge presentation instead of plain text.
+- **Settings Layout**: Wider content and larger text make better use of the default window size.
+- **About Window**: A compact, integrated layout fits the default main window, with updates, app recommendations, and footer links preserved.
+
+### Fixed
+- **New Task Dialog**: Browse starts in Program Files, shortcuts retain their target arguments, and the Esc badge is centered.
+- **Disk Navigation**: Opening disk performance from the floating widget also restores a minimized main window.
 
 ## [1.5.2] - 2026-10-15
 
@@ -122,7 +132,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory leak in icon generation** — Fixed `Icon.FromHandle` handle leak by properly destroying the original handle after cloning.
 - **Double-click kills process** — Removed dangerous double-click-to-kill behavior.
 
-[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/CyberGems/CyberManager/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/CyberGems/CyberManager/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/CyberGems/CyberManager/compare/v1.5.0...v1.5.2
 [1.5.0]: https://github.com/CyberGems/CyberManager/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/CyberGems/CyberManager/compare/v1.3.0...v1.4.0

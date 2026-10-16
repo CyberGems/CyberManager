@@ -8,7 +8,7 @@
 
 <!-- Maintainer: Rewrite the marked paragraph for every release. Use 25-45 words, lead with user-facing changes, and do not repeat the app name or version. -->
 <!-- changelog-summary:start -->
-Scroll process lists with fewer stalls and less row flicker, and watch metric histories move smoothly between samples. Launching the app again now restores the existing window, while background icon loading and cached graph drawings keep the interface responsive.
+Monitor disk activity across all drives or a selected disk, jump to live graphs from activity LEDs, and launch tasks with reusable command history. New shortcuts, shortcut badges, roomier settings, and a compact About dialog make navigation more consistent.
 <!-- changelog-summary:end -->
 
 > **New to CyberManager?** A lightweight Windows task manager with instant search, process insight, and a focused compact mode.
@@ -17,40 +17,54 @@ Scroll process lists with fewer stalls and less row flicker, and watch metric hi
 
 ### ✨ Key Features & Highlights
 
-- 📜 **Smoother Process Lists**:
-  - Background icon loading updates individual images instead of refreshing the whole list, reducing stalls as new rows appear.
-  - Animated scrollbar-arrow movement reduces row flicker in Full and Compact modes and yields immediately to wheel, keyboard, and thumb input.
+- 💽 **Disk Activity and Performance**:
+  - A new Disks tab shows all physical disks combined or an individual disk, with active-time and read/write histories, transfer rates, response time, queue length, and session byte totals.
+  - Samples arrive every 500 ms independently of process refresh. Combined active time is averaged; transfer rates and byte totals are summed.
+  - Live LEDs in Full mode, Compact mode, and the floating widget show reads in green, writes in red, and both in amber. Click an LED or press `Ctrl+4` to open the disk view.
 
-- 📊 **Animated Metric Histories**:
-  - CPU, memory, and system activity graphs move smoothly between actual samples across the main window, Performance views, system information window, and floating widget.
-  - The sampling interval is unchanged. Animation pauses when graphs are hidden or their windows are minimized, and respects Windows animation settings.
+- ➕ **Run New Task with History**:
+  - Use the plus button beside process actions in either layout, or press `Ctrl+N`, to open programs, folders, documents, and URLs. Arguments and environment variables are supported.
+  - Choose a file with Browse, starting in Program Files, or request administrator privileges when needed.
+  - Reuse the last 20 successful open requests, remove individual entries, or clear the history. Failed and cancelled requests are not saved, and elevation is not remembered.
 
-- 🪟 **One Instance per Session**:
-  - Opening the app again restores the existing window instead of starting another copy.
-  - Removed a stray separator beside the title-bar close button.
+- ⌨️ **Keyboard Navigation and Shortcut Badges**:
+  - Title-bar controls, including branding, expose keyboard shortcuts in both layouts. `Alt+M` opens More with the first item focused so you can continue with the arrow keys.
+  - Tooltips show keyboard hints in badges, and dialogs use consistent, centered Enter and Esc hints.
+
+- 🪟 **More Comfortable Layouts**:
+  - Settings uses more of the available width and larger text at the default window size.
+  - About uses a compact layout integrated with the main window while retaining update actions and links.
+  - Update prompts distinguish installed and available versions, and opening disk performance from the widget restores a minimized main window.
 
 <details>
 <summary><b>🌐 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-Recorre las listas de procesos con menos pausas y parpadeos entre filas, y observa cómo los gráficos avanzan suavemente entre muestras. Al abrir la aplicación de nuevo se restaura la ventana existente; la carga de iconos en segundo plano y los dibujos de gráficos en caché mantienen la interfaz ágil.
+Observa la actividad de todos los discos o de uno en particular, abre sus gráficas desde los LED y ejecuta tareas con un historial reutilizable. Los nuevos atajos y badges, una Configuración más amplia y un Acerca de compacto facilitan la navegación.
 
 ---
 
 ### ✨ Novedades destacadas
 
-- 📜 **Listas de procesos más fluidas**:
-  - Los iconos se cargan en segundo plano y actualizan solo su imagen, reduciendo las pausas al mostrar nuevas filas.
-  - El movimiento animado de las flechas de la barra de desplazamiento reduce el parpadeo en los modos Completo y Compacto y cede de inmediato ante la rueda, el teclado o el cabezal.
+- 💽 **Actividad y rendimiento de discos**:
+  - La nueva pestaña Discos muestra todos los discos físicos combinados o uno individual, con historiales de actividad y lectura/escritura, velocidades, tiempo de respuesta, cola y totales de bytes de la sesión.
+  - Las muestras se toman cada 500 ms, independientemente de los procesos. El tiempo activo combinado es un promedio; las velocidades y los totales de bytes se suman.
+  - Los LED de los modos Completo, Compacto y el widget muestran lectura en verde, escritura en rojo y ambas en ámbar. Pulsa un LED o `Ctrl+4` para abrir la sección.
 
-- 📊 **Historiales de métricas animados**:
-  - Los gráficos de CPU, memoria y actividad del sistema avanzan suavemente entre muestras reales en la ventana principal, Rendimiento, información del sistema y el widget flotante.
-  - Se conserva el intervalo de muestreo. La animación se pausa cuando el gráfico está oculto o su ventana está minimizada, y respeta la configuración de animaciones de Windows.
+- ➕ **Ejecutar nueva tarea con historial**:
+  - Usa el botón de suma junto a las acciones de Procesos, en ambos modos, o `Ctrl+N` para abrir programas, carpetas, documentos y URL. Admite argumentos y variables de entorno.
+  - El selector de archivos abre Archivos de programa; la opción de administrador solicita permisos cuando hace falta.
+  - Reutiliza las últimas 20 solicitudes de apertura correctas, elimina una entrada o vacía el historial. Las solicitudes fallidas o canceladas no se guardan y la elevación no se recuerda.
 
-- 🪟 **Una instancia por sesión**:
-  - Al abrir la aplicación de nuevo se restaura la ventana existente en lugar de iniciar otra copia.
-  - Se eliminó un separador sobrante junto al botón de cierre de la barra de título.
+- ⌨️ **Navegación por teclado y badges**:
+  - Los controles de la barra de título, incluido el branding, tienen atajos en ambos modos. `Alt+M` abre More con el primer elemento enfocado para continuar con las flechas.
+  - Los tooltips muestran los atajos dentro de badges; los diálogos comparten hints Enter y Esc centrados.
+
+- 🪟 **Distribución más cómoda**:
+  - Configuración aprovecha mejor el ancho y aumenta el tamaño del texto en la ventana predeterminada.
+  - Acerca de utiliza un diseño compacto e integrado y conserva los enlaces y las acciones de actualización.
+  - Los avisos de actualización distinguen las versiones instalada y disponible; abrir Discos desde el widget restaura la ventana principal minimizada.
 
 </details>
 
