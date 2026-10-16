@@ -27,6 +27,13 @@ public class AppSettingsTests
     }
 
     [Fact]
+    public void AppSettings_DefaultHighlightNewProcesses_IsTrue()
+    {
+        var settings = new AppSettings();
+        Assert.True(settings.HighlightNewProcesses);
+    }
+
+    [Fact]
     public void AppSettings_DefaultSorting_IsDescendingCpu()
     {
         var settings = new AppSettings();

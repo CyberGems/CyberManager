@@ -319,6 +319,8 @@ public static class Strings
         ["GroupByAppDesc"] = ("Combines multiple instances of the same app under an expandable hierarchy.", "Agrupa múltiples instancias de una aplicación bajo un encabezado jerárquico expandible."),
         ["HighlightSuspendedTitle"] = ("Dim suspended processes", "Atenuar procesos suspendidos"),
         ["HighlightSuspendedDesc"] = ("Visually dims suspended or energy-saving background processes.", "Distingue visualmente con menor opacidad los procesos suspendidos o en ahorro de energía."),
+        ["HighlightNewProcessesTitle"] = ("Highlight new processes", "Resaltar procesos nuevos"),
+        ["HighlightNewProcessesDesc"] = ("Briefly highlights new processes entering the system with a soft fade.", "Resalta brevemente con un destello suave los procesos nuevos que entran al sistema."),
         ["HideSystemProcessesTitle"] = ("Hide system processes", "Ocultar procesos del sistema"),
         ["HideSystemProcessesDesc"] = ("Hides Windows system processes (kernel tasks, drivers and Windows system images) while keeping your applications and the desktop shell.", "Oculta los procesos del sistema de Windows (tareas del kernel, controladores e imágenes del sistema) manteniendo tus aplicaciones y el shell de escritorio."),
         ["RefreshIntervalTitle"] = ("Refresh Rate", "Frecuencia de actualización"),

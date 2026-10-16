@@ -336,6 +336,41 @@ public class ProcessListViewModelTests
         Assert.Equal(10.5, result[0].CpuPercent);
     }
 
+    [Fact]
+    public void Grouping_PropagatesIsNewlyCreatedToParent()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo
+            {
+                Pid = 100,
+                Name = "app.exe",
+                IsNewlyCreated = false
+            },
+            new ProcessInfo
+            {
+                Pid = 101,
+                Name = "app.exe",
+                IsNewlyCreated = true
+            }
+        };
+
+        var query = new ProcessListQuery(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: true,
+            DimSuspended: true,
+            SortColumn: "Name",
+            SortDirection: ListSortDirection.Ascending,
+            ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        var result = ProcessListViewModel.Build(processes, query);
+
+        Assert.Single(result);
+        Assert.True(result[0].IsGroupParent);
+        Assert.True(result[0].IsNewlyCreated);
+    }
+
     private static ProcessListQuery CreateSystemFilterQuery(bool hideSystemProcesses) =>
         new(
             Search: "",

@@ -357,6 +357,25 @@
 
                         <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,4,0,8"/>
 
+                        <!-- HIGHLIGHT NEW PROCESSES -->
+                        <Grid Margin="0,4,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Width="32" Height="32" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                <Path Data="M 12 3 L 14.5 9 L 21 9.5 L 16 14 L 17.5 20.5 L 12 17 L 6.5 20.5 L 8 14 L 3 9.5 L 9.5 9 Z" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                <TextBlock x:Name="HighlightNewProcessesTitleLbl" Text="Resaltar procesos nuevos" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="HighlightNewProcessesDescLbl" Text="Resalta brevemente con un destello suave los procesos nuevos que entran al sistema." FontSize="13" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <CheckBox x:Name="HighlightNewProcessesSwitch" Grid.Column="2" AutomationProperties.Name="Highlight new processes" Style="{StaticResource ModernToggleSwitch}" VerticalAlignment="Center" Checked="SettingChanged" Unchecked="SettingChanged"/>
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,4,0,8"/>
+
                         <!-- HIDE SYSTEM PROCESSES -->
                         <Grid Margin="0,4,0,4">
                             <Grid.ColumnDefinitions>

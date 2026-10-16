@@ -26,6 +26,7 @@ public sealed class AppSettings
     public bool GroupProcesses { get; set; } = true;
     public double RowFontSize { get; set; } = 13.0;
     public bool ShowSuspended { get; set; } = true;
+    public bool HighlightNewProcesses { get; set; } = true;
     public bool HideSystemProcesses { get; set; }
     public bool HeavyProcessesOnly { get; set; }
     /// <summary>

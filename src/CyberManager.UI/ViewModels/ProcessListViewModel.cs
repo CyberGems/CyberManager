@@ -144,6 +144,7 @@ public sealed class ProcessListViewModel
                 IsExpanded = query.ExpandedGroups.Contains(group.Key),
                 InstanceCount = processes.Count,
                 DimWhenSuspended = query.DimSuspended && processes.All(process => process.Status == "Suspended"),
+                IsNewlyCreated = processes.Any(process => process.IsNewlyCreated),
                 Children = processes.OrderByDescending(process => process.HasWindow)
                     .ThenByDescending(process => process.CpuPercent)
                     .ThenByDescending(process => process.WorkingSetBytes)
@@ -335,6 +336,7 @@ public sealed class ProcessListViewModel
         target.InstanceCount = source.InstanceCount;
         target.Children = source.Children;
         target.DimWhenSuspended = source.DimWhenSuspended;
+        target.IsNewlyCreated = source.IsNewlyCreated;
     }
 
     private static ProcessInfo FindRootProcess(

@@ -126,6 +126,9 @@ public partial class MainWindow : Window
     private readonly ProcessListViewModel _processList = new();
     private readonly HashSet<string> _expandedGroups = new(StringComparer.OrdinalIgnoreCase);
     private readonly System.Collections.Concurrent.ConcurrentDictionary<int, DateTime> _terminatedPids = new();
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<ProcessIdentity, DateTime> _newProcessHighlights = new();
+    private readonly HashSet<ProcessIdentity> _knownProcesses = new();
+    private bool _hasInitializedKnownProcesses;
     private readonly GlobalHotkeyService _hotkeyService = new();
     private readonly TrayIconService _trayService = new();
     private FloatingMetricsWindow? _metricsWidget;
@@ -921,8 +924,48 @@ public partial class MainWindow : Window
                     if (kv.Value < now) _terminatedPids.TryRemove(kv.Key, out _);
                 }
 
+                foreach (var kv in _newProcessHighlights)
+                {
+                    if (kv.Value < now) _newProcessHighlights.TryRemove(kv.Key, out _);
+                }
+
                 var data = await _collector.CollectAsync(cancellationToken);
                 _all = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
+
+                if (!_hasInitializedKnownProcesses)
+                {
+                    foreach (var p in _all)
+                    {
+                        _knownProcesses.Add(new ProcessIdentity(p.Pid, p.StartTime));
+                    }
+                    _hasInitializedKnownProcesses = true;
+                }
+                else
+                {
+                    var currentIdentities = new HashSet<ProcessIdentity>(_all.Count);
+                    foreach (var p in _all)
+                    {
+                        var identity = new ProcessIdentity(p.Pid, p.StartTime);
+                        currentIdentities.Add(identity);
+
+                        if (!_knownProcesses.Contains(identity))
+                        {
+                            if (App.Settings.HighlightNewProcesses && p.Pid > 4)
+                            {
+                                _newProcessHighlights[identity] = now.AddSeconds(2.0);
+                            }
+                            _knownProcesses.Add(identity);
+                        }
+
+                        if (_newProcessHighlights.TryGetValue(identity, out var expires) && expires > now)
+                        {
+                            p.IsNewlyCreated = true;
+                        }
+                    }
+
+                    _knownProcesses.RemoveWhere(id => !currentIdentities.Contains(id));
+                }
+
                 _lastLoadError = null;
                 _hasLoadedOnce = true;
                 ApplySortingAndFilter();

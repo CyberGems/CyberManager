@@ -63,6 +63,7 @@ public partial class SettingsView : UserControl
         ShowIdleSwitch.IsChecked = App.Settings.ShowIdleProcess;
         GroupByAppSwitch.IsChecked = App.Settings.GroupProcesses;
         HighlightSuspendedSwitch.IsChecked = App.Settings.ShowSuspended;
+        HighlightNewProcessesSwitch.IsChecked = App.Settings.HighlightNewProcesses;
         HideSystemSwitch.IsChecked = App.Settings.HideSystemProcesses;
 
         // Language
@@ -113,6 +114,7 @@ public partial class SettingsView : UserControl
         App.Settings.ShowIdleProcess = ShowIdleSwitch.IsChecked == true;
         App.Settings.GroupProcesses = GroupByAppSwitch.IsChecked == true;
         App.Settings.ShowSuspended = HighlightSuspendedSwitch.IsChecked == true;
+        App.Settings.HighlightNewProcesses = HighlightNewProcessesSwitch.IsChecked == true;
         App.Settings.HideSystemProcesses = HideSystemSwitch.IsChecked == true;
         App.Settings.StartWithWindows = StartWithWinSwitch.IsChecked == true;
         App.Settings.MinimizeToTrayOnMinimize = MinimizeToTrayOnMinimizeSwitch.IsChecked == true;
@@ -406,6 +408,8 @@ public partial class SettingsView : UserControl
         GroupByAppDescLbl.Text = Strings.T("GroupByAppDesc");
         HighlightSuspendedTitleLbl.Text = Strings.T("HighlightSuspendedTitle");
         HighlightSuspendedDescLbl.Text = Strings.T("HighlightSuspendedDesc");
+        HighlightNewProcessesTitleLbl.Text = Strings.T("HighlightNewProcessesTitle");
+        HighlightNewProcessesDescLbl.Text = Strings.T("HighlightNewProcessesDesc");
         HideSystemTitleLbl.Text = Strings.T("HideSystemProcessesTitle");
         HideSystemDescLbl.Text = Strings.T("HideSystemProcessesDesc");
 

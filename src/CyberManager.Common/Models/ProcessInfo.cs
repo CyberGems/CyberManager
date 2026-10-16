@@ -29,6 +29,7 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     private List<ProcessInfo> _children = new();
     private bool _dimWhenSuspended;
     private bool _isContextTarget;
+    private bool _isNewlyCreated;
 
     public int Pid
     {
@@ -160,6 +161,7 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     public bool DimWhenSuspended { get => _dimWhenSuspended; set => Set(ref _dimWhenSuspended, value); }
 
     public bool IsContextTarget { get => _isContextTarget; set => Set(ref _isContextTarget, value); }
+    public bool IsNewlyCreated { get => _isNewlyCreated; set => Set(ref _isNewlyCreated, value); }
 
     public string DisplayName
     {

@@ -114,33 +114,51 @@
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="MinHeight" Value="26"/>
             <Setter Property="Height" Value="26"/>
-            <Setter Property="BorderThickness" Value="0"/>
             <!-- Rows must be focusable: this grid uses SelectionUnit=FullRow with non-focusable
                  cells, so the row is the only element that can take keyboard focus. Without it
                  arrow-key navigation silently does nothing. -->
             <Setter Property="Focusable" Value="True"/>
-            <Style.Triggers>
-                <Trigger Property="AlternationIndex" Value="1">
-                    <Setter Property="Background" Value="{DynamicResource GridAltBrush}"/>
-                </Trigger>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
-                </Trigger>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource SelectionBgBrush}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                    <Setter Property="BorderThickness" Value="3,0,0,0"/>
-                </Trigger>
-                <DataTrigger Binding="{Binding IsContextTarget}" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource SelectionBgBrush}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                    <Setter Property="BorderThickness" Value="3,0,0,0"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding DimWhenSuspended}" Value="True">
-                    <Setter Property="Opacity" Value="0.6"/>
-                </DataTrigger>
-            </Style.Triggers>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridRow">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="3,0,0,0">
+                            <Grid>
+                                <Border x:Name="NewHighlightOverlay" Background="#3310B981" Opacity="0" IsHitTestVisible="False"/>
+                                <SelectiveScrollingGrid>
+                                    <SelectiveScrollingGrid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></SelectiveScrollingGrid.ColumnDefinitions>
+                                    <SelectiveScrollingGrid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></SelectiveScrollingGrid.RowDefinitions>
+                                    <DataGridCellsPresenter Grid.Column="1" ItemsPanel="{TemplateBinding ItemsPanel}" SnapsToDevicePixels="True"/>
+                                    <DataGridDetailsPresenter Grid.Column="1" Grid.Row="1" Visibility="{TemplateBinding DetailsVisibility}"/>
+                                    <DataGridRowHeader Grid.RowSpan="2" SelectiveScrollingGrid.SelectiveScrollingOrientation="Vertical" Visibility="{Binding HeadersVisibility, ConverterParameter={x:Static DataGridHeadersVisibility.Row}, Converter={x:Static DataGrid.HeadersVisibilityConverter}, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"/>
+                                </SelectiveScrollingGrid>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="AlternationIndex" Value="1"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource GridAltBrush}"/></Trigger>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionBgBrush}"/><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/></Trigger>
+                            <DataTrigger Binding="{Binding IsContextTarget}" Value="True"><Setter TargetName="Bd" Property="Background" Value="{DynamicResource SelectionBgBrush}"/><Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/></DataTrigger>
+                            <DataTrigger Binding="{Binding DimWhenSuspended}" Value="True"><Setter TargetName="Bd" Property="Opacity" Value="0.6"/></DataTrigger>
+                            <DataTrigger Binding="{Binding IsNewlyCreated}" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#10B981"/>
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="CompactNewHighlightAnim">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="NewHighlightOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             From="1.0" To="0.0"
+                                                             Duration="0:0:2.0"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="CompactNewHighlightAnim"/>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style TargetType="DataGridCell">
