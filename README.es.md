@@ -99,11 +99,13 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 - **Siempre visible**: fija la ventana sobre otras aplicaciones
 - **Inicio automático**: inicio fiable al iniciar sesión en Windows mediante registro de tarea programada, con respaldo en el registro
 - **Actualizaciones automáticas**: comprueba GitHub Releases al iniciar, con progreso de descarga
+- **Navegación por teclado**: los controles de la barra de título y el branding muestran sus atajos en badges; `Alt+M` abre More con el primer elemento enfocado para navegar con las flechas
 
 ### 🎨 Personalización
 - **3 temas**: CyberManager (Obsidiana y Cyan Neón), Dark (Carbón e Índigo), Light (Pizarra y Azul Real)
 - **Tamaño de fuente de fila**: ajustable de 11 a 17 px con vista previa en vivo
 - **Interfaz bilingüe**: interfaz completa en inglés y español
+- **Diálogos integrados**: Configuración más amplia y legible, Acerca de compacto y avisos de actualización que distinguen las versiones instalada y disponible
 - **Chrome sin marco**: esquinas redondeadas de DWM, efectos de fondo Mica y Acrílico
 - **Restablecer valores de fábrica**: restaura todas las preferencias de la aplicación a sus valores predeterminados
 ---
@@ -180,10 +182,18 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | Tecla | Acción | Ámbito |
 |---|---|---|
 | `Alt+Shift+M` | Mostrar/ocultar CyberManager | Global |
+| `Alt+Shift+W` | Mostrar/ocultar el widget de métricas (configurable) | Global |
 | `Ctrl+Shift+M` | Alternar el modo compacto | Aplicación |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Cambiar a Procesos / Rendimiento / Configuración | Aplicación |
 | `Ctrl+4` | Abrir Rendimiento → Discos | Aplicación / Widget |
 | `Ctrl+N` | Ejecutar nueva tarea, con historial reciente | Aplicación |
+| `F1` | Abrir Acerca de (también desde el branding) | Aplicación |
+| `Alt+M` | Abrir More y enfocar el primer elemento; navegar con flechas | Aplicación |
+| `Ctrl+,` | Abrir Configuración | Aplicación |
+| `Ctrl+Shift+U` | Buscar actualizaciones / abrir la actualización disponible | Aplicación |
+| `Ctrl+Shift+P` | Alternar siempre visible | Aplicación |
+| `Ctrl+Alt+Down` / `Ctrl+Alt+Up` | Minimizar / alternar maximización | Aplicación |
+| `Alt+F4` | Cerrar según el comportamiento de bandeja/salida configurado | Aplicación |
 | `Ctrl+F` / `Ctrl+E` | Enfocar el cuadro de búsqueda | Aplicación |
 | `Ctrl+G` | Alternar la agrupación de procesos | Aplicación |
 | `Ctrl+I` | Abrir Información del Sistema | Aplicación |

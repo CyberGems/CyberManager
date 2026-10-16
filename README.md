@@ -99,11 +99,13 @@ Most task managers either freeze under heavy load or bury basic features behind 
 - **Always on Top** — Pin window above other applications
 - **Auto-Start** — Reliable Windows sign-in startup through scheduled task registration with a registry fallback
 - **Auto-Updates** — Check GitHub Releases on startup with download progress
+- **Keyboard Navigation**: Title-bar controls and branding have shortcut badges; `Alt+M` opens More with the first item focused for arrow-key navigation
 
 ### 🎨 Customization
 - **3 Themes** — CyberManager (Obsidian & Soft Cyan), Dark (Charcoal & Indigo), Light (Slate & Royal Blue)
 - **Row Font Size** — Adjustable 11–17px with live preview
 - **Bilingual UI** — Full English and Spanish interface
+- **Integrated Dialogs**: Wider, more readable settings, a compact About window, and update prompts that distinguish installed and available versions
 - **Frameless Chrome** — DWM rounded corners, Mica/Acrylic background effects
 - **Factory Reset** — Restore all application preferences to their defaults
 
@@ -183,10 +185,18 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | Key | Action | Scope |
 |---|---|---|
 | `Alt+Shift+M` | Toggle CyberManager | Global |
+| `Alt+Shift+W` | Show/hide floating metrics widget (configurable) | Global |
 | `Ctrl+Shift+M` | Toggle compact mode | Application |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Switch to Processes / Performance / Settings | Application |
 | `Ctrl+4` | Open Performance → Disks | Application / Widget |
 | `Ctrl+N` | Run new task, with recent-task history | Application |
+| `F1` | Open About (also available from branding) | Application |
+| `Alt+M` | Open More and focus its first item; navigate with arrows | Application |
+| `Ctrl+,` | Open Configuration | Application |
+| `Ctrl+Shift+U` | Check for updates / open available update | Application |
+| `Ctrl+Shift+P` | Toggle always on top | Application |
+| `Ctrl+Alt+Down` / `Ctrl+Alt+Up` | Minimize / toggle maximize | Application |
+| `Alt+F4` | Close window, following the configured tray/exit behavior | Application |
 | `Ctrl+F` / `Ctrl+E` | Focus search box | Application |
 | `Ctrl+G` | Toggle process grouping | Application |
 | `Ctrl+I` | Open System Information | Application |
