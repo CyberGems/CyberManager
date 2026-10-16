@@ -12,6 +12,7 @@ public enum AppTheme { CyberManager, Dark, Light }
 public sealed class AppSettings
 {
     public const string DefaultSortColumn = "CpuPercent";
+    public const int MaxRecentTasks = 20;
 
     private static readonly string[] SortableColumns =
     {
@@ -38,6 +39,7 @@ public sealed class AppSettings
     public bool SortAscending { get; set; }
     public string SearchText { get; set; } = "";
     public List<string> RecentSearches { get; set; } = new();
+    public List<string> RecentTasks { get; set; } = new();
     public HashSet<string> SuppressedConfirmations { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public bool MinimizeToTrayOnMinimize { get; set; }
     public bool MinimizeToTrayOnClose { get; set; } = true;
@@ -199,6 +201,7 @@ public sealed class AppSettings
         SearchText ??= "";
         SortColumn = NormalizeSortColumn(SortColumn);
         RecentSearches = NormalizeSearchHistory(RecentSearches);
+        RecentTasks = NormalizeTaskHistory(RecentTasks);
         SuppressedConfirmations ??= new(StringComparer.OrdinalIgnoreCase);
         GlobalHotkey = GlobalHotkey?.Trim() ?? "";
         WidgetHotkey = WidgetHotkey?.Trim() ?? "";
@@ -221,6 +224,7 @@ public sealed class AppSettings
         SortAscending = defaults.SortAscending;
         SearchText = defaults.SearchText;
         RecentSearches = new();
+        RecentTasks = new();
         SuppressedConfirmations = new(StringComparer.OrdinalIgnoreCase);
         MinimizeToTrayOnMinimize = defaults.MinimizeToTrayOnMinimize;
         MinimizeToTrayOnClose = defaults.MinimizeToTrayOnClose;
@@ -290,6 +294,25 @@ public sealed class AppSettings
         RecentSearches ??= new();
         RecentSearches.Clear();
     }
+
+    public void RecordTask(string command)
+    {
+        RecentTasks = NormalizeTaskHistory(new[] { command }.Concat(RecentTasks ?? new()));
+    }
+
+    public void RemoveTask(string command) => RecentTasks.RemoveAll(existing =>
+        string.Equals(existing, command, StringComparison.Ordinal));
+
+    public void ClearTaskHistory() => RecentTasks.Clear();
+
+    private static List<string> NormalizeTaskHistory(IEnumerable<string>? commands) =>
+        (commands ?? Enumerable.Empty<string>())
+            .Where(command => !string.IsNullOrWhiteSpace(command) && command.Length <= 32767 &&
+                command.IndexOfAny(['\0', '\r', '\n']) < 0)
+            .Select(command => command.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .Take(MaxRecentTasks)
+            .ToList();
 
     private static string NormalizeSortColumn(string? column) =>
         !string.IsNullOrWhiteSpace(column) &&

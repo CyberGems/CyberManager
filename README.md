@@ -67,6 +67,7 @@ Most task managers either freeze under heavy load or bury basic features behind 
 - **Pause Detection** — Freeze the process list snapshot while CPU, RAM, and sparklines keep updating
 
 ### 🎛️ Process Control
+- **Run New Task**: Open programs (with arguments), folders, documents, or URLs from the Processes toolbar or `Ctrl+N`, with a file picker and an optional administrator checkbox. The last 20 successful open requests are remembered, with individual removal and clear-history actions
 - **End Task** — Terminate selected process
 - **End Process Tree** — Terminate process and all children
 - **Multi-Select & Batch End** — Select several processes with Ctrl+click, Shift+click, or a rubber-band drag and end them together
@@ -185,6 +186,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Ctrl+Shift+M` | Toggle compact mode | Application |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Switch to Processes / Performance / Settings | Application |
 | `Ctrl+4` | Open Performance → Disks | Application / Widget |
+| `Ctrl+N` | Run new task, with recent-task history | Application |
 | `Ctrl+F` / `Ctrl+E` | Focus search box | Application |
 | `Ctrl+G` | Toggle process grouping | Application |
 | `Ctrl+I` | Open System Information | Application |

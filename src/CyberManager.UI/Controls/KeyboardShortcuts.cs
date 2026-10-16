@@ -18,4 +18,5 @@ internal static class KeyboardShortcuts
     internal const string Refresh = "F5";
     internal const string PauseDetection = "Ctrl+P";
     internal const string RestartProcess = "Ctrl+R";
+    internal const string RunNewTask = "Ctrl+N";
 }

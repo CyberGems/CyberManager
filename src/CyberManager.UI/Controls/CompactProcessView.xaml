@@ -506,6 +506,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <Border x:Name="CompactSearchBar"
@@ -572,6 +573,11 @@
                     </Grid>
                 </Border>
 
+                <Button x:Name="NewTaskButton" Grid.Column="6" Width="28" Height="26" Margin="6,0,0,0" Padding="0"
+                        Style="{DynamicResource CompactIconButton}" Click="NewTaskButton_Click">
+                    <Path Data="M 12 4 V 20 M 4 12 H 20" Width="13" Height="13" Stretch="Uniform"
+                          Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round"/>
+                </Button>
                 <ToggleButton x:Name="HeavyFilterToggle"
                               Grid.Column="1"
                               Width="28"

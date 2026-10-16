@@ -67,6 +67,7 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 - **Pausar detección**: congela la lista de procesos mientras la CPU, la RAM y las gráficas siguen actualizándose
 
 ### 🎛️ Control de procesos
+- **Ejecutar nueva tarea**: abre programas (con argumentos), carpetas, documentos o URL desde la barra de Procesos o con `Ctrl+N`, con selector de archivos y opción de administrador. Recuerda las últimas 20 solicitudes de apertura correctas y permite eliminar entradas o vaciar el historial
 - **Finalizar tarea**: termina el proceso seleccionado
 - **Finalizar árbol**: termina el proceso y todos sus hijos
 - **Multi-selección y finalización por lotes**: selecciona varios procesos con Ctrl+clic, Shift+clic o un lazo de arrastre y finalízalos juntos
@@ -182,6 +183,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Ctrl+Shift+M` | Alternar el modo compacto | Aplicación |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Cambiar a Procesos / Rendimiento / Configuración | Aplicación |
 | `Ctrl+4` | Abrir Rendimiento → Discos | Aplicación / Widget |
+| `Ctrl+N` | Ejecutar nueva tarea, con historial reciente | Aplicación |
 | `Ctrl+F` / `Ctrl+E` | Enfocar el cuadro de búsqueda | Aplicación |
 | `Ctrl+G` | Alternar la agrupación de procesos | Aplicación |
 | `Ctrl+I` | Abrir Información del Sistema | Aplicación |

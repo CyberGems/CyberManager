@@ -145,6 +145,7 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? ToggleRequested;
     public event RoutedEventHandler? EndTaskRequested;
     public event RoutedEventHandler? RestartRequested;
+    public event RoutedEventHandler? NewTaskRequested;
     public event RoutedEventHandler? PauseDetectionRequested;
     public event RoutedEventHandler? PinRequested;
     public event RoutedEventHandler? SettingsRequested;
@@ -162,6 +163,9 @@ public partial class CompactProcessView : UserControl
     public void ApplyLanguage()
     {
         DiskActivityLed.RefreshLocalization();
+        NewTaskButton.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("RunNewTask"), KeyboardShortcuts.RunNewTask);
+        AutomationProperties.SetName(NewTaskButton, Strings.T("RunNewTask"));
+        AutomationProperties.SetAcceleratorKey(NewTaskButton, KeyboardShortcuts.RunNewTask);
         EndTaskButton.ToolTip = HotkeyToolTipContent.WithShortcut(
             Strings.T("EndTaskTooltip"),
             Strings.T("DeleteKey"));
@@ -595,6 +599,8 @@ public partial class CompactProcessView : UserControl
 
     private void EndTaskButton_Click(object sender, RoutedEventArgs e) =>
         EndTaskRequested?.Invoke(sender, e);
+
+    private void NewTaskButton_Click(object sender, RoutedEventArgs e) => NewTaskRequested?.Invoke(sender, e);
 
     private void ClearSelectionButton_Click(object sender, RoutedEventArgs e) =>
         ClearSelectionRequested?.Invoke(sender, e);

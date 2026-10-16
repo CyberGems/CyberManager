@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Run New Task**: A plus button on the Full and Compact process toolbars and `Ctrl+N` open an integrated launch dialog for programs, arguments, folders, documents, and URLs. Includes a file picker, optional administrator privileges, and a persistent 20-command history with individual removal and clear-history actions. Failed or cancelled requests are not saved.
 - **Disk Monitoring**: Performance gains a Disks tab with combined and per-physical-disk activity, read/write histories, transfer rates, latency, queue length, and session byte totals from native Windows performance counters. A live activity LED in Full/Compact layouts and the floating widget opens this view, also available through `Ctrl+4`.
 
 ### Changed

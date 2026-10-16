@@ -213,6 +213,7 @@ public partial class MainWindow : Window
         CompactView.ToggleRequested += CompactView_ToggleRequested;
         CompactView.EndTaskRequested += Kill_Click;
         CompactView.RestartRequested += Restart_Click;
+        CompactView.NewTaskRequested += NewTask_Click;
         CompactView.PauseDetectionRequested += (_, _) => SetDetectionPaused(!_detectionPaused);
         CompactView.DiskActivityRequested += (_, _) => OpenDiskPerformance();
         CompactView.PinRequested += CompactView_PinRequested;
@@ -2824,6 +2825,16 @@ public partial class MainWindow : Window
         _settingsSaveTimer.Start();
     }
 
+    private void NewTask_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new NewTaskDialog(App.Settings, ThrottledSaveSettings) { Owner = this };
+        if (dialog.ShowDialog() == true)
+        {
+            SetStatus(Strings.T("NewTaskOpened"));
+            _ = RefreshAsync(force: true, cancellationToken: _lifetimeCts.Token);
+        }
+    }
+
     private async void Kill_Click(object sender, RoutedEventArgs e)
     {
         // The context-menu batch item is only shown for a multi-selection, so it always routes
@@ -3319,6 +3330,9 @@ public partial class MainWindow : Window
             AutomationProperties.SetName(SystemFilterCheck, Strings.T("HideSystemProcesses"));
             FontSizeSlider.ToolTip = Strings.T("TextSize");
             RefreshBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Refresh"), KeyboardShortcuts.Refresh);
+            NewTaskBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("RunNewTask"), KeyboardShortcuts.RunNewTask);
+            AutomationProperties.SetName(NewTaskBtn, Strings.T("RunNewTask"));
+            AutomationProperties.SetAcceleratorKey(NewTaskBtn, KeyboardShortcuts.RunNewTask);
             UpdateWidgetToggleHint();
             UpdatePill.ApplyLanguage();
             _metricsWidget?.ApplyLocalization();
@@ -3478,6 +3492,13 @@ public partial class MainWindow : Window
     {
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
         var modifiers = Keyboard.Modifiers;
+
+        if (modifiers == ModifierKeys.Control && key == Key.N)
+        {
+            e.Handled = true;
+            NewTask_Click(this, new RoutedEventArgs());
+            return;
+        }
 
         if (modifiers == ModifierKeys.Alt && key == Key.M)
         {
