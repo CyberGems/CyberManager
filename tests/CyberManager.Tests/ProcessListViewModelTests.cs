@@ -190,6 +190,152 @@ public class ProcessListViewModelTests
         Assert.Equal(2, result.Count);
     }
 
+    [Fact]
+    public void Grouping_AggregatesWebView2ProcessesUnderHostApplication()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo
+            {
+                Pid = 15948,
+                ParentPid = 1000,
+                Name = "CyberClock.exe",
+                FriendlyName = "CyberClock",
+                MainWindowTitle = "CyberClock",
+                CpuPercent = 0.2,
+                WorkingSetBytes = 80 * 1024L * 1024L
+            },
+            new ProcessInfo
+            {
+                Pid = 16664,
+                ParentPid = 15948,
+                Name = "msedgewebview2.exe",
+                FriendlyName = "Microsoft Edge WebView2",
+                CpuPercent = 0.1,
+                WorkingSetBytes = 50 * 1024L * 1024L
+            },
+            new ProcessInfo
+            {
+                Pid = 18312,
+                ParentPid = 16664,
+                Name = "msedgewebview2.exe",
+                FriendlyName = "Microsoft Edge WebView2",
+                CpuPercent = 12.8,
+                WorkingSetBytes = 90 * 1024L * 1024L
+            }
+        };
+
+        var query = new ProcessListQuery(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: true,
+            DimSuspended: true,
+            SortColumn: "CpuPercent",
+            SortDirection: ListSortDirection.Descending,
+            ExpandedGroups: new HashSet<string>(["CyberClock.exe"], StringComparer.OrdinalIgnoreCase));
+
+        var result = ProcessListViewModel.Build(processes, query);
+
+        Assert.Equal(4, result.Count); // Parent + 3 children
+        var parent = result[0];
+        Assert.True(parent.IsGroupParent);
+        Assert.Equal("CyberClock.exe", parent.Name);
+        Assert.Equal("CyberClock", parent.FriendlyName);
+        Assert.Equal(3, parent.InstanceCount);
+        Assert.Equal(13.1, Math.Round(parent.CpuPercent, 1));
+        Assert.Equal(220 * 1024L * 1024L, parent.WorkingSetBytes);
+        Assert.True(result[1].IsGroupChild);
+        Assert.True(result[2].IsGroupChild);
+        Assert.True(result[3].IsGroupChild);
+    }
+
+    [Fact]
+    public void Grouping_DoesNotAdoptUnrelatedAppsFromLaunchers()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo
+            {
+                Pid = 100,
+                ParentPid = 4,
+                Name = "explorer.exe",
+                FriendlyName = "Windows Explorer",
+                MainWindowTitle = ""
+            },
+            new ProcessInfo
+            {
+                Pid = 200,
+                ParentPid = 100,
+                Name = "notepad.exe",
+                FriendlyName = "Notepad",
+                MainWindowTitle = "Untitled - Notepad"
+            }
+        };
+
+        var query = new ProcessListQuery(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: true,
+            DimSuspended: true,
+            SortColumn: "Name",
+            SortDirection: ListSortDirection.Ascending,
+            ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        var result = ProcessListViewModel.Build(processes, query);
+
+        Assert.Equal(2, result.Count);
+        Assert.DoesNotContain(result, p => p.IsGroupParent);
+    }
+
+    [Fact]
+    public void Grouping_SearchByParentName_IncludesChildHelpers()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo
+            {
+                Pid = 100,
+                ParentPid = 10,
+                Name = "CyberClock.exe",
+                FriendlyName = "CyberClock",
+                MainWindowTitle = "CyberClock",
+                CpuPercent = 0.5
+            },
+            new ProcessInfo
+            {
+                Pid = 101,
+                ParentPid = 100,
+                Name = "msedgewebview2.exe",
+                FriendlyName = "Microsoft Edge WebView2",
+                CpuPercent = 10.0
+            },
+            new ProcessInfo
+            {
+                Pid = 200,
+                ParentPid = 10,
+                Name = "unrelated.exe",
+                FriendlyName = "Other App",
+                CpuPercent = 5.0
+            }
+        };
+
+        var query = new ProcessListQuery(
+            Search: "CyberClock",
+            ShowIdleProcess: true,
+            GroupProcesses: true,
+            DimSuspended: true,
+            SortColumn: "CpuPercent",
+            SortDirection: ListSortDirection.Descending,
+            ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        var result = ProcessListViewModel.Build(processes, query);
+
+        Assert.Single(result);
+        Assert.Equal("CyberClock.exe", result[0].Name);
+        Assert.Equal(2, result[0].InstanceCount);
+        Assert.Equal(10.5, result[0].CpuPercent);
+    }
+
     private static ProcessListQuery CreateSystemFilterQuery(bool hideSystemProcesses) =>
         new(
             Search: "",

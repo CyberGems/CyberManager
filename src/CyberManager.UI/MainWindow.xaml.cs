@@ -3721,7 +3721,7 @@ public partial class MainWindow : Window
             }
             else if (Selected is { IsGroupChild: true } c)
             {
-                var parent = _view.FirstOrDefault(x => x.IsGroupParent && x.Name.Equals(c.Name, StringComparison.OrdinalIgnoreCase));
+                var parent = _view.FirstOrDefault(x => x.IsGroupParent && (x.Children.Contains(c) || x.Name.Equals(c.Name, StringComparison.OrdinalIgnoreCase)));
                 if (parent != null)
                 {
                     SetSelectedProcess(parent);

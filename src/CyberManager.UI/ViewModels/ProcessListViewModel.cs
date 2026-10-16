@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using CyberManager.Common.Models;
 using CyberManager.UI.Services;
 
@@ -18,10 +19,41 @@ public sealed record ProcessListQuery(
 
 public sealed class ProcessListViewModel
 {
+    private static readonly HashSet<string> SystemLaunchers = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "explorer.exe", "explorer",
+        "services.exe", "services",
+        "svchost.exe", "svchost",
+        "smss.exe", "smss",
+        "csrss.exe", "csrss",
+        "wininit.exe", "wininit",
+        "winlogon.exe", "winlogon",
+        "lsass.exe", "lsass",
+        "taskhostw.exe", "taskhostw",
+        "runtimebroker.exe", "runtimebroker"
+    };
+
+    private static readonly HashSet<string> KnownHelperNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "msedgewebview2.exe", "msedgewebview2",
+        "conhost.exe", "conhost",
+        "crashpad_handler.exe", "crashpad_handler",
+        "werfault.exe", "werfault"
+    };
+
     public ObservableCollection<ProcessInfo> Items { get; } = new();
 
     public static List<ProcessInfo> Build(IReadOnlyList<ProcessInfo> all, ProcessListQuery query)
     {
+        var byPid = new Dictionary<int, ProcessInfo>(all.Count);
+        foreach (var p in all)
+        {
+            if (p.Pid > 0)
+            {
+                byPid.TryAdd(p.Pid, p);
+            }
+        }
+
         IEnumerable<ProcessInfo> filtered = all;
         if (!query.ShowIdleProcess)
         {
@@ -38,10 +70,18 @@ public sealed class ProcessListViewModel
             var search = query.Search.Trim();
             var isPid = int.TryParse(search, out var pid);
             filtered = filtered.Where(process =>
-                process.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                process.FriendlyName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                process.ExePath.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-                (isPid && process.Pid == pid));
+            {
+                if (MatchesSearch(process, search, isPid, pid)) return true;
+                if (query.GroupProcesses)
+                {
+                    var root = FindRootProcess(process, byPid);
+                    if (!ReferenceEquals(root, process) && MatchesSearch(root, search, isPid, pid))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            });
         }
 
         if (!query.GroupProcesses)
@@ -63,7 +103,7 @@ public sealed class ProcessListViewModel
         }
 
         var topLevel = new List<ProcessInfo>();
-        foreach (var group in filtered.GroupBy(process => process.Name, StringComparer.OrdinalIgnoreCase))
+        foreach (var group in filtered.GroupBy(process => FindRootProcess(process, byPid).Name, StringComparer.OrdinalIgnoreCase))
         {
             var processes = group.ToList();
             if (processes.Count == 1)
@@ -77,7 +117,9 @@ public sealed class ProcessListViewModel
                 continue;
             }
 
-            var mainProcess = processes.FirstOrDefault(process => process.HasWindow) ??
+            var mainProcess = processes.FirstOrDefault(process => process.HasWindow && process.Name.Equals(group.Key, StringComparison.OrdinalIgnoreCase)) ??
+                              processes.FirstOrDefault(process => process.Name.Equals(group.Key, StringComparison.OrdinalIgnoreCase)) ??
+                              processes.FirstOrDefault(process => process.HasWindow) ??
                               processes.OrderBy(process => process.Pid).First();
             var parent = new ProcessInfo
             {
@@ -294,4 +336,67 @@ public sealed class ProcessListViewModel
         target.Children = source.Children;
         target.DimWhenSuspended = source.DimWhenSuspended;
     }
+
+    private static ProcessInfo FindRootProcess(
+        ProcessInfo process,
+        Dictionary<int, ProcessInfo> byPid)
+    {
+        var current = process;
+        var visited = new HashSet<int> { current.Pid };
+
+        while (current.ParentPid > 4 && byPid.TryGetValue(current.ParentPid, out var parent))
+        {
+            if (!visited.Add(parent.Pid)) break;
+            if (SystemLaunchers.Contains(parent.Name)) break;
+
+            if (!IsHelperOf(current, parent))
+            {
+                break;
+            }
+
+            current = parent;
+        }
+
+        return current;
+    }
+
+    private static bool IsHelperOf(ProcessInfo child, ProcessInfo parent)
+    {
+        if (child.Name.Equals(parent.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (KnownHelperNames.Contains(child.Name))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrEmpty(child.ExePath) &&
+            !string.IsNullOrEmpty(parent.ExePath) &&
+            !child.HasWindow)
+        {
+            try
+            {
+                var parentDir = Path.GetDirectoryName(parent.ExePath);
+                if (!string.IsNullOrEmpty(parentDir) &&
+                    child.ExePath.StartsWith(parentDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // Ignore invalid paths
+            }
+        }
+
+        return false;
+    }
+
+    private static bool MatchesSearch(ProcessInfo process, string search, bool isPid, int pid) =>
+        process.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+        process.FriendlyName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+        process.ExePath.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+        (isPid && process.Pid == pid);
 }
