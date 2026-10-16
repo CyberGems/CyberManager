@@ -159,25 +159,31 @@ public partial class CompactProcessView : UserControl
 
     public void ApplyLanguage()
     {
-        EndTaskButton.ToolTip = Strings.T("Kill");
-        RestartButton.ToolTip = Strings.T("Restart");
+        EndTaskButton.ToolTip = HotkeyToolTipContent.WithShortcut(
+            Strings.T("EndTaskTooltip"),
+            Strings.T("DeleteKey"));
+        RestartButton.ToolTip = HotkeyToolTipContent.WithShortcut(
+            Strings.T("Restart"),
+            KeyboardShortcuts.RestartProcess);
         AutomationProperties.SetName(RestartButton, Strings.T("Restart"));
         ToolTipService.SetShowOnDisabled(RestartButton, true);
-        PauseDetectionButton.ToolTip = Strings.T("PauseDetection");
+        PauseDetectionButton.ToolTip = HotkeyToolTipContent.WithShortcut(
+            Strings.T("PauseDetection"),
+            KeyboardShortcuts.PauseDetection);
         AutomationProperties.SetName(PauseDetectionButton, Strings.T("PauseDetection"));
-        PinButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("AlwaysOnTop"), TitleBarHotkeys.TogglePin);
+        PinButton.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("AlwaysOnTop"), KeyboardShortcuts.TogglePin);
         EngineBadgeText.Text = Strings.T("WfpEngineBadge");
         CompactCpuLabel.Text = Strings.T("Cpu");
         CompactRamLabel.Text = Strings.T("Ram");
         UpdateMetricToolTips();
-        ModeButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("MoreDetails"), TitleBarHotkeys.ToggleCompact);
+        ModeButton.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("MoreDetails"), KeyboardShortcuts.ToggleCompact);
         AutomationProperties.SetName(ModeButton, Strings.T("MoreDetails"));
-        BrandingPanel.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("About"), TitleBarHotkeys.About);
+        BrandingPanel.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("About"), KeyboardShortcuts.About);
         AutomationProperties.SetName(BrandingPanel, Strings.T("About"));
         UpdatePill.ApplyLanguage();
-        SettingsButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Settings"), TitleBarHotkeys.Settings);
-        MoreButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("MoreOptions"), TitleBarHotkeys.More);
-        CloseButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Close"), TitleBarHotkeys.Close);
+        SettingsButton.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Settings"), KeyboardShortcuts.SettingsTooltip);
+        MoreButton.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("MoreOptions"), KeyboardShortcuts.More);
+        CloseButton.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Close"), KeyboardShortcuts.Close);
         SearchBox.ToolTip = Strings.T("SearchPlaceholder");
         SearchHint.Text = Strings.T("SearchPlaceholder");
         ClearSearchButton.ToolTip = Strings.T("Clear");
@@ -186,7 +192,7 @@ public partial class CompactProcessView : UserControl
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
         AutomationProperties.SetName(SettingsButton, Strings.T("Settings"));
         AutomationProperties.SetName(MoreButton, Strings.T("MoreOptions"));
-        MinimizeButton.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Minimize"), TitleBarHotkeys.Minimize);
+        MinimizeButton.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Minimize"), KeyboardShortcuts.Minimize);
         AutomationProperties.SetName(MinimizeButton, Strings.T("Minimize"));
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
         AutomationProperties.SetName(SearchBox, Strings.T("SearchProcesses"));
@@ -299,7 +305,7 @@ public partial class CompactProcessView : UserControl
         SelectionCountText.Text = count > 1 ? Strings.T("SelectionCountShort", count) : string.Empty;
         EndTaskButton.ToolTip = count > 1
             ? Strings.T("EndSelectedTooltip", count)
-            : Strings.T("EndTaskTooltip");
+            : HotkeyToolTipContent.WithShortcut(Strings.T("EndTaskTooltip"), Strings.T("DeleteKey"));
         AutomationProperties.SetName(
             EndTaskButton,
             count > 1 ? Strings.T("EndSelected", count) : Strings.T("EndTask"));
@@ -316,12 +322,12 @@ public partial class CompactProcessView : UserControl
     /// "nothing selected" case. A disabled control keeps its tooltip visible only when
     /// <c>ToolTipService.ShowOnDisabled</c> is set, which <see cref="ApplyLanguage"/> handles.
     /// </summary>
-    public void SetRestartState(bool enabled, string? tooltip)
+    public void SetRestartState(bool enabled, string? unavailableReason)
     {
         RestartButton.IsEnabled = enabled;
-        RestartButton.ToolTip = string.IsNullOrWhiteSpace(tooltip)
-            ? $"{Strings.T("Restart")} ({Strings.T("RestartShortcutHint")})"
-            : tooltip;
+        RestartButton.ToolTip = string.IsNullOrWhiteSpace(unavailableReason)
+            ? HotkeyToolTipContent.WithShortcut(Strings.T("Restart"), KeyboardShortcuts.RestartProcess)
+            : unavailableReason;
     }
 
     /// <summary>
@@ -336,8 +342,8 @@ public partial class CompactProcessView : UserControl
             : "M 5,3 H 9 V 21 H 5 Z M 15,3 H 19 V 21 H 15 Z");
 
         PauseDetectionButton.ToolTip = paused
-            ? $"{Strings.T("ResumeDetection")} ({Strings.T("RestartShortcutHint")})"
-            : $"{Strings.T("PauseDetection")} ({Strings.T("RestartShortcutHint")})";
+            ? HotkeyToolTipContent.WithShortcut(Strings.T("ResumeDetection"), KeyboardShortcuts.PauseDetection)
+            : HotkeyToolTipContent.WithShortcut(Strings.T("PauseDetection"), KeyboardShortcuts.PauseDetection);
         AutomationProperties.SetName(PauseDetectionButton, paused
             ? Strings.T("ResumeDetection")
             : Strings.T("PauseDetection"));
@@ -364,7 +370,7 @@ public partial class CompactProcessView : UserControl
         // not by a colored plate painted behind the icon.
         PinButton.Opacity = pinned ? 1.0 : 0.65;
         var label = pinned ? $"{Strings.T("AlwaysOnTop")} ✓" : Strings.T("AlwaysOnTop");
-        PinButton.ToolTip = TitleBarHotkeys.WithShortcut(label, TitleBarHotkeys.TogglePin);
+        PinButton.ToolTip = HotkeyToolTipContent.WithShortcut(label, KeyboardShortcuts.TogglePin);
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
     }
 

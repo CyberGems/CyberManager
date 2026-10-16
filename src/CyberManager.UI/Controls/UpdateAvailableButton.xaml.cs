@@ -117,7 +117,7 @@ public partial class UpdateAvailableButton : UserControl
         // the value it stands for. Both live on the button: a UserControl is not the element a
         // screen reader or an automation probe reaches.
         var announcement = Strings.T("UpdateAvailable", _versionLabel);
-        ToolTip = TitleBarHotkeys.WithShortcut(announcement, TitleBarHotkeys.Update);
+        ToolTip = HotkeyToolTipContent.WithShortcut(announcement, KeyboardShortcuts.Update);
         AutomationProperties.SetName(PillButton, announcement);
         Visibility = Visibility.Visible;
     }

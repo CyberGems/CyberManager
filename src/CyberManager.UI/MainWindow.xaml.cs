@@ -830,7 +830,7 @@ public partial class MainWindow : Window
 
     private static string FormatHotkeyForDisplay(string hotkey) =>
         string.Join(
-            " + ",
+            "+",
             hotkey.Split('+', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
     private async Task RefreshAsync(bool force = false, CancellationToken cancellationToken = default)
@@ -2054,7 +2054,7 @@ public partial class MainWindow : Window
         var label = Strings.T("FloatingWidget");
         WidgetToggleBtn.ToolTip = string.IsNullOrWhiteSpace(App.Settings.WidgetHotkey)
             ? label
-            : $"{label} ({FormatHotkeyForDisplay(App.Settings.WidgetHotkey)})";
+            : HotkeyToolTipContent.WithShortcut(label, FormatHotkeyForDisplay(App.Settings.WidgetHotkey));
         AutomationProperties.SetName(WidgetToggleBtn, label);
     }
 
@@ -2330,8 +2330,8 @@ public partial class MainWindow : Window
             : "M 5,3 H 9 V 21 H 5 Z M 15,3 H 19 V 21 H 15 Z");
 
         PauseDetectionBtn.ToolTip = paused
-            ? $"{Strings.T("ResumeDetection")} (Ctrl+P)"
-            : $"{Strings.T("PauseDetection")} (Ctrl+P)";
+            ? HotkeyToolTipContent.WithShortcut(Strings.T("ResumeDetection"), KeyboardShortcuts.PauseDetection)
+            : HotkeyToolTipContent.WithShortcut(Strings.T("PauseDetection"), KeyboardShortcuts.PauseDetection);
         AutomationProperties.SetName(PauseDetectionBtn, paused
             ? Strings.T("ResumeDetection")
             : Strings.T("PauseDetection"));
@@ -2730,7 +2730,7 @@ public partial class MainWindow : Window
         var hasSelection = count > 0;
         KillBtn.ToolTip = count > 1
             ? Strings.T("EndSelectedTooltip", count)
-            : Strings.T("EndTaskTooltip");
+            : HotkeyToolTipContent.WithShortcut(Strings.T("EndTaskTooltip"), Strings.T("DeleteKey"));
         AutomationProperties.SetName(KillBtn, count > 1 ? Strings.T("EndSelected", count) : Strings.T("EndTask"));
         // WPF TextBlocks share their parent's UI Automation peer, so the badge count is exposed
         // through the clear button, which does own a peer of its own.
@@ -3024,12 +3024,14 @@ public partial class MainWindow : Window
         // informative (name + shortcut) instead of showing a reason that would look confusing.
         var reason = GetRestartDisabledReason(process);
         var enabled = process != null && reason == null;
-        var tooltip = reason ?? $"{Strings.T("Restart")} ({Strings.T("RestartShortcutHint")})";
+        object tooltip = reason is null
+            ? HotkeyToolTipContent.WithShortcut(Strings.T("Restart"), KeyboardShortcuts.RestartProcess)
+            : reason;
 
         RestartBtn.IsEnabled = enabled;
         RestartBtn.ToolTip = tooltip;
 
-        CompactView.SetRestartState(enabled, tooltip);
+        CompactView.SetRestartState(enabled, reason);
         if (ProcContextMenu != null)
         {
             ContextRestartItem.IsEnabled = enabled;
@@ -3222,9 +3224,9 @@ public partial class MainWindow : Window
         TabProcessesText.Text = Strings.T("NavProcesses");
         TabPerformanceText.Text = Strings.T("NavPerformance");
         TabSettingsText.Text = Strings.T("NavSettings");
-        TabProcessesBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("NavProcessesTip"), TitleBarHotkeys.Processes);
-        TabPerformanceBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("NavPerformanceTip"), TitleBarHotkeys.Performance);
-        TabSettingsBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("NavSettingsTip"), TitleBarHotkeys.Settings);
+        TabProcessesBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavProcessesTip"), KeyboardShortcuts.Processes);
+        TabPerformanceBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavPerformanceTip"), KeyboardShortcuts.Performance);
+        TabSettingsBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavSettingsTip"), KeyboardShortcuts.SettingsTooltip);
     }
 
     private void ApplyTheme()
@@ -3246,7 +3248,7 @@ public partial class MainWindow : Window
             SettingsTabContent?.RefreshLocalization();
 
             SubtitleText.Text = Strings.T("AppSubtitle");
-            FullBrandingPanel.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("About"), TitleBarHotkeys.About);
+            FullBrandingPanel.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("About"), KeyboardShortcuts.About);
             AutomationProperties.SetName(FullBrandingPanel, Strings.T("About"));
             SearchHint.Text = Strings.T("SearchPlaceholder");
             LoaderOverlay.RefreshLocalization();
@@ -3254,7 +3256,7 @@ public partial class MainWindow : Window
             SystemFilterLabel.Text = Strings.T("HideSystemProcesses");
             AutomationProperties.SetName(SystemFilterCheck, Strings.T("HideSystemProcesses"));
             FontSizeSlider.ToolTip = Strings.T("TextSize");
-            RefreshBtn.ToolTip = $"{Strings.T("Refresh")} (F5)";
+            RefreshBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Refresh"), KeyboardShortcuts.Refresh);
             UpdateWidgetToggleHint();
             UpdatePill.ApplyLanguage();
             _metricsWidget?.ApplyLocalization();
@@ -3263,13 +3265,13 @@ public partial class MainWindow : Window
             CpuMenuSysInfoItem.Header = $"{Strings.T("SystemInformation")}...";
             RamMenuSysInfoItem.Header = $"{Strings.T("SystemInformation")}...";
             PauseDetectionBtn.ToolTip = _detectionPaused
-                ? $"{Strings.T("ResumeDetection")} (Ctrl+P)"
-                : $"{Strings.T("PauseDetection")} (Ctrl+P)";
+                ? HotkeyToolTipContent.WithShortcut(Strings.T("ResumeDetection"), KeyboardShortcuts.PauseDetection)
+                : HotkeyToolTipContent.WithShortcut(Strings.T("PauseDetection"), KeyboardShortcuts.PauseDetection);
             AutomationProperties.SetName(PauseDetectionBtn, _detectionPaused
                 ? Strings.T("ResumeDetection")
                 : Strings.T("PauseDetection"));
-            KillBtn.ToolTip = $"{Strings.T("Kill")} (Del)";
-            RestartBtn.ToolTip = $"{Strings.T("Restart")} ({Strings.T("RestartShortcutHint")})";
+            KillBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("EndTaskTooltip"), Strings.T("DeleteKey"));
+            RestartBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Restart"), KeyboardShortcuts.RestartProcess);
             ClearBtn.ToolTip = Strings.T("Clear");
             HeavyFilterToggle.ToolTip = Strings.T("ShowHeavyProcesses");
             AutomationProperties.SetName(RefreshBtn, Strings.T("Refresh"));
@@ -3277,9 +3279,9 @@ public partial class MainWindow : Window
             AutomationProperties.SetName(RestartBtn, Strings.T("Restart"));
             AutomationProperties.SetName(ClearBtn, Strings.T("Clear"));
             AutomationProperties.SetName(HeavyFilterToggle, Strings.T("ShowHeavyProcesses"));
-            FullModeToggleBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("CompactMode"), TitleBarHotkeys.ToggleCompact);
+            FullModeToggleBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("CompactMode"), KeyboardShortcuts.ToggleCompact);
             AutomationProperties.SetName(FullModeToggleBtn, Strings.T("CompactMode"));
-            MoreBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("MoreOptions"), TitleBarHotkeys.More);
+            MoreBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("MoreOptions"), KeyboardShortcuts.More);
             AutomationProperties.SetName(MoreBtn, Strings.T("MoreOptions"));
             if (MoreOptionsMenu != null)
             {
@@ -3295,8 +3297,8 @@ public partial class MainWindow : Window
                 MoreAboutItem.Header = Strings.T("AboutCyberManager");
                 MoreExitItem.Header = Strings.T("Exit");
             }
-            MinimizeBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Minimize"), TitleBarHotkeys.Minimize);
-            CloseBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Close"), TitleBarHotkeys.Close);
+            MinimizeBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Minimize"), KeyboardShortcuts.Minimize);
+            CloseBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Close"), KeyboardShortcuts.Close);
             UpdateMaximizeButtonIcon();
             StatsBorder.ToolTip = Strings.T("OpenSystemInfoTip");
             AutomationProperties.SetName(StatsBorder, Strings.T("SystemInformation"));
@@ -3381,14 +3383,14 @@ public partial class MainWindow : Window
 
         if (WorkAreaMaximize.IsFilled(this) || WindowState == WindowState.Maximized)
         {
-            MaximizeBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Restore"), TitleBarHotkeys.Maximize);
+            MaximizeBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Restore"), KeyboardShortcuts.Maximize);
             AutomationProperties.SetName(MaximizeBtn, Strings.T("Restore"));
             MaximizeIconPath.Data = Geometry.Parse(
                 "M 6 2 L 6 6 L 2 6 M 6 6 L 2.5 2.5 M 8 12 L 8 8 L 12 8 M 8 8 L 11.5 11.5");
         }
         else
         {
-            MaximizeBtn.ToolTip = TitleBarHotkeys.WithShortcut(Strings.T("Maximize"), TitleBarHotkeys.Maximize);
+            MaximizeBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Maximize"), KeyboardShortcuts.Maximize);
             AutomationProperties.SetName(MaximizeBtn, Strings.T("Maximize"));
             MaximizeIconPath.Data = Geometry.Parse(
                 "M 3 7 L 3 3 L 7 3 M 3 3 L 6.5 6.5 M 11 7 L 11 11 L 7 11 M 11 11 L 7.5 7.5");
