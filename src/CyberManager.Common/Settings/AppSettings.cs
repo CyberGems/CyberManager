@@ -16,7 +16,7 @@ public sealed class AppSettings
 
     private static readonly string[] SortableColumns =
     {
-        "Name", "Pid", "CpuPercent", "WorkingSetBytes", "ThreadCount", "Priority", "ExePath"
+        "Name", "Status", "Pid", "CpuPercent", "WorkingSetBytes", "ThreadCount", "Priority", "ExePath"
     };
 
     public Lang Language { get; set; } = Lang.Es;

@@ -131,7 +131,8 @@ public sealed class ProcessListViewModel
                     ? mainProcess.ExePath
                     : processes.FirstOrDefault(process => !string.IsNullOrEmpty(process.ExePath))?.ExePath ?? "",
                 UserName = mainProcess.UserName,
-                Status = processes.Any(process => process.Status == "Running") ? "Running" : "Suspended",
+                Status = processes.Any(process => process.Status == "Running") ? "Running" :
+                         processes.All(process => process.Status == "Exited") ? "Exited" : "Suspended",
                 CpuPercent = processes.Sum(process => process.CpuPercent),
                 WorkingSetBytes = processes.Sum(process => process.WorkingSetBytes),
                 PrivateBytes = processes.Sum(process => process.PrivateBytes),
@@ -145,6 +146,7 @@ public sealed class ProcessListViewModel
                 InstanceCount = processes.Count,
                 DimWhenSuspended = query.DimSuspended && processes.All(process => process.Status == "Suspended"),
                 IsNewlyCreated = processes.Any(process => process.IsNewlyCreated),
+                IsTerminating = processes.All(process => process.IsTerminating),
                 Children = processes.OrderByDescending(process => process.HasWindow)
                     .ThenByDescending(process => process.CpuPercent)
                     .ThenByDescending(process => process.WorkingSetBytes)
@@ -296,6 +298,9 @@ public sealed class ProcessListViewModel
             "Name" => ascending
                 ? list.OrderBy(SortName, NameComparer).ThenBy(process => process.Pid)
                 : list.OrderByDescending(SortName, NameComparer).ThenBy(process => process.Pid),
+            "Status" => ascending
+                ? list.OrderBy(process => process.StatusFormatted).ThenBy(SortName, NameComparer)
+                : list.OrderByDescending(process => process.StatusFormatted).ThenBy(SortName, NameComparer),
             "Pid" => ascending ? list.OrderBy(process => process.Pid) : list.OrderByDescending(process => process.Pid),
             "CpuPercent" => ascending ? list.OrderBy(process => process.CpuPercent).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.CpuPercent).ThenBy(SortName, NameComparer),
             "WorkingSetBytes" => ascending ? list.OrderBy(process => process.WorkingSetBytes).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.WorkingSetBytes).ThenBy(SortName, NameComparer),
@@ -337,6 +342,7 @@ public sealed class ProcessListViewModel
         target.Children = source.Children;
         target.DimWhenSuspended = source.DimWhenSuspended;
         target.IsNewlyCreated = source.IsNewlyCreated;
+        target.IsTerminating = source.IsTerminating;
     }
 
     private static ProcessInfo FindRootProcess(

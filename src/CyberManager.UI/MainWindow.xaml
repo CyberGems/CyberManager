@@ -403,6 +403,7 @@
                         <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="2,0,0,0">
                             <Grid>
                                 <Border x:Name="NewHighlightOverlay" Background="#3310B981" Opacity="0" IsHitTestVisible="False"/>
+                                <Border x:Name="ExitHighlightOverlay" Background="#33EF4444" Opacity="0" IsHitTestVisible="False"/>
                                 <SelectiveScrollingGrid>
                                     <SelectiveScrollingGrid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></SelectiveScrollingGrid.ColumnDefinitions>
                                     <SelectiveScrollingGrid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></SelectiveScrollingGrid.RowDefinitions>
@@ -439,6 +440,22 @@
                                 </DataTrigger.EnterActions>
                                 <DataTrigger.ExitActions>
                                     <StopStoryboard BeginStoryboardName="NewHighlightAnim"/>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsTerminating}" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#EF4444"/>
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="ExitHighlightAnim">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ExitHighlightOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             From="1.0" To="0.0"
+                                                             Duration="0:0:1.8"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="ExitHighlightAnim"/>
                                 </DataTrigger.ExitActions>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
@@ -1273,6 +1290,36 @@
                                                     </Border>
                                                 </StackPanel>
                                             </Grid>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Status" Width="105" SortMemberPath="Status">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid VerticalAlignment="Center" Margin="8,0,4,0">
+                                                <Border x:Name="StatusPill" CornerRadius="4" Padding="7,2" HorizontalAlignment="Left"
+                                                        Background="#1510B981" BorderBrush="#3010B981" BorderThickness="1">
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Ellipse x:Name="StatusDot" Width="6" Height="6" Margin="0,0,5,0" Fill="#10B981" VerticalAlignment="Center"/>
+                                                        <TextBlock x:Name="StatusText" Text="{Binding StatusFormatted}" FontSize="10" FontWeight="SemiBold"
+                                                                   Foreground="#10B981" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Status}" Value="Suspended">
+                                                    <Setter TargetName="StatusPill" Property="Background" Value="#20F59E0B"/>
+                                                    <Setter TargetName="StatusPill" Property="BorderBrush" Value="#40F59E0B"/>
+                                                    <Setter TargetName="StatusDot" Property="Fill" Value="#F59E0B"/>
+                                                    <Setter TargetName="StatusText" Property="Foreground" Value="#F59E0B"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="Exited">
+                                                    <Setter TargetName="StatusPill" Property="Background" Value="#25EF4444"/>
+                                                    <Setter TargetName="StatusPill" Property="BorderBrush" Value="#50EF4444"/>
+                                                    <Setter TargetName="StatusDot" Property="Fill" Value="#EF4444"/>
+                                                    <Setter TargetName="StatusText" Property="Foreground" Value="#EF4444"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>

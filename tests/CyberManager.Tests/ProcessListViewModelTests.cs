@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using CyberManager.Common.I18n;
 using CyberManager.Common.Models;
 using CyberManager.UI.ViewModels;
 using Xunit;
@@ -409,6 +410,134 @@ public class ProcessListViewModelTests
             SortDirection: ListSortDirection.Descending,
             ExpandedGroups: new HashSet<string>(expandedGroups ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase),
             HeavyProcessesOnly: true);
+
+    [Fact]
+    public void StatusFormatted_LocalizesCorrectly_InSpanishAndEnglish()
+    {
+        var originalLang = Strings.Current;
+        try
+        {
+            var proc = new ProcessInfo { Status = "Exited" };
+
+            Strings.Current = Lang.Es;
+            Assert.Equal("Finalizado", proc.StatusFormatted);
+
+            Strings.Current = Lang.En;
+            Assert.Equal("Exited", proc.StatusFormatted);
+
+            proc.Status = "Running";
+            Strings.Current = Lang.Es;
+            Assert.Equal("En ejecución", proc.StatusFormatted);
+            Strings.Current = Lang.En;
+            Assert.Equal("Running", proc.StatusFormatted);
+
+            proc.Status = "Suspended";
+            Strings.Current = Lang.Es;
+            Assert.Equal("Suspendido", proc.StatusFormatted);
+            Strings.Current = Lang.En;
+            Assert.Equal("Suspended", proc.StatusFormatted);
+        }
+        finally
+        {
+            Strings.Current = originalLang;
+        }
+    }
+
+    [Fact]
+    public void SortByStatus_AscendingAndDescending_OrdersCorrectly()
+    {
+        var originalLang = Strings.Current;
+        try
+        {
+            Strings.Current = Lang.En;
+            var processes = new[]
+            {
+                new ProcessInfo { Pid = 10, Name = "AppA.exe", Status = "Running" },
+                new ProcessInfo { Pid = 20, Name = "AppB.exe", Status = "Exited" },
+                new ProcessInfo { Pid = 30, Name = "AppC.exe", Status = "Suspended" }
+            };
+
+            var queryAsc = new ProcessListQuery(
+                Search: "",
+                ShowIdleProcess: true,
+                GroupProcesses: false,
+                DimSuspended: false,
+                SortColumn: "Status",
+                SortDirection: ListSortDirection.Ascending,
+                ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+            var resultAsc = ProcessListViewModel.Build(processes, queryAsc);
+            Assert.Equal("Exited", resultAsc[0].Status);
+            Assert.Equal("Running", resultAsc[1].Status);
+            Assert.Equal("Suspended", resultAsc[2].Status);
+
+            var queryDesc = new ProcessListQuery(
+                Search: "",
+                ShowIdleProcess: true,
+                GroupProcesses: false,
+                DimSuspended: false,
+                SortColumn: "Status",
+                SortDirection: ListSortDirection.Descending,
+                ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+            var resultDesc = ProcessListViewModel.Build(processes, queryDesc);
+            Assert.Equal("Suspended", resultDesc[0].Status);
+            Assert.Equal("Running", resultDesc[1].Status);
+            Assert.Equal("Exited", resultDesc[2].Status);
+        }
+        finally
+        {
+            Strings.Current = originalLang;
+        }
+    }
+
+    [Fact]
+    public void GroupedProcesses_AggregatesExitingStatus_WhenAllChildrenExit()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo { Pid = 100, Name = "MyApp.exe", FriendlyName = "MyApp", Status = "Exited", IsTerminating = true },
+            new ProcessInfo { Pid = 101, Name = "MyApp.exe", FriendlyName = "MyApp", Status = "Exited", IsTerminating = true }
+        };
+
+        var query = new ProcessListQuery(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: true,
+            DimSuspended: false,
+            SortColumn: "Name",
+            SortDirection: ListSortDirection.Ascending,
+            ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        var result = ProcessListViewModel.Build(processes, query);
+        Assert.Single(result);
+        Assert.Equal("Exited", result[0].Status);
+        Assert.True(result[0].IsTerminating);
+    }
+
+    [Fact]
+    public void GroupedProcesses_RemainsRunning_WhenOnlySomeChildrenExit()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo { Pid = 100, Name = "MyApp.exe", FriendlyName = "MyApp", Status = "Running", IsTerminating = false },
+            new ProcessInfo { Pid = 101, Name = "MyApp.exe", FriendlyName = "MyApp", Status = "Exited", IsTerminating = true }
+        };
+
+        var query = new ProcessListQuery(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: true,
+            DimSuspended: false,
+            SortColumn: "Name",
+            SortDirection: ListSortDirection.Ascending,
+            ExpandedGroups: new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        var result = ProcessListViewModel.Build(processes, query);
+        Assert.Single(result);
+        Assert.Equal("Running", result[0].Status);
+        Assert.False(result[0].IsTerminating);
+    }
 
     private static ProcessInfo CreateProcess(string name, double cpu, int memoryMb) =>
         new()

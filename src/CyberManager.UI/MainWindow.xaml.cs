@@ -127,7 +127,9 @@ public partial class MainWindow : Window
     private readonly HashSet<string> _expandedGroups = new(StringComparer.OrdinalIgnoreCase);
     private readonly System.Collections.Concurrent.ConcurrentDictionary<int, DateTime> _terminatedPids = new();
     private readonly System.Collections.Concurrent.ConcurrentDictionary<ProcessIdentity, DateTime> _newProcessHighlights = new();
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<ProcessIdentity, (ProcessInfo Info, DateTime Expires)> _exitingProcesses = new();
     private readonly HashSet<ProcessIdentity> _knownProcesses = new();
+    private readonly Dictionary<ProcessIdentity, ProcessInfo> _lastKnownProcesses = new();
     private bool _hasInitializedKnownProcesses;
     private readonly GlobalHotkeyService _hotkeyService = new();
     private readonly TrayIconService _trayService = new();
@@ -929,24 +931,37 @@ public partial class MainWindow : Window
                     if (kv.Value < now) _newProcessHighlights.TryRemove(kv.Key, out _);
                 }
 
+                foreach (var kv in _exitingProcesses)
+                {
+                    if (kv.Value.Expires < now)
+                    {
+                        _exitingProcesses.TryRemove(kv.Key, out _);
+                        _lastKnownProcesses.Remove(kv.Key);
+                    }
+                }
+
                 var data = await _collector.CollectAsync(cancellationToken);
-                _all = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
+                var liveProcesses = data.Where(x => !_terminatedPids.ContainsKey(x.Pid)).ToList();
 
                 if (!_hasInitializedKnownProcesses)
                 {
-                    foreach (var p in _all)
+                    foreach (var p in liveProcesses)
                     {
-                        _knownProcesses.Add(new ProcessIdentity(p.Pid, p.StartTime));
+                        var id = new ProcessIdentity(p.Pid, p.StartTime);
+                        _knownProcesses.Add(id);
+                        _lastKnownProcesses[id] = p;
                     }
                     _hasInitializedKnownProcesses = true;
                 }
                 else
                 {
-                    var currentIdentities = new HashSet<ProcessIdentity>(_all.Count);
-                    foreach (var p in _all)
+                    var currentIdentities = new HashSet<ProcessIdentity>(liveProcesses.Count);
+                    foreach (var p in liveProcesses)
                     {
                         var identity = new ProcessIdentity(p.Pid, p.StartTime);
                         currentIdentities.Add(identity);
+
+                        _exitingProcesses.TryRemove(identity, out _);
 
                         if (!_knownProcesses.Contains(identity))
                         {
@@ -957,14 +972,54 @@ public partial class MainWindow : Window
                             _knownProcesses.Add(identity);
                         }
 
+                        _lastKnownProcesses[identity] = p;
+
                         if (_newProcessHighlights.TryGetValue(identity, out var expires) && expires > now)
                         {
                             p.IsNewlyCreated = true;
                         }
                     }
 
+                    // Processes that were known but are missing from live collection enter the exiting phase
+                    foreach (var knownId in _knownProcesses)
+                    {
+                        if (!currentIdentities.Contains(knownId) && !_exitingProcesses.ContainsKey(knownId))
+                        {
+                            if (knownId.Pid > 4 && _lastKnownProcesses.TryGetValue(knownId, out var lastInfo))
+                            {
+                                var exitingCopy = new ProcessInfo
+                                {
+                                    Pid = lastInfo.Pid,
+                                    ParentPid = lastInfo.ParentPid,
+                                    Name = lastInfo.Name,
+                                    FriendlyName = lastInfo.FriendlyName,
+                                    ExePath = lastInfo.ExePath,
+                                    UserName = lastInfo.UserName,
+                                    Status = "Exited",
+                                    IsTerminating = true,
+                                    CpuPercent = 0,
+                                    WorkingSetBytes = lastInfo.WorkingSetBytes,
+                                    PrivateBytes = lastInfo.PrivateBytes,
+                                    ThreadCount = lastInfo.ThreadCount,
+                                    StartTime = lastInfo.StartTime,
+                                    Priority = lastInfo.Priority,
+                                    MainWindowTitle = lastInfo.MainWindowTitle
+                                };
+                                _exitingProcesses[knownId] = (exitingCopy, now.AddSeconds(1.8));
+                            }
+                        }
+                    }
+
                     _knownProcesses.RemoveWhere(id => !currentIdentities.Contains(id));
+                    var toClean = _lastKnownProcesses.Keys
+                        .Where(id => !currentIdentities.Contains(id) && !_exitingProcesses.ContainsKey(id))
+                        .ToList();
+                    foreach (var id in toClean) _lastKnownProcesses.Remove(id);
                 }
+
+                _all = liveProcesses
+                    .Concat(_exitingProcesses.Values.Select(v => v.Info))
+                    .ToList();
 
                 _lastLoadError = null;
                 _hasLoadedOnce = true;
@@ -1820,6 +1875,7 @@ public partial class MainWindow : Window
 
     private void UpdateContextMenuAvailability(ProcessInfo process)
     {
+        var isExiting = process.IsTerminating || process.Status == "Exited";
         var hasProcessTree = process.IsGroupParent && process.Children.Count > 0;
         var hasSuspendedProcesses = process.IsGroupParent
             ? process.Children.Any(IsSuspended)
@@ -1829,7 +1885,7 @@ public partial class MainWindow : Window
             : !IsSuspended(process);
         var hasExecutablePath = !string.IsNullOrWhiteSpace(process.ExePath);
 
-        ContextKillItem.IsEnabled = process.Pid > 0;
+        ContextKillItem.IsEnabled = !isExiting && process.Pid > 0;
 
         // Derive the batch state from the same grid the menu was opened on (the compact grid is
         // also mirrored into the full grid, so either one is authoritative). Using the visible
@@ -1843,23 +1899,20 @@ public partial class MainWindow : Window
             ContextKillSelectionItem.Header = Strings.T("EndSelected", selection.Count);
         }
 
-        // "Properties" only ever describes one process, so with several rows selected it would
-        // silently show the properties of whichever row happened to be the target. Disable it
-        // instead of presenting a misleading dialog.
-        ContextPropertiesItem.IsEnabled = !batch && (process.Pid > 0 || hasExecutablePath);
+        ContextPropertiesItem.IsEnabled = !isExiting && !batch && (process.Pid > 0 || hasExecutablePath);
         ContextPropertiesItem.ToolTip = batch ? Strings.T("SingleProcessOnly") : null;
 
-        ContextKillTreeItem.IsEnabled = !batch && hasProcessTree;
+        ContextKillTreeItem.IsEnabled = !isExiting && !batch && hasProcessTree;
         var restartReason = GetRestartDisabledReason(process);
-        ContextRestartItem.IsEnabled = !batch && restartReason == null;
+        ContextRestartItem.IsEnabled = !isExiting && !batch && restartReason == null;
         ContextRestartItem.ToolTip = batch ? Strings.T("SingleProcessOnly") : restartReason;
-        ContextSuspendItem.IsEnabled = !batch && hasRunningProcesses;
-        ContextResumeItem.IsEnabled = !batch && hasSuspendedProcesses;
+        ContextSuspendItem.IsEnabled = !isExiting && !batch && hasRunningProcesses;
+        ContextResumeItem.IsEnabled = !isExiting && !batch && hasSuspendedProcesses;
 
         // The remaining actions each open a dialog or a shell window for exactly one process.
         // Running them against a batch would fire off several windows at once, which is both
         // confusing and hard to undo, so they are single-selection only as well.
-        ContextSetPriorityItem.IsEnabled = !batch && process.Pid > 0;
+        ContextSetPriorityItem.IsEnabled = !isExiting && !batch && process.Pid > 0;
         ContextCopyPathItem.IsEnabled = !batch && hasExecutablePath;
         ContextOpenFolderItem.IsEnabled = !batch && hasExecutablePath;
         ContextSearchOnlineItem.IsEnabled = !batch && !string.IsNullOrWhiteSpace(process.Name);
@@ -2897,7 +2950,7 @@ public partial class MainWindow : Window
         }
 
         var s = GetActionTarget(sender);
-        if (s == null) return;
+        if (s == null || s.IsTerminating || s.Status == "Exited") return;
 
         if (s.IsGroupParent && s.InstanceCount > 1)
         {
@@ -2976,7 +3029,7 @@ public partial class MainWindow : Window
     private async void KillTree_Click(object sender, RoutedEventArgs e)
     {
         var s = GetActionTarget(sender);
-        if (s == null) return;
+        if (s == null || s.IsTerminating || s.Status == "Exited") return;
         if (ConfirmDialog.ShowProcess(this, Strings.T("KillTree"), Strings.T("KillTreeConfirm", s.Name), s.ExePath, Strings.T("KillTree"), Strings.T("Cancel"), isDanger: true, confirmationKey: "process.kill-tree"))
         {
             int rootPid = s.Pid;
@@ -3253,14 +3306,41 @@ public partial class MainWindow : Window
             .Select(pair => pair.Key)
             .ToHashSet();
 
+        var now = DateTime.UtcNow;
         foreach (var pid in successfulPids)
         {
-            _terminatedPids[pid] = DateTime.UtcNow.AddSeconds(2);
+            _terminatedPids[pid] = now.AddSeconds(2);
+            var exiting = _all.FirstOrDefault(p => p.Pid == pid);
+            if (exiting != null)
+            {
+                var identity = new ProcessIdentity(exiting.Pid, exiting.StartTime);
+                var exitingCopy = new ProcessInfo
+                {
+                    Pid = exiting.Pid,
+                    ParentPid = exiting.ParentPid,
+                    Name = exiting.Name,
+                    FriendlyName = exiting.FriendlyName,
+                    ExePath = exiting.ExePath,
+                    UserName = exiting.UserName,
+                    Status = "Exited",
+                    IsTerminating = true,
+                    CpuPercent = 0,
+                    WorkingSetBytes = exiting.WorkingSetBytes,
+                    PrivateBytes = exiting.PrivateBytes,
+                    ThreadCount = exiting.ThreadCount,
+                    StartTime = exiting.StartTime,
+                    Priority = exiting.Priority,
+                    MainWindowTitle = exiting.MainWindowTitle
+                };
+                _exitingProcesses[identity] = (exitingCopy, now.AddSeconds(1.8));
+            }
         }
 
         if (successfulPids.Count > 0)
         {
-            _all.RemoveAll(process => successfulPids.Contains(process.Pid));
+            _all = _all.Where(process => !successfulPids.Contains(process.Pid))
+                .Concat(_exitingProcesses.Values.Select(v => v.Info))
+                .ToList();
             ApplySortingAndFilter();
         }
 
@@ -3438,6 +3518,7 @@ public partial class MainWindow : Window
                 var headerKeys = new Dictionary<string, string>(StringComparer.Ordinal)
                 {
                     ["Name"] = "Process",
+                    ["Status"] = "Status",
                     ["CpuPercent"] = "Cpu",
                     ["Pid"] = "Pid",
                     ["WorkingSetBytes"] = "Memory",

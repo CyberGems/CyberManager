@@ -37,6 +37,7 @@ public static class Strings
         ["Status"] = ("Status", "Estado"),
         ["Running"] = ("Running", "En ejecución"),
         ["Suspended"] = ("Suspended", "Suspendido"),
+        ["Exited"] = ("Exited", "Finalizado"),
         ["Kill"] = ("End Task", "Finalizar tarea"),
         ["KillTree"] = ("End Process Tree", "Finalizar árbol"),
         ["Suspend"] = ("Suspend", "Suspender"),

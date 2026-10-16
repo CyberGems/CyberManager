@@ -124,6 +124,7 @@
                         <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="3,0,0,0">
                             <Grid>
                                 <Border x:Name="NewHighlightOverlay" Background="#3310B981" Opacity="0" IsHitTestVisible="False"/>
+                                <Border x:Name="ExitHighlightOverlay" Background="#33EF4444" Opacity="0" IsHitTestVisible="False"/>
                                 <SelectiveScrollingGrid>
                                     <SelectiveScrollingGrid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></SelectiveScrollingGrid.ColumnDefinitions>
                                     <SelectiveScrollingGrid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></SelectiveScrollingGrid.RowDefinitions>
@@ -153,6 +154,22 @@
                                 </DataTrigger.EnterActions>
                                 <DataTrigger.ExitActions>
                                     <StopStoryboard BeginStoryboardName="CompactNewHighlightAnim"/>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsTerminating}" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#EF4444"/>
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard x:Name="CompactExitHighlightAnim">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ExitHighlightOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             From="1.0" To="0.0"
+                                                             Duration="0:0:1.8"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="CompactExitHighlightAnim"/>
                                 </DataTrigger.ExitActions>
                             </DataTrigger>
                         </ControlTemplate.Triggers>

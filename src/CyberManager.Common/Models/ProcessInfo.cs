@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using CyberManager.Common.I18n;
 
 namespace CyberManager.Common.Models;
 
@@ -30,6 +31,7 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     private bool _dimWhenSuspended;
     private bool _isContextTarget;
     private bool _isNewlyCreated;
+    private bool _isTerminating;
 
     public int Pid
     {
@@ -70,8 +72,13 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     public string Status
     {
         get => _status;
-        set => Set(ref _status, value);
+        set
+        {
+            if (Set(ref _status, value)) OnPropertyChanged(nameof(StatusFormatted));
+        }
     }
+
+    public string StatusFormatted => Strings.T(string.IsNullOrEmpty(_status) ? "Running" : _status);
 
     public double CpuPercent
     {
@@ -162,6 +169,7 @@ public sealed class ProcessInfo : INotifyPropertyChanged
 
     public bool IsContextTarget { get => _isContextTarget; set => Set(ref _isContextTarget, value); }
     public bool IsNewlyCreated { get => _isNewlyCreated; set => Set(ref _isNewlyCreated, value); }
+    public bool IsTerminating { get => _isTerminating; set => Set(ref _isTerminating, value); }
 
     public string DisplayName
     {
