@@ -124,6 +124,7 @@ public partial class NewTaskDialog : Window, IModalAttentionWindow
         var picker = new OpenFileDialog
         {
             Title = Strings.T("NewTaskBrowseTitle"), Filter = Strings.T("NewTaskFileFilter"),
+            InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             CheckFileExists = true, Multiselect = false, DereferenceLinks = false
         };
         if (picker.ShowDialog(this) != true) return;
