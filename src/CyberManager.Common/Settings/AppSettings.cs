@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CyberManager.Common.I18n;
+using CyberManager.Common.Models;
 
 namespace CyberManager.Common.Settings;
 
@@ -16,7 +17,7 @@ public sealed class AppSettings
 
     private static readonly string[] SortableColumns =
     {
-        "Name", "Status", "Pid", "CpuPercent", "WorkingSetBytes", "ThreadCount", "Priority", "ExePath"
+        "Name", "Status", "Pid", "UserName", "CpuPercent", "WorkingSetBytes", "ThreadCount", "Priority", "ExePath"
     };
 
     public Lang Language { get; set; } = Lang.Es;
@@ -29,6 +30,7 @@ public sealed class AppSettings
     public bool HighlightNewProcesses { get; set; } = true;
     public bool HideSystemProcesses { get; set; }
     public bool HeavyProcessesOnly { get; set; }
+    public ProcessCategoryFilter CategoryFilter { get; set; } = ProcessCategoryFilter.All;
     /// <summary>
     /// SortMemberPath of the process grid column the user last sorted by. Persisted so the
     /// ordering survives restarts.

@@ -167,6 +167,7 @@ public partial class MainWindow : Window
     private bool _suppressSelectionMirror;
     private bool _syncingHeavyFilter;
     private bool _syncingSystemFilter;
+    private bool _syncingCategoryFilter;
     private FrameworkElement? _suppressedMinimizeToolTipTarget;
     private object? _suppressedMinimizeToolTipContent;
 
@@ -284,6 +285,8 @@ public partial class MainWindow : Window
             Topmost = App.Settings.AlwaysOnTop;
             CompactView.SetPinned(Topmost);
             SetHeavyFilterControls(App.Settings.HeavyProcessesOnly);
+            SyncCategoryFilterRadio();
+            UpdateCategoryChips();
             GroupToggleCheck.IsChecked = App.Settings.GroupProcesses;
             SystemFilterCheck.IsChecked = App.Settings.HideSystemProcesses;
             FontSizeSlider.Value = App.Settings.RowFontSize;
@@ -308,6 +311,8 @@ public partial class MainWindow : Window
             Topmost = App.Settings.AlwaysOnTop;
             CompactView.SetPinned(Topmost);
             SetHeavyFilterControls(App.Settings.HeavyProcessesOnly);
+            SyncCategoryFilterRadio();
+            UpdateCategoryChips();
             KillBtn.IsEnabled = Selected != null;
             FontSizeSlider.Value = App.Settings.RowFontSize > 0 ? App.Settings.RowFontSize : 13;
             ProcGrid.FontSize = FontSizeSlider.Value;
@@ -1080,6 +1085,7 @@ public partial class MainWindow : Window
             // cards and sparklines above, so repeating them here (with a different RAM unit)
             // was redundant and crowded the status line into the controls on the right.
             StatsText.Text = Strings.T("ProcessesCount", _all.Count);
+            UpdateCategoryChips();
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -1232,7 +1238,10 @@ public partial class MainWindow : Window
                 _sortDirection,
                 _expandedGroups,
                 App.Settings.HeavyProcessesOnly,
-                HideSystemProcesses: App.Settings.HideSystemProcesses));
+                HideSystemProcesses: App.Settings.HideSystemProcesses,
+                CategoryFilter: App.Settings.CategoryFilter));
+
+        UpdateCategoryChips();
 
         // The refresh tick rebuilds the item collection every interval, which would otherwise
         // throw away a multi-selection. Snapshot the whole selection (by PID) before the rebuild
@@ -2672,6 +2681,75 @@ public partial class MainWindow : Window
         }
     }
 
+    private void CategoryFilter_Click(object sender, RoutedEventArgs e)
+    {
+        if (_syncingCategoryFilter) return;
+
+        var targetFilter = ProcessCategoryFilter.All;
+        if (ReferenceEquals(sender, CategoryAppsRadio))
+            targetFilter = ProcessCategoryFilter.Applications;
+        else if (ReferenceEquals(sender, CategoryBgRadio))
+            targetFilter = ProcessCategoryFilter.Background;
+
+        if (App.Settings.CategoryFilter != targetFilter)
+        {
+            App.Settings.CategoryFilter = targetFilter;
+            ThrottledSaveSettings();
+            ApplySortingAndFilter();
+        }
+    }
+
+    private void SyncCategoryFilterRadio()
+    {
+        _syncingCategoryFilter = true;
+        try
+        {
+            switch (App.Settings.CategoryFilter)
+            {
+                case ProcessCategoryFilter.Applications:
+                    CategoryAppsRadio.IsChecked = true;
+                    break;
+                case ProcessCategoryFilter.Background:
+                    CategoryBgRadio.IsChecked = true;
+                    break;
+                default:
+                    CategoryAllRadio.IsChecked = true;
+                    break;
+            }
+        }
+        finally
+        {
+            _syncingCategoryFilter = false;
+        }
+    }
+
+    private void UpdateCategoryChips()
+    {
+        if (CategoryAllRadio == null || CategoryAppsRadio == null || CategoryBgRadio == null)
+            return;
+
+        int totalCount = _all.Count;
+        int appsCount = 0;
+        for (int i = 0; i < _all.Count; i++)
+        {
+            if (_all[i].IsApplication)
+                appsCount++;
+        }
+        int bgCount = totalCount - appsCount;
+
+        CategoryAllRadio.Content = Strings.T("CategoryAllCount", totalCount);
+        CategoryAppsRadio.Content = Strings.T("CategoryAppsCount", appsCount);
+        CategoryBgRadio.Content = Strings.T("CategoryBgCount", bgCount);
+
+        CategoryAllRadio.ToolTip = Strings.T("CategoryAll");
+        CategoryAppsRadio.ToolTip = Strings.T("CategoryApps");
+        CategoryBgRadio.ToolTip = Strings.T("CategoryBackground");
+
+        AutomationProperties.SetName(CategoryAllRadio, Strings.T("CategoryAll"));
+        AutomationProperties.SetName(CategoryAppsRadio, Strings.T("CategoryApps"));
+        AutomationProperties.SetName(CategoryBgRadio, Strings.T("CategoryBackground"));
+    }
+
     private void ProcGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         var source = sender as DataGrid ?? ProcGrid;
@@ -3510,6 +3588,7 @@ public partial class MainWindow : Window
             UpdateEmptyState();
             CompactView.SetPinned(Topmost);
             _trayService.UpdateLocalization();
+            UpdateCategoryChips();
 
             if (ProcGrid.Columns.Count >= 7)
             {
@@ -3521,6 +3600,7 @@ public partial class MainWindow : Window
                     ["Status"] = "Status",
                     ["CpuPercent"] = "Cpu",
                     ["Pid"] = "Pid",
+                    ["UserName"] = "User",
                     ["WorkingSetBytes"] = "Memory",
                     ["ThreadCount"] = "Threads",
                     ["Priority"] = "Priority",

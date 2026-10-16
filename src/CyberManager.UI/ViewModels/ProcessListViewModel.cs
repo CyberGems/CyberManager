@@ -15,7 +15,8 @@ public sealed record ProcessListQuery(
     ListSortDirection SortDirection,
     IReadOnlySet<string> ExpandedGroups,
     bool HeavyProcessesOnly = false,
-    bool HideSystemProcesses = false);
+    bool HideSystemProcesses = false,
+    ProcessCategoryFilter CategoryFilter = ProcessCategoryFilter.All);
 
 public sealed class ProcessListViewModel
 {
@@ -84,7 +85,7 @@ public sealed class ProcessListViewModel
             });
         }
 
-        if (!query.GroupProcesses)
+            if (!query.GroupProcesses)
         {
             foreach (var process in filtered)
             {
@@ -93,6 +94,8 @@ public sealed class ProcessListViewModel
                 process.InstanceCount = 1;
                 process.DimWhenSuspended = query.DimSuspended && process.Status == "Suspended";
             }
+
+            filtered = filtered.Where(process => MatchesCategory(process, query.CategoryFilter));
 
             if (query.HeavyProcessesOnly)
             {
@@ -163,9 +166,11 @@ public sealed class ProcessListViewModel
             topLevel.Add(parent);
         }
 
-        var candidates = query.HeavyProcessesOnly
-            ? topLevel.Where(HasHighlightedMetric)
-            : topLevel;
+        var candidates = topLevel.Where(item => MatchesCategory(item, query.CategoryFilter));
+        if (query.HeavyProcessesOnly)
+        {
+            candidates = candidates.Where(HasHighlightedMetric);
+        }
         var result = new List<ProcessInfo>();
         foreach (var item in ApplySorting(candidates, query))
         {
@@ -302,6 +307,9 @@ public sealed class ProcessListViewModel
                 ? list.OrderBy(process => process.StatusFormatted).ThenBy(SortName, NameComparer)
                 : list.OrderByDescending(process => process.StatusFormatted).ThenBy(SortName, NameComparer),
             "Pid" => ascending ? list.OrderBy(process => process.Pid) : list.OrderByDescending(process => process.Pid),
+            "UserName" => ascending
+                ? list.OrderBy(process => process.UserShortName, StringComparer.OrdinalIgnoreCase).ThenBy(SortName, NameComparer)
+                : list.OrderByDescending(process => process.UserShortName, StringComparer.OrdinalIgnoreCase).ThenBy(SortName, NameComparer),
             "CpuPercent" => ascending ? list.OrderBy(process => process.CpuPercent).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.CpuPercent).ThenBy(SortName, NameComparer),
             "WorkingSetBytes" => ascending ? list.OrderBy(process => process.WorkingSetBytes).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.WorkingSetBytes).ThenBy(SortName, NameComparer),
             "ThreadCount" => ascending ? list.OrderBy(process => process.ThreadCount).ThenBy(SortName, NameComparer) : list.OrderByDescending(process => process.ThreadCount).ThenBy(SortName, NameComparer),
@@ -314,6 +322,14 @@ public sealed class ProcessListViewModel
     }
 
     private static readonly StringComparer NameComparer = StringComparer.InvariantCultureIgnoreCase;
+
+    private static bool MatchesCategory(ProcessInfo process, ProcessCategoryFilter filter) =>
+        filter switch
+        {
+            ProcessCategoryFilter.Applications => process.IsApplication,
+            ProcessCategoryFilter.Background => !process.IsApplication,
+            _ => true
+        };
 
     private static string SortName(ProcessInfo process) =>
         string.IsNullOrWhiteSpace(process.FriendlyName) ? process.Name : process.FriendlyName;

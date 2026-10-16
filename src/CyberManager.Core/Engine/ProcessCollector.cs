@@ -17,6 +17,7 @@ public sealed class ProcessCollector
 
     private readonly ProcessCpuTracker _cpuTracker = new();
     private readonly ConcurrentDictionary<ProcessCacheKey, string> _pathCache = new();
+    private readonly ConcurrentDictionary<ProcessCacheKey, string> _userNameCache = new();
     private readonly ConcurrentDictionary<string, string> _friendlyNameCache =
         new(StringComparer.OrdinalIgnoreCase);
     private readonly SemaphoreSlim _collectGate = new(1, 1);
@@ -68,6 +69,7 @@ public sealed class ProcessCollector
             if (!currentProcesses.Contains(key))
             {
                 _pathCache.TryRemove(key, out _);
+                _userNameCache.TryRemove(key, out _);
             }
         }
 
@@ -171,9 +173,11 @@ public sealed class ProcessCollector
                     info.MainWindowTitle = title;
                 }
 
-                // Exe Path with bounded identity-aware caching
-                info.ExePath = GetOrResolveExePath(pid, name, info.StartTime);
+                // Exe Path & User with bounded identity-aware caching
+                ResolveProcessMetadata(pid, name, info.StartTime, out var exePath, out var userName);
+                info.ExePath = exePath;
                 info.FriendlyName = GetOrResolveFriendlyName(name, info.ExePath);
+                info.UserName = userName;
 
                 result.Add(info);
 
@@ -189,16 +193,34 @@ public sealed class ProcessCollector
         return result;
     }
 
-    private string GetOrResolveExePath(int pid, string processName, DateTime startTime)
+    private void ResolveProcessMetadata(
+        int pid,
+        string processName,
+        DateTime startTime,
+        out string path,
+        out string userName)
     {
-        if (pid <= 4) return "";
-        var key = new ProcessCacheKey(pid, GetStartTimeKey(startTime));
-        if (_pathCache.TryGetValue(key, out var cachedPath))
+        if (pid <= 4)
         {
-            return cachedPath;
+            path = "";
+            userName = pid == 0 ? "" : "SYSTEM";
+            return;
         }
 
-        string path = "";
+        var key = new ProcessCacheKey(pid, GetStartTimeKey(startTime));
+        var hasCachedPath = _pathCache.TryGetValue(key, out var cachedPath);
+        var hasCachedUser = _userNameCache.TryGetValue(key, out var cachedUser);
+
+        if (hasCachedPath && hasCachedUser)
+        {
+            path = cachedPath ?? "";
+            userName = cachedUser ?? "";
+            return;
+        }
+
+        path = cachedPath ?? "";
+        userName = cachedUser ?? "";
+
         try
         {
             // PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
@@ -207,11 +229,34 @@ public sealed class ProcessCollector
             {
                 try
                 {
-                    var sb = new StringBuilder(1024);
-                    int size = sb.Capacity;
-                    if (QueryFullProcessImageName(handle, 0, sb, ref size))
+                    if (!hasCachedPath)
                     {
-                        path = sb.ToString();
+                        var sb = new StringBuilder(1024);
+                        int size = sb.Capacity;
+                        if (QueryFullProcessImageName(handle, 0, sb, ref size))
+                        {
+                            path = sb.ToString();
+                        }
+                    }
+
+                    if (!hasCachedUser)
+                    {
+                        if (OpenProcessToken(handle, TokenQuery, out var tokenHandle))
+                        {
+                            try
+                            {
+                                var identity = new System.Security.Principal.WindowsIdentity(tokenHandle);
+                                userName = identity.Name;
+                            }
+                            catch (Exception ex)
+                            {
+                                Trace.WriteLine($"Unable to read token identity for PID {pid}: {ex.Message}");
+                            }
+                            finally
+                            {
+                                CloseHandle(tokenHandle);
+                            }
+                        }
                     }
                 }
                 finally
@@ -222,14 +267,18 @@ public sealed class ProcessCollector
         }
         catch (Exception ex)
         {
-            Trace.WriteLine($"Unable to resolve executable path for PID {pid}: {ex.Message}");
+            Trace.WriteLine($"Unable to resolve process metadata for PID {pid}: {ex.Message}");
         }
 
         if (string.IsNullOrEmpty(path) && processName.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
         {
-            // Fallback to System32 path if standard system binary
             var sysPath = Path.Combine(Environment.SystemDirectory, processName);
             if (File.Exists(sysPath)) path = sysPath;
+        }
+
+        if (string.IsNullOrEmpty(userName) && (path.StartsWith(Environment.SystemDirectory, StringComparison.OrdinalIgnoreCase) || pid <= 4))
+        {
+            userName = "NT AUTHORITY\\SYSTEM";
         }
 
         if (_pathCache.Count >= MaxPathCacheEntries)
@@ -237,11 +286,12 @@ public sealed class ProcessCollector
             foreach (var oldKey in _pathCache.Keys.Take(64))
             {
                 _pathCache.TryRemove(oldKey, out _);
+                _userNameCache.TryRemove(oldKey, out _);
             }
         }
 
         _pathCache[key] = path;
-        return path;
+        _userNameCache[key] = userName;
     }
 
     private string GetOrResolveFriendlyName(string processName, string executablePath)
@@ -408,6 +458,11 @@ public sealed class ProcessCollector
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr h);
+
+    private const uint TokenQuery = 0x0008;
+
+    [DllImport("advapi32.dll", SetLastError = true)]
+    private static extern bool OpenProcessToken(IntPtr processHandle, uint desiredAccess, out IntPtr tokenHandle);
 
     #endregion
 

@@ -23,6 +23,16 @@ public class ProcessListViewModelTests
         "Adobe Acrobat", "Google Chrome", "Microsoft Edge"
     };
 
+    private static readonly string[] ExpectedUserNamesAscending =
+    {
+        "Alice", "Bob", "Charlie"
+    };
+
+    private static readonly string[] ExpectedUserNamesDescending =
+    {
+        "Charlie", "Bob", "Alice"
+    };
+
     [Fact]
     public void HeavyFilter_IncludesEveryProcessWithAHighlightedCpuOrMemoryValue()
     {
@@ -537,6 +547,111 @@ public class ProcessListViewModelTests
         Assert.Single(result);
         Assert.Equal("Running", result[0].Status);
         Assert.False(result[0].IsTerminating);
+    }
+
+    [Fact]
+    public void UserShortName_StripsDomainAndHandlesEmpty()
+    {
+        var proc = new ProcessInfo { UserName = @"CORP\Alice" };
+        Assert.Equal("Alice", proc.UserShortName);
+
+        proc.UserName = "Bob";
+        Assert.Equal("Bob", proc.UserShortName);
+
+        proc.UserName = "";
+        Assert.Equal("", proc.UserShortName);
+
+        proc.UserName = @"DOMAIN\SUB\Charlie";
+        Assert.Equal("Charlie", proc.UserShortName);
+    }
+
+    [Fact]
+    public void IsApplication_IdentifiesWindowsAndExplorer()
+    {
+        var app = new ProcessInfo { Name = "notepad.exe", MainWindowTitle = "Notepad" };
+        Assert.True(app.IsApplication);
+
+        var explorer = new ProcessInfo { Name = "explorer.exe", MainWindowTitle = "" };
+        Assert.True(explorer.IsApplication);
+
+        var service = new ProcessInfo { Name = "svchost.exe", MainWindowTitle = "" };
+        Assert.False(service.IsApplication);
+
+        var groupParent = new ProcessInfo
+        {
+            Name = "chrome.exe",
+            IsGroupParent = true,
+            MainWindowTitle = "",
+            Children = new List<ProcessInfo>
+            {
+                new() { Name = "chrome.exe", MainWindowTitle = "Google Chrome" }
+            }
+        };
+        Assert.True(groupParent.IsApplication);
+    }
+
+    [Fact]
+    public void CategoryFilter_SeparatesApplicationsAndBackground()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo { Pid = 101, Name = "notepad.exe", MainWindowTitle = "Notepad" },
+            new ProcessInfo { Pid = 102, Name = "svchost.exe", MainWindowTitle = "" },
+            new ProcessInfo { Pid = 103, Name = "explorer.exe", MainWindowTitle = "" }
+        };
+
+        var allQuery = new ProcessListQuery(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: false,
+            DimSuspended: false,
+            SortColumn: "Pid",
+            SortDirection: ListSortDirection.Ascending,
+            ExpandedGroups: new HashSet<string>(),
+            CategoryFilter: ProcessCategoryFilter.All);
+
+        var appsQuery = allQuery with { CategoryFilter = ProcessCategoryFilter.Applications };
+        var bgQuery = allQuery with { CategoryFilter = ProcessCategoryFilter.Background };
+
+        var allResult = ProcessListViewModel.Build(processes, allQuery);
+        var appsResult = ProcessListViewModel.Build(processes, appsQuery);
+        var bgResult = ProcessListViewModel.Build(processes, bgQuery);
+
+        Assert.Equal(3, allResult.Count);
+        Assert.Equal(2, appsResult.Count);
+        Assert.Contains(appsResult, p => p.Name == "notepad.exe");
+        Assert.Contains(appsResult, p => p.Name == "explorer.exe");
+
+        Assert.Single(bgResult);
+        Assert.Equal("svchost.exe", bgResult[0].Name);
+    }
+
+    [Fact]
+    public void Sorting_ByUserName_SortsAlphabetically()
+    {
+        var processes = new[]
+        {
+            new ProcessInfo { Pid = 1, Name = "ProcA", UserName = @"DOMAIN\Charlie" },
+            new ProcessInfo { Pid = 2, Name = "ProcB", UserName = @"DOMAIN\Alice" },
+            new ProcessInfo { Pid = 3, Name = "ProcC", UserName = @"DOMAIN\Bob" }
+        };
+
+        var ascQuery = new ProcessListQuery(
+            Search: "",
+            ShowIdleProcess: true,
+            GroupProcesses: false,
+            DimSuspended: false,
+            SortColumn: "UserName",
+            SortDirection: ListSortDirection.Ascending,
+            ExpandedGroups: new HashSet<string>());
+
+        var descQuery = ascQuery with { SortDirection = ListSortDirection.Descending };
+
+        var ascResult = ProcessListViewModel.Build(processes, ascQuery);
+        var descResult = ProcessListViewModel.Build(processes, descQuery);
+
+        Assert.Equal(ExpectedUserNamesAscending, ascResult.Select(p => p.UserShortName));
+        Assert.Equal(ExpectedUserNamesDescending, descResult.Select(p => p.UserShortName));
     }
 
     private static ProcessInfo CreateProcess(string name, double cpu, int memoryMb) =>

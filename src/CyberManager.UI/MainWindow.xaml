@@ -471,6 +471,38 @@
             <Setter Property="Margin" Value="12,0,0,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
+        <!-- Category Filter Chip RadioButton Style -->
+        <Style x:Key="CategoryChipRadioStyle" TargetType="RadioButton">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="ChipBorder" Background="{TemplateBinding Background}"
+                                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ChipBorder" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="ChipBorder" Property="Background" Value="#2210B981"/>
+                                <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <!-- CyberSnap Neon Glowing Toggle Switch Style -->
         <Style x:Key="CyberSnapToggleStyle" TargetType="CheckBox">
             <Setter Property="Cursor" Value="Hand"/>
@@ -741,6 +773,7 @@
                 <Grid x:Name="ProcessesTabContent" Grid.Row="1" Visibility="Visible">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/> <!-- FullToolbar -->
+                        <RowDefinition Height="Auto"/> <!-- Category Filter Chips -->
                         <RowDefinition Height="*"/>    <!-- FullProcessListBorder -->
                         <RowDefinition Height="Auto"/> <!-- FullFooter -->
                     </Grid.RowDefinitions>
@@ -969,8 +1002,21 @@
                     </StackPanel>
                 </Grid>
 
+                <!-- Category Filter Chips -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="2,0,0,10" VerticalAlignment="Center">
+                    <RadioButton x:Name="CategoryAllRadio" GroupName="CategoryFilterGroup"
+                                 Style="{StaticResource CategoryChipRadioStyle}"
+                                 IsChecked="True" Click="CategoryFilter_Click"/>
+                    <RadioButton x:Name="CategoryAppsRadio" GroupName="CategoryFilterGroup"
+                                 Style="{StaticResource CategoryChipRadioStyle}"
+                                 Margin="8,0,0,0" Click="CategoryFilter_Click"/>
+                    <RadioButton x:Name="CategoryBgRadio" GroupName="CategoryFilterGroup"
+                                 Style="{StaticResource CategoryChipRadioStyle}"
+                                 Margin="8,0,0,0" Click="CategoryFilter_Click"/>
+                </StackPanel>
+
                 <!-- DataGrid -->
-                <Border x:Name="FullProcessListBorder" Grid.Row="1" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
+                <Border x:Name="FullProcessListBorder" Grid.Row="2" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="10" ClipToBounds="True">
                     <Grid>
                         <DataGrid x:Name="ProcGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="None"
                                   Background="{DynamicResource CardBrush}" BorderThickness="0" RowHeaderWidth="0"
@@ -1349,6 +1395,36 @@
                                 </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="80" SortMemberPath="Pid"
                                                     ElementStyle="{StaticResource MainGridValueTextStyle}"/>
+                                <DataGridTemplateColumn Header="User" Width="105" SortMemberPath="UserName">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid VerticalAlignment="Center" Margin="10,0,4,0">
+                                                <Border x:Name="UserPill" CornerRadius="4" Padding="6,1.5" HorizontalAlignment="Left"
+                                                        Background="#10FFFFFF" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                                        ToolTip="{Binding UserName}">
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Path Data="M 12 12 A 4 4 0 1 0 12 4 A 4 4 0 1 0 12 12 Z M 5 20 A 7 7 0 0 1 19 20"
+                                                              Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.2"
+                                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                                              Width="10" Height="10" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center"
+                                                              Fill="Transparent"/>
+                                                        <TextBlock Text="{Binding UserShortName}" FontSize="10.5" Foreground="{DynamicResource TextBrush}"
+                                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="80"/>
+                                                    </StackPanel>
+                                                </Border>
+                                            </Grid>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding UserShortName}" Value="">
+                                                    <Setter TargetName="UserPill" Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding UserShortName}" Value="SYSTEM">
+                                                    <Setter TargetName="UserPill" Property="Background" Value="#183B82F6"/>
+                                                    <Setter TargetName="UserPill" Property="BorderBrush" Value="#353B82F6"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="Threads" Binding="{Binding ThreadCount}" Width="70" SortMemberPath="ThreadCount"
                                                     ElementStyle="{StaticResource MainGridValueTextStyle}"/>
                                 <DataGridTextColumn Header="Priority" Binding="{Binding PriorityFormatted}" Width="90" SortMemberPath="Priority"
@@ -1435,7 +1511,7 @@
                 </Border>
 
                 <!-- Footer -->
-                <Grid x:Name="FullFooter" Grid.Row="2" Margin="0,12,0,0">
+                <Grid x:Name="FullFooter" Grid.Row="3" Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>

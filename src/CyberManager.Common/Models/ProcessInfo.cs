@@ -68,7 +68,24 @@ public sealed class ProcessInfo : INotifyPropertyChanged
             if (Set(ref _exePath, value)) OnPropertyChanged(nameof(IsSystemProcess));
         }
     }
-    public string UserName { get => _userName; set => Set(ref _userName, value); }
+    public string UserName
+    {
+        get => _userName;
+        set
+        {
+            if (Set(ref _userName, value)) OnPropertyChanged(nameof(UserShortName));
+        }
+    }
+
+    public string UserShortName
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(_userName)) return "";
+            var slash = _userName.LastIndexOf('\\');
+            return slash >= 0 && slash < _userName.Length - 1 ? _userName.Substring(slash + 1) : _userName;
+        }
+    }
     public string Status
     {
         get => _status;
@@ -126,6 +143,12 @@ public sealed class ProcessInfo : INotifyPropertyChanged
     }
 
     public bool HasWindow => !string.IsNullOrWhiteSpace(MainWindowTitle);
+
+    /// <summary>
+    /// True when the process is an interactive application (it has a top-level window,
+    /// or is a group parent whose children include a top-level window, or is the desktop shell).
+    /// </summary>
+    public bool IsApplication => HasWindow || (IsGroupParent && Children.Any(child => child.HasWindow)) || Name.Equals("explorer.exe", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// True when the process belongs to the Windows system category (kernel idle/system
