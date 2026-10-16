@@ -313,6 +313,7 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Margin="0,0,8,0">
+                    <controls:DiskActivityIndicator x:Name="DiskActivityLed" Width="26" Height="26" Margin="0,0,5,0" Click="DiskActivity_Click"/>
                     <!-- Both pills layer their tint over the theme background instead of replacing it,
                          so a theme switch keeps working and the metric colour only warms up as the
                          machine fills. Tint and tooltip are driven from SetSystemMetrics. -->

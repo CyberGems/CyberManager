@@ -72,6 +72,26 @@ public class LargeHistoryGraphControl : AnimatedHistoryGraph
             typeof(LargeHistoryGraphControl),
             new FrameworkPropertyMetadata(Color.FromRgb(248, 113, 113), FrameworkPropertyMetadataOptions.AffectsRender)); // Red / Coral
 
+    public static readonly DependencyProperty PlotBackgroundProperty = DependencyProperty.Register(
+        nameof(PlotBackground), typeof(Brush), typeof(LargeHistoryGraphControl),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public static readonly DependencyProperty PlotGridBrushProperty = DependencyProperty.Register(
+        nameof(PlotGridBrush), typeof(Brush), typeof(LargeHistoryGraphControl),
+        new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public Brush? PlotBackground
+    {
+        get => (Brush?)GetValue(PlotBackgroundProperty);
+        set => SetValue(PlotBackgroundProperty, value);
+    }
+
+    public Brush? PlotGridBrush
+    {
+        get => (Brush?)GetValue(PlotGridBrushProperty);
+        set => SetValue(PlotGridBrushProperty, value);
+    }
+
     public float[]? PrimaryValues
     {
         get => (float[]?)GetValue(PrimaryValuesProperty);
@@ -127,6 +147,9 @@ public class LargeHistoryGraphControl : AnimatedHistoryGraph
     }
 
     public int MaxSamples { get; set; } = 60;
+    public bool ShowMeter { get; set; } = true;
+    public string? PrimarySeriesLabel { get; set; }
+    public string? SecondarySeriesLabel { get; set; }
 
     private Point? _hoverPos;
     private long _lastHoverRenderTimestamp;
@@ -146,6 +169,7 @@ public class LargeHistoryGraphControl : AnimatedHistoryGraph
     private Brush? _secondaryFill;
     private Pen? _primaryPen;
     private Pen? _secondaryPen;
+    private Pen? _plotGridPen;
     internal int GeometryBuildCount => _primaryDrawing.BuildCount + _secondaryDrawing.BuildCount;
 
     public void UpdateHistory(float[] primary, float[]? secondary, object sample, TimeSpan interval)
@@ -222,74 +246,85 @@ public class LargeHistoryGraphControl : AnimatedHistoryGraph
 
         double meterWidth = 38;
         double gap = 12;
-        double graphLeft = meterWidth + gap;
+        double graphLeft = ShowMeter ? meterWidth + gap : 0;
         double graphWidth = Math.Max(10, w - graphLeft);
         double graphHeight = h - 24;
         double graphTop = 8;
         double graphBottom = graphTop + graphHeight;
         EnsurePaints();
 
-        // 1. Draw Left Vertical Meter Box
-        var meterRect = new Rect(0, graphTop, meterWidth, graphHeight);
-        dc.DrawRoundedRectangle(GraphBackgroundBrush, GraphBorderPen, meterRect, 4, 4);
-
         double max = MaxValue > 0 ? MaxValue : 100.0;
-        double curVal = Math.Clamp(CurrentValue, 0.0, max);
-        double secVal = Math.Clamp(SecondaryCurrentValue, 0.0, curVal);
-
-        double curNorm = curVal / max;
-        double secNorm = secVal / max;
-
-        _meterTargetPrimary = curNorm;
-        _meterTargetSecondary = secNorm;
-        _primaryMeter.CenterY = _secondaryMeter.CenterY = graphBottom;
-        if (!IsAnimating)
+        if (ShowMeter)
         {
-            _primaryMeter.ScaleY = curNorm;
-            _secondaryMeter.ScaleY = secNorm;
+            // 1. Draw Left Vertical Meter Box
+            var meterRect = new Rect(0, graphTop, meterWidth, graphHeight);
+            dc.DrawRoundedRectangle(GraphBackgroundBrush, GraphBorderPen, meterRect, 4, 4);
+
+            double curVal = Math.Clamp(CurrentValue, 0.0, max);
+            double secVal = Math.Clamp(SecondaryCurrentValue, 0.0, curVal);
+
+            double curNorm = curVal / max;
+            double secNorm = secVal / max;
+
+            _meterTargetPrimary = curNorm;
+            _meterTargetSecondary = secNorm;
+            _primaryMeter.CenterY = _secondaryMeter.CenterY = graphBottom;
+            if (!IsAnimating)
+            {
+                _primaryMeter.ScaleY = curNorm;
+                _secondaryMeter.ScaleY = secNorm;
+            }
+
+            // Draw primary bar fill
+            dc.PushTransform(_primaryMeter);
+            dc.DrawRectangle(_primaryMeterBrush, null, new Rect(1, graphTop + 2, meterWidth - 2, graphHeight - 2));
+            dc.Pop();
+
+            // Draw secondary bar fill (kernel)
+            dc.PushTransform(_secondaryMeter);
+            dc.DrawRectangle(_secondaryMeterBrush, null, new Rect(1, graphTop + 2, meterWidth - 2, graphHeight - 2));
+            dc.Pop();
+
+            // Meter Title & Value
+            var titleFt = new FormattedText(
+                Title,
+                CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                GraphTypeface,
+                10.5,
+                MeterTitleBrush,
+                VisualTreeHelper.GetDpi(this).PixelsPerDip);
+            dc.DrawText(titleFt, new Point(meterWidth / 2.0 - titleFt.Width / 2.0, graphTop + 4));
+
+            string curValStr = UnitSuffix == "%" ? $"{curVal:F1}%" : $"{curVal:F1}{UnitSuffix}";
+            var valFt = new FormattedText(
+                curValStr,
+                CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                GraphTypeface,
+                9.5,
+                MeterValueBrush,
+                VisualTreeHelper.GetDpi(this).PixelsPerDip);
+            dc.DrawText(valFt, new Point(meterWidth / 2.0 - valFt.Width / 2.0, graphBottom - valFt.Height - 4));
         }
-
-        // Draw primary bar fill
-        dc.PushTransform(_primaryMeter);
-        dc.DrawRectangle(_primaryMeterBrush, null, new Rect(1, graphTop + 2, meterWidth - 2, graphHeight - 2));
-        dc.Pop();
-
-        // Draw secondary bar fill (kernel)
-        dc.PushTransform(_secondaryMeter);
-        dc.DrawRectangle(_secondaryMeterBrush, null, new Rect(1, graphTop + 2, meterWidth - 2, graphHeight - 2));
-        dc.Pop();
-
-        // Meter Title & Value
-        var titleFt = new FormattedText(
-            Title,
-            CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            GraphTypeface,
-            10.5,
-            MeterTitleBrush,
-            VisualTreeHelper.GetDpi(this).PixelsPerDip);
-        dc.DrawText(titleFt, new Point(meterWidth / 2.0 - titleFt.Width / 2.0, graphTop + 4));
-
-        string curValStr = UnitSuffix == "%" ? $"{curVal:F1}%" : $"{curVal:F1}{UnitSuffix}";
-        var valFt = new FormattedText(
-            curValStr,
-            CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            GraphTypeface,
-            9.5,
-            MeterValueBrush,
-            VisualTreeHelper.GetDpi(this).PixelsPerDip);
-        dc.DrawText(valFt, new Point(meterWidth / 2.0 - valFt.Width / 2.0, graphBottom - valFt.Height - 4));
 
         // 2. Draw Main Graph Box
         var graphRect = new Rect(graphLeft, graphTop, graphWidth, graphHeight);
-        dc.DrawRoundedRectangle(GraphBackgroundBrush, GraphBorderPen, graphRect, 4, 4);
+        dc.DrawRoundedRectangle(PlotBackground ?? GraphBackgroundBrush, GraphBorderPen, graphRect, 4, 4);
+
+        var gridPen = GridPen;
+        if (PlotGridBrush is { } gridBrush)
+        {
+            if (_plotGridPen == null || !ReferenceEquals(_plotGridPen.Brush, gridBrush))
+                _plotGridPen = new Pen(gridBrush, 1);
+            gridPen = _plotGridPen;
+        }
 
         // Grid Lines (25%, 50%, 75%)
         for (int step = 1; step <= 3; step++)
         {
             double gy = graphBottom - (step * 0.25 * graphHeight);
-            dc.DrawLine(GridPen, new Point(graphLeft + 1, gy), new Point(graphLeft + graphWidth - 1, gy));
+            dc.DrawLine(gridPen, new Point(graphLeft + 1, gy), new Point(graphLeft + graphWidth - 1, gy));
         }
 
         // Clip data to graph box
@@ -335,7 +370,9 @@ public class LargeHistoryGraphControl : AnimatedHistoryGraph
 
                     float val = primary[hoverIdx];
                     float secV = secondary != null && hoverIdx < secondary.Length ? secondary[hoverIdx] : 0f;
-                    string tipText = UnitSuffix == "%" 
+                    string tipText = secondary != null && SecondarySeriesLabel != null
+                        ? $"{PrimarySeriesLabel}: {val:F1} {UnitSuffix}\n{SecondarySeriesLabel}: {secV:F1} {UnitSuffix}"
+                        : UnitSuffix == "%"
                         ? $"{(secondary != null ? $"Total: {val:F1}%\nKernel: {secV:F1}%" : $"{val:F1}%")}"
                         : $"{val:F1} {UnitSuffix}";
 

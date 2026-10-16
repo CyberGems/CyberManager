@@ -106,7 +106,12 @@ public class StringsTests
             "Update", "UpdateTagUnrecognized", "UpdateAvailable", "UpToDate",
             "FloatingWidget", "CloseWidget", "WidgetHotkeyTitle", "WidgetHotkeyDesc", "ShowMainWindow",
             "MoreOptions", "DocumentationWiki", "AboutCyberManager", "Description",
-            "Unknown", "CpuModel", "TotalRam", "TotalRamLabel", "HistorySamples"
+            "Unknown", "CpuModel", "TotalRam", "TotalRamLabel", "HistorySamples",
+            "Disks", "DiskActivity", "OpenDiskPerformance", "AllDisksCombined", "DiskNumber", "DiskSelection",
+            "DiskActiveTime", "DiskTransferRate", "DiskReadSpeed", "DiskWriteSpeed", "DiskResponseTime",
+            "DiskQueueLength", "DiskTotalRead", "DiskTotalWritten", "DiskTransfers", "DiskCount", "DiskHistoryHint",
+            "DiskCombinedHint", "DiskSelectedHint", "DiskWarmingUp", "DiskUnavailable", "DiskLedRates",
+            "DiskReading", "DiskWriting", "DiskReadingWriting", "DiskIdle"
         };
         foreach (var key in keys)
         {

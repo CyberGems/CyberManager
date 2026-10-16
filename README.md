@@ -39,7 +39,7 @@ Most task managers either freeze under heavy load or bury basic features behind 
 | Manage large process lists | Virtualized rows, background icon loading, and smooth scrollbar arrows |
 | Instant process refresh | NT-native engine — direct API calls, zero WMI overhead |
 | Identify resource hogs | Adaptive CPU/RAM heatmap and top-10 heavy-process filter |
-| Monitor system health | Animated histories, a floating CPU/RAM widget, and a Performance view with 4 tabs |
+| Monitor system health | Animated histories, a floating CPU/RAM widget with a disk activity LED, and a Performance view with 5 tabs |
 | Control processes | End, end tree, restart, suspend, resume, set priority |
 | Act on many at once | Multi-select with Ctrl/Shift+click and one-touch "End selected" |
 | Understand processes | Friendly names, metadata, and a detailed Properties dialog |
@@ -81,12 +81,14 @@ Most task managers either freeze under heavy load or bury basic features behind 
 ### 📊 System Monitoring
 - **Animated Metric Histories**: CPU, RAM, and system activity graphs move smoothly between real samples across the main window, Performance views, and floating widget. Sampling frequency is unchanged; animation pauses for hidden graphs or minimized windows and respects Windows animation settings
 - **Floating Metrics Widget** — Keep CPU and RAM readings and history visible in a movable, pinnable window with detailed tooltips
+- **Disk Activity LED**: See read (green), write (red), or simultaneous activity (amber) in both window layouts and the floating widget. Click it or press `Ctrl+4` to open disk performance
 - **Persistent Update Notices** — Available updates stay visible from either title bar or the notification-area menu
-- **Performance View**: Integrated view with 4 tabs:
+- **Performance View**: Integrated view with 5 tabs:
   - **Summary** — Dual sparklines + system totals + hardware topology
   - **CPU** — Full history graph + model name + core/thread counts
   - **Memory** — Physical RAM, commit charge, kernel pools (paged/non-paged)
   - **System Activity**: Process/thread/handle counts + kernel pool stats
+  - **Disks**: Combined or per-physical-disk activity and read/write histories, transfer rates, response time, queue length, and session byte totals. Samples are collected every 500 ms independently of process-list refreshes. Combined active time is an average; transfer rates and byte totals are summed
 
 ### 🖥️ Desktop Integration
 - **Single Instance**: Launching again restores the existing window within the same session
@@ -182,6 +184,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Alt+Shift+M` | Toggle CyberManager | Global |
 | `Ctrl+Shift+M` | Toggle compact mode | Application |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Switch to Processes / Performance / Settings | Application |
+| `Ctrl+4` | Open Performance → Disks | Application / Widget |
 | `Ctrl+F` / `Ctrl+E` | Focus search box | Application |
 | `Ctrl+G` | Toggle process grouping | Application |
 | `Ctrl+I` | Open System Information | Application |

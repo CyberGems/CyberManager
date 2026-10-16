@@ -564,8 +564,10 @@
                         </Grid.ColumnDefinitions>
                         <!-- Sits first so the notice is the leftmost thing the eye meets on the
                              right cluster, and stays hidden until a check finds a newer version. -->
-                        <controls:UpdateAvailableButton Grid.Column="0" x:Name="UpdatePill"
-                                                        UpdateRequested="UpdatePill_UpdateRequested"/>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <controls:UpdateAvailableButton x:Name="UpdatePill" UpdateRequested="UpdatePill_UpdateRequested"/>
+                            <controls:DiskActivityIndicator x:Name="DiskActivityLed" Width="30" Height="32" Click="DiskActivity_Click"/>
+                        </StackPanel>
                         <Button Grid.Column="3" x:Name="FullModeToggleBtn" Width="42" Margin="4,0,0,0" Style="{StaticResource ModeToggleButton}" Click="FullModeToggle_Click" ToolTip="Modo compacto" AutomationProperties.Name="Modo compacto">
                             <!-- Compact-window glyph, swapped from the widget control. -->
                             <Path Data="M 3 5 H 21 V 19 H 3 Z M 12 11 H 19 V 17 H 12 Z"

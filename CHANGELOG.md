@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Disk Monitoring**: Performance gains a Disks tab with combined and per-physical-disk activity, read/write histories, transfer rates, latency, queue length, and session byte totals from native Windows performance counters. A live activity LED in Full/Compact layouts and the floating widget opens this view, also available through `Ctrl+4`.
+
 ### Changed
 - **Update Prompts**: A download icon, separate installed/available version cards, and a clearer layout replace the generic warning-style update modal in all update entry points.
 - **Dialog Keyboard Hints**: Confirmation, process properties, and close-window dialogs share centered vector Enter badges, with consistent shortcut chips across themes.

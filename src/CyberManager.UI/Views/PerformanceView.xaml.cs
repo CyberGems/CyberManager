@@ -41,6 +41,7 @@ public partial class PerformanceView : UserControl
         TabCpu.IsChecked = string.Equals(name, "Cpu", StringComparison.OrdinalIgnoreCase);
         TabMemory.IsChecked = string.Equals(name, "Memory", StringComparison.OrdinalIgnoreCase);
         TabIo.IsChecked = string.Equals(name, "Io", StringComparison.OrdinalIgnoreCase);
+        TabDisks.IsChecked = string.Equals(name, "Disks", StringComparison.OrdinalIgnoreCase);
         UpdateSubTabVisibility();
     }
 
@@ -52,10 +53,13 @@ public partial class PerformanceView : UserControl
         TabCpuLabel.Text = Strings.T("Cpu");
         TabMemoryLabel.Text = Strings.T("Memory");
         TabIoLabel.Text = Strings.T("IoHistory");
+        TabDisksLabel.Text = Strings.T("Disks");
         AutomationProperties.SetName(TabSummary, Strings.T("Summary"));
         AutomationProperties.SetName(TabCpu, Strings.T("Cpu"));
         AutomationProperties.SetName(TabMemory, Strings.T("Memory"));
         AutomationProperties.SetName(TabIo, Strings.T("IoHistory"));
+        AutomationProperties.SetName(TabDisks, Strings.T("Disks"));
+        ViewDisks.RefreshLocalization();
 
         CpuHistoryTitle.Text = Strings.T("CpuHistory");
         CpuLegend.Text = Strings.T("CpuLegend");
@@ -210,13 +214,17 @@ public partial class PerformanceView : UserControl
 
     private void UpdateSubTabVisibility()
     {
-        if (ViewSummary == null || ViewCpu == null || ViewMemory == null || ViewIo == null) return;
+        if (ViewSummary == null || ViewCpu == null || ViewMemory == null || ViewIo == null || ViewDisks == null) return;
 
         ViewSummary.Visibility = TabSummary.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         ViewCpu.Visibility = TabCpu.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         ViewMemory.Visibility = TabMemory.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         ViewIo.Visibility = TabIo.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        ViewDisks.Visibility = TabDisks.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+        TelemetryStatus.Visibility = TabDisks.IsChecked == true ? Visibility.Collapsed : Visibility.Visible;
     }
+
+    public void UpdateDiskMetrics(DiskTelemetrySnapshot snapshot) => ViewDisks.UpdateMetrics(snapshot);
 
     /// <summary>Compact up time: "3d 04h 12m", "4h 12m" or "12m".</summary>
     private static string FormatUptime(TimeSpan uptime) => uptime.TotalDays >= 1

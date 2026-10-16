@@ -114,6 +114,10 @@ public partial class MainWindow : Window
 
     private readonly ProcessCollector _collector = new();
     private readonly DispatcherTimer _timer = new();
+    private readonly DispatcherTimer _diskTimer = new();
+    private readonly DiskMetricsCollector _diskCollector = new();
+    private DiskTelemetrySnapshot _diskSnapshot = new();
+    private int _diskRefreshInFlight;
     private readonly DispatcherTimer _searchDebounceTimer = new();
     private readonly DispatcherTimer _searchHistoryTimer = new();
     private readonly DispatcherTimer _settingsSaveTimer = new();
@@ -210,6 +214,7 @@ public partial class MainWindow : Window
         CompactView.EndTaskRequested += Kill_Click;
         CompactView.RestartRequested += Restart_Click;
         CompactView.PauseDetectionRequested += (_, _) => SetDetectionPaused(!_detectionPaused);
+        CompactView.DiskActivityRequested += (_, _) => OpenDiskPerformance();
         CompactView.PinRequested += CompactView_PinRequested;
         CompactView.SettingsRequested += Settings_Click;
         CompactView.MinimizeRequested += Minimize_Click;
@@ -237,6 +242,8 @@ public partial class MainWindow : Window
         Closed += OnClosed;
         _timer.Interval = TimeSpan.FromMilliseconds(App.Settings.RefreshIntervalMs);
         _timer.Tick += (_, _) => _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
+        _diskTimer.Interval = DiskMetricsCollector.SampleInterval;
+        _diskTimer.Tick += (_, _) => _ = RefreshDiskMetricsAsync();
         _searchDebounceTimer.Interval = TimeSpan.FromMilliseconds(150);
         _searchDebounceTimer.Tick += (_, _) => { _searchDebounceTimer.Stop(); ApplySortingAndFilter(); };
         _searchHistoryTimer.Interval = TimeSpan.FromMilliseconds(750);
@@ -408,6 +415,7 @@ public partial class MainWindow : Window
 
             _isClosed = true;
             _timer.Stop();
+            _diskTimer.Stop();
             _searchDebounceTimer.Stop();
             _searchHistoryTimer.Stop();
             _settingsSaveTimer.Stop();
@@ -516,6 +524,8 @@ public partial class MainWindow : Window
     {
         _isClosed = true;
         _timer.Stop();
+        _diskTimer.Stop();
+        _diskCollector.Dispose();
         _searchDebounceTimer.Stop();
         _searchHistoryTimer.Stop();
         _settingsSaveTimer.Stop();
@@ -743,8 +753,55 @@ public partial class MainWindow : Window
     {
         if (_isClosed) return;
 
-        if (ShouldSampleMetrics) _timer.Start();
-        else _timer.Stop();
+        if (ShouldSampleMetrics)
+        {
+            _timer.Start();
+            if (!_diskTimer.IsEnabled)
+            {
+                _diskTimer.Start();
+                _ = RefreshDiskMetricsAsync();
+            }
+        }
+        else
+        {
+            _timer.Stop();
+            _diskTimer.Stop();
+        }
+    }
+
+    private async Task RefreshDiskMetricsAsync()
+    {
+        if (_isClosed || Interlocked.Exchange(ref _diskRefreshInFlight, 1) != 0) return;
+        try
+        {
+            // Device discovery and driver queries can block. Keep collection off the UI thread.
+            var snapshot = await Task.Run(_diskCollector.Sample);
+            if (!_isClosed) ApplyDiskMetrics(snapshot);
+        }
+        catch (ObjectDisposedException) when (_isClosed) { }
+        catch (Exception ex)
+        {
+            Trace.TraceError("Disk telemetry failed: {0}", ex);
+            if (!_isClosed) ApplyDiskMetrics(new() { Status = DiskMetricsStatus.Unavailable });
+        }
+        finally { Interlocked.Exchange(ref _diskRefreshInFlight, 0); }
+    }
+
+    private void ApplyDiskMetrics(DiskTelemetrySnapshot snapshot)
+    {
+        _diskSnapshot = snapshot;
+        DiskActivityLed.UpdateMetrics(snapshot);
+        CompactView.UpdateDiskMetrics(snapshot);
+        PerformanceTabContent.UpdateDiskMetrics(snapshot);
+        _metricsWidget?.UpdateDiskMetrics(snapshot);
+    }
+
+    private void DiskActivity_Click(object sender, RoutedEventArgs e) => OpenDiskPerformance();
+
+    private void OpenDiskPerformance()
+    {
+        ShowFromTray();
+        NavigateToTab(MainTab.Performance, "Disks");
     }
 
     private void ToggleMetricsWidget() => SetMetricsWidgetVisible(_metricsWidget?.IsVisible != true);
@@ -802,6 +859,7 @@ public partial class MainWindow : Window
             ThrottledSaveSettings();
         };
         widget.MenuActionRequested += OnMetricsWidgetMenuAction;
+        widget.UpdateDiskMetrics(_diskSnapshot);
 
         _metricsWidget = widget;
     }
@@ -815,6 +873,9 @@ public partial class MainWindow : Window
                 break;
             case WidgetMenuAction.SystemInformation:
                 OpenSystemInfoFromTray();
+                break;
+            case WidgetMenuAction.DiskPerformance:
+                OpenDiskPerformance();
                 break;
             case WidgetMenuAction.Settings:
                 OpenSettingsFromTray();
@@ -3249,6 +3310,7 @@ public partial class MainWindow : Window
 
             SubtitleText.Text = Strings.T("AppSubtitle");
             FullBrandingPanel.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("About"), KeyboardShortcuts.About);
+            DiskActivityLed.RefreshLocalization();
             AutomationProperties.SetName(FullBrandingPanel, Strings.T("About"));
             SearchHint.Text = Strings.T("SearchPlaceholder");
             LoaderOverlay.RefreshLocalization();
@@ -3484,6 +3546,13 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
             NavigateToTab(MainTab.Performance);
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D4 || e.Key == Key.NumPad4))
+        {
+            e.Handled = true;
+            OpenDiskPerformance();
             return;
         }
 
@@ -3893,8 +3962,9 @@ public partial class MainWindow : Window
         if (!IsVisible)
         {
             Show();
-            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
         }
+
+        if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
 
         Activate();
     }

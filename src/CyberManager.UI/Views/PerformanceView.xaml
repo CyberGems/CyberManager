@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:CyberManager.UI.Controls"
+             xmlns:views="clr-namespace:CyberManager.UI.Views"
              TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType" TextOptions.TextHintingMode="Fixed"
              UseLayoutRounding="True" SnapsToDevicePixels="True"
              FontFamily="Segoe UI Variable Text, Segoe UI, -apple-system, BlinkMacSystemFont, Roboto, sans-serif">
@@ -19,7 +20,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}" Margin="0,0,6,0">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="Transparent" BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}" Margin="0,0,6,0">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -30,8 +31,7 @@
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter TargetName="Bd" Property="Background" Value="{DynamicResource CardSecondaryBrush}"/>
                                 <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
-                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -69,56 +69,72 @@
                     <!-- Tab icons follow the button's own Foreground so they share the idle,
                          hover and checked colors of their labels. -->
                     <RadioButton x:Name="TabSummary" Style="{StaticResource SubTabNavButton}" IsChecked="True" Checked="SubTab_Checked">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <Path Data="M 5 5 H 11 V 11 H 5 Z M 13 5 H 19 V 11 H 13 Z M 5 13 H 11 V 19 H 5 Z M 13 13 H 19 V 19 H 13 Z"
                                   Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TabSummaryLabel" Text="Resumen" VerticalAlignment="Center"/>
-                        </StackPanel>
+                            <TextBlock x:Name="TabSummaryLabel" Grid.Column="1" Text="Resumen" VerticalAlignment="Center"/>
+                        </Grid>
                     </RadioButton>
                     <RadioButton x:Name="TabCpu" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <Path Data="M 6 6 H 18 V 18 H 6 Z M 9 3 V 6 M 15 3 V 6 M 9 18 V 21 M 15 18 V 21 M 3 9 H 6 M 18 9 H 21 M 3 15 H 6 M 18 15 H 21"
                                   Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TabCpuLabel" Text="CPU" VerticalAlignment="Center"/>
-                        </StackPanel>
+                            <TextBlock x:Name="TabCpuLabel" Grid.Column="1" Text="CPU" VerticalAlignment="Center"/>
+                        </Grid>
                     </RadioButton>
                     <RadioButton x:Name="TabMemory" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <Path Data="M 4 7 H 20 V 12 H 4 Z M 4 15 H 20 V 20 H 4 Z M 8 12 V 15 M 16 12 V 15"
                                   Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TabMemoryLabel" Text="Memoria" VerticalAlignment="Center"/>
-                        </StackPanel>
+                            <TextBlock x:Name="TabMemoryLabel" Grid.Column="1" Text="Memoria" VerticalAlignment="Center"/>
+                        </Grid>
                     </RadioButton>
                     <RadioButton x:Name="TabIo" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                             <Path Data="M 2 12 H 6.5 L 9.5 5.5 L 13.5 18.5 L 16.5 9 L 18 12 H 22"
                                   Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                   Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="TabIoLabel" Text="Actividad" VerticalAlignment="Center"/>
-                        </StackPanel>
+                            <TextBlock x:Name="TabIoLabel" Grid.Column="1" Text="Actividad" VerticalAlignment="Center"/>
+                        </Grid>
+                    </RadioButton>
+                    <RadioButton x:Name="TabDisks" Style="{StaticResource SubTabNavButton}" Checked="SubTab_Checked">
+                        <Grid VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <Path Data="M 5 4 H 19 L 22 15 V 20 H 2 V 15 Z M 2 15 H 22 M 16 18 H 16.1 M 19 18 H 19.1"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round" StrokeLineJoin="Round" Fill="Transparent"
+                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="TabDisksLabel" Grid.Column="1" VerticalAlignment="Center"/>
+                        </Grid>
                     </RadioButton>
                 </StackPanel>
             </Border>
 
             <!-- Hardware Overview Chip -->
-            <Border Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <Border Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="10,6">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
                     <Path Data="M 4 4 H 20 V 20 H 4 Z M 9 2 V 4 M 15 2 V 4 M 9 20 V 22 M 15 20 V 22 M 2 9 H 4 M 20 9 H 22 M 2 15 H 4 M 20 15 H 22"
                           Stroke="{DynamicResource TextBrush}" StrokeThickness="1.4" Width="13" Height="13" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="CpuModelSubtitle" Text="NT Kernel Engine • Telemetría en tiempo real" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                </StackPanel>
+                    <TextBlock x:Name="CpuModelSubtitle" Grid.Column="1" Text="NT Kernel Engine • Telemetría en tiempo real" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                </Grid>
             </Border>
         </Grid>
 
         <!-- Row 1: Dynamic Sub-Tab Content -->
         <Grid Grid.Row="1">
+            <views:DiskPerformanceView x:Name="ViewDisks" Visibility="Collapsed"/>
             <!-- SUB-TAB 1: SUMMARY (Dual Graphs + 4 Stat Cards) -->
             <Grid x:Name="ViewSummary" Visibility="Visible">
                 <Grid.RowDefinitions>
@@ -428,7 +444,7 @@
         </Grid>
 
         <!-- Row 2: Bottom Telemetry Status Bar -->
-        <Border Grid.Row="2" Margin="0,10,0,0">
+        <Border x:Name="TelemetryStatus" Grid.Row="2" Margin="0,10,0,0">
             <TextBlock x:Name="TelemetryFooter" Text="⚡ Real-time telemetry via NT Kernel Engine • 60s sample window" FontSize="11" Foreground="{DynamicResource SubTextBrush}"/>
         </Border>
     </Grid>

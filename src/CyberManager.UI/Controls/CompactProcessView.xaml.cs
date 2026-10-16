@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
+using CyberManager.Core.Engine;
 using CyberManager.UI.Services;
 
 namespace CyberManager.UI.Controls;
@@ -149,6 +150,7 @@ public partial class CompactProcessView : UserControl
     public event RoutedEventHandler? SettingsRequested;
     public event RoutedEventHandler? MoreRequested;
     public event RoutedEventHandler? AboutRequested;
+    public event RoutedEventHandler? DiskActivityRequested;
     public event RoutedEventHandler? MinimizeRequested;
     public event RoutedEventHandler? CloseRequested;
     public event RoutedEventHandler? DragRequested;
@@ -159,6 +161,7 @@ public partial class CompactProcessView : UserControl
 
     public void ApplyLanguage()
     {
+        DiskActivityLed.RefreshLocalization();
         EndTaskButton.ToolTip = HotkeyToolTipContent.WithShortcut(
             Strings.T("EndTaskTooltip"),
             Strings.T("DeleteKey"));
@@ -243,6 +246,8 @@ public partial class CompactProcessView : UserControl
 
     public void SetStatus(string value) => StatusText.Text = value;
     public void SetStatusToolTip(string? value) => StatusText.ToolTip = value;
+    public void UpdateDiskMetrics(DiskTelemetrySnapshot snapshot) => DiskActivityLed.UpdateMetrics(snapshot);
+    private void DiskActivity_Click(object sender, RoutedEventArgs e) => DiskActivityRequested?.Invoke(this, e);
 
     public void SetSystemMetrics(double cpuPercent, double ramPercent, double usedRamGb, string? cpuModelName, double totalRamGb)
     {

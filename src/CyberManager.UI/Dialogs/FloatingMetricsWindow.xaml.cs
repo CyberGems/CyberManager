@@ -5,6 +5,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using CyberManager.Common.I18n;
+using CyberManager.Core.Engine;
 using CyberManager.UI.Controls;
 using CyberManager.UI.Services;
 
@@ -15,6 +16,7 @@ public enum WidgetMenuAction
 {
     ShowMainWindow,
     SystemInformation,
+    DiskPerformance,
     Settings,
     About,
     Exit
@@ -72,10 +74,19 @@ public partial class FloatingMetricsWindow : Window
         ApplyAlwaysOnTop(App.Settings.WidgetAlwaysOnTop);
         Loaded += (_, _) => ApplyInitialPosition();
         IsVisibleChanged += Window_IsVisibleChanged;
+        PreviewKeyDown += (_, e) =>
+        {
+            if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D4 || e.Key == Key.NumPad4))
+            {
+                e.Handled = true;
+                MenuActionRequested?.Invoke(WidgetMenuAction.DiskPerformance);
+            }
+        };
     }
 
     public void ApplyLocalization()
     {
+        DiskActivityLed.RefreshLocalization();
         CpuLabel.Text = Strings.T("Cpu");
         RamLabel.Text = Strings.T("Ram");
         CloseButton.ToolTip = Strings.T("CloseWidget");
@@ -247,6 +258,8 @@ public partial class FloatingMetricsWindow : Window
     }
 
     private void UpdatePinToolTip() => PinButton.ToolTip = Strings.T("AlwaysOnTop");
+    public void UpdateDiskMetrics(DiskTelemetrySnapshot snapshot) => DiskActivityLed.UpdateMetrics(snapshot);
+    private void DiskActivity_Click(object sender, RoutedEventArgs e) => MenuActionRequested?.Invoke(WidgetMenuAction.DiskPerformance);
 
     private void Root_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {

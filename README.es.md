@@ -39,7 +39,7 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 | Gestiona listas grandes de procesos | Filas virtualizadas, iconos en segundo plano y flechas de desplazamiento suaves |
 | Refresco instantáneo de procesos | Motor nativo NT: llamadas directas a la API, cero sobrecarga de WMI |
 | Identifica procesos consumidores | Mapa térmico adaptativo de CPU/RAM y filtro de los 10 procesos más pesados |
-| Monitoriza la salud del sistema | Historiales animados, widget flotante de CPU/RAM y vista Rendimiento con 4 pestañas |
+| Monitoriza la salud del sistema | Historiales animados, widget flotante de CPU/RAM con LED de discos y vista Rendimiento con 5 pestañas |
 | Controla los procesos | Finalizar, finalizar árbol, reiniciar, suspender, reanudar, establecer prioridad |
 | Actúa sobre varios a la vez | Multi-selección con Ctrl/Shift+clic y "Finalizar selección" de un solo toque |
 | Entiende los procesos | Nombres amigables, metadatos y un detallado diálogo de Propiedades |
@@ -81,12 +81,14 @@ La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconde
 ### 📊 Monitorización del sistema
 - **Historiales de métricas animados**: los gráficos de CPU, RAM y actividad del sistema avanzan suavemente entre muestras reales en la ventana principal, Rendimiento y el widget flotante. Se conserva la frecuencia de muestreo; la animación se pausa cuando el gráfico está oculto o su ventana minimizada y respeta la configuración de animaciones de Windows
 - **Widget flotante de métricas**: mantén visibles las lecturas e historial de CPU y RAM en una ventana móvil y fijable, con tooltips detallados
+- **LED de actividad de discos**: distingue lectura (verde), escritura (rojo) o ambas (ámbar) en los dos modos de ventana y en el widget flotante. Púlsalo o usa `Ctrl+4` para abrir el rendimiento de discos
 - **Avisos persistentes de actualización**: las nuevas versiones permanecen visibles desde ambas barras de título o el menú de la bandeja del sistema
-- **Vista Rendimiento**: vista integrada con 4 pestañas:
+- **Vista Rendimiento**: vista integrada con 5 pestañas:
   - **Resumen**: doble sparkline + totales del sistema + topología del hardware
   - **CPU**: gráfico de historial completo + nombre del modelo + recuentos de núcleos e hilos
   - **Memoria**: RAM física, carga de commited, pools del kernel (paginados y no paginados)
   - **Actividad del sistema**: recuentos de procesos, hilos y handles + estadísticas de pools del kernel
+  - **Discos**: actividad combinada o por disco físico, historiales de lectura/escritura, velocidades, tiempo de respuesta, cola y totales de bytes de la sesión. Las muestras se recogen cada 500 ms, independientemente de la lista de procesos. El tiempo activo combinado es un promedio; las velocidades y los totales de bytes se suman
 
 ### 🖥️ Integración con escritorio
 - **Instancia única**: al abrir de nuevo la aplicación se restaura la ventana existente en la misma sesión
@@ -179,6 +181,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Alt+Shift+M` | Mostrar/ocultar CyberManager | Global |
 | `Ctrl+Shift+M` | Alternar el modo compacto | Aplicación |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Cambiar a Procesos / Rendimiento / Configuración | Aplicación |
+| `Ctrl+4` | Abrir Rendimiento → Discos | Aplicación / Widget |
 | `Ctrl+F` / `Ctrl+E` | Enfocar el cuadro de búsqueda | Aplicación |
 | `Ctrl+G` | Alternar la agrupación de procesos | Aplicación |
 | `Ctrl+I` | Abrir Información del Sistema | Aplicación |
