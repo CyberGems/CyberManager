@@ -1077,8 +1077,6 @@
                                             </StackPanel>
                                         </MenuItem.Header>
                                     </MenuItem>
-                                    <Separator/>
-
                                     <!-- Primary Actions (Closest to mouse click) -->
                                     <MenuItem x:Name="ContextKillSelectionItem" Header="End selected" Style="{StaticResource ModernMenuItem}" Click="Kill_Click" Visibility="Collapsed">
                                         <MenuItem.Icon>
@@ -1105,7 +1103,7 @@
                                                   HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <Separator/>
+                                    <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
                                     <!-- Lifecycle Controls -->
                                     <MenuItem x:Name="ContextRestartItem" Header="Restart Process" Style="{StaticResource ModernMenuItem}" Click="Restart_Click">
@@ -1133,10 +1131,10 @@
                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <Separator/>
+                                    <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
                                     <!-- Priority Submenu -->
-                                    <MenuItem x:Name="ContextSetPriorityItem" Header="Set Priority" Style="{StaticResource ModernMenuItem}">
+                                    <MenuItem x:Name="ContextSetPriorityItem" Header="Set Priority" Style="{StaticResource ModernMenuItem}" SubmenuOpened="PrioritySubmenu_Opened">
                                         <MenuItem.Icon>
                                             <Path Data="M 4,5 H 20 M 4,12 H 20 M 4,19 H 20 M 9,3 V 7 M 15,10 V 14 M 7,17 V 21"
                                                   Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4"
@@ -1193,7 +1191,7 @@
                                             </MenuItem.Icon>
                                         </MenuItem>
                                     </MenuItem>
-                                    <Separator/>
+                                    <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
                                     <!-- File, Path & Search Exploration -->
                                     <MenuItem x:Name="ContextOpenFolderItem" Header="Open Folder" Style="{StaticResource ModernMenuItem}" Click="OpenFolder_Click">
@@ -1223,7 +1221,7 @@
                                                   HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                                         </MenuItem.Icon>
                                     </MenuItem>
-                                    <Separator/>
+                                    <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
                                     <!-- Process Properties (Standard bottom location) -->
                                     <MenuItem x:Name="ContextPropertiesItem" Header="Process properties" Style="{StaticResource ModernMenuItem}" Click="Properties_Click">

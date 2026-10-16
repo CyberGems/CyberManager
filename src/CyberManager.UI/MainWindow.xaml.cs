@@ -1801,6 +1801,22 @@ public partial class MainWindow : Window
             UpdateContextMenuAvailability(target.Item);
         }
         KeepContextTargetVisible();
+
+        if (PresentationSource.FromVisual(ProcContextMenu) is HwndSource source && source.Handle != IntPtr.Zero)
+        {
+            MenuGlassEffect.ApplyBlur(source.Handle, ThemeManager.IsDarkTheme);
+        }
+    }
+
+    private void PrioritySubmenu_Opened(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem mi && mi.Template.FindName("PART_Popup", mi) is System.Windows.Controls.Primitives.Popup popup)
+        {
+            if (popup.Child != null && PresentationSource.FromVisual(popup.Child) is HwndSource source && source.Handle != IntPtr.Zero)
+            {
+                MenuGlassEffect.ApplyBlur(source.Handle, ThemeManager.IsDarkTheme);
+            }
+        }
     }
 
     private void ProcContextMenu_Closed(object sender, RoutedEventArgs e)

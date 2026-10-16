@@ -29,8 +29,9 @@
         <SolidColorBrush x:Key="CpuBrush" Color="#10B981"/>
         <SolidColorBrush x:Key="SwitchActiveBrush" Color="#24A6B5"/>
         <SolidColorBrush x:Key="SwitchTrackBrush" Color="#29394D"/>
-        <SolidColorBrush x:Key="MenuGlassBgBrush" Color="#F0101724"/>
+        <SolidColorBrush x:Key="MenuGlassBgBrush" Color="#C40F1623"/>
         <SolidColorBrush x:Key="MenuGlassBorderBrush" Color="#403DB5C5"/>
+        <SolidColorBrush x:Key="MenuSeparatorBrush" Color="#1EFFFFFF"/>
         <Geometry x:Key="DialogEnterKeyGeometry">M 16,4 V 10 Q 16,13 13,13 H 4 M 8,9 L 4,13 L 8,17</Geometry>
         <Style x:Key="DialogKeyHintStyle" TargetType="Border">
             <Setter Property="Height" Value="22"/>
@@ -365,23 +366,24 @@
             </Setter>
         </Style>
 
-        <!-- Subtle, Elegant 1px Menu Separator -->
+        <!-- Subtle, Centered 1px Hairline Menu Separator -->
         <Style x:Key="ModernMenuSeparator" TargetType="{x:Type Separator}">
             <Setter Property="Height" Value="1"/>
-            <Setter Property="Margin" Value="8,4"/>
+            <Setter Property="Margin" Value="12,3,12,3"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="IsHitTestVisible" Value="False"/>
-            <Setter Property="Background" Value="{DynamicResource BorderBrush}"/>
-            <Setter Property="Opacity" Value="0.45"/>
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Separator}">
-                        <Border Height="1" Background="{TemplateBinding Background}" SnapsToDevicePixels="True"/>
+                        <Border Height="1" Margin="0" Background="{DynamicResource MenuSeparatorBrush}" SnapsToDevicePixels="True"/>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
         <Style TargetType="{x:Type Separator}" BasedOn="{StaticResource ModernMenuSeparator}"/>
+        <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}" BasedOn="{StaticResource ModernMenuSeparator}"/>
 
         <!-- Context Menu Header Card Style for Target Process -->
         <Style x:Key="ContextMenuHeaderStyle" TargetType="{x:Type MenuItem}">
@@ -397,7 +399,7 @@
                                 BorderThickness="1"
                                 CornerRadius="8"
                                 Padding="8,7"
-                                Margin="2,2,2,4"
+                                Margin="2,2,2,6"
                                 SnapsToDevicePixels="True">
                             <Grid>
                                 <Grid.ColumnDefinitions>
