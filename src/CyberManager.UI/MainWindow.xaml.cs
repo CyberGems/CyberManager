@@ -234,6 +234,7 @@ public partial class MainWindow : Window
         CompactView.SearchHistoryRequested += SearchHistoryButton_Click;
         CompactView.ClearSelectionRequested += ClearSelectionBtn_Click;
         CompactView.HeavyFilterChanged += CompactView_HeavyFilterChanged;
+        CompactView.CategoryFilterChanged += CompactView_CategoryFilterChanged;
         CompactView.MoreRequested += CompactView_MoreRequested;
         // Both titlebars show the same notice and share one confirm/download flow.
         CompactView.UpdateRequested += UpdatePill_UpdateRequested;
@@ -1606,6 +1607,17 @@ public partial class MainWindow : Window
     private void CompactView_HeavyFilterChanged(object? sender, EventArgs e) =>
         SetHeavyFilterControls(CompactView.IsHeavyFilterEnabled);
 
+    private void CompactView_CategoryFilterChanged(object? sender, ProcessCategoryFilter filter)
+    {
+        if (App.Settings.CategoryFilter != filter)
+        {
+            App.Settings.CategoryFilter = filter;
+            ThrottledSaveSettings();
+            SyncCategoryFilterRadio();
+            ApplySortingAndFilter();
+        }
+    }
+
     private void SetHeavyFilterControls(bool enabled)
     {
         var changed = App.Settings.HeavyProcessesOnly != enabled;
@@ -2748,6 +2760,8 @@ public partial class MainWindow : Window
         AutomationProperties.SetName(CategoryAllRadio, Strings.T("CategoryAll"));
         AutomationProperties.SetName(CategoryAppsRadio, Strings.T("CategoryApps"));
         AutomationProperties.SetName(CategoryBgRadio, Strings.T("CategoryBackground"));
+
+        CompactView.UpdateCategoryFilterState(App.Settings.CategoryFilter, totalCount, appsCount, bgCount);
     }
 
     private void ProcGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)

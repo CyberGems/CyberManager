@@ -542,6 +542,7 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <Border x:Name="CompactSearchBar"
@@ -608,7 +609,7 @@
                     </Grid>
                 </Border>
 
-                <Button x:Name="NewTaskButton" Grid.Column="6" Width="28" Height="26" Margin="6,0,0,0" Padding="0"
+                <Button x:Name="NewTaskButton" Grid.Column="7" Width="28" Height="26" Margin="6,0,0,0" Padding="0"
                         Style="{DynamicResource CompactIconButton}" Click="NewTaskButton_Click">
                     <Path Data="M 12 4 V 20 M 4 12 H 20" Width="13" Height="13" Stretch="Uniform"
                           Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round"/>
@@ -633,8 +634,31 @@
                           Fill="Transparent"/>
                 </ToggleButton>
 
-                <Button x:Name="EndTaskButton"
+                <Button x:Name="CategoryFilterButton"
                         Grid.Column="2"
+                        Width="28"
+                        Height="26"
+                        Margin="0,0,6,0"
+                        Padding="0"
+                        Style="{DynamicResource CompactIconButton}"
+                        Click="CategoryFilterButton_Click"
+                        MouseEnter="InteractiveControl_MouseEnter"
+                        MouseLeave="InteractiveControl_MouseLeave"
+                        ToolTip="Filter by category"
+                        AutomationProperties.Name="Filter by category">
+                    <Path x:Name="CategoryFilterIcon"
+                          Data="M 3,4 H 11 V 11 H 3 Z M 13,4 H 21 V 11 H 13 Z M 3,13 H 11 V 20 H 3 Z M 13,13 H 21 V 20 H 13 Z"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="1.3"
+                          StrokeLineJoin="Round"
+                          Width="13"
+                          Height="13"
+                          Stretch="Uniform"
+                          Fill="Transparent"/>
+                </Button>
+
+                <Button x:Name="EndTaskButton"
+                        Grid.Column="3"
                         Width="28"
                         Height="26"
                         Padding="0"
@@ -652,7 +676,7 @@
                 </Button>
 
                 <Button x:Name="RestartButton"
-                        Grid.Column="4"
+                        Grid.Column="5"
                         Width="28"
                         Height="26"
                         Padding="0"
@@ -674,7 +698,7 @@
                 </Button>
 
                 <ToggleButton x:Name="PauseDetectionButton"
-                              Grid.Column="3"
+                              Grid.Column="4"
                               Width="28"
                               Height="26"
                               Margin="0,0,6,0"
@@ -692,7 +716,7 @@
                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </ToggleButton>
                 <Border x:Name="SelectionBadge"
-                        Grid.Column="5"
+                        Grid.Column="6"
                         VerticalAlignment="Center"
                         Margin="6,0,0,0"
                         Padding="6,2"
@@ -842,6 +866,7 @@
                                                     BorderThickness="1"
                                                     CornerRadius="4"
                                                     Padding="4,1"
+                                                    Margin="0,0,4,0"
                                                     VerticalAlignment="Center"
                                                     ToolTip="{Binding MainWindowTitle}"
                                                     Visibility="{Binding HasWindow, Converter={StaticResource BoolToVisConverter}}">
@@ -849,6 +874,18 @@
                                                            FontSize="9"
                                                            FontWeight="Bold"
                                                            Foreground="{DynamicResource AccentBrush}"/>
+                                            </Border>
+                                            <Border Background="#25EF4444"
+                                                    BorderBrush="#60EF4444"
+                                                    BorderThickness="1"
+                                                    CornerRadius="4"
+                                                    Padding="4,1"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding IsTerminating, Converter={StaticResource BoolToVisConverter}}">
+                                                <TextBlock Text="{Binding StatusFormatted}"
+                                                           FontSize="9"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="#EF4444"/>
                                             </Border>
                                         </StackPanel>
                                     </Grid>

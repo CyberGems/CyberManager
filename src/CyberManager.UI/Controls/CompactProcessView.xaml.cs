@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
+using CyberManager.Common.Models;
 using CyberManager.Core.Engine;
 using CyberManager.UI.Services;
 
@@ -142,6 +143,7 @@ public partial class CompactProcessView : UserControl
     public event EventHandler? SearchSubmitted;
     public event RoutedEventHandler? SearchHistoryRequested;
     public event EventHandler? HeavyFilterChanged;
+    public event EventHandler<ProcessCategoryFilter>? CategoryFilterChanged;
     public event RoutedEventHandler? ToggleRequested;
     public event RoutedEventHandler? EndTaskRequested;
     public event RoutedEventHandler? RestartRequested;
@@ -196,6 +198,7 @@ public partial class CompactProcessView : UserControl
         ClearSearchButton.ToolTip = Strings.T("Clear");
         SearchHistoryButton.ToolTip = Strings.T("RecentSearches");
         HeavyFilterToggle.ToolTip = Strings.T("ShowHeavyProcesses");
+        UpdateCategoryFilterToolTip();
         AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
         AutomationProperties.SetName(SettingsButton, Strings.T("Settings"));
         AutomationProperties.SetName(MoreButton, Strings.T("MoreOptions"));
@@ -371,6 +374,92 @@ public partial class CompactProcessView : UserControl
         {
             _syncingHeavyFilter = false;
         }
+    }
+
+    private int _cachedTotalCount;
+    private int _cachedAppsCount;
+    private int _cachedBgCount;
+    private ProcessCategoryFilter _currentCategoryFilter = ProcessCategoryFilter.All;
+
+    public void UpdateCategoryFilterState(ProcessCategoryFilter filter, int totalCount, int appsCount, int bgCount)
+    {
+        _currentCategoryFilter = filter;
+        _cachedTotalCount = totalCount;
+        _cachedAppsCount = appsCount;
+        _cachedBgCount = bgCount;
+
+        var isActive = filter != ProcessCategoryFilter.All;
+        if (CategoryFilterButton != null)
+        {
+            if (isActive)
+            {
+                CategoryFilterButton.Background = TryFindResource("AccentGlowBrush") as Brush ?? new SolidColorBrush(Color.FromArgb(0x22, 0x10, 0xB9, 0x81));
+                CategoryFilterButton.Foreground = TryFindResource("AccentBrush") as Brush;
+            }
+            else
+            {
+                CategoryFilterButton.ClearValue(Button.BackgroundProperty);
+                CategoryFilterButton.ClearValue(Button.ForegroundProperty);
+            }
+        }
+
+        UpdateCategoryFilterToolTip();
+    }
+
+    private void UpdateCategoryFilterToolTip()
+    {
+        if (CategoryFilterButton == null) return;
+
+        string tipText = _currentCategoryFilter switch
+        {
+            ProcessCategoryFilter.Applications => $"{Strings.T("CategoryApps")} ({_cachedAppsCount})",
+            ProcessCategoryFilter.Background => $"{Strings.T("CategoryBackground")} ({_cachedBgCount})",
+            _ => $"{Strings.T("CategoryAll")} ({_cachedTotalCount})"
+        };
+        CategoryFilterButton.ToolTip = $"{Strings.T("CategoryFilter")}: {tipText}";
+        AutomationProperties.SetName(CategoryFilterButton, $"{Strings.T("CategoryFilter")}: {tipText}");
+    }
+
+    private void CategoryFilterButton_Click(object sender, RoutedEventArgs e)
+    {
+        var menu = new ContextMenu
+        {
+            PlacementTarget = CategoryFilterButton,
+            Placement = PlacementMode.Bottom,
+            Style = TryFindResource("ModernContextMenu") as Style
+        };
+
+        var allItem = new MenuItem
+        {
+            Header = Strings.T("CategoryAllCount", _cachedTotalCount),
+            IsCheckable = true,
+            IsChecked = _currentCategoryFilter == ProcessCategoryFilter.All,
+            Style = TryFindResource("ModernMenuItem") as Style
+        };
+        allItem.Click += (_, _) => CategoryFilterChanged?.Invoke(this, ProcessCategoryFilter.All);
+        menu.Items.Add(allItem);
+
+        var appsItem = new MenuItem
+        {
+            Header = Strings.T("CategoryAppsCount", _cachedAppsCount),
+            IsCheckable = true,
+            IsChecked = _currentCategoryFilter == ProcessCategoryFilter.Applications,
+            Style = TryFindResource("ModernMenuItem") as Style
+        };
+        appsItem.Click += (_, _) => CategoryFilterChanged?.Invoke(this, ProcessCategoryFilter.Applications);
+        menu.Items.Add(appsItem);
+
+        var bgItem = new MenuItem
+        {
+            Header = Strings.T("CategoryBgCount", _cachedBgCount),
+            IsCheckable = true,
+            IsChecked = _currentCategoryFilter == ProcessCategoryFilter.Background,
+            Style = TryFindResource("ModernMenuItem") as Style
+        };
+        bgItem.Click += (_, _) => CategoryFilterChanged?.Invoke(this, ProcessCategoryFilter.Background);
+        menu.Items.Add(bgItem);
+
+        menu.IsOpen = true;
     }
 
     public void SetPinned(bool pinned)

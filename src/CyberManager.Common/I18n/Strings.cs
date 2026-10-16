@@ -34,6 +34,7 @@ public static class Strings
         ["CategoryAllCount"] = ("All ({0})", "Todos ({0})"),
         ["CategoryAppsCount"] = ("Applications ({0})", "Aplicaciones ({0})"),
         ["CategoryBgCount"] = ("Background ({0})", "Segundo plano ({0})"),
+        ["CategoryFilter"] = ("Filter by category", "Filtrar por categoría"),
         ["Company"] = ("Company", "Empresa"),
         ["Product"] = ("Product", "Producto"),
         ["OriginalFilename"] = ("Original filename", "Nombre de archivo original"),
