@@ -1,4 +1,4 @@
-; Script generated for CyberManager
+﻿; Script generated for CyberManager
 ; Ultra-Lightweight Virtualized Task Manager
 ; Built by CyberGems (https://cybergems.org)
 
@@ -21,6 +21,7 @@ AllowNoIcons=yes
 OutputDir=.
 OutputBaseFilename=CyberManager-Setup-{#AppVersion}
 SetupIconFile=.\src\CyberManager.UI\Assets\CyberManager.ico
+WizardSmallImageFile=.\installer\installerWizardSmall.bmp
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
