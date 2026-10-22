@@ -22,6 +22,7 @@ OutputDir=.
 OutputBaseFilename=CyberManager-Setup-{#AppVersion}
 SetupIconFile=.\src\CyberManager.UI\Assets\CyberManager.ico
 WizardSmallImageFile=.\installer\installerWizardSmall.bmp
+WizardImageFile=.\installer\installerWizard.bmp
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
