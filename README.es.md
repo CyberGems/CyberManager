@@ -22,6 +22,31 @@
 
 ---
 
+## 📑 Table of Contents
+
+- [¿Qué es CyberManager?](#qué-es-cybermanager)
+- [🎯 ¿Por qué CyberManager?](#-por-qué-cybermanager)
+- [✨ Funciones principales](#-funciones-principales)
+- [🚀 Primeros pasos](#-primeros-pasos)
+- [🛠️ Stack tecnológico y arquitectura](#️-stack-tecnológico-y-arquitectura)
+- [⌨️ Atajos de teclado](#️-atajos-de-teclado)
+- [❤️ Donar](#️-donar)
+- [📄 Licencia](#-licencia)
+- [❓ Preguntas frecuentes](#-preguntas-frecuentes)
+- [🔗 Ver también](#-ver-también)
+
+<details>
+<summary><strong>🔗 Related links (outside this README)</strong></summary>
+
+- 🌐 [CyberManager en la web](https://cybergems.org/apps/cybermanager/) — resumen, descarga y guía de SmartScreen
+- 📚 [Documentación y FAQ — Wiki](https://github.com/CyberGems/CyberManager/wiki) — solución de problemas y guías detalladas
+- 💾 [Releases](https://github.com/CyberGems/CyberManager/releases) — instaladores, versiones portátiles y changelog
+- 🟣 [Suite CyberGems](https://github.com/CyberGems) — todas las apps de código abierto
+
+</details>
+
+---
+
 ## ¿Qué es CyberManager?
 
 CyberManager es una alternativa ligera y de alta capacidad al Administrador de Tareas de Windows, diseñada para mantenerse rápido incluso con miles de procesos activos. Su interfaz virtualizada y su motor nativo de NT ofrecen búsqueda instantánea, refrescos receptivos, telemetría de CPU y memoria en vivo y controles directos para terminar, reiniciar, suspender, reanudar o cambiar la prioridad de los procesos, incluidas acciones por lotes sobre una multi-selección. Un modo compacto, acceso a la bandeja del sistema, un atajo global y información detallada del sistema mantienen la monitorización esencial a mano sin saturar el escritorio.
@@ -211,9 +236,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 
 ## ❤️ Donar
 
-Tras incontables horas construyendo y perfeccionando **CyberManager** para mi propio uso, decidí recientemente compartirlo con el mundo junto a mis otras herramientas de código abierto en [CyberGems](https://github.com/CyberGems#-all-apps--repositories).
-
-Si te gustaría apoyar las futuras actualizaciones, te lo agradecería de verdad. Tu donación ayuda a mantener el desarrollo, lanzar nuevas funciones, acelerar la resolución de actualizaciones y errores, y mejorar la calidad de la documentación. También puedes mostrar tu apoyo [poniendo una estrella al repo en GitHub](https://github.com/CyberGems/CyberManager). ¡Gracias! 🙏
+**CyberManager** es 100% gratis y de código abierto. Si te resulta útil, por favor considera [donar](https://cybergems.org/donate) o [dar una estrella al repo en GitHub](https://github.com/CyberGems/CyberManager) para apoyar el desarrollo continuo. [Lee la historia completa](https://cybergems.org/about/) del proyecto. ¡Gracias! 🙏
 
 <p align="center">
   <a href="https://www.paypal.com/donate/?hosted_button_id=M4PY3UPJA5Y6Q"><img src="https://img.shields.io/badge/Donar-PayPal-0070BA?style=for-the-badge&logo=paypal" alt="Donar con PayPal" /></a>
