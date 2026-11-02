@@ -4,27 +4,36 @@
 
 <p align="center">
   <a href="https://cybergems.org/apps/cybermanager/">
-    <img src="https://cybergems.org/banners/es/cybermanager.png" alt="CyberManager: gestor de tareas rápido para miles de procesos" />
+    <img src="https://cybergems.org/banners/es/cybermanager.png" alt="Controla cada proceso de Windows" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/CyberGems/CyberManager/releases/latest"><img src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberManager%2Fmain%2FDirectory.Build.props&query=%2FProject%2FPropertyGroup%2FVersion&prefix=%20Descargar%20CyberManager%20v&suffix=%20&style=for-the-badge&label=&labelColor=0891B2&color=0891B2" alt="Descargar la última versión" /><img src="https://img.shields.io/badge/Windows_10%2F11_(64--bit)-2563EB?style=for-the-badge" alt="Windows 10/11 (64 bits)" /></a>
-  &nbsp;<a href="https://github.com/CyberGems/CyberManager/releases"><img src="https://img.shields.io/badge/Todas_las_versiones-30363D?style=for-the-badge&logo=github&logoColor=white" alt="Todas las versiones" /><img src="https://img.shields.io/badge/Notas_de_la_versi%C3%B3n-475569?style=for-the-badge" alt="Notas de la versión" /></a>
+  <a href="https://github.com/CyberGems/CyberManager/releases/latest"><img src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2FCyberGems%2FCyberManager%2Fmain%2FDirectory.Build.props&query=%2FProject%2FPropertyGroup%2FVersion&prefix=%20Descargar%20v&suffix=%20&style=for-the-badge&label=&labelColor=0891B2&color=0891B2" alt="Descargar la última versión" /><img src="https://img.shields.io/badge/Windows_10%2F11_(64--bit)-2563EB?style=for-the-badge" alt="Windows 10/11 (64 bits)" /></a>
+  &nbsp;<a href="https://github.com/CyberGems/CyberManager/releases"><img src="https://img.shields.io/badge/Todas_las_versiones-30363D?style=for-the-badge&logo=github&logoColor=white" alt="Todas las versiones" /></a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Licencia-GPL--3.0-1F2428.svg?style=flat-square&color=334155" alt="Licencia" />&nbsp;
   <img src="https://img.shields.io/badge/Plataforma-Windows_10%2F11-1F2428.svg?style=flat-square&color=334155" alt="Plataforma" />&nbsp;
   <img src="https://img.shields.io/badge/.NET-10.0-1F2428.svg?style=flat-square&logo=dotnet&logoColor=white&color=334155" alt=".NET" />&nbsp;
-  <a href="https://github.com/CyberGems/CyberManager/wiki"><img src="https://img.shields.io/badge/Wiki-Documentaci%C3%B3n-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=334155" alt="Wiki" /></a>
+  <a href="https://github.com/CyberGems/CyberManager/wiki"><img src="https://img.shields.io/badge/Wiki-Documentaci%C3%B3n-1F2428?style=flat-square&logo=gitbook&logoColor=white&color=334155" alt="Wiki" /></a>&nbsp;
+  <a href="https://github.com/CyberGems/CyberManager/blob/main/CHANGELOG.md"><img src="https://img.shields.io/badge/Notas_de_la_versi%C3%B3n-475569?style=flat-square" alt="Notas de la versión" /></a>
 </p>
+
+---
+
+<div align="center">
+
+### Gestor de tareas rápido para miles de procesos
+
+</div>
 
 ---
 
 ## 📑 Table of Contents
 
-- [¿Qué es CyberManager?](#qué-es-cybermanager)
+- [👋 Introducción](#-introducción)
 - [🎯 ¿Por qué CyberManager?](#-por-qué-cybermanager)
 - [✨ Funciones principales](#-funciones-principales)
 - [🚀 Primeros pasos](#-primeros-pasos)
@@ -47,7 +56,7 @@
 
 ---
 
-## ¿Qué es CyberManager?
+## 👋 Introducción
 
 CyberManager es una alternativa ligera y de alta capacidad al Administrador de Tareas de Windows, diseñada para mantenerse rápido incluso con miles de procesos activos. Su interfaz virtualizada y su motor nativo de NT ofrecen búsqueda instantánea, refrescos receptivos, telemetría de CPU y memoria en vivo y controles directos para terminar, reiniciar, suspender, reanudar o cambiar la prioridad de los procesos, incluidas acciones por lotes sobre una multi-selección. Un modo compacto, acceso a la bandeja del sistema, un atajo global y información detallada del sistema mantienen la monitorización esencial a mano sin saturar el escritorio.
 
