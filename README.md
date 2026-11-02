@@ -25,7 +25,7 @@
 
 <div align="center">
 
-### A fast task manager for thousands of processes
+### Every process on your PC, visible and under control — even when there are thousands
 
 </div>
 
@@ -58,7 +58,7 @@
 
 ## 👋 Introduction
 
-CyberManager is a lightweight, high-capacity alternative to Windows Task Manager, designed to remain fast even when thousands of processes are active. Its virtualized interface and native NT engine provide instant search, responsive refreshes, live CPU and memory telemetry, and direct controls for ending, restarting, suspending, resuming, or reprioritizing processes, including batch actions over a multi-selection. A compact mode, system tray access, global hotkey, and detailed system information keep essential monitoring close without filling the desktop.
+When a PC slows down, Task Manager is the first thing you open — and often the first thing to freeze, sort slowly or hide the process you were looking for. CyberManager reads the process list straight from the NT API instead of WMI, with differential snapshots, a virtualized grid and background icon loading, so search, sorting and scrolling stay instant with thousands of processes. End a process or its whole tree, restart, suspend, resume or reprioritize one item or a multi-selection; watch CPU, RAM and disk in animated histories and a Performance view; and keep a floating CPU/RAM widget with a disk activity LED on screen while the rest of the app waits on a global hotkey. Built with **.NET 10** and **WPF**.
 
 *Free and open source (GPLv3): no ads, no tracking, and no data collection. Just enjoy it.*
 
@@ -66,7 +66,7 @@ CyberManager is a lightweight, high-capacity alternative to Windows Task Manager
 
 ## 🎯 Why CyberManager?
 
-Most task managers either freeze under heavy load or bury basic features behind complex UIs. CyberManager gives you **instant process control, real-time telemetry, and deep system insights**, all in a frameless, neon-styled interface that stays responsive no matter how many processes you run.
+Plenty of task managers freeze under heavy load or bury basic features behind complex UIs. CyberManager gives you **instant process control, real-time telemetry, and deep system insights**, all in a frameless, neon-styled interface that stays responsive no matter how many processes you run.
 
 | Need | Solution |
 |---|---|

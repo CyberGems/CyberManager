@@ -25,7 +25,7 @@
 
 <div align="center">
 
-### Gestor de tareas rápido para miles de procesos
+### Todos los procesos de tu PC, a la vista y bajo control, incluso cuando hay miles
 
 </div>
 
@@ -58,7 +58,7 @@
 
 ## 👋 Introducción
 
-CyberManager es una alternativa ligera y de alta capacidad al Administrador de Tareas de Windows, diseñada para mantenerse rápido incluso con miles de procesos activos. Su interfaz virtualizada y su motor nativo de NT ofrecen búsqueda instantánea, refrescos receptivos, telemetría de CPU y memoria en vivo y controles directos para terminar, reiniciar, suspender, reanudar o cambiar la prioridad de los procesos, incluidas acciones por lotes sobre una multi-selección. Un modo compacto, acceso a la bandeja del sistema, un atajo global y información detallada del sistema mantienen la monitorización esencial a mano sin saturar el escritorio.
+Cuando el PC va lento, el Administrador de tareas es lo primero que abres, y muchas veces lo primero que se congela, ordena con lentitud u oculta el proceso que buscabas. CyberManager lee la lista de procesos directamente de la API NT en lugar de WMI, con instantáneas diferenciales, una rejilla virtualizada y carga de iconos en segundo plano, así que la búsqueda, el orden y el desplazamiento siguen siendo instantáneos con miles de procesos. Termina un proceso o todo su árbol, reinicia, suspende, reanuda o cambia la prioridad de uno o de una selección múltiple; observa CPU, RAM y disco en historiales animados y una vista de Rendimiento; y mantén en pantalla un widget flotante de CPU/RAM con LED de actividad de disco mientras el resto de la app espera tras un atajo global. Construido con **.NET 10** y **WPF**.
 
 *Gratuito y de código abierto (GPLv3): sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
 
@@ -66,7 +66,7 @@ CyberManager es una alternativa ligera y de alta capacidad al Administrador de T
 
 ## 🎯 ¿Por qué CyberManager?
 
-La mayoría de los gestores de tareas se congelan bajo carga intensiva o esconden funciones básicas detrás de interfaces complejas. CyberManager te ofrece **control instantáneo de procesos, telemetría en tiempo real y un análisis profundo del sistema**, todo en una interfaz sin marco y con estilo neón que se mantiene receptiva sin importar cuántos procesos ejecutes.
+Muchos gestores de tareas se congelan bajo carga intensiva o esconden funciones básicas detrás de interfaces complejas. CyberManager te ofrece **control instantáneo de procesos, telemetría en tiempo real y un análisis profundo del sistema**, todo en una interfaz sin marco y con estilo neón que se mantiene receptiva sin importar cuántos procesos ejecutes.
 
 | Necesidad | Solución |
 |---|---|
