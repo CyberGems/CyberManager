@@ -34,6 +34,7 @@
 ## 📑 Table of Contents
 
 - [👋 Introduction](#-introduction)
+- [📸 Screenshots](#-screenshots)
 - [🎯 Why CyberManager?](#-why-cybermanager)
 - [✨ Key Features](#-key-features)
 - [🚀 Getting Started](#-getting-started)
@@ -61,6 +62,14 @@
 When a PC slows down, Task Manager is the first thing you open — and often the first thing to freeze, sort slowly or hide the process you were looking for. CyberManager reads the process list straight from the NT API instead of WMI, with differential snapshots, a virtualized grid and background icon loading, so search, sorting and scrolling stay instant with thousands of processes. End a process or its whole tree, restart, suspend, resume or reprioritize one item or a multi-selection; watch CPU, RAM and disk in animated histories and a Performance view; and keep a floating CPU/RAM widget with a disk activity LED on screen while the rest of the app waits on a global hotkey. Built with **.NET 10** and **WPF**.
 
 *Free and open source (GPLv3): no ads, no tracking, and no data collection. Just enjoy it.*
+
+---
+
+<!-- Screenshots: pending the bilingual EN/ES gallery in the capture plan at https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — replace the blockquote, keep this heading and the TOC entry. -->
+
+## 📸 Screenshots
+
+> Coming soon...
 
 ---
 

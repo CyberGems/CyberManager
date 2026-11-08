@@ -34,6 +34,7 @@
 ## 📑 Table of Contents
 
 - [👋 Introducción](#-introducción)
+- [📸 Capturas](#-capturas)
 - [🎯 ¿Por qué CyberManager?](#-por-qué-cybermanager)
 - [✨ Funciones principales](#-funciones-principales)
 - [🚀 Primeros pasos](#-primeros-pasos)
@@ -61,6 +62,14 @@
 Cuando el PC va lento, el Administrador de tareas es lo primero que abres, y muchas veces lo primero que se congela, ordena con lentitud u oculta el proceso que buscabas. CyberManager lee la lista de procesos directamente de la API NT en lugar de WMI, con instantáneas diferenciales, una rejilla virtualizada y carga de iconos en segundo plano, así que la búsqueda, el orden y el desplazamiento siguen siendo instantáneos con miles de procesos. Termina un proceso o todo su árbol, reinicia, suspende, reanuda o cambia la prioridad de uno o de una selección múltiple; observa CPU, RAM y disco en historiales animados y una vista de Rendimiento; y mantén en pantalla un widget flotante de CPU/RAM con LED de actividad de disco mientras el resto de la app espera tras un atajo global. Construido con **.NET 10** y **WPF**.
 
 *Gratuito y de código abierto (GPLv3): sin anuncios, sin rastreo y sin recogida de datos. Solo disfrútalo.*
+
+---
+
+<!-- Capturas: pendiente de la galería bilingüe ES/EN del plan en https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — sustituir la cita, conservar este título y su entrada en el índice. -->
+
+## 📸 Capturas
+
+> Próximamente...
 
 ---
 
