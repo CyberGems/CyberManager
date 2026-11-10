@@ -40,11 +40,13 @@ english.CreateShortcutGroup=Create shortcuts:
 english.CyberManagerShortcut=CyberManager (Task Manager)
 english.OptionsGroup=Options:
 english.RunAtStartup=Run CyberManager when Windows starts
+english.CloseBeforeUninstall=CyberManager is still running. Choose Exit from the CyberManager icon menu in the notification area, then click Retry.
 
 spanish.CreateShortcutGroup=Crear accesos directos:
 spanish.CyberManagerShortcut=CyberManager (Gestor de Tareas)
 spanish.OptionsGroup=Opciones:
 spanish.RunAtStartup=Ejecutar CyberManager al iniciar Windows
+spanish.CloseBeforeUninstall=CyberManager sigue abierto. Elige Salir en el menú del icono de CyberManager en la bandeja del sistema y haz clic en Reintentar.
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CyberManagerShortcut}"; GroupDescription: "{cm:CreateShortcutGroup}"
@@ -67,3 +69,20 @@ Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#AppName}}"; F
 
 [UninstallRun]
 Filename: "schtasks"; Parameters: "delete /tn ""CyberManager"" /f"; RunOnceId: "CyberManagerScheduledTaskRemoval"; Flags: runhidden
+
+[Code]
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep <> usUninstall then
+    Exit;
+
+  { Match the mutex held by CyberManager's SingleInstance service. }
+  while CheckForMutexes('CyberManager_SingleInstance') do
+  begin
+    Log('CyberManager is running. Close it before uninstalling.');
+    if UninstallSilent then
+      Abort;
+    if MsgBox(CustomMessage('CloseBeforeUninstall'), mbInformation, MB_RETRYCANCEL) <> IDRETRY then
+      Abort;
+  end;
+end;
