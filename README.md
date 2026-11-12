@@ -37,7 +37,8 @@
 - [🖼️ Screenshots](#️-screenshots)
 - [🎯 Why CyberManager?](#-why-cybermanager)
 - [✨ Key Features](#-key-features)
-- [🚀 Getting Started](#-getting-started)
+- [🚀 Installation](#-installation)
+- [🧭 Using the App](#-using-the-app)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
 - [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts)
 - [❤️ Donate](#️-donate)
@@ -154,7 +155,7 @@ Plenty of task managers freeze under heavy load or bury basic features behind co
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation
 
 ### Install
 
@@ -186,6 +187,20 @@ Windows shows this warning for any installer without a paid code-signing certifi
 You can verify the file independently: compare the SHA with the GitHub release, scan it on VirusTotal, or build from source. More details: [SmartScreen guide on the website](https://cybergems.org/download#smartscreen).
 
 </details>
+
+---
+
+## 🧭 Using the App
+
+CyberManager is a compact window you can toggle from any application with `Alt+Shift+M`.
+
+1. Press `Alt+Shift+M` and click the **CPU** column to sort processes by usage.
+2. Check the heatmap colours and the sparkline at the bottom to tell a spike from a constant drain.
+3. Press `Alt+Shift+W` for the floating metrics widget, or `Ctrl+1` / `Ctrl+2` / `Ctrl+3` to switch views.
+
+Red rows mean high usage at a glance. The widget hotkey is configurable and `Ctrl+Shift+M` toggles compact mode.
+
+See [How Do You Use CyberManager?](https://github.com/CyberGems/CyberManager/wiki/How-Do-You-Use) for everyday examples and the full guides.
 
 ---
 

@@ -37,7 +37,8 @@
 - [🖼️ Capturas](#️-capturas)
 - [🎯 ¿Por qué CyberManager?](#-por-qué-cybermanager)
 - [✨ Funciones principales](#-funciones-principales)
-- [🚀 Primeros pasos](#-primeros-pasos)
+- [🚀 Instalación](#-instalación)
+- [🧭 Cómo usar la app](#-cómo-usar-la-app)
 - [🛠️ Stack tecnológico y arquitectura](#️-stack-tecnológico-y-arquitectura)
 - [⌨️ Atajos de teclado](#️-atajos-de-teclado)
 - [❤️ Donar](#️-donar)
@@ -153,9 +154,9 @@ Muchos gestores de tareas se congelan bajo carga intensiva o esconden funciones 
 - **Restablecer valores de fábrica**: restaura todas las preferencias de la aplicación a sus valores predeterminados
 ---
 
-## 🚀 Primeros pasos
+## 🚀 Instalación
 
-### Instalación
+### Instalar
 
 1. Descarga la [última versión](https://github.com/CyberGems/CyberManager/releases/latest)
 2. Ejecuta el instalador o la [versión portable](https://github.com/CyberGems/CyberManager/releases/latest)
@@ -185,6 +186,20 @@ Windows muestra este aviso para cualquier instalador sin un certificado de firma
 Puedes verificar el archivo de forma independiente: compara el SHA con el release de GitHub, escanéalo en VirusTotal o compila desde el código fuente. Más detalles: [guía de SmartScreen en el sitio web](https://cybergems.org/download#smartscreen).
 
 </details>
+---
+
+## 🧭 Cómo usar la app
+
+CyberManager es una ventana compacta que puedes mostrar u ocultar desde cualquier aplicación con `Alt+Shift+M`.
+
+1. Pulsa `Alt+Shift+M` y haz clic en la columna **CPU** para ordenar los procesos por uso.
+2. Mira los colores del mapa de calor y la línea de tendencia inferior para distinguir un pico de un consumo constante.
+3. Pulsa `Alt+Shift+W` para el widget flotante de métricas, o `Ctrl+1` / `Ctrl+2` / `Ctrl+3` para cambiar de vista.
+
+Las filas rojas indican uso alto de un vistazo. El atajo del widget es configurable y `Ctrl+Shift+M` activa el modo compacto.
+
+Consulta [¿Cómo se usa CyberManager?](https://github.com/CyberGems/CyberManager/wiki/How-Do-You-Use) para ver ejemplos cotidianos y las guías completas de la wiki (en inglés).
+
 ---
 
 ## 🛠️ Stack tecnológico y arquitectura
