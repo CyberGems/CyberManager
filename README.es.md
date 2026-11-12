@@ -37,7 +37,7 @@
 - [🖼️ Capturas](#️-capturas)
 - [🎯 ¿Por qué CyberManager?](#-por-qué-cybermanager)
 - [✨ Funciones principales](#-funciones-principales)
-- [🚀 Instalación](#-instalación)
+- [⬇️ Instalación](#️-instalación)
 - [🧭 Cómo usar la app](#-cómo-usar-la-app)
 - [🛠️ Stack tecnológico y arquitectura](#️-stack-tecnológico-y-arquitectura)
 - [⌨️ Atajos de teclado](#️-atajos-de-teclado)
@@ -152,9 +152,10 @@ Muchos gestores de tareas se congelan bajo carga intensiva o esconden funciones 
 - **Diálogos integrados**: Configuración más amplia y legible, Acerca de compacto y avisos de actualización que distinguen las versiones instalada y disponible
 - **Chrome sin marco**: esquinas redondeadas de DWM, efectos de fondo Mica y Acrílico
 - **Restablecer valores de fábrica**: restaura todas las preferencias de la aplicación a sus valores predeterminados
+
 ---
 
-## 🚀 Instalación
+## ⬇️ Instalación
 
 ### Instalar
 
@@ -186,6 +187,7 @@ Windows muestra este aviso para cualquier instalador sin un certificado de firma
 Puedes verificar el archivo de forma independiente: compara el SHA con el release de GitHub, escanéalo en VirusTotal o compila desde el código fuente. Más detalles: [guía de SmartScreen en el sitio web](https://cybergems.org/download#smartscreen).
 
 </details>
+
 ---
 
 ## 🧭 Cómo usar la app
@@ -233,6 +235,7 @@ cd CyberManager
 dotnet build
 dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 ```
+
 ---
 
 ## ⌨️ Atajos de teclado

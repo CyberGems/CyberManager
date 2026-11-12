@@ -37,7 +37,7 @@
 - [🖼️ Screenshots](#️-screenshots)
 - [🎯 Why CyberManager?](#-why-cybermanager)
 - [✨ Key Features](#-key-features)
-- [🚀 Installation](#-installation)
+- [⬇️ Installation](#️-installation)
 - [🧭 Using the App](#-using-the-app)
 - [🛠️ Tech Stack & Architecture](#️-tech-stack--architecture)
 - [⌨️ Keyboard Shortcuts](#️-keyboard-shortcuts)
@@ -155,7 +155,7 @@ Plenty of task managers freeze under heavy load or bury basic features behind co
 
 ---
 
-## 🚀 Installation
+## ⬇️ Installation
 
 ### Install
 
