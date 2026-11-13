@@ -5,6 +5,7 @@
 #define AppName "CyberManager"
 #define AppPublisher "CyberGems"
 #define AppURL "https://cybergems.org"
+#define AppDescription "See what is slowing your PC down and take action without losing your place."
 #define AppExeName "CyberManager.exe"
 
 [Setup]
@@ -15,6 +16,7 @@ AppPublisher={#AppPublisher}
 AppPublisherURL={#AppURL}
 AppSupportURL={#AppURL}
 AppUpdatesURL={#AppURL}
+AppComments={#AppDescription}
 DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 AllowNoIcons=yes
