@@ -40,6 +40,8 @@ Filter processes by category, inspect process owner user names, and track lifecy
 
 Filtra procesos por categorías, consulta el usuario propietario y sigue el ciclo de vida con resaltados animados y una columna de Estado. El menú contextual modernizado incorpora desenfoque acrílico nativo, separadores centrados y acceso inmediato a Finalizar tarea.
 
+> **¿Nuevo en CyberManager?** Un administrador de tareas Windows ligero, con búsqueda instantánea, detalle de procesos y un modo compacto enfocado.
+
 ---
 
 ### ✨ Novedades destacadas
