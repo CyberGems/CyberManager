@@ -200,7 +200,7 @@ CyberManager es una ventana compacta que puedes mostrar u ocultar desde cualquie
 
 Las filas rojas indican uso alto de un vistazo. El atajo del widget es configurable y `Ctrl+Shift+M` activa el modo compacto.
 
-Consulta [¿Cómo se usa CyberManager?](https://github.com/CyberGems/CyberManager/wiki/How-Do-You-Use) para ver ejemplos cotidianos y las guías completas de la wiki (en inglés).
+Consulta [¿Cómo se usa CyberManager?](https://github.com/CyberGems/CyberManager/wiki/How-Do-You-Use-es) para ver ejemplos cotidianos y las guías completas de la wiki.
 
 ---
 
