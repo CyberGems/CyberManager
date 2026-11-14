@@ -1,4 +1,4 @@
-﻿<p align="center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/CyberGems/CyberManager/main/src/CyberManager.UI/Assets/CyberManager.png" width="120" alt="CyberManager">
 </p>
 
