@@ -105,4 +105,6 @@ Filtra procesos por categorías, consulta el usuario propietario y sigue el cicl
 
 ---
 
+📜 **Full changelog:** browse every version in [CHANGELOG.md](https://github.com/CyberGems/CyberManager/blob/main/CHANGELOG.md).
+
 *Crafted with precision by [CyberGems](https://cybergems.org)*
