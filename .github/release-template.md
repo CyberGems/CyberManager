@@ -34,7 +34,7 @@ Filter processes by category, inspect process owner user names, and track lifecy
   - Enhanced grouping correctly associates helper processes and WebView2 runtimes under the parent application even when child workers have earlier start timestamps.
 
 <details>
-<summary><b>🌐 Ver notas de la versión en Español</b></summary>
+<summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
