@@ -85,14 +85,21 @@ Filtra procesos por categorías, consulta el usuario propietario y sigue el cicl
 
 ---
 
-### 🔍 VirusTotal Scan Results (70+ Antivirus Engines)
+### 🔐 VirusTotal and SHA256
 
-> ℹ️ These links open the security report on VirusTotal in a new tab, they do not download the app.
+> 🛡️ The report opens on VirusTotal and does not download anything.
 
-- 🛡️ **Setup Installer**: [View security report on VirusTotal](https://www.virustotal.com/gui/file/{{INSTALLER_HASH}})  
-  *(SHA256: `{{INSTALLER_HASH}}`)*
-- 💼 **Portable Archive**: [View security report on VirusTotal](https://www.virustotal.com/gui/file/{{PORTABLE_HASH}})  
-  *(SHA256: `{{PORTABLE_HASH}}`)*
+**Installer**: [View VirusTotal report](https://www.virustotal.com/gui/file/{{INSTALLER_HASH}})
+
+```text
+{{INSTALLER_HASH}}
+```
+
+**Portable**: [View VirusTotal report](https://www.virustotal.com/gui/file/{{PORTABLE_HASH}})
+
+```text
+{{PORTABLE_HASH}}
+```
 
 ---
 
