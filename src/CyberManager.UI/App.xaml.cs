@@ -1,6 +1,7 @@
 using System.Windows;
 using CyberManager.Common.I18n;
 using CyberManager.Common.Settings;
+using CyberManager.UI.Controls;
 using CyberManager.UI.Services;
 
 namespace CyberManager.UI;
@@ -28,6 +29,8 @@ public partial class App : System.Windows.Application
         Settings = AppSettings.Load();
         Strings.Current = Settings.Language;
         ThemeManager.Apply(Settings.Theme);
+        // Every text field gets the suite-styled context menu (see TextFieldContextMenu).
+        TextFieldContextMenu.InstallGlobalHandler();
         _ = Task.Run(() =>
             StartupManager.EnsureAutoStart(Settings.StartWithWindows, startMinimized: true));
         var w = new MainWindow();

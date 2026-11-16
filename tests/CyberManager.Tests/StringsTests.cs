@@ -89,6 +89,8 @@ public class StringsTests
             "NoProcesses", "NoSearchMatches", "NoProcessesFiltered", "Refresh", "AlwaysOnTop", "KillConfirm", "KillTreeConfirm",
             "PauseDetection", "ResumeDetection", "DetectionPaused",
             "Settings", "About", "ThemeCyberManager", "ThemeDark", "ThemeLight",
+            "TextMenuUndo", "TextMenuRedo", "TextMenuCut", "TextMenuCopy", "TextMenuPaste",
+            "TextMenuSelectAll", "TextMenuDelete", "LanguageDesc", "ThemeDesc",
             "Ok", "Cancel", "DoNotShowAgain", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",
             "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction",
             "GroupByApp", "Ungroup", "KillGroupConfirm", "SuspendGroupConfirm", "ResumeGroupConfirm",
