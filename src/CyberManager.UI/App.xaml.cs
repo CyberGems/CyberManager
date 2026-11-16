@@ -40,7 +40,15 @@ public partial class App : System.Windows.Application
 
     protected override void OnExit(System.Windows.ExitEventArgs e)
     {
-        try { Settings.Save(); } catch { }
+        try
+        {
+            Settings.Save();
+        }
+        catch (Exception ex)
+        {
+            // Losing the settings silently made exit-time failures invisible; keep a trail.
+            System.Diagnostics.Debug.WriteLine($"Settings save on exit failed: {ex}");
+        }
         base.OnExit(e);
     }
 }

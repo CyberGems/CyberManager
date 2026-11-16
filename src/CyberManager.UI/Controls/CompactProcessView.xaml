@@ -206,6 +206,7 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Focusable" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource SuiteFocusVisual}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -265,6 +266,7 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Focusable" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource SuiteFocusVisual}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ToggleButton">
@@ -438,15 +440,20 @@
                             Height="26"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            Content="📌"
-                            FontSize="12"
                             Padding="0"
                             Style="{DynamicResource CompactIconButton}"
                             Click="PinButton_Click"
                             MouseEnter="InteractiveControl_MouseEnter"
                             MouseLeave="InteractiveControl_MouseLeave"
                             ToolTip="Always on top"
-                            AutomationProperties.Name="Always on top"/>
+                            AutomationProperties.Name="Always on top">
+                            <!-- Vector pushpin: the emoji rendered as a colored glyph that ignored
+                                 the button Foreground and the suite's icon style. -->
+                            <Path Data="M 9 3 H 15 L 14 9 L 18 12 V 14 H 6 V 12 L 10 9 Z M 12 14 V 21"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="13" Height="13" Stretch="Uniform" Fill="Transparent"/>
+                        </Button>
                     </Border>
                     <Border Grid.Column="5" x:Name="ModeButtonHost"
                             Width="32"

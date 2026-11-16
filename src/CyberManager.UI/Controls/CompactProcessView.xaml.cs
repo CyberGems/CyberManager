@@ -493,7 +493,9 @@ public partial class CompactProcessView : UserControl
         PinButton.Opacity = pinned ? 1.0 : 0.65;
         var label = pinned ? $"{Strings.T("AlwaysOnTop")} ✓" : Strings.T("AlwaysOnTop");
         PinButton.ToolTip = HotkeyToolTipContent.WithShortcut(label, KeyboardShortcuts.TogglePin);
-        AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
+        // The ✓ in the tooltip is invisible to assistive tech, so the name carries the state.
+        var state = pinned ? Strings.T("WidgetPinned") : Strings.T("WidgetUnpinned");
+        AutomationProperties.SetName(PinButton, $"{Strings.T("AlwaysOnTop")} ({state})");
     }
 
     public void FocusSearchBox()
