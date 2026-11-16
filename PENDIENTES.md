@@ -4,15 +4,16 @@ Problemas conocidos y mejoras acordadas que todavía no están implementados.
 
 ## Issues conocidos
 
-### Widget flotante fijado termina detrás de otras ventanas
-
-- **Síntoma:** con el widget en estado fijado ("siempre visible"), después de un periodo de horas indeterminado deja de quedar por encima y aparece detrás de otras ventanas.
-- **Sin determinar:** el tiempo exacto, y si depende de suspensión/reanudación, bloqueo de sesión, cambio de DPI o del monitor, o de qué ventana recupera el primer plano.
-- **Sospecha:** WPF pierde el `Topmost` cuando Windows reordena o recrea el z-order (reanudación, cambio de escritorio virtual, recreación del HWND). Habría que reafirmar `Topmost` al mostrarse y al recuperar el foco, o usar `SetWindowPos(HWND_TOPMOST)` tras esos eventos.
-- **Estado:** reportado el 2026-11-16; sin reproducir ni corregir.
+Ninguno abierto en este momento.
 
 ## Mejoras pendientes
 
-- **Foco de teclado visible:** varias plantillas de botón (`ModernButton`, `TitleBtn`, `IconButton`, `HeavyFilterToggleStyle`, compacta) no tienen trigger de `IsKeyboardFocused`, y las pestañas de navegación son `Focusable=False`. Falta un indicador de foco coherente con los tokens del tema.
-- **Icono de pin de la vista compacta:** `CompactProcessView.xaml` sigue usando el emoji 📌 mientras el resto de iconos son `Path` vectoriales.
-- **Paleta duplicada:** `App.xaml` y `ThemeManager.cs` repiten los valores por defecto de los temas; conviene una única fuente para que no vuelvan a divergir.
+- **Rendimiento de la ventana principal:** `AllowsTransparency="True"` en `MainWindow.xaml` desactiva la aceleración por hardware de toda la ventana. Merece una medición antes de decidir si compensa cambiar a `WindowChrome` con esquinas redondeadas del sistema. No medido todavía.
+- **Paleta duplicada:** `App.xaml` y `ThemeManager.cs` siguen repitiendo los valores por defecto de los temas. Hoy están sincronizados y `ThemeManager` es la fuente en tiempo de ejecución, pero una única fuente generada evitaría divergencias futuras.
+
+## Resuelto
+
+- **Widget fijado detrás de otras ventanas:** un watchdog cada 10 s comprueba `WS_EX_TOPMOST` y solo reafirma la banda superior si se perdió, además de hacerlo al mostrarse y tras cambios de pantalla (`FloatingMetricsWindow`). Reportado el 2026-11-16, corregido el mismo día; pendiente de validar en una sesión larga real.
+- **Foco de teclado invisible:** anillo de foco compartido `SuiteFocusVisual` en las plantillas de botón y en las pestañas de navegación, que ahora son alcanzables con Tab.
+- **Icono de pin de la vista compacta:** sustituido el emoji 📌 por un icono vectorial.
+- **Menú contextual de campos de texto:** implementado y compartido (`TextFieldContextMenu`).
