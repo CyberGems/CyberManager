@@ -23,6 +23,8 @@ AllowNoIcons=yes
 OutputDir=.
 OutputBaseFilename=CyberManager-Setup-{#AppVersion}
 SetupIconFile=.\src\CyberManager.UI\Assets\CyberManager.ico
+; Without this, Inno leaves DisplayIcon empty and Windows shows a generic icon in Apps.
+UninstallDisplayIcon={app}\CyberManager.exe,0
 WizardSmallImageFile=.\installer\installerWizardSmall.bmp
 WizardImageFile=.\installer\installerWizard.bmp
 Compression=lzma
