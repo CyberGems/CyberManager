@@ -13,7 +13,7 @@ Ninguno abierto en este momento.
 
 ## Resuelto
 
-- **Widget fijado detrás de otras ventanas:** un watchdog cada 10 s comprueba `WS_EX_TOPMOST` y solo reafirma la banda superior si se perdió, además de hacerlo al mostrarse y tras cambios de pantalla (`FloatingMetricsWindow`). Reportado el 2026-11-16, corregido el mismo día; pendiente de validar en una sesión larga real.
+- **Ventanas «siempre visible» que caen detrás:** `Services/TopmostGuard.cs` centraliza la vigilancia para el widget y la ventana principal. Sigue la propiedad `Topmost`, comprueba `WS_EX_TOPMOST` cada 10 s y solo reafirma la banda si se perdió, además de hacerlo al mostrarse y tras cambios de pantalla. Reportado para el widget el 2026-11-16, extendido a la ventana principal el mismo día; pendiente de validar en una sesión larga real.
 - **Foco de teclado invisible:** anillo de foco compartido `SuiteFocusVisual` en las plantillas de botón y en las pestañas de navegación, que ahora son alcanzables con Tab.
 - **Icono de pin de la vista compacta:** sustituido el emoji 📌 por un icono vectorial.
 - **Menú contextual de campos de texto:** implementado y compartido (`TextFieldContextMenu`).
