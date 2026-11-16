@@ -97,6 +97,8 @@ public class StringsTests
             "StartupActionEnable", "StartupActionDisable", "StartupActionChange",
             "StartupEnableConfirm", "StartupDisableConfirm", "StartupToggleDoneEnabled",
             "StartupToggleDoneDisabled", "StartupToggleFailed", "StartupBackupNotice", "StartupSelectRow",
+            "StartupActionUndo", "StartupUndoTooltip", "StartupUndoConfirm", "StartupUndoDoneEnabled",
+            "StartupUndoDoneDisabled", "StartupUndoNothing", "StartupUndoFailed",
             "StartupSourceRegistryUser", "StartupSourceRegistryMachine",
             "StartupSourceRegistryMachine32", "StartupSourceFolderUser", "StartupSourceFolderCommon",
             "Ok", "Cancel", "DoNotShowAgain", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",

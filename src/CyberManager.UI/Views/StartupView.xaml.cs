@@ -43,6 +43,8 @@ public partial class StartupView : UserControl
         EmptyStateText.Text = Strings.T("StartupEmpty");
         BackupNotice.Text = Strings.T("StartupBackupNotice");
         ToggleButton.ToolTip = Strings.T("StartupSelectRow");
+        UndoButton.ToolTip = Strings.T("StartupUndoTooltip");
+        UndoButton.Content = Strings.T("StartupActionUndo");
         AutomationProperties.SetName(StartupGrid, Strings.T("StartupTitle"));
 
         // Source and state labels are localized, so the rows must be rebuilt on a language change.
@@ -63,18 +65,19 @@ public partial class StartupView : UserControl
         CountText.Text = Strings.T("StartupCount", rows.Count);
         CountText.Visibility = rows.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         EmptyStateText.Visibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        UpdateToggleButton();
+        UpdateActionButtons();
     }
 
-    private void StartupGrid_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateToggleButton();
+    private void StartupGrid_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateActionButtons();
 
-    private void UpdateToggleButton()
+    private void UpdateActionButtons()
     {
         var row = StartupGrid.SelectedItem as StartupRowViewModel;
         ToggleButton.IsEnabled = row is not null;
         ToggleButton.Content = row is null
             ? Strings.T("StartupActionChange")
             : Strings.T(row.Entry.IsEnabled ? "StartupActionDisable" : "StartupActionEnable");
+        UndoButton.IsEnabled = row is not null && StartupAppsController.HasUndoableChange(row.Entry);
     }
 
     private void ToggleButton_Click(object sender, RoutedEventArgs e)
@@ -108,6 +111,42 @@ public partial class StartupView : UserControl
         Activate();
         StatusText.Text = Strings.T(
             enabling ? "StartupToggleDoneEnabled" : "StartupToggleDoneDisabled",
+            entry.Name);
+    }
+
+    private void UndoButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (StartupGrid.SelectedItem is not StartupRowViewModel row) return;
+
+        var entry = row.Entry;
+        var action = Strings.T("StartupActionUndo");
+
+        var confirmed = ConfirmDialog.Show(
+            Window.GetWindow(this),
+            action,
+            Strings.T("StartupUndoConfirm", entry.Name),
+            okText: action,
+            cancelText: Strings.T("Cancel"),
+            iconType: ConfirmIconType.Info);
+
+        if (!confirmed) return;
+
+        var result = StartupAppsController.UndoLastChange(entry);
+        if (!result.Success)
+        {
+            StatusText.Text = Strings.T("StartupUndoFailed");
+            return;
+        }
+
+        if (!result.Found)
+        {
+            StatusText.Text = Strings.T("StartupUndoNothing");
+            return;
+        }
+
+        Activate();
+        StatusText.Text = Strings.T(
+            result.RestoredEnabled ? "StartupUndoDoneEnabled" : "StartupUndoDoneDisabled",
             entry.Name);
     }
 

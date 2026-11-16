@@ -87,6 +87,124 @@ public class StartupAppsControllerTests
     }
 
     [Fact]
+    public void UndoLastChange_RestoresTheExactOriginalBytes()
+    {
+        const string name = "CyberManager.SelfTest.Undo";
+        var backupDirectory = Path.Combine(Path.GetTempPath(), "cybermanager-undo-" + Guid.NewGuid().ToString("N"));
+        var previousOverride = StartupAppsController.BackupDirectoryOverride;
+        StartupAppsController.BackupDirectoryOverride = backupDirectory;
+
+        var entry = new StartupAppInfo(
+            name, string.Empty, @"C:\self-test.exe", StartupEntrySource.RegistryUser, true, "Run", name);
+        var original = new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+        try
+        {
+            WriteRecord(name, original);
+
+            var disable = StartupAppsController.SetEnabled(entry, false);
+            Assert.True(disable.Success, disable.Error);
+            Assert.True(StartupAppsController.HasUndoableChange(entry));
+
+            var undo = StartupAppsController.UndoLastChange(entry);
+
+            Assert.True(undo.Success, undo.Error);
+            Assert.True(undo.Found);
+            Assert.True(undo.RestoredEnabled);
+            // Byte-exact restore: a previous value that Windows wrote is never rewritten from scratch.
+            Assert.Equal(original, ReadRecord(name));
+        }
+        finally
+        {
+            DeleteRecord(name);
+            StartupAppsController.BackupDirectoryOverride = previousOverride;
+            try
+            {
+                Directory.Delete(backupDirectory, recursive: true);
+            }
+            catch
+            {
+                // Best-effort cleanup of the test directory.
+            }
+        }
+    }
+
+    [Fact]
+    public void UndoLastChange_ReportsWhenNothingWasBackedUp()
+    {
+        const string name = "CyberManager.SelfTest.Nothing";
+        var backupDirectory = Path.Combine(Path.GetTempPath(), "cybermanager-undo-empty-" + Guid.NewGuid().ToString("N"));
+        var previousOverride = StartupAppsController.BackupDirectoryOverride;
+        StartupAppsController.BackupDirectoryOverride = backupDirectory;
+
+        var entry = new StartupAppInfo(
+            name, string.Empty, @"C:\self-test.exe", StartupEntrySource.RegistryUser, true, "Run", name);
+
+        try
+        {
+            Assert.False(StartupAppsController.HasUndoableChange(entry));
+
+            var undo = StartupAppsController.UndoLastChange(entry);
+
+            Assert.True(undo.Success);
+            Assert.False(undo.Found);
+            Assert.Null(ReadRecord(name));
+        }
+        finally
+        {
+            DeleteRecord(name);
+            StartupAppsController.BackupDirectoryOverride = previousOverride;
+            try
+            {
+                Directory.Delete(backupDirectory, recursive: true);
+            }
+            catch
+            {
+                // Best-effort cleanup of the test directory.
+            }
+        }
+    }
+
+    [Fact]
+    public void SetEnabled_RotatesAnOversizedBackupLog()
+    {
+        const string name = "CyberManager.SelfTest.Rotation";
+        var backupDirectory = Path.Combine(Path.GetTempPath(), "cybermanager-rotate-" + Guid.NewGuid().ToString("N"));
+        var previousOverride = StartupAppsController.BackupDirectoryOverride;
+        StartupAppsController.BackupDirectoryOverride = backupDirectory;
+
+        var entry = new StartupAppInfo(
+            name, string.Empty, @"C:\self-test.exe", StartupEntrySource.RegistryUser, true, "Run", name);
+
+        try
+        {
+            Directory.CreateDirectory(backupDirectory);
+            var path = Path.Combine(backupDirectory, "startup-approvals-backup.log");
+            File.WriteAllLines(path, Enumerable.Repeat(new string('x', 100), 4000));
+
+            var result = StartupAppsController.SetEnabled(entry, false);
+
+            Assert.True(result.Success, result.Error);
+            var lines = File.ReadAllLines(path);
+            Assert.True(lines.Length <= 502, $"log kept {lines.Length} lines");
+            Assert.Contains(lines, line => line.Contains(name, StringComparison.Ordinal));
+        }
+        finally
+        {
+            DeleteRecord(name);
+            StartupAppsController.BackupDirectoryOverride = previousOverride;
+            try
+            {
+                Directory.Delete(backupDirectory, recursive: true);
+            }
+            catch
+            {
+                // Best-effort cleanup of the test directory.
+            }
+        }
+    }
+
+    [Fact]
     public void SetEnabled_RejectsUnknownCategories()
     {
         var entry = new StartupAppInfo(
@@ -101,6 +219,12 @@ public class StartupAppsControllerTests
     {
         using var key = Registry.CurrentUser.OpenSubKey(ApprovedRunKey, writable: false);
         return key?.GetValue(name) as byte[];
+    }
+
+    private static void WriteRecord(string name, byte[] value)
+    {
+        using var key = Registry.CurrentUser.CreateSubKey(ApprovedRunKey, writable: true);
+        key!.SetValue(name, value, RegistryValueKind.Binary);
     }
 
     private static void DeleteRecord(string name)
