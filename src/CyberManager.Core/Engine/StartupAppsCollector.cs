@@ -34,11 +34,11 @@ public sealed class StartupAppsCollector
         var folderApproved = ReadApprovalState("StartupFolder");
 
         AddRegistryEntries(result, RegistryHive.CurrentUser, RegistryView.Registry64,
-            StartupEntrySource.RegistryUser, runApproved);
+            StartupEntrySource.RegistryUser, "Run", runApproved);
         AddRegistryEntries(result, RegistryHive.LocalMachine, RegistryView.Registry64,
-            StartupEntrySource.RegistryMachine, runApproved);
+            StartupEntrySource.RegistryMachine, "Run", runApproved);
         AddRegistryEntries(result, RegistryHive.LocalMachine, RegistryView.Registry32,
-            StartupEntrySource.RegistryMachine32, run32Approved);
+            StartupEntrySource.RegistryMachine32, "Run32", run32Approved);
 
         AddFolderEntries(result, Environment.GetFolderPath(Environment.SpecialFolder.Startup),
             StartupEntrySource.StartupFolderUser, folderApproved);
@@ -119,6 +119,7 @@ public sealed class StartupAppsCollector
         RegistryHive hive,
         RegistryView view,
         StartupEntrySource source,
+        string approvalCategory,
         Dictionary<string, bool> approved)
     {
         try
@@ -137,7 +138,9 @@ public sealed class StartupAppsCollector
                     ResolvePublisher(command),
                     command,
                     source,
-                    !approved.TryGetValue(name, out var enabled) || enabled));
+                    !approved.TryGetValue(name, out var enabled) || enabled,
+                    approvalCategory,
+                    name));
             }
         }
         catch (Exception ex)
@@ -161,15 +164,24 @@ public sealed class StartupAppsCollector
                 var extension = Path.GetExtension(path);
                 if (!StartupFileExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase)) continue;
 
+                var fileName = Path.GetFileName(path);
                 var name = Path.GetFileNameWithoutExtension(path);
-                if (string.IsNullOrWhiteSpace(name)) continue;
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(fileName)) continue;
+
+                // Windows keys these records by file name, extension included. Fall back to the
+                // bare name for environments that wrote it without one.
+                var isEnabled = true;
+                if (approved.TryGetValue(fileName, out var byFileName)) isEnabled = byFileName;
+                else if (approved.TryGetValue(name, out var byName)) isEnabled = byName;
 
                 target.Add(new StartupAppInfo(
                     name,
                     ResolvePublisher(path),
                     path,
                     source,
-                    !approved.TryGetValue(name, out var enabled) || enabled));
+                    isEnabled,
+                    "StartupFolder",
+                    fileName));
             }
         }
         catch (Exception ex)

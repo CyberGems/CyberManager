@@ -48,6 +48,38 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="StartupActionButton" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentFgBrush}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,7"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource SuiteFocusVisual}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="8" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.4"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="0,4,0,0">
@@ -82,6 +114,7 @@
                       GridLinesVisibility="None"
                       SelectionMode="Single"
                       SelectionUnit="FullRow"
+                      SelectionChanged="StartupGrid_SelectionChanged"
                       RowHeight="32"
                       Background="{DynamicResource CardBrush}"
                       BorderBrush="{DynamicResource BorderBrush}"
@@ -137,7 +170,19 @@
                        Visibility="Collapsed"/>
         </Grid>
 
-        <TextBlock x:Name="ReadOnlyNotice" Grid.Row="2" Margin="2,10,0,0"
-                   FontSize="11.5" Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap"/>
+        <Grid Grid.Row="2" Margin="2,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock x:Name="BackupNotice" FontSize="11.5" Foreground="{DynamicResource SubTextBrush}" TextWrapping="Wrap"/>
+                <TextBlock x:Name="StatusText" FontSize="11.5" FontWeight="SemiBold"
+                           Foreground="{DynamicResource AccentBrush}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+            <Button x:Name="ToggleButton" Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center"
+                    Style="{StaticResource StartupActionButton}" IsEnabled="False"
+                    ToolTipService.ShowOnDisabled="True" Click="ToggleButton_Click"/>
+        </Grid>
     </Grid>
 </UserControl>

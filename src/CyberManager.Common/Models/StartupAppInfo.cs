@@ -5,19 +5,22 @@ public enum StartupEntrySource
 {
     RegistryUser,
     RegistryMachine,
-    RegistryUser32,
     RegistryMachine32,
     StartupFolderUser,
     StartupFolderCommon
 }
 
 /// <summary>
-/// A single application Windows launches when the user signs in. Read-only for now: the second
-/// phase will add enable/disable through the StartupApproved keys.
+/// A single application Windows launches when the user signs in.
+/// <paramref name="ApprovalCategory"/> and <paramref name="ApprovalValueName"/> identify the
+/// per-user StartupApproved record that holds its enabled state, which is what enabling or
+/// disabling the entry writes.
 /// </summary>
 public sealed record StartupAppInfo(
     string Name,
     string Publisher,
     string Command,
     StartupEntrySource Source,
-    bool IsEnabled);
+    bool IsEnabled,
+    string ApprovalCategory,
+    string ApprovalValueName);
