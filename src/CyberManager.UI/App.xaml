@@ -6,7 +6,9 @@
     <Application.Resources>
         <primitives:PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</primitives:PopupAnimation>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
-        <SolidColorBrush x:Key="BgBrush" Color="#070B12"/>
+        <!-- Defaults mirror ThemeManager's CyberManager palette, which is the runtime source
+             of truth (Apply runs before any window is created). Keep both in sync. -->
+        <SolidColorBrush x:Key="BgBrush" Color="#090D14"/>
         <SolidColorBrush x:Key="CardBrush" Color="#131A26"/>
         <SolidColorBrush x:Key="CardSecondaryBrush" Color="#1A2535"/>
         <SolidColorBrush x:Key="SelectionBgBrush" Color="#20344A"/>
@@ -36,6 +38,8 @@
         <SolidColorBrush x:Key="SwitchTrackBrush" Color="#29394D"/>
         <SolidColorBrush x:Key="MenuGlassBgBrush" Color="#C40F1623"/>
         <SolidColorBrush x:Key="MenuGlassBorderBrush" Color="#403DB5C5"/>
+        <!-- Tray menu surface: near-opaque on purpose, it floats over the desktop. -->
+        <SolidColorBrush x:Key="TrayMenuBgBrush" Color="#FA0F1623"/>
         <SolidColorBrush x:Key="MenuSeparatorBrush" Color="#1EFFFFFF"/>
         <Geometry x:Key="DialogEnterKeyGeometry">M 16,4 V 10 Q 16,13 13,13 H 4 M 8,9 L 4,13 L 8,17</Geometry>
         <Style x:Key="DialogKeyHintStyle" TargetType="Border">
@@ -84,6 +88,22 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- Shared keyboard-focus ring. Controls opt in with FocusVisualStyle; the adorner
+             only appears for keyboard focus, so pointer interaction is unchanged. -->
+        <Style x:Key="SuiteFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border BorderBrush="{DynamicResource AccentBrush}"
+                                BorderThickness="2"
+                                CornerRadius="7"
+                                Margin="1"
+                                SnapsToDevicePixels="True"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Global CyberGems Themed ScrollBar Styles -->
         <!-- The repeat buttons must be fully transparent and templated, otherwise WPF falls
              back to the default button chrome and paints an ugly frame around the thumb. -->

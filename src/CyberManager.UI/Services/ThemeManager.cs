@@ -10,14 +10,14 @@ public static class ThemeManager
         string Text, string SubText, string Accent, string AccentGlow, string AccentFg,
         string GridAlt, string HeaderBg, string SearchBg, string InputBg, string SwitchActive, string SwitchTrack,
         string Ram, string RamFill, string Cpu,
-        string CpuFill, string CpuSecondary, string CpuSecondaryFill, string RamSecondary,
+        string CpuFill, string CpuSecondary, string CpuSecondaryFill, string RamSecondary, string TrayMenuBg,
         string MenuGlassBg, string MenuGlassBorder, string MenuSeparator);
 
     private static readonly Dictionary<AppTheme, Palette> Palettes = new()
     {
-        [AppTheme.CyberManager] = new("#090D14","#131A26","#1A2535","#20344A","#29394D","#42566B","#F0F6FC","#93A2B4","#24A6B5","#3324A6B5","#071216","#101824","#1B2737","#111A27","#111A27","#24A6B5","#29394D","#24A6B5","#2024A6B5","#10B981","#2010B981","#EF4444","#40EF4444","#A855F7","#C40F1623","#403DB5C5","#1EFFFFFF"),
-        [AppTheme.Dark] = new("#121214","#1A1A1E","#222228","#282834","#2E2E38","#424250","#EDEDF0","#9E9EA8","#6366F1","#336366F1","#FFFFFF","#161619","#222229","#16161A","#16161A","#6366F1","#2E2E38","#00E5FF","#2000E5FF","#10B981","#2010B981","#EF4444","#40EF4444","#A855F7","#C414141A","#30FFFFFF","#1EFFFFFF"),
-        [AppTheme.Light] = new("#F8FAFC","#FFFFFF","#F1F5F9","#DBEAFE","#E2E8F0","#CBD5E1","#0F172A","#64748B","#2563EB","#222563EB","#FFFFFF","#F8FAFC","#F1F5F9","#FFFFFF","#FFFFFF","#2563EB","#CBD5E1","#0284C7","#200284C7","#047857","#20047857","#DC2626","#40DC2626","#7C3AED","#D8F8FAFC","#50CBD5E1","#200F172A"),
+        [AppTheme.CyberManager] = new("#090D14","#131A26","#1A2535","#20344A","#29394D","#42566B","#F0F6FC","#93A2B4","#24A6B5","#3324A6B5","#071216","#101824","#1B2737","#111A27","#111A27","#24A6B5","#29394D","#24A6B5","#2024A6B5","#10B981","#2010B981","#EF4444","#40EF4444","#A855F7","#FA0F1623","#C40F1623","#403DB5C5","#1EFFFFFF"),
+        [AppTheme.Dark] = new("#121214","#1A1A1E","#222228","#282834","#2E2E38","#424250","#EDEDF0","#9E9EA8","#6366F1","#336366F1","#FFFFFF","#161619","#222229","#16161A","#16161A","#6366F1","#2E2E38","#00E5FF","#2000E5FF","#10B981","#2010B981","#EF4444","#40EF4444","#A855F7","#FA14141A","#C414141A","#30FFFFFF","#1EFFFFFF"),
+        [AppTheme.Light] = new("#F8FAFC","#FFFFFF","#F1F5F9","#DBEAFE","#E2E8F0","#CBD5E1","#0F172A","#64748B","#2563EB","#222563EB","#FFFFFF","#F8FAFC","#F1F5F9","#FFFFFF","#FFFFFF","#2563EB","#CBD5E1","#0284C7","#200284C7","#047857","#20047857","#DC2626","#40DC2626","#7C3AED","#FAF8FAFC","#D8F8FAFC","#50CBD5E1","#200F172A"),
     };
 
     public static AppTheme CurrentTheme { get; private set; } = AppTheme.CyberManager;
@@ -40,6 +40,7 @@ public static class ThemeManager
         Set("CpuFillBrush", p.CpuFill); Set("CpuSecondaryBrush", p.CpuSecondary);
         Set("CpuSecondaryFillBrush", p.CpuSecondaryFill);
         Set("MenuGlassBgBrush", p.MenuGlassBg); Set("MenuGlassBorderBrush", p.MenuGlassBorder);
+        Set("TrayMenuBgBrush", p.TrayMenuBg);
         Set("MenuSeparatorBrush", p.MenuSeparator);
         res["RamColor"] = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(p.Ram)!;
         res["CpuColor"] = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(p.Cpu)!;
