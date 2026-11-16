@@ -198,6 +198,8 @@ public partial class MainWindow : Window
 
     private sealed record ProcessIdentity(int Pid, DateTime StartTime);
 
+    private readonly TopmostGuard _alwaysOnTopGuard;
+
     private sealed record ContextMenuTarget(
         ProcessInfo Item,
         int Pid,
@@ -209,6 +211,9 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        // "Always on top" can silently lose the topmost band in long sessions; the same guard the
+        // widget uses keeps the main window pinned without any per-call reassertions.
+        _alwaysOnTopGuard = new TopmostGuard(this);
         StateChanged += MainWindow_StateChanged;
         IsVisibleChanged += MainWindow_IsVisibleChanged;
         ApplyNavTabLabels();
