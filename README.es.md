@@ -123,6 +123,10 @@ Muchos gestores de tareas se congelan bajo carga intensiva o esconden funciones 
 - **Buscar en línea**: búsqueda en Google del nombre del proceso
 - **Propiedades**: inspecciona el nombre amigable, los metadatos del archivo, el estado en tiempo de ejecución y el uso de recursos
 
+### 🚦 Gestión de inicio
+- **Pestaña Inicio**: revisa todas las entradas de inicio del registro y de las carpetas de arranque en un solo lugar, con la fila seleccionada resaltada
+- **Habilitar / Deshabilitar**: activa o desactiva entradas con un paso de confirmación y un respaldo automático del valor original en `%LOCALAPPDATA%\CyberManager\startup-approvals-backup.log`
+
 ### 📊 Monitorización del sistema
 - **Historiales de métricas animados**: los gráficos de CPU, RAM y actividad del sistema avanzan suavemente entre muestras reales en la ventana principal, Rendimiento y el widget flotante. Se conserva la frecuencia de muestreo; la animación se pausa cuando el gráfico está oculto o su ventana minimizada y respeta la configuración de animaciones de Windows
 - **Widget flotante de métricas**: mantén visibles las lecturas e historial de CPU y RAM en una ventana móvil y fijable, con tooltips detallados

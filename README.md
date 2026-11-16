@@ -123,6 +123,10 @@ Plenty of task managers freeze under heavy load or bury basic features behind co
 - **Search Online** — Google search for process name
 - **Properties** — Inspect friendly name, file metadata, runtime state, and resource usage
 
+### 🚦 Startup Management
+- **Startup Tab** — Review every startup entry from the registry and startup folders in one place, with the selected row highlighted
+- **Enable / Disable** — Toggle entries with a confirmation step and an automatic backup of the original value to `%LOCALAPPDATA%\CyberManager\startup-approvals-backup.log`
+
 ### 📊 System Monitoring
 - **Animated Metric Histories**: CPU, RAM, and system activity graphs move smoothly between real samples across the main window, Performance views, and floating widget. Sampling frequency is unchanged; animation pauses for hidden graphs or minimized windows and respects Windows animation settings
 - **Floating Metrics Widget** — Keep CPU and RAM readings and history visible in a movable, pinnable window with detailed tooltips
