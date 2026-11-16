@@ -173,6 +173,27 @@ jobs:
           $notes = $template.Replace("{{VERSION}}", "${{ env.VERSION }}").Replace("{{INSTALLER_HASH}}", $installerHash).Replace("{{PORTABLE_HASH}}", $portableHash)
           [System.IO.File]::WriteAllText("release_notes.md", $notes, [System.Text.Encoding]::UTF8)
 
+          $tag = "${{ env.VERSION }}"
+          # winget versions carry no 'v' prefix (1.7.0, not v1.7.0); URLs keep the tag's.
+          $bareVersion = $tag.TrimStart("v")
+          $manifestFiles = @{
+              "winget-version.yaml"   = "CyberGems.CyberManager.yaml"
+              "winget-locale.yaml"    = "CyberGems.CyberManager.locale.en-US.yaml"
+              "winget-installer.yaml" = "CyberGems.CyberManager.installer.yaml"
+          }
+          New-Item -ItemType Directory -Path winget-pkg -Force | Out-Null
+          foreach ($entry in $manifestFiles.GetEnumerator()) {
+              $manifestTemplate = [System.IO.File]::ReadAllText($entry.Key, [System.Text.Encoding]::UTF8)
+              $manifest = $manifestTemplate.Replace("{{VERSION}}", $bareVersion).Replace("{{TAG}}", $tag).Replace("{{INSTALLER_HASH}}", $installerHash)
+              [System.IO.File]::WriteAllText("winget-pkg/$($entry.Value)", $manifest, [System.Text.Encoding]::UTF8)
+          }
+          Write-Host "Generated winget manifests for $tag with installer hash: $installerHash"
+
+      - name: Validate winget manifests
+        shell: pwsh
+        run: |
+          winget validate winget-pkg
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -181,6 +202,9 @@ jobs:
           files: |
             ./CyberManager-${{ env.VERSION }}-Portable-win-x64.zip
             ./CyberManager-Setup-${{ env.VERSION }}.exe
+            ./winget-pkg/CyberGems.CyberManager.yaml
+            ./winget-pkg/CyberGems.CyberManager.locale.en-US.yaml
+            ./winget-pkg/CyberGems.CyberManager.installer.yaml
           draft: true
           prerelease: false
           body_path: ./release_notes.md

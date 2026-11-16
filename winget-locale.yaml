@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: CyberGems.CyberManager
+PackageVersion: {{VERSION}}
+PackageLocale: en-US
+Publisher: CyberGems
+PackageName: CyberManager
+PackageUrl: https://cybergems.org/apps/cybermanager/
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/CyberGems/CyberManager/blob/main/LICENSE
+Copyright: Copyright (C) 2026 CyberGems
+ShortDescription: Fast process manager and system monitor for Windows
+Description: When a PC slows down, Task Manager is often the first thing to freeze or to hide the process you wanted. CyberManager reads the process list directly from Windows instead of the slower management APIs, so search, sorting and scrolling stay instant even with thousands of processes. Search by name, PID or path, sort by CPU or memory, and use live graphs, heatmap colors and a top-10 filter to spot what needs attention. End a process or its whole tree, restart, suspend, resume or reprioritize one item or a multi-selection, monitor all disks or one physical disk, and keep a floating CPU/RAM widget on screen while the app waits on a global hotkey.
+Tags:
+- task-manager
+- process-explorer
+- system-monitor
+- performance
+- productivity
+Moniker: cybermanager
+ReleaseNotesUrl: https://github.com/CyberGems/CyberManager/releases/tag/{{TAG}}
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
