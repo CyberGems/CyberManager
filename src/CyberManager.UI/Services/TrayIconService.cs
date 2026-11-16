@@ -173,33 +173,21 @@ public sealed class TrayIconService : IDisposable
     private bool AddTrayIcon() =>
         _hIcon != IntPtr.Zero && Shell_NotifyIcon(NIM_ADD, ref _nid);
 
-    /// <summary>
-    /// Resolves the tray surface brush on every open, so a theme change is picked up without
-    /// rebuilding the menu. Falls back to the normal glass brush if the key is missing.
-    /// </summary>
-    private void ApplyTrayMenuSurface()
-    {
-        if (_contextMenu is null) return;
-        if (Application.Current.TryFindResource("TrayMenuBgBrush") is Brush traySurface)
-        {
-            _contextMenu.Resources["MenuGlassBgBrush"] = traySurface;
-        }
-    }
-
     private void BuildContextMenu()
     {
         _contextMenu = new ContextMenu();
-        if (Application.Current.TryFindResource("ModernContextMenu") is Style cmStyle)
+        // Dedicated tray styles: the menu floats over the desktop, where the app's glass tint
+        // reads as too transparent. Declared in App.xaml so the root menu and its submenus are
+        // guaranteed to use the near-opaque surface.
+        var cmStyle = Application.Current.TryFindResource("TrayContextMenu") as Style
+                      ?? Application.Current.TryFindResource("ModernContextMenu") as Style;
+        if (cmStyle != null)
         {
             _contextMenu.Style = cmStyle;
         }
 
-        // The tray menu floats over the desktop, where the app's glass tint reads as far too
-        // transparent. Overriding the glass key inside this menu's own resource scope keeps the
-        // root menu and its submenus near-opaque without touching the in-app menus.
-        _contextMenu.Opened += (_, _) => ApplyTrayMenuSurface();
-
-        Style? miStyle = Application.Current.TryFindResource("ModernMenuItem") as Style;
+        Style? miStyle = Application.Current.TryFindResource("TrayMenuItem") as Style
+                         ?? Application.Current.TryFindResource("ModernMenuItem") as Style;
         Style? sepStyle = Application.Current.TryFindResource("ModernMenuSeparator") as Style;
 
         // 1. Branding Header Item: [Logo] CyberManager v1.0.0
