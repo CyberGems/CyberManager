@@ -8,6 +8,8 @@ Ninguno abierto en este momento.
 
 ## Mejoras pendientes
 
+- **Pestaña Inicio, fase 2:** habilitar y deshabilitar aplicaciones de inicio escribiendo los registros `StartupApproved`, con confirmación y respaldo del valor original. Falta decidir el tratamiento de las entradas de HKLM cuando la app no está elevada (solo lectura o elevación puntual).
+
 - **Rendimiento de la ventana principal:** `AllowsTransparency="True"` en `MainWindow.xaml` desactiva la aceleración por hardware de toda la ventana. Merece una medición antes de decidir si compensa cambiar a `WindowChrome` con esquinas redondeadas del sistema. No medido todavía.
 - **Paleta duplicada:** `App.xaml` y `ThemeManager.cs` siguen repitiendo los valores por defecto de los temas. Hoy están sincronizados y `ThemeManager` es la fuente en tiempo de ejecución, pero una única fuente generada evitaría divergencias futuras.
 
