@@ -8,7 +8,7 @@ Ninguno abierto en este momento.
 
 ## Mejoras pendientes
 
-- **Pestaña Inicio, fase 2:** habilitar y deshabilitar aplicaciones de inicio escribiendo los registros `StartupApproved`, con confirmación y respaldo del valor original. Falta decidir el tratamiento de las entradas de HKLM cuando la app no está elevada (solo lectura o elevación puntual).
+- **Pestaña Inicio, alcance restante:** las entradas de HKLM se habilitan y deshabilitan por usuario (escritura en `StartupApproved` de HKCU), igual que el Administrador de tareas. Eliminar una entrada del sistema para todos los usuarios, o borrar su clave `Run`, queda fuera de alcance a propósito.
 
 - **Rendimiento de la ventana principal:** `AllowsTransparency="True"` en `MainWindow.xaml` desactiva la aceleración por hardware de toda la ventana. Merece una medición antes de decidir si compensa cambiar a `WindowChrome` con esquinas redondeadas del sistema. No medido todavía.
 - **Paleta duplicada:** `App.xaml` y `ThemeManager.cs` siguen repitiendo los valores por defecto de los temas. Hoy están sincronizados y `ThemeManager` es la fuente en tiempo de ejecución, pero una única fuente generada evitaría divergencias futuras.
@@ -19,3 +19,4 @@ Ninguno abierto en este momento.
 - **Foco de teclado invisible:** anillo de foco compartido `SuiteFocusVisual` en las plantillas de botón y en las pestañas de navegación, que ahora son alcanzables con Tab.
 - **Icono de pin de la vista compacta:** sustituido el emoji 📌 por un icono vectorial.
 - **Menú contextual de campos de texto:** implementado y compartido (`TextFieldContextMenu`).
+- **Pestaña Inicio, fase 2:** habilitar y deshabilitar con confirmación previa y copia del valor original en `%LOCALAPPDATA%\CyberManager\startup-approvals-backup.log`; si el respaldo falla, el cambio se aborta.
