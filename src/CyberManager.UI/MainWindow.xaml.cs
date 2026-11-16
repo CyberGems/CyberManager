@@ -30,6 +30,7 @@ public enum MainTab
 {
     Processes,
     Performance,
+    Startup,
     Settings
 }
 
@@ -44,10 +45,12 @@ public partial class MainWindow : Window
 
         TabProcessesBtn.IsChecked = tab == MainTab.Processes;
         TabPerformanceBtn.IsChecked = tab == MainTab.Performance;
+        TabStartupBtn.IsChecked = tab == MainTab.Startup;
         TabSettingsBtn.IsChecked = tab == MainTab.Settings;
 
         ProcessesTabContent.Visibility = tab == MainTab.Processes ? Visibility.Visible : Visibility.Collapsed;
         PerformanceTabContent.Visibility = tab == MainTab.Performance ? Visibility.Visible : Visibility.Collapsed;
+        StartupTabContent.Visibility = tab == MainTab.Startup ? Visibility.Visible : Visibility.Collapsed;
         SettingsTabContent.Visibility = tab == MainTab.Settings ? Visibility.Visible : Visibility.Collapsed;
 
         // The tab icons follow their button's Foreground through a binding, so the selected
@@ -64,6 +67,12 @@ public partial class MainWindow : Window
         else
         {
             PerformanceTabContent.Deactivate();
+        }
+
+        if (tab == MainTab.Startup)
+        {
+            // Read once per visit: startup entries only change when software is installed.
+            StartupTabContent.Activate();
         }
 
         if (tab == MainTab.Settings)
@@ -94,6 +103,7 @@ public partial class MainWindow : Window
             {
                 "Processes" => MainTab.Processes,
                 "Performance" => MainTab.Performance,
+                "Startup" => MainTab.Startup,
                 "Settings" => MainTab.Settings,
                 _ => MainTab.Processes
             };
@@ -3531,9 +3541,11 @@ public partial class MainWindow : Window
     {
         TabProcessesText.Text = Strings.T("NavProcesses");
         TabPerformanceText.Text = Strings.T("NavPerformance");
+        TabStartupText.Text = Strings.T("NavStartup");
         TabSettingsText.Text = Strings.T("NavSettings");
         TabProcessesBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavProcessesTip"), KeyboardShortcuts.Processes);
         TabPerformanceBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavPerformanceTip"), KeyboardShortcuts.Performance);
+        TabStartupBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavStartupTip"), KeyboardShortcuts.Startup);
         TabSettingsBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavSettingsTip"), KeyboardShortcuts.SettingsTooltip);
     }
 
@@ -3553,6 +3565,7 @@ public partial class MainWindow : Window
             ApplyNavTabLabels();
 
             PerformanceTabContent?.RefreshLocalization();
+            StartupTabContent?.RefreshLocalization();
             SettingsTabContent?.RefreshLocalization();
 
             SubtitleText.Text = Strings.T("AppSubtitle");
@@ -3820,6 +3833,13 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
             NavigateToTab(MainTab.Settings);
+            return;
+        }
+
+        if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D5 || e.Key == Key.NumPad5))
+        {
+            e.Handled = true;
+            NavigateToTab(MainTab.Startup);
             return;
         }
 
