@@ -91,6 +91,7 @@ public class StringsTests
             "Settings", "About", "ThemeCyberManager", "ThemeDark", "ThemeLight",
             "TextMenuUndo", "TextMenuRedo", "TextMenuCut", "TextMenuCopy", "TextMenuPaste",
             "TextMenuSelectAll", "TextMenuDelete", "LanguageDesc", "ThemeDesc",
+            "WidgetPinned", "WidgetUnpinned",
             "Ok", "Cancel", "DoNotShowAgain", "Close", "Updated", "Ready", "CheckUpdatesAction", "CheckUpdates",
             "UpdatesAndMaintenance", "ElevationRequired", "ConfirmAction",
             "GroupByApp", "Ungroup", "KillGroupConfirm", "SuspendGroupConfirm", "ResumeGroupConfirm",

@@ -1,9 +1,11 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using CyberManager.Common.I18n;
 using CyberManager.Core.Engine;
 using CyberManager.UI.Controls;
@@ -31,6 +33,21 @@ public enum WidgetMenuAction
 public partial class FloatingMetricsWindow : Window
 {
     private const int WM_DISPLAYCHANGE = 0x007E;
+    private const int GWL_EXSTYLE = -20;
+    private const int WS_EX_TOPMOST = 0x00000008;
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOACTIVATE = 0x0010;
+
+    private static readonly IntPtr HwndTopmost = new IntPtr(-1);
+
+    // GetWindowLongW instead of GetWindowLongPtrW: the extended style we inspect (WS_EX_TOPMOST)
+    // lives in the low 32 bits, and this entry point exists on both x86 and x64.
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongW", SetLastError = true)]
+    private static extern int GetWindowLong(IntPtr hwnd, int index);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
 
     /// <summary>Gap kept from the work area edge when the widget is placed for the first time.</summary>
     private const double DefaultEdgeMargin = 24;
@@ -51,6 +68,9 @@ public partial class FloatingMetricsWindow : Window
     private double _totalRamGb;
     private string _cpuModelName = string.Empty;
     private int _historySampleCount;
+
+    // Only ticks while the widget is pinned and visible: one cheap style check every 10 s.
+    private readonly DispatcherTimer _topmostWatchdog = new() { Interval = TimeSpan.FromSeconds(10) };
 
     /// <summary>Raised when the user asks to close the widget.</summary>
     public event Action? CloseRequested;
@@ -74,6 +94,8 @@ public partial class FloatingMetricsWindow : Window
         ApplyAlwaysOnTop(App.Settings.WidgetAlwaysOnTop);
         Loaded += (_, _) => ApplyInitialPosition();
         IsVisibleChanged += Window_IsVisibleChanged;
+        _topmostWatchdog.Tick += (_, _) => EnsureTopmost();
+        Closed += (_, _) => _topmostWatchdog.Stop();
         PreviewKeyDown += (_, e) =>
         {
             if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.D4 || e.Key == Key.NumPad4))
@@ -91,7 +113,7 @@ public partial class FloatingMetricsWindow : Window
         RamLabel.Text = Strings.T("Ram");
         CloseButton.ToolTip = Strings.T("CloseWidget");
         AutomationProperties.SetName(CloseButton, Strings.T("CloseWidget"));
-        AutomationProperties.SetName(PinButton, Strings.T("AlwaysOnTop"));
+        UpdatePinAutomationName();
         UpdatePinToolTip();
 
         WidgetPinItem.Header = Strings.T("AlwaysOnTop");
@@ -116,6 +138,9 @@ public partial class FloatingMetricsWindow : Window
         WidgetPinItem.IsChecked = onTop;
         PinIcon.SetResourceReference(Shape.StrokeProperty, onTop ? "AccentBrush" : "SubTextBrush");
         UpdatePinToolTip();
+        UpdatePinAutomationName();
+        EnsureTopmost();
+        UpdateTopmostWatchdog();
     }
 
     public void UpdateMetrics(
@@ -234,6 +259,8 @@ public partial class FloatingMetricsWindow : Window
     {
         // Coming back from a hidden period, the display layout may have changed meanwhile.
         if (IsVisible && _positionApplied) MoveOnScreen(Left, Top);
+        if (IsVisible) EnsureTopmost();
+        UpdateTopmostWatchdog();
     }
 
     private IntPtr WindowMessageHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -244,6 +271,7 @@ public partial class FloatingMetricsWindow : Window
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (_positionApplied) MoveOnScreen(Left, Top);
+                EnsureTopmost();
             }));
         }
 
@@ -258,6 +286,43 @@ public partial class FloatingMetricsWindow : Window
     }
 
     private void UpdatePinToolTip() => PinButton.ToolTip = Strings.T("AlwaysOnTop");
+
+    private void UpdatePinAutomationName()
+    {
+        // The tooltip is the same in both states; assistive tech needs the state itself.
+        var state = PinButton.IsChecked == true ? Strings.T("WidgetPinned") : Strings.T("WidgetUnpinned");
+        AutomationProperties.SetName(PinButton, $"{Strings.T("AlwaysOnTop")} ({state})");
+    }
+
+    /// <summary>
+    /// A pinned widget can silently fall out of the topmost band in long sessions: the shell
+    /// reorders or recreates z-order after lock/unlock, full-screen apps or display changes.
+    /// This only reasserts the band when the extended style actually lost WS_EX_TOPMOST, so a
+    /// healthy window is never pushed above other topmost windows and the call is a no-op.
+    /// </summary>
+    private void EnsureTopmost()
+    {
+        if (!Topmost || !IsVisible) return;
+
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero) return;
+
+        if ((GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_TOPMOST) != 0) return;
+
+        SetWindowPos(hwnd, HwndTopmost, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
+
+    private void UpdateTopmostWatchdog()
+    {
+        if (Topmost && IsVisible)
+        {
+            if (!_topmostWatchdog.IsEnabled) _topmostWatchdog.Start();
+        }
+        else
+        {
+            _topmostWatchdog.Stop();
+        }
+    }
     public void UpdateDiskMetrics(DiskTelemetrySnapshot snapshot) => DiskActivityLed.UpdateMetrics(snapshot);
     private void DiskActivity_Click(object sender, RoutedEventArgs e) => MenuActionRequested?.Invoke(WidgetMenuAction.DiskPerformance);
 

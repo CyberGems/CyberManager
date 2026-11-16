@@ -127,6 +127,8 @@ public static class Strings
         ["TextMenuDelete"] = ("Delete", "Eliminar"),
         ["LanguageDesc"] = ("Language used across menus, dialogs, and metrics.", "Idioma usado en menús, ventanas y métricas."),
         ["ThemeDesc"] = ("Select visual accent and background style.", "Elige el aspecto visual característico de CyberManager."),
+        ["WidgetPinned"] = ("Pinned", "Fijado"),
+        ["WidgetUnpinned"] = ("Not pinned", "Sin fijar"),
         ["Ready"] = ("Ready", "Listo"),
         ["AboutSubtitle"] = ("About", "Acerca de"),
         ["Version"] = ("Version", "Versión"),
