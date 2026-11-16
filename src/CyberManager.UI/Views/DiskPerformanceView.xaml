@@ -39,7 +39,7 @@
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock x:Name="Heading" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextBrush}"/>
-                <TextBlock x:Name="ActiveValue" FontSize="18" FontWeight="SemiBold" Foreground="#10B981" Margin="12,0,0,0"/>
+                <TextBlock x:Name="ActiveValue" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource CpuBrush}" Margin="12,0,0,0"/>
             </StackPanel>
             <ComboBox x:Name="DiskSelector" Grid.Column="1" MinWidth="230" MaxWidth="340" Height="34"
                       SelectedValuePath="Id" SelectionChanged="DiskSelector_SelectionChanged"
@@ -73,7 +73,7 @@
                 <Border Style="{StaticResource GraphCard}" Margin="0,0,0,8">
                     <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                         <TextBlock x:Name="ActiveHistoryLabel" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" FontSize="12"/>
-                        <controls:LargeHistoryGraphControl x:Name="ActiveGraph" Grid.Row="1" ShowMeter="False" MaxSamples="120" MaxValue="100" UnitSuffix="%" PrimaryColor="#10B981" MinHeight="90"
+                        <controls:LargeHistoryGraphControl x:Name="ActiveGraph" Grid.Row="1" ShowMeter="False" MaxSamples="120" MaxValue="100" UnitSuffix="%" PrimaryColor="{DynamicResource CpuColor}" MinHeight="90"
                                                            PlotBackground="{DynamicResource InputBgBrush}" PlotGridBrush="{DynamicResource BorderBrush}"/>
                     </Grid>
                 </Border>
@@ -83,11 +83,11 @@
                             <TextBlock x:Name="TransferScale" DockPanel.Dock="Right" HorizontalAlignment="Right" Style="{StaticResource MetricLabel}"/>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock x:Name="TransferLabel" Foreground="{DynamicResource TextBrush}" FontWeight="SemiBold" FontSize="12" Margin="0,0,12,0"/>
-                                <TextBlock x:Name="ReadLegend" Foreground="#10B981" FontSize="11" Margin="0,0,12,0"/>
-                                <TextBlock x:Name="WriteLegend" Foreground="#EF4444" FontSize="11"/>
+                                <TextBlock x:Name="ReadLegend" Foreground="{DynamicResource CpuBrush}" FontSize="11" Margin="0,0,12,0"/>
+                                <TextBlock x:Name="WriteLegend" Foreground="{DynamicResource CpuSecondaryBrush}" FontSize="11"/>
                             </StackPanel>
                         </DockPanel>
-                        <controls:LargeHistoryGraphControl x:Name="TransferGraph" Grid.Row="1" ShowMeter="False" MaxSamples="120" UnitSuffix="MB/s" PrimaryColor="#10B981" SecondaryColor="#EF4444" MinHeight="90"
+                        <controls:LargeHistoryGraphControl x:Name="TransferGraph" Grid.Row="1" ShowMeter="False" MaxSamples="120" UnitSuffix="MB/s" PrimaryColor="{DynamicResource CpuColor}" SecondaryColor="{DynamicResource CpuSecondaryColor}" MinHeight="90"
                                                            PlotBackground="{DynamicResource InputBgBrush}" PlotGridBrush="{DynamicResource BorderBrush}"/>
                     </Grid>
                 </Border>

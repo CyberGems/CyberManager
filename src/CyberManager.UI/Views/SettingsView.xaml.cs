@@ -415,9 +415,12 @@ public partial class SettingsView : UserControl
 
         // General
         LanguageTitleLbl.Text = Strings.T("Language");
-        LanguageDescLbl.Text = Strings.Current == Lang.Es ? "Idioma usado en menús, ventanas y métricas." : "Language used across menus, dialogs, and metrics.";
+        LanguageDescLbl.Text = Strings.T("LanguageDesc");
         ThemeTitleLbl.Text = Strings.T("Theme");
-        ThemeDescLbl.Text = Strings.Current == Lang.Es ? "Elige el aspecto visual característico de CyberManager." : "Select visual accent and background style.";
+        ThemeDescLbl.Text = Strings.T("ThemeDesc");
+        ApplyThemeCard(ThemeCyberManagerRadio, ThemeCyberManagerNameText, ThemeCyberManagerDescText, "ThemeCyberManager");
+        ApplyThemeCard(ThemeDarkRadio, ThemeDarkNameText, ThemeDarkDescText, "ThemeDark");
+        ApplyThemeCard(ThemeLightRadio, ThemeLightNameText, ThemeLightDescText, "ThemeLight");
 
         // Performance
         RefreshRateTitleLbl.Text = Strings.T("RefreshIntervalTitle");
@@ -463,5 +466,20 @@ public partial class SettingsView : UserControl
 
         // Buttons
         ResetBtn.Content = Strings.T("RestoreFactorySettings");
+    }
+
+    /// <summary>
+    /// The existing theme keys carry both parts of a card label ("Dark — Charcoal &amp; Indigo"),
+    /// so the bold name and the muted descriptor are split from the one translated value instead
+    /// of duplicating the palette names in XAML.
+    /// </summary>
+    private static void ApplyThemeCard(RadioButton card, TextBlock name, TextBlock descriptor, string key)
+    {
+        var label = Strings.T(key);
+        var separator = label.IndexOf(" \u2014 ", StringComparison.Ordinal);
+
+        name.Text = separator < 0 ? label : label[..separator];
+        descriptor.Text = separator < 0 ? string.Empty : label[(separator + 3)..];
+        AutomationProperties.SetName(card, label);
     }
 }

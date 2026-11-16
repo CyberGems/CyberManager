@@ -867,9 +867,9 @@
                                 </StackPanel>
                                 <controls:SparklineControl x:Name="CpuSparkline" Grid.Column="1" Width="100" Height="28"
                                                           StrokeBrush="{DynamicResource CpuBrush}"
-                                                          FillBrush="#2010B981"
-                                                          SecondaryStrokeBrush="#EF4444"
-                                                          SecondaryFillBrush="#40EF4444"
+                                                          FillBrush="{DynamicResource CpuFillBrush}"
+                                                          SecondaryStrokeBrush="{DynamicResource CpuSecondaryBrush}"
+                                                          SecondaryFillBrush="{DynamicResource CpuSecondaryFillBrush}"
                                                           Click="SystemInfo_Click"/>
                             </Grid>
                         </Grid>

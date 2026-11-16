@@ -267,8 +267,8 @@
                                         <Border Width="24" Height="24" CornerRadius="12" Background="#090D14" BorderBrush="#24A6B5" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
                                             <Border Width="8" Height="8" CornerRadius="4" Background="#24A6B5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <TextBlock Text="CyberManager" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="Obsidian &amp; Cyan" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock x:Name="ThemeCyberManagerNameText" Text="CyberManager" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock x:Name="ThemeCyberManagerDescText" Text="Obsidian &amp; Cyan" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </RadioButton>
 
@@ -277,8 +277,8 @@
                                         <Border Width="24" Height="24" CornerRadius="12" Background="#121214" BorderBrush="#6366F1" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
                                             <Border Width="8" Height="8" CornerRadius="4" Background="#6366F1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <TextBlock Text="Dark" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="Charcoal &amp; Indigo" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock x:Name="ThemeDarkNameText" Text="Dark" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock x:Name="ThemeDarkDescText" Text="Charcoal &amp; Indigo" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </RadioButton>
 
@@ -287,8 +287,8 @@
                                         <Border Width="24" Height="24" CornerRadius="12" Background="#F8FAFC" BorderBrush="#2563EB" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
                                             <Border Width="8" Height="8" CornerRadius="4" Background="#2563EB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                         </Border>
-                                        <TextBlock Text="Light" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="Slate &amp; Blue" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock x:Name="ThemeLightNameText" Text="Light" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
+                                        <TextBlock x:Name="ThemeLightDescText" Text="Slate &amp; Blue" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
                                     </StackPanel>
                                 </RadioButton>
                             </Grid>

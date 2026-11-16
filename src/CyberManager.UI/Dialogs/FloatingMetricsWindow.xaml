@@ -197,10 +197,10 @@
                 <controls:SparklineControl x:Name="CpuSparkline"
                                            Grid.Column="1"
                                            Height="34"
-                                           StrokeBrush="#10B981"
-                                           FillBrush="#2010B981"
-                                           SecondaryStrokeBrush="#EF4444"
-                                           SecondaryFillBrush="#40EF4444"/>
+                                           StrokeBrush="{DynamicResource CpuBrush}"
+                                           FillBrush="{DynamicResource CpuFillBrush}"
+                                           SecondaryStrokeBrush="{DynamicResource CpuSecondaryBrush}"
+                                           SecondaryFillBrush="{DynamicResource CpuSecondaryFillBrush}"/>
             </Grid>
 
             <Border Grid.Row="2" Height="1" Background="{DynamicResource BorderBrush}" Margin="0,10"/>

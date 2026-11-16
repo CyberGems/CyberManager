@@ -27,6 +27,11 @@
         <SolidColorBrush x:Key="RamBrush" Color="#24A6B5"/>
         <SolidColorBrush x:Key="RamFillBrush" Color="#2024A6B5"/>
         <SolidColorBrush x:Key="CpuBrush" Color="#10B981"/>
+        <SolidColorBrush x:Key="CpuFillBrush" Color="#2010B981"/>
+        <SolidColorBrush x:Key="CpuSecondaryBrush" Color="#EF4444"/>
+        <SolidColorBrush x:Key="CpuSecondaryFillBrush" Color="#40EF4444"/>
+        <Color x:Key="CpuSecondaryColor">#EF4444</Color>
+        <Color x:Key="RamSecondaryColor">#A855F7</Color>
         <SolidColorBrush x:Key="SwitchActiveBrush" Color="#24A6B5"/>
         <SolidColorBrush x:Key="SwitchTrackBrush" Color="#29394D"/>
         <SolidColorBrush x:Key="MenuGlassBgBrush" Color="#C40F1623"/>

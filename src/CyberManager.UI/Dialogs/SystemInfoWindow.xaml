@@ -247,7 +247,7 @@
                                         <TextBlock x:Name="CpuHistoryTitle" Text="CPU History" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                                         <TextBlock x:Name="CpuLegend" Text="(User / Kernel)" FontSize="10" Foreground="{DynamicResource SubTextBrush}" Margin="8,0,0,0" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                    <controls:LargeHistoryGraphControl x:Name="SummaryCpuGraph" Grid.Row="1" Title="CPU" UnitSuffix="%" PrimaryColor="#10B981" SecondaryColor="#EF4444"/>
+                                    <controls:LargeHistoryGraphControl x:Name="SummaryCpuGraph" Grid.Row="1" Title="CPU" UnitSuffix="%" PrimaryColor="{DynamicResource CpuColor}" SecondaryColor="{DynamicResource CpuSecondaryColor}"/>
                                 </Grid>
                             </Border>
 
@@ -266,7 +266,7 @@
                                         <TextBlock x:Name="MemHistoryTitle" Text="Memory History" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                                         <TextBlock x:Name="MemLegend" Text="(In Use / Commit)" FontSize="10" Foreground="{DynamicResource SubTextBrush}" Margin="8,0,0,0" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                    <controls:LargeHistoryGraphControl x:Name="SummaryMemGraph" Grid.Row="1" Title="RAM" UnitSuffix="%" PrimaryColor="{DynamicResource RamColor}" SecondaryColor="#A855F7"/>
+                                    <controls:LargeHistoryGraphControl x:Name="SummaryMemGraph" Grid.Row="1" Title="RAM" UnitSuffix="%" PrimaryColor="{DynamicResource RamColor}" SecondaryColor="{DynamicResource RamSecondaryColor}"/>
                                 </Grid>
                             </Border>
                         </Grid>
@@ -308,11 +308,11 @@
                                     <TextBlock x:Name="CpuCardTitle" Text="CPU" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
                                     <Grid Margin="0,2">
                                         <TextBlock x:Name="CpuTotalLbl" Text="Total" FontSize="11" Foreground="{DynamicResource SubTextBrush}"/>
-                                        <TextBlock x:Name="CpuTotalVal" Text="—" FontSize="11" FontWeight="SemiBold" Foreground="#10B981" HorizontalAlignment="Right"/>
+                                        <TextBlock x:Name="CpuTotalVal" Text="—" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource CpuBrush}" HorizontalAlignment="Right"/>
                                     </Grid>
                                     <Grid Margin="0,2">
                                         <TextBlock x:Name="CpuKernelLbl" Text="Kernel" FontSize="11" Foreground="{DynamicResource SubTextBrush}"/>
-                                        <TextBlock x:Name="CpuKernelVal" Text="—" FontSize="11" FontWeight="SemiBold" Foreground="#EF4444" HorizontalAlignment="Right"/>
+                                        <TextBlock x:Name="CpuKernelVal" Text="—" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource CpuSecondaryBrush}" HorizontalAlignment="Right"/>
                                     </Grid>
                                     <Grid Margin="0,2">
                                         <TextBlock x:Name="CpuUserLbl" Text="User" FontSize="11" Foreground="{DynamicResource SubTextBrush}"/>
@@ -381,7 +381,7 @@
                                           Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                     <TextBlock x:Name="FullCpuHistoryTitle" Text="CPU Activity History (User &amp; Kernel Time)" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <controls:LargeHistoryGraphControl x:Name="FullCpuGraph" Grid.Row="1" Title="CPU" UnitSuffix="%" PrimaryColor="#10B981" SecondaryColor="#EF4444"/>
+                                <controls:LargeHistoryGraphControl x:Name="FullCpuGraph" Grid.Row="1" Title="CPU" UnitSuffix="%" PrimaryColor="{DynamicResource CpuColor}" SecondaryColor="{DynamicResource CpuSecondaryColor}"/>
                             </Grid>
                         </Border>
 
@@ -395,8 +395,8 @@
                             <Border Grid.Column="0" Style="{StaticResource StatCard}">
                                 <StackPanel>
                                     <TextBlock x:Name="FullCpuMetricsTitle" Text="CPU Metrics" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
-                                    <Grid Margin="0,3"><TextBlock Text="CPU Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuTotal" Text="—" FontWeight="SemiBold" Foreground="#10B981" HorizontalAlignment="Right"/></Grid>
-                                    <Grid Margin="0,3"><TextBlock Text="Kernel Mode CPU" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuKernel" Text="—" FontWeight="SemiBold" Foreground="#EF4444" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,3"><TextBlock Text="CPU Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuTotal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource CpuBrush}" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,3"><TextBlock Text="Kernel Mode CPU" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuKernel" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource CpuSecondaryBrush}" HorizontalAlignment="Right"/></Grid>
                                     <Grid Margin="0,3"><TextBlock Text="User Mode CPU" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCpuUser" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
                                 </StackPanel>
                             </Border>
@@ -432,7 +432,7 @@
                                           Width="15" Height="15" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                     <TextBlock x:Name="FullMemHistoryTitle" Text="Physical Memory &amp; Commit History" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <controls:LargeHistoryGraphControl x:Name="FullMemGraph" Grid.Row="1" Title="RAM" UnitSuffix="%" PrimaryColor="{DynamicResource RamColor}" SecondaryColor="#A855F7"/>
+                                <controls:LargeHistoryGraphControl x:Name="FullMemGraph" Grid.Row="1" Title="RAM" UnitSuffix="%" PrimaryColor="{DynamicResource RamColor}" SecondaryColor="{DynamicResource RamSecondaryColor}"/>
                             </Grid>
                         </Border>
 
@@ -457,7 +457,7 @@
                             <Border Grid.Column="2" Style="{StaticResource StatCard}">
                                 <StackPanel>
                                     <TextBlock x:Name="CommitChargeTitle" Text="Commit Charge (GB)" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource AccentBrush}" Margin="0,0,0,8"/>
-                                    <Grid Margin="0,3"><TextBlock x:Name="CommitTotalLbl" Text="Committed Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCommitTotal" Text="—" FontWeight="SemiBold" Foreground="#A855F7" HorizontalAlignment="Right"/></Grid>
+                                    <Grid Margin="0,3"><TextBlock x:Name="CommitTotalLbl" Text="Committed Total" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCommitTotal" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource RamSecondaryBrush}" HorizontalAlignment="Right"/></Grid>
                                     <Grid Margin="0,3"><TextBlock x:Name="CommitLimitLbl" Text="Commit Limit" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCommitLimit" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
                                     <Grid Margin="0,3"><TextBlock x:Name="CommitPeakLbl" Text="Commit Peak" Foreground="{DynamicResource SubTextBrush}"/><TextBlock x:Name="FullCommitPeak" Text="—" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/></Grid>
                                 </StackPanel>
