@@ -2,6 +2,30 @@
 
 All notable changes to CyberManager are documented here.
 
+## [1.8.0] - 2026-11-16
+
+### 🇺🇸 English
+
+- Add a Startup tab that lists every startup entry from the registry and startup folders, highlights the selected row, and enables or disables entries with a confirmation step plus an automatic backup of the original value to a log file.
+- Keep pinned widgets and the main window on top of other windows with a shared topmost guard that reasserts the flag when it gets lost.
+- Add the suite-standard themed context menu to every text field, with undo, redo, clipboard actions, select all, and delete.
+- Draw charts and theme cards from theme tokens, replace the pin emoji with a vector icon, and show a keyboard focus ring on buttons and navigation tabs.
+- Make the notification-area menu near-opaque so it stays readable across apps and themes.
+- Brand the installer wizard with the app artwork and show the app icon on the Windows uninstall entry.
+- Wait for CyberManager to close before uninstalling.
+- Ship winget manifests with every release and automate Windows Package Manager submissions.
+
+### 🇪🇸 Español
+
+- Añade una pestaña Inicio que lista todas las entradas de inicio del registro y de las carpetas de arranque, resalta la fila seleccionada y habilita o deshabilita entradas con un paso de confirmación y un respaldo automático del valor original en un archivo de registro.
+- Mantén los widgets fijados y la ventana principal siempre visibles con una protección compartida que restablece la banda cuando otra ventana la roba.
+- Añade el menú contextual temático estándar de la suite a todos los campos de texto, con deshacer, rehacer, acciones de portapapeles, seleccionar todo y eliminar.
+- Dibuja gráficas y tarjetas de tema con tokens del tema, sustituye el emoji de pin por un icono vectorial y muestra un anillo de foco de teclado en botones y pestañas de navegación.
+- Hace el menú del área de notificación casi opaco para que se lea bien sobre cualquier app y tema.
+- Viste el asistente del instalador con la imagen de la app y muestra su icono en la entrada de desinstalación de Windows.
+- Espera a que CyberManager se cierre antes de desinstalar.
+- Publica manifiestos winget con cada release y automatiza los envíos al Windows Package Manager.
+
 ## [1.7.0] - 2026-10-16
 
 ### 🇺🇸 English
