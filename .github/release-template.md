@@ -62,7 +62,7 @@ La nueva pestaña Inicio permite revisar y habilitar o deshabilitar apps de inic
   - El asistente del instalador luce la imagen de la app y la entrada de desinstalación de Windows muestra su icono.
   - El desinstalador espera a que CyberManager se cierre antes de borrar archivos.
 
-### ⚠️ Antes de instalar
+### ℹ️ Antes de instalar
 
 - **Windows:** esta versión aún no está firmada digitalmente. SmartScreen puede avisar antes de ejecutarla: **Más información › Ejecutar de todas formas**. Cuando Smart App Control está activado, Windows rechaza programas sin firmar; consulta la [política de firma de código](https://github.com/CyberGems/.github/blob/main/CODE_SIGNING.md). Verifica la descarga con los checksums SHA256 que aparecen más abajo.
 
@@ -70,7 +70,7 @@ La nueva pestaña Inicio permite revisar y habilitar o deshabilitar apps de inic
 
 ---
 
-### ⚠️ Before you install
+### ℹ️ Before you install
 
 - **Windows:** this release is not code-signed yet. SmartScreen may ask before it runs: **More info › Run anyway**. Where Smart App Control is on, Windows refuses unsigned programs; see the [code signing policy](https://github.com/CyberGems/.github/blob/main/CODE_SIGNING.md). Verify the download with the SHA256 checksums below.
 
