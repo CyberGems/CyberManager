@@ -2306,6 +2306,13 @@ public partial class MainWindow : Window
         _moreMenuDismissedAtUtc = DateTime.MinValue;
         if (sender is not ContextMenu menu) return;
 
+        // Same acrylic surface as the process context menu; without the blur the glass
+        // background reads as plain translucency over whatever is behind the popup.
+        if (PresentationSource.FromVisual(menu) is HwndSource source && source.Handle != IntPtr.Zero)
+        {
+            MenuGlassEffect.ApplyBlur(source.Handle, ThemeManager.IsDarkTheme);
+        }
+
         // The popup gets its keyboard focus after it has opened, so arrows can continue from
         // the first action instead of leaving focus on the More button.
         Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
