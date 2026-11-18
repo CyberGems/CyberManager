@@ -8,7 +8,7 @@ using CyberManager.Common.Models;
 
 namespace CyberManager.Common.Settings;
 
-public enum AppTheme { CyberManager, Dark, Light }
+public enum AppTheme { CyberManager, Gray, Light }
 
 public sealed class AppSettings
 {

@@ -90,7 +90,7 @@ public class StringsTests
             "Suspend", "Resume", "Restart", "RestartConfirm", "RestartUnavailable", "RestartPackagedUnsupported", "RestartFailed", "RestartHintSuspended", "RestartHintNoPath", "RestartHintPackaged", "RestartShortcutHint", "CopyPath", "CopyProcessInfo", "ProcessInfoCopied", "OpenFolder", "SearchOnline", "Priority",
             "NoProcesses", "NoSearchMatches", "NoProcessesFiltered", "Refresh", "AlwaysOnTop", "KillConfirm", "KillTreeConfirm",
             "PauseDetection", "ResumeDetection", "DetectionPaused",
-            "Settings", "About", "ThemeCyberManager", "ThemeDark", "ThemeLight",
+            "Settings", "About", "ThemeCyberManager", "ThemeGray", "ThemeLight", "ThemeInstantNote",
             "TextMenuUndo", "TextMenuRedo", "TextMenuCut", "TextMenuCopy", "TextMenuPaste",
             "TextMenuSelectAll", "TextMenuDelete", "LanguageDesc", "ThemeDesc",
             "WidgetPinned", "WidgetUnpinned", "NavStartup", "NavStartupTip",

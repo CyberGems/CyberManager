@@ -2,7 +2,9 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
 using CyberManager.Common.Settings;
@@ -75,8 +77,8 @@ public partial class SettingsView : UserControl
             case AppTheme.CyberManager:
                 ThemeCyberManagerRadio.IsChecked = true;
                 break;
-            case AppTheme.Dark:
-                ThemeDarkRadio.IsChecked = true;
+            case AppTheme.Gray:
+                ThemeGrayRadio.IsChecked = true;
                 break;
             case AppTheme.Light:
                 ThemeLightRadio.IsChecked = true;
@@ -164,7 +166,7 @@ public partial class SettingsView : UserControl
         if (_initializing) return;
 
         AppTheme theme = AppTheme.CyberManager;
-        if (ThemeDarkRadio.IsChecked == true) theme = AppTheme.Dark;
+        if (ThemeGrayRadio.IsChecked == true) theme = AppTheme.Gray;
         else if (ThemeLightRadio.IsChecked == true) theme = AppTheme.Light;
 
         if (App.Settings.Theme != theme)
@@ -173,6 +175,8 @@ public partial class SettingsView : UserControl
             ThemeManager.Apply(theme);
             SaveAndNotify();
         }
+
+        RefreshThemeCards();
     }
 
 
@@ -418,9 +422,8 @@ public partial class SettingsView : UserControl
         LanguageDescLbl.Text = Strings.T("LanguageDesc");
         ThemeTitleLbl.Text = Strings.T("Theme");
         ThemeDescLbl.Text = Strings.T("ThemeDesc");
-        ApplyThemeCard(ThemeCyberManagerRadio, ThemeCyberManagerNameText, ThemeCyberManagerDescText, "ThemeCyberManager");
-        ApplyThemeCard(ThemeDarkRadio, ThemeDarkNameText, ThemeDarkDescText, "ThemeDark");
-        ApplyThemeCard(ThemeLightRadio, ThemeLightNameText, ThemeLightDescText, "ThemeLight");
+        ThemeInstantNote.Text = Strings.T("ThemeInstantNote");
+        RefreshThemeCards();
 
         // Performance
         RefreshRateTitleLbl.Text = Strings.T("RefreshIntervalTitle");
@@ -473,13 +476,96 @@ public partial class SettingsView : UserControl
     /// so the bold name and the muted descriptor are split from the one translated value instead
     /// of duplicating the palette names in XAML.
     /// </summary>
-    private static void ApplyThemeCard(RadioButton card, TextBlock name, TextBlock descriptor, string key)
+    /// <summary>
+    /// Refreshes the three theme cards: palette-driven mini previews, localized names and
+    /// the selected card highlight. Runs on localization refresh and whenever the user
+    /// picks a theme, because the selection visuals are code-driven.
+    /// </summary>
+    private void RefreshThemeCards()
+    {
+        ApplyThemeCard(ThemeCyberManagerRadio, ThemeCyberManagerNameText, ThemeCyberManagerPreview, "ThemeCyberManager", AppTheme.CyberManager);
+        ApplyThemeCard(ThemeGrayRadio, ThemeGrayNameText, ThemeGrayPreview, "ThemeGray", AppTheme.Gray);
+        ApplyThemeCard(ThemeLightRadio, ThemeLightNameText, ThemeLightPreview, "ThemeLight", AppTheme.Light);
+    }
+
+    private static void ApplyThemeCard(RadioButton card, TextBlock name, Border preview, string key, AppTheme theme)
     {
         var label = Strings.T(key);
         var separator = label.IndexOf(" \u2014 ", StringComparison.Ordinal);
+        var themeName = separator < 0 ? label : label[..separator];
 
-        name.Text = separator < 0 ? label : label[..separator];
-        descriptor.Text = separator < 0 ? string.Empty : label[(separator + 3)..];
-        AutomationProperties.SetName(card, label);
+        name.Text = themeName;
+        AutomationProperties.SetName(card, themeName);
+
+        var palette = ThemeManager.Get(theme);
+        FillPreview(preview, palette);
+
+        var selected = card.IsChecked == true;
+        name.FontWeight = selected ? FontWeights.Bold : FontWeights.Normal;
+        name.SetResourceReference(TextBlock.ForegroundProperty, selected ? "TextBrush" : "SubTextBrush");
+
+        if (selected)
+        {
+            preview.BorderBrush = (Brush)Application.Current.Resources["AccentBrush"];
+            preview.Effect = new DropShadowEffect
+            {
+                Color = (Color)Application.Current.Resources["AccentColor"],
+                BlurRadius = 14,
+                ShadowDepth = 0,
+                Opacity = 0.8
+            };
+        }
+        else
+        {
+            preview.BorderBrush = PalBrush(palette.Border);
+            preview.Effect = null;
+        }
     }
+
+    /// <summary>Builds the mini mockup of a theme: accent dots, one bright line, two dim lines.</summary>
+    private static void FillPreview(Border preview, ThemeManager.Palette palette)
+    {
+        var grid = new Grid { Margin = new Thickness(14, 11, 14, 11) };
+
+        var lines = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        AddPreviewLine(lines, 66, palette.Text, 0);
+        AddPreviewLine(lines, 50, palette.SubText, 6);
+        AddPreviewLine(lines, 58, palette.SubText, 6);
+
+        grid.Children.Add(lines);
+        grid.Children.Add(new System.Windows.Shapes.Ellipse
+        {
+            Width = 7,
+            Height = 7,
+            Fill = PalBrush(palette.Accent),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Top
+        });
+        grid.Children.Add(new System.Windows.Shapes.Ellipse
+        {
+            Width = 7,
+            Height = 7,
+            Fill = PalBrush(palette.Accent),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom
+        });
+
+        preview.Child = grid;
+    }
+
+    private static void AddPreviewLine(StackPanel panel, double width, string colorHex, double topMargin)
+    {
+        panel.Children.Add(new Border
+        {
+            Width = width,
+            Height = 4,
+            CornerRadius = new CornerRadius(2),
+            Background = PalBrush(colorHex),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, topMargin, 0, 0)
+        });
+    }
+
+    private static Brush PalBrush(string hex) =>
+        new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)!);
 }

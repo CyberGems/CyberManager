@@ -145,25 +145,15 @@
 
         <!-- Toggle switches use the suite-wide SuiteToggleSwitch style from App.xaml. -->
 
-        <!-- Theme Preview Card Style -->
-        <Style x:Key="ThemeOptionButton" TargetType="RadioButton">
+        <!-- Theme picker card: plain clickable content; the selection highlight targets the
+             preview inside the content, so it is driven from code (see RefreshThemeCards). -->
+        <Style x:Key="ThemeCardRadioStyle" TargetType="RadioButton">
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FocusVisualStyle" Value="{StaticResource SuiteFocusVisual}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="CardBd" CornerRadius="10" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Padding="12,10" Margin="4,0">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="CardBd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="CardBd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                <Setter TargetName="CardBd" Property="Background" Value="{DynamicResource SelectionBgBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
+                        <ContentPresenter/>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -227,44 +217,40 @@
 
                         <!-- THEME SELECTION -->
                         <StackPanel Margin="0,0,0,4">
-                            <TextBlock x:Name="ThemeTitleLbl" Text="Tema" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource TextBrush}"/>
+                            <TextBlock x:Name="ThemeTitleLbl" Text="Tema de la aplicación" FontWeight="SemiBold" FontSize="15" Foreground="{DynamicResource TextBrush}"/>
                             <TextBlock x:Name="ThemeDescLbl" Text="Elige el aspecto visual característico de CyberManager." FontSize="13" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,8"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <RadioButton x:Name="ThemeCyberManagerRadio" Grid.Column="0" GroupName="AppThemeGroup" Style="{StaticResource ThemeOptionButton}" Click="ThemeRadio_Click">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <Border Width="24" Height="24" CornerRadius="12" Background="#090D14" BorderBrush="#24A6B5" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
-                                            <Border Width="8" Height="8" CornerRadius="4" Background="#24A6B5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <TextBlock x:Name="ThemeCyberManagerNameText" Text="CyberManager" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock x:Name="ThemeCyberManagerDescText" Text="Obsidian &amp; Cyan" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                </RadioButton>
+                            <Border CornerRadius="12" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="8,14">
+                                <StackPanel>
+                                    <Grid HorizontalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <RadioButton x:Name="ThemeCyberManagerRadio" Grid.Column="0" GroupName="AppThemeGroup" Style="{StaticResource ThemeCardRadioStyle}" Click="ThemeRadio_Click" Margin="10,0">
+                                            <StackPanel>
+                                                <Border x:Name="ThemeCyberManagerPreview" Width="150" Height="84" CornerRadius="10" BorderThickness="1" Background="{DynamicResource BgBrush}"/>
+                                                <TextBlock x:Name="ThemeCyberManagerNameText" Text="CyberManager" FontSize="13" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                            </StackPanel>
+                                        </RadioButton>
 
-                                <RadioButton x:Name="ThemeDarkRadio" Grid.Column="1" GroupName="AppThemeGroup" Style="{StaticResource ThemeOptionButton}" Click="ThemeRadio_Click">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <Border Width="24" Height="24" CornerRadius="12" Background="#121214" BorderBrush="#6366F1" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
-                                            <Border Width="8" Height="8" CornerRadius="4" Background="#6366F1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <TextBlock x:Name="ThemeDarkNameText" Text="Dark" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock x:Name="ThemeDarkDescText" Text="Charcoal &amp; Indigo" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                </RadioButton>
+                                        <RadioButton x:Name="ThemeGrayRadio" Grid.Column="1" GroupName="AppThemeGroup" Style="{StaticResource ThemeCardRadioStyle}" Click="ThemeRadio_Click" Margin="10,0">
+                                            <StackPanel>
+                                                <Border x:Name="ThemeGrayPreview" Width="150" Height="84" CornerRadius="10" BorderThickness="1" Background="{DynamicResource BgBrush}"/>
+                                                <TextBlock x:Name="ThemeGrayNameText" Text="Gris" FontSize="13" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                            </StackPanel>
+                                        </RadioButton>
 
-                                <RadioButton x:Name="ThemeLightRadio" Grid.Column="2" GroupName="AppThemeGroup" Style="{StaticResource ThemeOptionButton}" Click="ThemeRadio_Click">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <Border Width="24" Height="24" CornerRadius="12" Background="#F8FAFC" BorderBrush="#2563EB" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,4">
-                                            <Border Width="8" Height="8" CornerRadius="4" Background="#2563EB" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <TextBlock x:Name="ThemeLightNameText" Text="Light" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
-                                        <TextBlock x:Name="ThemeLightDescText" Text="Slate &amp; Blue" FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                </RadioButton>
-                            </Grid>
+                                        <RadioButton x:Name="ThemeLightRadio" Grid.Column="2" GroupName="AppThemeGroup" Style="{StaticResource ThemeCardRadioStyle}" Click="ThemeRadio_Click" Margin="10,0">
+                                            <StackPanel>
+                                                <Border x:Name="ThemeLightPreview" Width="150" Height="84" CornerRadius="10" BorderThickness="1" Background="{DynamicResource BgBrush}"/>
+                                                <TextBlock x:Name="ThemeLightNameText" Text="Light" FontSize="13" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                            </StackPanel>
+                                        </RadioButton>
+                                    </Grid>
+                                    <TextBlock x:Name="ThemeInstantNote" Text="Se aplica al instante sin necesidad de reiniciar la aplicación." FontSize="12" Foreground="{DynamicResource SubTextBrush}" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </StackPanel>
                 </Border>
