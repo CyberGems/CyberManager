@@ -2335,6 +2335,10 @@ public partial class MainWindow : Window
     private DateTime _moreMenuDismissedAtUtc = DateTime.MinValue;
     private static readonly TimeSpan MoreMenuReopenGuard = TimeSpan.FromMilliseconds(400);
 
+    // True while the options menu was opened through the Alt+M hotkey, whose flow pre-highlights
+    // the first action for immediate activation. A mouse-opened menu must show no highlight.
+    private bool _moreMenuKeyboardInvoked;
+
     private void MoreOptionsMenu_Opened(object sender, RoutedEventArgs e)
     {
         _moreMenuDismissedAtUtc = DateTime.MinValue;
@@ -2347,8 +2351,9 @@ public partial class MainWindow : Window
             MenuGlassEffect.ApplyBlur(source.Handle, ThemeManager.IsDarkTheme);
         }
 
-        // The popup gets its keyboard focus after it has opened, so arrows can continue from
-        // the first action instead of leaving focus on the More button.
+        // Hotkey flow only: the popup gets its keyboard focus after it has opened, so arrows can
+        // continue from the first action. Mouse-opened menus keep every item unhighlighted.
+        if (!_moreMenuKeyboardInvoked) return;
         Dispatcher.BeginInvoke(DispatcherPriority.Input, new Action(() =>
         {
             if (!menu.IsOpen) return;
@@ -2360,6 +2365,7 @@ public partial class MainWindow : Window
 
     private void MoreOptionsMenu_Closed(object sender, RoutedEventArgs e)
     {
+        _moreMenuKeyboardInvoked = false;
         // Menu items close the menu on mouse up, so a pressed button means an outside press.
         if (Mouse.LeftButton == MouseButtonState.Pressed)
         {
@@ -2367,12 +2373,19 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MoreBtn_Click(object sender, RoutedEventArgs e) => ToggleMoreMenu(MoreBtn);
+    private void MoreBtn_Click(object sender, RoutedEventArgs e)
+    {
+        _moreMenuKeyboardInvoked = false;
+        ToggleMoreMenu(MoreBtn);
+    }
 
     private void MoreExit_Click(object sender, RoutedEventArgs e) => ExitApplication();
 
-    private void CompactView_MoreRequested(object sender, RoutedEventArgs e) =>
+    private void CompactView_MoreRequested(object sender, RoutedEventArgs e)
+    {
+        _moreMenuKeyboardInvoked = false;
         ToggleMoreMenu(sender as Button ?? MoreBtn);
+    }
 
     /// <summary>
     /// Opens the shared options menu below the given button, or closes it when it is already
@@ -3821,6 +3834,7 @@ public partial class MainWindow : Window
         if (modifiers == ModifierKeys.Alt && key == Key.M)
         {
             e.Handled = true;
+            _moreMenuKeyboardInvoked = true;
             ToggleMoreMenu(_isCompactMode ? CompactView.MoreButton : MoreBtn);
             return;
         }
