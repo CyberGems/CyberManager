@@ -66,6 +66,34 @@
             <Setter Property="Margin" Value="6,0,0,0"/>
         </Style>
 
+        <!-- The footer sits on CardSecondaryBrush, so the HeaderBgBrush hover used by the
+             title-bar buttons is invisible there. BorderBrush is the next step up on the
+             surface ladder in every theme, which gives this icon the same perceived hover
+             as the other icon buttons. -->
+        <Style x:Key="FooterIconButtonStyle" TargetType="Button" BasedOn="{StaticResource TitleButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource BorderBrush}"/>
+                                <Setter Property="Foreground"
+                                        Value="{DynamicResource TextBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="ModalPrimaryButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
             <Setter Property="Foreground" Value="{DynamicResource AccentFgBrush}"/>
@@ -347,7 +375,7 @@
                     <Button x:Name="CopyInfoButton"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Style="{StaticResource TitleButtonStyle}"
+                            Style="{StaticResource FooterIconButtonStyle}"
                             Click="CopyInfoButton_Click"
                             ToolTip="Copy process information"
                             AutomationProperties.Name="Copy process information">
