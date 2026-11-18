@@ -150,7 +150,7 @@ Muchos gestores de tareas se congelan bajo carga intensiva o esconden funciones 
 - **Navegación por teclado**: los controles de la barra de título y el branding muestran sus atajos en badges; `Alt+M` abre More con el primer elemento enfocado para navegar con las flechas
 
 ### 🎨 Personalización
-- **3 temas**: CyberManager (Obsidiana y Cyan Neón), Dark (Carbón e Índigo), Light (Pizarra y Azul Real)
+- **3 temas**: CyberManager (Obsidiana y Cyan Neón), Gris (Carbón e Índigo), Claro (Pizarra y Azul Real)
 - **Tamaño de fuente de fila**: ajustable de 11 a 17 px con vista previa en vivo
 - **Interfaz bilingüe**: interfaz completa en inglés y español
 - **Diálogos integrados**: Configuración más amplia y legible, Acerca de compacto y avisos de actualización que distinguen las versiones instalada y disponible

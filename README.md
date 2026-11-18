@@ -150,7 +150,7 @@ Plenty of task managers freeze under heavy load or bury basic features behind co
 - **Keyboard Navigation**: Title-bar controls and branding have shortcut badges; `Alt+M` opens More with the first item focused for arrow-key navigation
 
 ### 🎨 Customization
-- **3 Themes** — CyberManager (Obsidian & Soft Cyan), Dark (Charcoal & Indigo), Light (Slate & Royal Blue)
+- **3 Themes** — CyberManager (Obsidian & Soft Cyan), Gray (Charcoal & Indigo), Light (Slate & Royal Blue)
 - **Row Font Size** — Adjustable 11–17px with live preview
 - **Bilingual UI** — Full English and Spanish interface
 - **Integrated Dialogs**: Wider, more readable settings, a compact About window, and update prompts that distinguish installed and available versions
