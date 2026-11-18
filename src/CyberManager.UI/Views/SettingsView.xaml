@@ -244,7 +244,7 @@
                                         <RadioButton x:Name="ThemeLightRadio" Grid.Column="2" GroupName="AppThemeGroup" Style="{StaticResource ThemeCardRadioStyle}" Click="ThemeRadio_Click" Margin="10,0">
                                             <StackPanel>
                                                 <Border x:Name="ThemeLightPreview" Width="150" Height="84" CornerRadius="10" BorderThickness="1" Background="{DynamicResource BgBrush}"/>
-                                                <TextBlock x:Name="ThemeLightNameText" Text="Light" FontSize="13" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                                <TextBlock x:Name="ThemeLightNameText" Text="Claro" FontSize="13" HorizontalAlignment="Center" Margin="0,8,0,0"/>
                                             </StackPanel>
                                         </RadioButton>
                                     </Grid>

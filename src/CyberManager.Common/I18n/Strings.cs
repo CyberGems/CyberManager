@@ -114,7 +114,7 @@ public static class Strings
         ["Language"] = ("Language", "Idioma"),
         ["ThemeCyberManager"] = ("CyberManager — Obsidian & Neon Cyan", "CyberManager — Obsidiana y Cyan Neón"),
         ["ThemeGray"] = ("Gray — Charcoal & Indigo", "Gris — Carbón e Índigo"),
-        ["ThemeLight"] = ("Light — Slate & Royal Blue", "Light — Pizarra y Azul Real"),
+        ["ThemeLight"] = ("Light — Slate & Royal Blue", "Claro — Pizarra y Azul Real"),
         ["ThemeInstantNote"] = ("Applies instantly without restarting the application.", "Se aplica al instante sin necesidad de reiniciar la aplicación."),
         ["Ok"] = ("OK", "Aceptar"),
         ["Cancel"] = ("Cancel", "Cancelar"),
