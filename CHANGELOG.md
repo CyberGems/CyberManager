@@ -2,6 +2,28 @@
 
 All notable changes to CyberManager are documented here.
 
+## [1.9.0] - 2026-11-18
+
+### 🇺🇸 English
+
+- Copy process information everywhere: the properties window gains a copy button next to the path and a footer button with the full summary, the process context menu gains "Copy process information", and Ctrl+Shift+C (main window) or Ctrl+C (properties window) do the same. The copied summary leads with the friendly name.
+- Show the keyboard shortcut of every action that has one: the process context menu lists Supr, Shift+Supr, Ctrl+R, Ctrl+C and Ctrl+Shift+C inline, the More menu adds the missing Ctrl+Shift+U and F1 gestures, and the group-by-application toggle gets a Ctrl+G badge.
+- Unify every toggle switch on the suite pill style, with a check mark, a keyboard focus border and a disabled state.
+- Redesign the theme picker as preview cards drawn from the theme palettes, with an accent glow on the selected card and an "applies instantly" note.
+- Rename the Dark theme to Gray, with Spanish captions Gris and Claro in the picker.
+- Give the More options menu the same acrylic surface as the process context menu.
+- Make the footer copy button hover visible on the footer surface.
+
+### 🇪🇸 Español
+
+- Copia la información del proceso donde haga falta: la ventana de propiedades estrena un botón de copia junto a la ruta y otro en el pie con el resumen completo, el menú contextual añade "Copiar información del proceso", y Ctrl+Shift+C (ventana principal) o Ctrl+C (ventana de propiedades) hacen lo mismo. El resumen copiado abre con el nombre descriptivo.
+- Muestra el atajo de teclado de cada acción que tiene uno: el menú contextual lista Supr, Shift+Supr, Ctrl+R, Ctrl+C y Ctrl+Shift+C en línea, el menú More añade los gestos que faltaban (Ctrl+Shift+U y F1) y el toggle de agrupación muestra su badge Ctrl+G.
+- Unifica todos los interruptores en el estilo pill de la suite, con marca de check, borde de foco de teclado y estado deshabilitado.
+- Rediseña el selector de temas como tarjetas de previsualización dibujadas desde las paletas, con brillo de acento en la tarjeta seleccionada y una nota de aplicación al instante.
+- Renombra el tema Dark a Gray, con las leyendas Gris y Claro en el selector en español.
+- Da al menú More la misma superficie acrílica del menú contextual de procesos.
+- Hace visible el hover del botón de copia del pie sobre la superficie del pie.
+
 ## [1.8.0] - 2026-11-16
 
 ### 🇺🇸 English

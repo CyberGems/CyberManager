@@ -8,7 +8,7 @@
 
 <!-- IMPORTANT FOR AGENTS & MAINTAINERS: Always rewrite this entire section and highlights with the ACTUAL release notes for this specific new version before tagging. NEVER leave or copy previous version notes! Use 25-45 words for the summary, lead with user-facing changes, and do not repeat the app name or version. Keep the Spanish mirror inside the details block in sync: translate the summary and rewrite the highlights. -->
 <!-- changelog-summary:start -->
-The new Startup tab lets you review and enable or disable startup apps with confirmation and backup. Pinned widgets and the main window stay on top, text fields gain a themed context menu, and the installer and uninstall entry get the app branding.
+Copy process information from the properties window, the context menu or the new Ctrl+Shift+C shortcut. The theme picker becomes preview cards with Gray replacing Dark, every toggle adopts the suite switch, and the action menus now show their shortcuts.
 <!-- changelog-summary:end -->
 
 > **New to CyberManager?** A lightweight Windows task manager with instant search, process insight, and a focused compact mode.
@@ -17,28 +17,28 @@ The new Startup tab lets you review and enable or disable startup apps with conf
 
 ### ✨ Key Features & Highlights
 
-- 🚀 **New Startup tab**:
-  - Review every startup entry from the registry and startup folders in one place, with the selected row highlighted.
-  - Enable or disable entries with a confirmation step and an automatic backup of the original value to a log file.
+- 📋 **Copy process information anywhere**:
+  - The properties window gains a copy button next to the path and a footer button with the full summary; Ctrl+C does the same there.
+  - The process context menu adds "Copy process information", backed by the new Ctrl+Shift+C shortcut in the main window, and the copied summary leads with the friendly name.
 
-- 📌 **Always on top, reliably**:
-  - Pinned widgets and the main window keep the topmost band with a shared guard that restores it when another window takes it.
-  - The notification-area menu is near-opaque and stays readable over any app behind it.
+- ⌨️ **Shortcuts where you can see them**:
+  - The process context menu lists Supr, Shift+Supr, Ctrl+R, Ctrl+C and Ctrl+Shift+C next to each action.
+  - The More menu gains the missing Ctrl+Shift+U and F1 gestures, and the group-by-application toggle shows a Ctrl+G badge.
 
-- 🎨 **Consistent, reachable visuals**:
-  - Every text field opens the suite-themed context menu with undo, redo, clipboard actions, select all, and delete.
-  - Charts and theme cards follow theme tokens, the pin emoji becomes a vector icon, and buttons and navigation tabs show a keyboard focus ring.
+- 🎨 **Theme picker as preview cards**:
+  - Three palette-driven mini mockups with an accent glow on the selected card and an "applies instantly" note.
+  - The Dark theme is renamed to Gray, with Spanish captions Gris and Claro.
 
-- 🧹 **Branded install and uninstall**:
-  - The installer wizard wears the app artwork, and the Windows uninstall entry shows the app icon.
-  - The uninstaller waits for CyberManager to close before removing files.
+- 🧹 **Consistent suite controls**:
+  - Every toggle switch uses the suite pill style with a check mark, keyboard focus border and disabled state.
+  - The More options menu shares the acrylic surface of the process context menu, and the footer copy button hover is now visible.
 
 <details>
 <summary><b>🇪🇸 Ver notas de la versión en Español</b></summary>
 
 ### 🚀 Novedades de esta versión
 
-La nueva pestaña Inicio permite revisar y habilitar o deshabilitar apps de inicio con confirmación y respaldo. Los widgets fijados y la ventana principal se mantienen siempre visibles, los campos de texto ganan un menú contextual temático y el instalador y la entrada de desinstalación estrenan la imagen de la app.
+Copia la información del proceso desde la ventana de propiedades, el menú contextual o el nuevo atajo Ctrl+Shift+C. El selector de temas pasa a tarjetas de previsualización con Gris en lugar de Dark, todos los interruptores adoptan el estilo de la suite y los menús muestran sus atajos.
 
 > **¿Nuevo en CyberManager?** Un administrador de tareas Windows ligero, con búsqueda instantánea, detalle de procesos y un modo compacto enfocado.
 
@@ -46,21 +46,21 @@ La nueva pestaña Inicio permite revisar y habilitar o deshabilitar apps de inic
 
 ### ✨ Novedades destacadas
 
-- 🚀 **Nueva pestaña Inicio**:
-  - Revisa todas las entradas de inicio del registro y de las carpetas de arranque en un solo lugar, con la fila seleccionada resaltada.
-  - Habilita o deshabilita entradas con un paso de confirmación y un respaldo automático del valor original en un archivo de registro.
+- 📋 **Copia la información del proceso donde quieras**:
+  - La ventana de propiedades estrena un botón de copia junto a la ruta y otro en el pie con el resumen completo; Ctrl+C hace lo mismo allí.
+  - El menú contextual añade "Copiar información del proceso", con el nuevo atajo Ctrl+Shift+C en la ventana principal, y el resumen copiado abre con el nombre descriptivo.
 
-- 📌 **Siempre visible, de verdad**:
-  - Los widgets fijados y la ventana principal conservan la banda de primer plano con una protección compartida que la restaura cuando otra ventana la roba.
-  - El menú del área de notificación es casi opaco y se lee bien sobre cualquier app.
+- ⌨️ **Atajos a la vista**:
+  - El menú contextual lista Supr, Shift+Supr, Ctrl+R, Ctrl+C y Ctrl+Shift+C junto a cada acción.
+  - El menú More recupera los gestos que faltaban (Ctrl+Shift+U y F1) y el toggle de agrupación muestra su badge Ctrl+G.
 
-- 🎨 **Visuales coherentes y alcanzables**:
-  - Cada campo de texto abre el menú contextual temático de la suite con deshacer, rehacer, acciones de portapapeles, seleccionar todo y eliminar.
-  - Las gráficas y las tarjetas de tema siguen los tokens del tema, el emoji de pin pasa a icono vectorial y los botones y pestañas de navegación muestran anillo de foco de teclado.
+- 🎨 **Selector de temas como tarjetas**:
+  - Tres miniaturas dibujadas desde las paletas, con brillo de acento en la tarjeta seleccionada y una nota de aplicación al instante.
+  - El tema Dark pasa a llamarse Gray, con las leyendas Gris y Claro en español.
 
-- 🧹 **Instalación y desinstalación con identidad**:
-  - El asistente del instalador luce la imagen de la app y la entrada de desinstalación de Windows muestra su icono.
-  - El desinstalador espera a que CyberManager se cierre antes de borrar archivos.
+- 🧹 **Controles coherentes con la suite**:
+  - Todos los interruptores usan el estilo pill de la suite, con marca de check, borde de foco de teclado y estado deshabilitado.
+  - El menú More comparte la superficie acrílica del menú contextual de procesos, y el hover del botón de copia del pie ya es visible.
 
 ### ℹ️ Antes de instalar
 

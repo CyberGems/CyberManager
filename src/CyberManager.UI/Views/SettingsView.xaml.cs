@@ -566,6 +566,6 @@ public partial class SettingsView : UserControl
         });
     }
 
-    private static Brush PalBrush(string hex) =>
+    private static SolidColorBrush PalBrush(string hex) =>
         new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)!);
 }
