@@ -734,7 +734,7 @@
 
                                     <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
-                                    <MenuItem x:Name="MoreCheckUpdatesItem" Header="Check for Update..." Style="{StaticResource ModernMenuItem}" Click="MoreCheckUpdates_Click">
+                                    <MenuItem x:Name="MoreCheckUpdatesItem" Header="Check for Update..." InputGestureText="Ctrl+Shift+U" Style="{StaticResource ModernMenuItem}" Click="MoreCheckUpdates_Click">
                                         <MenuItem.Icon>
                                             <Path Data="M 12 4 V 15 M 7 10 L 12 15 L 17 10 M 5 20 H 19"
                                                   Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
@@ -742,7 +742,7 @@
                                         </MenuItem.Icon>
                                     </MenuItem>
 
-                                    <MenuItem x:Name="MoreAboutItem" Header="About CyberManager..." Style="{StaticResource ModernMenuItem}" Click="About_Click">
+                                    <MenuItem x:Name="MoreAboutItem" Header="About CyberManager..." InputGestureText="F1" Style="{StaticResource ModernMenuItem}" Click="About_Click">
                                         <MenuItem.Icon>
                                             <Path Data="M 12 22 A 10 10 0 1 0 12 2 A 10 10 0 0 0 12 22 M 12 16 V 12 M 12 8 H 12.01"
                                                   Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"

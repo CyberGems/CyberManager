@@ -1991,8 +1991,8 @@ public partial class MainWindow : Window
             ContextCopyPathItem.ToolTip = null;
             ContextOpenFolderItem.ToolTip = null;
             ContextSearchOnlineItem.ToolTip = null;
-            // Shortcut hint for the copy-summary action; the gesture is not shown anywhere else.
-            ContextCopyInfoItem.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("CopyProcessInfo"), KeyboardShortcuts.CopyProcessInfo);
+            // Copy information shows its shortcut inline via InputGestureText, so no tooltip badge here.
+            ContextCopyInfoItem.ToolTip = null;
         }
     }
 
@@ -3603,6 +3603,7 @@ public partial class MainWindow : Window
             SearchHint.Text = Strings.T("SearchPlaceholder");
             LoaderOverlay.RefreshLocalization();
             GroupToggleLabel.Text = Strings.T("GroupByApp");
+            GroupToggleCheck.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("GroupByApp"), KeyboardShortcuts.GroupByApp);
             SystemFilterLabel.Text = Strings.T("HideSystemProcesses");
             AutomationProperties.SetName(SystemFilterCheck, Strings.T("HideSystemProcesses"));
             FontSizeSlider.ToolTip = Strings.T("TextSize");
@@ -3705,6 +3706,11 @@ public partial class MainWindow : Window
             {
                 ContextKillItem.Header = Strings.T("Kill");
                 ContextPropertiesItem.Header = Strings.T("ProcessProperties");
+                ContextKillItem.InputGestureText = Strings.T("DeleteKey");
+                ContextKillTreeItem.InputGestureText = $"Shift+{Strings.T("DeleteKey")}";
+                ContextRestartItem.InputGestureText = KeyboardShortcuts.RestartProcess;
+                ContextCopyPathItem.InputGestureText = KeyboardShortcuts.CopyPath;
+                ContextCopyInfoItem.InputGestureText = KeyboardShortcuts.CopyProcessInfo;
                 ContextKillTreeItem.Header = Strings.T("KillTree");
                 ContextRestartItem.Header = Strings.T("Restart");
                 ContextSuspendItem.Header = Strings.T("Suspend");

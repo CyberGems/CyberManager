@@ -20,6 +20,8 @@ internal static class KeyboardShortcuts
     internal const string PauseDetection = "Ctrl+P";
     internal const string RestartProcess = "Ctrl+R";
     internal const string RunNewTask = "Ctrl+N";
+    internal const string CopyPath = "Ctrl+C";
     internal const string CopyProcessInfo = "Ctrl+Shift+C";
     internal const string CopyProcessInfoWindow = "Ctrl+C";
+    internal const string GroupByApp = "Ctrl+G";
 }
