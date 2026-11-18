@@ -3,6 +3,8 @@ using Xunit;
 
 namespace CyberManager.Tests;
 
+// Shares Strings.Current with ProcessSummaryTextTests, so both classes run serialized.
+[Collection("StringsSequential")]
 public class StringsTests
 {
     [Fact]

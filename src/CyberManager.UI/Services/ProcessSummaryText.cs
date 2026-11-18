@@ -11,16 +11,16 @@ namespace CyberManager.UI.Services;
 /// </summary>
 public static class ProcessSummaryText
 {
-    public static string Build(ProcessInfo process)
+    public static string Build(ProcessInfo process) =>
+        Build(process, ProcessMetadataResolver.Resolve(process));
+
+    public static string Build(ProcessInfo process, ProcessMetadata metadata)
     {
-        var metadata = ProcessMetadataResolver.Resolve(process);
         var unknown = Strings.T("Unknown");
 
         var lines = new List<string>
         {
-            process.Pid > 0
-                ? $"{Strings.T("ProcessProperties")}: {process.Name} (PID {process.Pid})"
-                : $"{Strings.T("ProcessProperties")}: {process.Name}"
+            BuildHeader(process, metadata)
         };
 
         AddRow(lines, Strings.T("FriendlyName"), ValueOrUnknown(metadata.FriendlyName, unknown));
@@ -51,6 +51,25 @@ public static class ProcessSummaryText
 
     public static string ValueOrUnknown(string? value, string unknown) =>
         string.IsNullOrWhiteSpace(value) ? unknown : value.Trim();
+
+    /// <summary>
+    /// Header line with the friendly name first when it adds information beyond the
+    /// image name, e.g. "Process properties: Google Chrome · chrome.exe (PID 1234)".
+    /// </summary>
+    private static string BuildHeader(ProcessInfo process, ProcessMetadata metadata)
+    {
+        var subject = ValueOrUnknown(process.Name, Strings.T("Unknown"));
+        var friendly = metadata.FriendlyName?.Trim() ?? string.Empty;
+        if (!string.IsNullOrEmpty(friendly) &&
+            !string.Equals(friendly, subject, StringComparison.OrdinalIgnoreCase))
+        {
+            subject = $"{friendly} · {subject}";
+        }
+
+        return process.Pid > 0
+            ? $"{Strings.T("ProcessProperties")}: {subject} (PID {process.Pid})"
+            : $"{Strings.T("ProcessProperties")}: {subject}";
+    }
 
     public static string FormatStatus(string? status, string unknown)
     {
