@@ -510,39 +510,7 @@
             </Setter>
         </Style>
         <!-- CyberSnap Neon Glowing Toggle Switch Style -->
-        <Style x:Key="CyberSnapToggleStyle" TargetType="CheckBox">
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Focusable" Value="True"/>
-            <Setter Property="IsTabStop" Value="True"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="CheckBox">
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Border x:Name="Track" Width="36" Height="20" CornerRadius="10" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.2"/>
-                            <Ellipse x:Name="Thumb" Width="14" Height="14" Fill="#94A3B8" HorizontalAlignment="Left" Margin="3,0,0,0">
-                                <Ellipse.Effect>
-                                    <DropShadowEffect Color="Black" Opacity="0.35" BlurRadius="3" ShadowDepth="1"/>
-                                </Ellipse.Effect>
-                            </Ellipse>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Track" Property="Background" Value="{DynamicResource AccentBrush}"/>
-                                <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
-                                <Setter TargetName="Track" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="{DynamicResource AccentColor}" BlurRadius="8" ShadowDepth="0" Opacity="0.85"/>
-                                    </Setter.Value>
-                                </Setter>
-                                <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
-                                <Setter TargetName="Thumb" Property="Margin" Value="0,0,3,0"/>
-                                <Setter TargetName="Thumb" Property="Fill" Value="#FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <!-- Toggle switches use the suite-wide SuiteToggleSwitch style from App.xaml. -->
 
         <Style x:Key="EmptyStateText" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource SubTextBrush}"/>
@@ -1584,13 +1552,13 @@
                         <!-- Group by application toggle -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
                             <TextBlock x:Name="GroupToggleLabel" Text="Group by application" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="GroupToggleLabel_Click"/>
-                            <CheckBox x:Name="GroupToggleCheck" Style="{StaticResource CyberSnapToggleStyle}" AutomationProperties.Name="Group by application" VerticalAlignment="Center" Checked="GroupToggle_Checked" Unchecked="GroupToggle_Checked"/>
+                            <CheckBox x:Name="GroupToggleCheck" Style="{StaticResource SuiteToggleSwitch}" AutomationProperties.Name="Group by application" VerticalAlignment="Center" Checked="GroupToggle_Checked" Unchecked="GroupToggle_Checked"/>
                         </StackPanel>
 
                         <!-- Hide system processes toggle -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
                             <TextBlock x:Name="SystemFilterLabel" Text="Hide system processes" FontSize="11" Foreground="{DynamicResource SubTextBrush}" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonDown="SystemFilterLabel_Click"/>
-                            <CheckBox x:Name="SystemFilterCheck" Style="{StaticResource CyberSnapToggleStyle}" AutomationProperties.Name="Hide system processes" VerticalAlignment="Center" Checked="SystemFilter_Checked" Unchecked="SystemFilter_Checked"/>
+                            <CheckBox x:Name="SystemFilterCheck" Style="{StaticResource SuiteToggleSwitch}" AutomationProperties.Name="Hide system processes" VerticalAlignment="Center" Checked="SystemFilter_Checked" Unchecked="SystemFilter_Checked"/>
                         </StackPanel>
 
                         <!-- Text Size Slider -->

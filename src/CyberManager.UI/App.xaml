@@ -104,6 +104,60 @@
             </Setter>
         </Style>
 
+        <!-- Suite pill toggle (CyberSnap pattern): the one style every on/off switch uses.
+             The thumb is always white, so the check stroke keeps a fixed dark color in every
+             theme; the track and focus border come from theme tokens. -->
+        <Style x:Key="SuiteToggleSwitch" TargetType="CheckBox">
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="Track"
+                                Width="44"
+                                Height="24"
+                                CornerRadius="12"
+                                Background="{DynamicResource SwitchTrackBrush}"
+                                BorderBrush="Transparent"
+                                BorderThickness="1"
+                                SnapsToDevicePixels="True">
+                            <Grid x:Name="Thumb"
+                                  Width="18"
+                                  Height="18"
+                                  Margin="3,0,0,0"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Center">
+                                <Ellipse Fill="#FFFFFF"/>
+                                <Path x:Name="Check"
+                                      Data="M5,9.5 L8,12.5 L13,6"
+                                      Stroke="#0F141C"
+                                      StrokeThickness="2.2"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                                <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/>
+                                <Setter TargetName="Thumb" Property="Margin" Value="0,0,3,0"/>
+                                <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource BorderLightBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Track" Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- Global CyberGems Themed ScrollBar Styles -->
         <!-- The repeat buttons must be fully transparent and templated, otherwise WPF falls
              back to the default button chrome and paints an ugly frame around the thumb. -->
