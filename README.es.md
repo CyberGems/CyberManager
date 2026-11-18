@@ -268,6 +268,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Delete` | Finalizar la tarea o tareas seleccionadas | Aplicación |
 | `Shift+Delete` | Finalizar árbol de procesos | Aplicación |
 | `Ctrl+C` | Copiar la ruta del proceso | Aplicación |
+| `Ctrl+Shift+C` | Copiar la información del proceso seleccionado (nombre, ruta, metadatos, uso) | Aplicación |
 | `Espacio` / `Intro` | Contraer/extender grupo | Aplicación |
 | `Escape` | Limpiar la búsqueda / enfocar la cuadrícula | Aplicación |
 | `Apps` / `Shift+F10` | Abrir el menú contextual | Aplicación |

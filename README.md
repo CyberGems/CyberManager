@@ -268,6 +268,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Delete` | End selected task(s) | Application |
 | `Shift+Delete` | End process tree | Application |
 | `Ctrl+C` | Copy process path | Application |
+| `Ctrl+Shift+C` | Copy selected process information (name, path, metadata, usage) | Application |
 | `Space` / `Enter` | Expand/collapse group | Application |
 | `Escape` | Clear search / focus grid | Application |
 | `Apps` / `Shift+F10` | Open context menu | Application |
