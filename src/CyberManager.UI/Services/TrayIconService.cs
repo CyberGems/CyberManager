@@ -329,10 +329,10 @@ public sealed class TrayIconService : IDisposable
         if (miStyle != null) _subDonateItem.Style = miStyle;
         _subDonateItem.Click += (_, _) => OpenUrl("https://github.com/CyberGems/CyberManager#%EF%B8%8F-donate");
 
-        // Submenu: About
+        // Submenu: About (opens the About tab, not a dialog, so no ellipsis)
         _subAboutItem = new MenuItem
         {
-            Header = $"{Strings.T("About")}...",
+            Header = Strings.T("About"),
             Icon = CreatePathIcon("M 12 22 A 10 10 0 1 0 12 2 A 10 10 0 0 0 12 22 M 12 16 V 12 M 12 8 H 12.01")
         };
         if (miStyle != null) _subAboutItem.Style = miStyle;

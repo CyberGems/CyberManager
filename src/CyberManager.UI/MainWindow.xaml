@@ -27,8 +27,10 @@
             <Setter Property="Focusable" Value="True"/>
             <Setter Property="IsTabStop" Value="True"/>
             <Setter Property="Height" Value="32"/>
-            <Setter Property="Padding" Value="16,0"/>
-            <Setter Property="Margin" Value="2,0"/>
+            <!-- Tighter padding and margin than the pre-About bar: five tabs must fit the
+                 center column without clipping the last label. -->
+            <Setter Property="Padding" Value="13,0"/>
+            <Setter Property="Margin" Value="1,0"/>
             <Setter Property="ToolTipService.InitialShowDelay" Value="300"/>
             <Setter Property="ToolTipService.BetweenShowDelay" Value="0"/>
             <Setter Property="ToolTipService.ShowDuration" Value="4000"/>
@@ -544,21 +546,50 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel x:Name="FullBrandingPanel"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center"
-                                Cursor="Hand">
-                        <Image Source="pack://application:,,,/Assets/CyberManager.png" Width="30" Height="30" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                        <StackPanel VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="CyberManager" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
-                                <Border Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
-                                    <TextBlock Text="NT ENGINE" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
-                                </Border>
+                    <!-- The branding is the About tab's other entry point: a plain click opens the
+                         tab while a drag still moves the window (the titlebar handlers decide
+                         which). Hover fades in a soft pill and, while the About tab is open, an
+                         accent tint marks the branding as active. -->
+                    <Border x:Name="FullBrandingPanel"
+                            Background="Transparent"
+                            CornerRadius="8"
+                            Padding="6,4"
+                            Margin="-6,-4,0,-4"
+                            VerticalAlignment="Center"
+                            Cursor="Hand">
+                        <Grid>
+                            <Border x:Name="FullBrandingActiveOverlay" Background="{DynamicResource AccentGlowBrush}" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <Border x:Name="FullBrandingHoverOverlay" Background="{DynamicResource HeaderBgBrush}" CornerRadius="8" Opacity="0" IsHitTestVisible="False"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="pack://application:,,,/Assets/CyberManager.png" Width="30" Height="30" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="CyberManager" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center"/>
+                                        <Border Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="NT ENGINE" FontSize="9.5" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock x:Name="SubtitleText" Text="Gestor de tareas virtualizado" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" MaxWidth="250" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
                             </StackPanel>
-                            <TextBlock x:Name="SubtitleText" Text="Gestor de tareas virtualizado" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0" MaxWidth="250" TextTrimming="CharacterEllipsis"/>
-                        </StackPanel>
-                    </StackPanel>
+                        </Grid>
+                        <Border.Triggers>
+                            <EventTrigger RoutedEvent="MouseEnter">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FullBrandingHoverOverlay" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                            <EventTrigger RoutedEvent="MouseLeave">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="FullBrandingHoverOverlay" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Border.Triggers>
+                    </Border>
 
                     <!-- Center: GlassWire-Style Navigation Tab Bar -->
                     <Border x:Name="NavTabBarBorder" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -571,14 +602,14 @@
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <!-- Process list: three rows of bullet + entry, rather than the
                                          generic app grid used by the summary tabs. -->
-                                    <Path x:Name="TabProcessesIcon" Data="M 3.5 7 H 5 M 8.5 7 H 20.5 M 3.5 12 H 5 M 8.5 12 H 20.5 M 3.5 17 H 5 M 8.5 17 H 20.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <Path x:Name="TabProcessesIcon" Data="M 3.5 7 H 5 M 8.5 7 H 20.5 M 3.5 12 H 5 M 8.5 12 H 20.5 M 3.5 17 H 5 M 8.5 17 H 20.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                     <TextBlock x:Name="TabProcessesText" Text="Procesos" FontSize="11.5" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton x:Name="TabPerformanceBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="Performance">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Path x:Name="TabPerformanceIcon" Data="M 2 13 L 6 13 L 9 5 L 13 19 L 16 11 L 18 13 L 22 13" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <Path x:Name="TabPerformanceIcon" Data="M 2 13 L 6 13 L 9 5 L 13 19 L 16 11 L 18 13 L 22 13" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                     <TextBlock x:Name="TabPerformanceText" Text="Rendimiento" FontSize="11.5" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
@@ -586,15 +617,23 @@
                             <RadioButton x:Name="TabStartupBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="Startup">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <!-- Power glyph: the applications Windows starts at sign-in. -->
-                                    <Path x:Name="TabStartupIcon" Data="M 12 2 V 11 M 6.5 6.5 A 7.5 7.5 0 1 0 17.5 6.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="12" Height="13" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <Path x:Name="TabStartupIcon" Data="M 12 2 V 11 M 6.5 6.5 A 7.5 7.5 0 1 0 17.5 6.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="12" Height="13" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                     <TextBlock x:Name="TabStartupText" Text="Inicio" FontSize="11.5" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton x:Name="TabSettingsBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="Settings">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Path x:Name="TabSettingsIcon" Data="M 12 15 C 10.3 15 9 13.7 9 12 C 9 10.3 10.3 9 12 9 C 13.7 9 15 10.3 15 12 C 15 13.7 13.7 15 12 15 Z M 19.4 13 C 19.5 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.5 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10.1 2 C 9.8 2 9.6 2.2 9.6 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.5 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.5 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.6 21.6 C 9.6 21.8 9.8 22 10.1 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.2" Width="13" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <Path x:Name="TabSettingsIcon" Data="M 12 15 C 10.3 15 9 13.7 9 12 C 9 10.3 10.3 9 12 9 C 13.7 9 15 10.3 15 12 C 15 13.7 13.7 15 12 15 Z M 19.4 13 C 19.5 12.7 19.5 12.3 19.5 12 C 19.5 11.7 19.5 11.3 19.4 11 L 21.5 9.4 C 21.7 9.2 21.8 8.9 21.6 8.7 L 19.6 5.2 C 19.5 5 19.2 4.9 19 5 L 16.5 6 C 16 5.6 15.4 5.3 14.8 5.1 L 14.4 2.4 C 14.4 2.2 14.2 2 13.9 2 L 10.1 2 C 9.8 2 9.6 2.2 9.6 2.4 L 9.2 5.1 C 8.6 5.3 8 5.6 7.5 6 L 5 5 C 4.8 4.9 4.5 5 4.4 5.2 L 2.4 8.7 C 2.2 8.9 2.3 9.2 2.5 9.4 L 4.6 11 C 4.5 11.3 4.5 11.7 4.5 12 C 4.5 12.3 4.5 12.7 4.6 13 L 2.5 14.6 C 2.3 14.8 2.2 15.1 2.4 15.3 L 4.4 18.8 C 4.5 19 4.8 19.1 5 19 L 7.5 18 C 8 18.4 8.6 18.7 9.2 18.9 L 9.6 21.6 C 9.6 21.8 9.8 22 10.1 22 L 13.9 22 C 14.2 22 14.4 21.8 14.4 21.6 L 14.8 18.9 C 15.4 18.7 16 18.4 16.5 18 L 19 19 C 19.2 19.1 19.5 19 19.6 18.8 L 21.6 15.3 C 21.8 15.1 21.7 14.8 21.5 14.6 L 19.4 13 Z" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.2" Width="13" Height="14" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
                                     <TextBlock x:Name="TabSettingsText" Text="Configuración" FontSize="11.5" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton x:Name="TabAboutBtn" GroupName="MainTabs" Style="{StaticResource GlassWireTabStyle}" Click="TabClick" Checked="TabClick" Tag="About">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <!-- Info glyph: the same circled "i" the About surface uses. -->
+                                    <Path x:Name="TabAboutIcon" Data="M 12 22 A 10 10 0 1 0 12 2 A 10 10 0 0 0 12 22 M 12 16 V 12 M 12 8 H 12.01" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="13" Height="14" Stretch="Uniform" Margin="0,0,6,0" VerticalAlignment="Center" Fill="Transparent"/>
+                                    <TextBlock x:Name="TabAboutText" Text="Acerca de" FontSize="11.5" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
                         </StackPanel>
@@ -1583,6 +1622,9 @@
 
             <!-- Tab 4: Settings View (Preferences, Appearance, Behavior) -->
             <views:SettingsView x:Name="SettingsTabContent" Grid.Row="1" Visibility="Collapsed"/>
+
+            <!-- Tab 5: About View (Identity, Updates, Suite, Links) -->
+            <views:AboutView x:Name="AboutTabContent" Grid.Row="1" Visibility="Collapsed"/>
 
             <!-- Compact View Host -->
             <!-- Margin="0" overrides the 20/14/20/16 layout padding of the shared grid: in compact

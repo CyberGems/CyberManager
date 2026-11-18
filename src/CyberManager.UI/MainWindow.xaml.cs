@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -31,7 +32,8 @@ public enum MainTab
     Processes,
     Performance,
     Startup,
-    Settings
+    Settings,
+    About
 }
 
 [SuppressMessage("Design", "CA1001", Justification = "WPF window-owned services are released from the window lifecycle.")]
@@ -47,11 +49,13 @@ public partial class MainWindow : Window
         TabPerformanceBtn.IsChecked = tab == MainTab.Performance;
         TabStartupBtn.IsChecked = tab == MainTab.Startup;
         TabSettingsBtn.IsChecked = tab == MainTab.Settings;
+        TabAboutBtn.IsChecked = tab == MainTab.About;
 
         ProcessesTabContent.Visibility = tab == MainTab.Processes ? Visibility.Visible : Visibility.Collapsed;
         PerformanceTabContent.Visibility = tab == MainTab.Performance ? Visibility.Visible : Visibility.Collapsed;
         StartupTabContent.Visibility = tab == MainTab.Startup ? Visibility.Visible : Visibility.Collapsed;
         SettingsTabContent.Visibility = tab == MainTab.Settings ? Visibility.Visible : Visibility.Collapsed;
+        AboutTabContent.Visibility = tab == MainTab.About ? Visibility.Visible : Visibility.Collapsed;
 
         // The tab icons follow their button's Foreground through a binding, so the selected
         // color is applied by the tab style alone and needs no code here.
@@ -83,6 +87,32 @@ public partial class MainWindow : Window
         {
             SettingsTabContent.Deactivate();
         }
+
+        if (tab == MainTab.About)
+        {
+            AboutTabContent.Activate();
+        }
+        else
+        {
+            AboutTabContent.Deactivate();
+        }
+
+        UpdateBrandingActiveState();
+    }
+
+    /// <summary>
+    /// Lights the branding up while the About tab is open: the branding is the tab's other
+    /// entry point, so it carries the active tint the suite uses on CyberWall.
+    /// </summary>
+    private void UpdateBrandingActiveState()
+    {
+        var active = CurrentTab == MainTab.About;
+        FullBrandingActiveOverlay.BeginAnimation(OpacityProperty, new DoubleAnimation
+        {
+            To = active ? 1 : 0,
+            Duration = TimeSpan.FromMilliseconds(200),
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+        });
     }
 
     private void NavigateToTab(MainTab tab, string? subTab = null)
@@ -105,6 +135,7 @@ public partial class MainWindow : Window
                 "Performance" => MainTab.Performance,
                 "Startup" => MainTab.Startup,
                 "Settings" => MainTab.Settings,
+                "About" => MainTab.About,
                 _ => MainTab.Processes
             };
             if (CurrentTab != targetTab)
@@ -2414,8 +2445,9 @@ public partial class MainWindow : Window
 
     private void About_Click(object sender, RoutedEventArgs e)
     {
-        var w = new AboutWindow { Owner = this };
-        w.ShowDialog();
+        // About lives in its own tab now. Navigation also lifts compact mode first, so a
+        // branding click in the compact view lands in full mode with the tab open.
+        NavigateToTab(MainTab.About);
     }
 
     /// <summary>
@@ -2480,11 +2512,10 @@ public partial class MainWindow : Window
 
         if (!choice) return;
 
-        // The About window owns the download progress bar, so it is opened non-modally and driven
-        // from here. Keeping it non-modal is what stops an update prompt from freezing the app.
-        var about = new AboutWindow { Owner = this };
-        about.Show();
-        await about.StartUpdateDownloadAsync(result);
+        // The About tab owns the download progress bar, so it is opened and driven from here.
+        // Navigating is non-blocking, which is what stops an update prompt from freezing the app.
+        NavigateToTab(MainTab.About);
+        await AboutTabContent.StartUpdateDownloadAsync(result);
     }
 
     /// <summary>
@@ -3571,10 +3602,12 @@ public partial class MainWindow : Window
         TabPerformanceText.Text = Strings.T("NavPerformance");
         TabStartupText.Text = Strings.T("NavStartup");
         TabSettingsText.Text = Strings.T("NavSettings");
+        TabAboutText.Text = Strings.T("AboutSubtitle");
         TabProcessesBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavProcessesTip"), KeyboardShortcuts.Processes);
         TabPerformanceBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavPerformanceTip"), KeyboardShortcuts.Performance);
         TabStartupBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavStartupTip"), KeyboardShortcuts.Startup);
         TabSettingsBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavSettingsTip"), KeyboardShortcuts.SettingsTooltip);
+        TabAboutBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("About"), KeyboardShortcuts.About);
     }
 
     private void ApplyTheme()
@@ -3595,6 +3628,7 @@ public partial class MainWindow : Window
             PerformanceTabContent?.RefreshLocalization();
             StartupTabContent?.RefreshLocalization();
             SettingsTabContent?.RefreshLocalization();
+            AboutTabContent?.RefreshLocalization();
 
             SubtitleText.Text = Strings.T("AppSubtitle");
             FullBrandingPanel.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("About"), KeyboardShortcuts.About);
@@ -3648,7 +3682,7 @@ public partial class MainWindow : Window
                 MoreChangelogItem.Header = Strings.T("Changelog");
                 MoreWebsiteItem.Header = Strings.T("Website");
                 MoreCheckUpdatesItem.Header = Strings.T("CheckForUpdates");
-                MoreAboutItem.Header = Strings.T("AboutCyberManager");
+                MoreAboutItem.Header = Strings.T("About");
                 MoreExitItem.Header = Strings.T("Exit");
             }
             MinimizeBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Minimize"), KeyboardShortcuts.Minimize);
@@ -4309,8 +4343,7 @@ public partial class MainWindow : Window
     private void OpenAboutFromTray()
     {
         ShowFromTray();
-        var dlg = new AboutWindow { Owner = this };
-        dlg.ShowDialog();
+        NavigateToTab(MainTab.About);
     }
 
     private void ExitApplication()

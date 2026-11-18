@@ -404,7 +404,7 @@ public static class Strings
         ["RememberMyChoice"] = ("Remember my choice", "Recordar mi elección"),
         ["KeyHintSpace"] = ("Space", "Espacio"),
         ["SuiteSuggestionsTitle"] = ("Show CyberGems app recommendations", "Mostrar recomendaciones de apps de CyberGems"),
-        ["SuiteSuggestionsDesc"] = ("Show the CyberGems suite in the About window and the tray menu.", "Muestra la suite de CyberGems en Acerca de y en el menú de la bandeja."),
+        ["SuiteSuggestionsDesc"] = ("Show the CyberGems suite in About and the tray menu.", "Muestra la suite de CyberGems en Acerca de y en el menú de la bandeja."),
         ["MoreFromCyberGems"] = ("More from CyberGems", "Más de CyberGems"),
         ["SuiteMoreOnline"] = ("More details online...", "Más detalles online..."),
         ["GlobalHotkeyTitle"] = ("Global Hotkey", "Atajo de teclado global"),

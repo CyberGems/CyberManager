@@ -317,36 +317,62 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel x:Name="BrandingPanel"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                            IsHitTestVisible="True"
-                            Cursor="Hand">
-                    <Image Source="pack://application:,,,/Assets/CyberManager.png"
-                           Width="24"
-                           Height="24"
-                           Stretch="Uniform"
-                           RenderOptions.BitmapScalingMode="HighQuality"
-                           Margin="0,0,8,0"/>
-                    <TextBlock Text="CyberManager"
-                               Foreground="{DynamicResource TextBrush}"
-                               FontSize="14"
-                               FontWeight="Bold"
-                               VerticalAlignment="Center"/>
-                    <Border Background="{DynamicResource CardSecondaryBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="5"
-                            Padding="5,1"
-                            Margin="8,0,0,0"
-                            VerticalAlignment="Center">
-                        <TextBlock x:Name="EngineBadgeText"
-                                   Text="NT ENGINE"
-                                   Foreground="{DynamicResource AccentBrush}"
-                                   FontSize="8.5"
-                                   FontWeight="Bold"/>
-                    </Border>
-                </StackPanel>
+                <!-- Same affordance as the full titlebar branding: hover fades in a soft pill and a
+                     plain click opens the About tab (in full mode), while a drag moves the window. -->
+                <Border x:Name="BrandingPanel"
+                        Background="Transparent"
+                        CornerRadius="6"
+                        Padding="6,2"
+                        Margin="-6,0,0,0"
+                        VerticalAlignment="Center"
+                        IsHitTestVisible="True"
+                        Cursor="Hand">
+                    <Grid>
+                        <Border x:Name="BrandingHoverOverlay" Background="{DynamicResource HeaderBgBrush}" CornerRadius="6" Opacity="0" IsHitTestVisible="False"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="pack://application:,,,/Assets/CyberManager.png"
+                                   Width="24"
+                                   Height="24"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Margin="0,0,8,0"/>
+                            <TextBlock Text="CyberManager"
+                                       Foreground="{DynamicResource TextBrush}"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       VerticalAlignment="Center"/>
+                            <Border Background="{DynamicResource CardSecondaryBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="5"
+                                    Padding="5,1"
+                                    Margin="8,0,0,0"
+                                    VerticalAlignment="Center">
+                                <TextBlock x:Name="EngineBadgeText"
+                                           Text="NT ENGINE"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           FontSize="8.5"
+                                           FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="BrandingHoverOverlay" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.15"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                        <EventTrigger RoutedEvent="MouseLeave">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetName="BrandingHoverOverlay" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
+                </Border>
 
                 <StackPanel x:Name="CompactMetricsPanel"
                             Grid.Column="1"

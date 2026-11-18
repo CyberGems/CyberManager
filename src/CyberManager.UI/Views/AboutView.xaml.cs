@@ -3,18 +3,24 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
-using CyberManager.Common.Settings;
+using CyberManager.UI.Dialogs;
 using CyberManager.UI.Services;
 
-namespace CyberManager.UI.Dialogs;
+namespace CyberManager.UI.Views;
 
-public partial class AboutWindow : Window, IModalAttentionWindow
+/// <summary>
+/// About surface hosted as its own main-window tab (replaces the former About dialog).
+/// Identity and description, update checking and downloading, the sister-app row and the
+/// external-links footer all live here.
+/// </summary>
+public partial class AboutView : UserControl
 {
     private const string RepoUrl = "https://github.com/CyberGems/CyberManager";
     private const string WebsiteUrl = "https://cybergems.org";
@@ -22,44 +28,26 @@ public partial class AboutWindow : Window, IModalAttentionWindow
     private const string DonateUrl = "https://github.com/CyberGems/CyberManager#%EF%B8%8F-donate";
 
     private const double SuiteIdleOpacity = 0.7;
-    private const double MonitorEdgeMargin = 16;
 
     private bool _suppressAutoCheckUpdateChange;
-    private DateTime _lastAttentionTime = DateTime.MinValue;
     private bool _suiteBuilt;
     private DispatcherTimer? _diagTipTimer;
 
-    public void TriggerAttention()
-    {
-        ModalAttentionHelper.Trigger(this, OuterBorder, WindowScale, WindowGlow, ref _lastAttentionTime);
-    }
+    private Window? OwnerWindow => Window.GetWindow(this);
 
-    public AboutWindow()
+    public AboutView()
     {
         InitializeComponent();
-        Icon = AppIconHelper.CreateManagerImageSource(64) as System.Windows.Media.ImageSource;
-        CyberManagerWindowChrome.Apply(this, 12);
-        SourceInitialized += AboutWindow_SourceInitialized;
+    }
+
+    public void Activate()
+    {
         LoadContent();
     }
 
-    private void AboutWindow_SourceInitialized(object? sender, EventArgs e)
+    public void Deactivate()
     {
-        var workArea = MonitorPlacement.GetNearestWorkArea(Owner ?? this);
-        if (workArea.Width <= 0 || workArea.Height <= 0)
-            return;
-
-        var maxWidth = Math.Max(1, workArea.Width - MonitorEdgeMargin * 2);
-        var maxHeight = Math.Max(1, workArea.Height - MonitorEdgeMargin * 2);
-
-        // Lower the minimums before assigning maximums so even very small work areas
-        // can constrain the window without violating WPF's Min/Max size relationship.
-        MinWidth = Math.Min(MinWidth, maxWidth);
-        MinHeight = Math.Min(MinHeight, maxHeight);
-        MaxWidth = maxWidth;
-        MaxHeight = maxHeight;
-        Width = Math.Min(Width, maxWidth);
-        Height = Math.Min(Height, maxHeight);
+        _diagTipTimer?.Stop();
     }
 
     private void LoadContent()
@@ -70,7 +58,6 @@ public partial class AboutWindow : Window, IModalAttentionWindow
             AutoCheckUpdateCheck.IsChecked = App.Settings.AutoCheckForUpdates;
             RefreshLocalization();
             EnsureSuiteApps();
-            ApplySuiteVisibility();
         }
         finally
         {
@@ -81,7 +68,6 @@ public partial class AboutWindow : Window, IModalAttentionWindow
     public void RefreshLocalization()
     {
         var es = Strings.Current == Lang.Es;
-        Title = $"{Strings.T("AboutSubtitle")} ᐧ CyberManager";
         AboutTitleText.Text = $"{Strings.T("AboutSubtitle")} ᐧ CyberManager";
         var currentVerLabel = UpdateService.GetCurrentVersionLabel();
         AboutVersionText.Text = (es ? "Versión " : "Version ") + currentVerLabel;
@@ -91,7 +77,10 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         AutoUpdateDescLbl.Text = Strings.T("AutoUpdateDesc");
         CheckUpdateTitleLbl.Text = Strings.T("CheckUpdatesAction");
         CheckUpdateDescLbl.Text = Strings.T("CheckUpdatesDesc");
-        UpdateBtn.Content = Strings.T("CheckUpdates");
+        if (UpdateBtn.IsEnabled)
+        {
+            UpdateBtn.Content = Strings.T("CheckUpdates");
+        }
         AboutFooterCopyright.Text = Strings.T("Copyright");
         AboutFooterCopyright.ToolTip = Strings.T("Website");
         AboutFooterWebsiteBtn.ToolTip = Strings.T("Website");
@@ -130,7 +119,7 @@ public partial class AboutWindow : Window, IModalAttentionWindow
             if (result.IsUpdateAvailable)
             {
                 var choice = ConfirmDialog.ShowUpdate(
-                    this, UpdateService.GetCurrentVersionLabel(), result.LatestVersionLabel);
+                    OwnerWindow, UpdateService.GetCurrentVersionLabel(), result.LatestVersionLabel);
 
                 if (choice)
                 {
@@ -140,7 +129,7 @@ public partial class AboutWindow : Window, IModalAttentionWindow
             else
             {
                 ConfirmDialog.Show(
-                    this,
+                    OwnerWindow,
                     Strings.T("CheckUpdatesAction"),
                     result.StatusMessage,
                     Strings.T("Ok"),
@@ -153,7 +142,7 @@ public partial class AboutWindow : Window, IModalAttentionWindow
             UpdateBtn.IsEnabled = true;
             UpdateBtn.Content = Strings.T("CheckUpdates");
             ConfirmDialog.Show(
-                this,
+                OwnerWindow,
                 Strings.T("CheckUpdatesAction"),
                 ex.Message,
                 Strings.T("Ok"),
@@ -191,7 +180,7 @@ public partial class AboutWindow : Window, IModalAttentionWindow
             UpdateProgressText.Text = Strings.T("DownloadComplete");
 
             ConfirmDialog.Show(
-                this,
+                OwnerWindow,
                 Strings.T("DownloadComplete"),
                 Strings.T("DownloadCompleteDesc"),
                 Strings.T("Ok"),
@@ -206,7 +195,7 @@ public partial class AboutWindow : Window, IModalAttentionWindow
             UpdateBtn.IsEnabled = true;
 
             var errorChoice = ConfirmDialog.Show(
-                this,
+                OwnerWindow,
                 Strings.T("DownloadFailed"),
                 $"{ex.Message}\n\n{(Strings.Current == Lang.Es ? "¿Deseas abrir la página de releases de GitHub en el navegador?" : "Would you like to open the GitHub releases page in your browser?")}",
                 Strings.T("OpenBrowser"),
@@ -218,75 +207,6 @@ public partial class AboutWindow : Window, IModalAttentionWindow
                 OpenUrl(result.ReleaseUrl);
             }
         }
-    }
-
-    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ButtonState == MouseButtonState.Pressed)
-        {
-            DragMove();
-        }
-    }
-
-    private void Close_Click(object sender, RoutedEventArgs e) => Close();
-
-    private void AboutFooterWebsite_Click(object sender, MouseButtonEventArgs e)
-    {
-        e.Handled = true;
-        OpenUrl(WebsiteUrl);
-    }
-
-    private void AboutFooterDocs_Click(object sender, MouseButtonEventArgs e)
-    {
-        e.Handled = true;
-        OpenUrl(WikiUrl);
-    }
-
-    private void AboutFooterGithub_Click(object sender, MouseButtonEventArgs e)
-    {
-        e.Handled = true;
-        OpenUrl(RepoUrl);
-    }
-
-    private void AboutFooterIssues_Click(object sender, MouseButtonEventArgs e)
-    {
-        e.Handled = true;
-        OpenUrl($"{RepoUrl}/issues");
-    }
-
-    private void AboutFooterReleases_Click(object sender, MouseButtonEventArgs e)
-    {
-        e.Handled = true;
-        OpenUrl($"{RepoUrl}/releases");
-    }
-
-    private void AboutFooterDonate_Click(object sender, MouseButtonEventArgs e)
-    {
-        e.Handled = true;
-        OpenUrl(DonateUrl);
-    }
-
-    private void AboutFooterDiag_Click(object sender, MouseButtonEventArgs e)
-    {
-        e.Handled = true;
-        try
-        {
-            Clipboard.SetText(BuildDiagnosticReport());
-        }
-        catch
-        {
-            return;
-        }
-
-        AboutFooterDiagBtn.ToolTip = Strings.T("DiagnosticInfoCopied");
-        _diagTipTimer?.Stop();
-        _diagTipTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.2) };
-        _diagTipTimer.Tick += (_, _) =>
-        {
-            _diagTipTimer?.Stop();
-            AboutFooterDiagBtn.ToolTip = Strings.T("DiagnosticInfo");
-        };
-        _diagTipTimer.Start();
     }
 
     private void SuiteMoreBtn_Click(object sender, RoutedEventArgs e) => OpenUrl(WebsiteUrl);
@@ -382,14 +302,24 @@ public partial class AboutWindow : Window, IModalAttentionWindow
 
     private string BuildDiagnosticReport()
     {
-        var dpi = VisualTreeHelper.GetDpi(this);
+        var dpiLine = "Unknown";
+        try
+        {
+            if (OwnerWindow is { } win)
+            {
+                var dpi = VisualTreeHelper.GetDpi(win);
+                dpiLine = $"{SystemParameters.PrimaryScreenWidth:0}x{SystemParameters.PrimaryScreenHeight:0}, DPI {dpi.PixelsPerInchX:0} ({dpi.DpiScaleX * 100:0}%)";
+            }
+        }
+        catch { }
+
         return string.Join(Environment.NewLine,
             "CyberManager diagnostic report",
             "",
             $"- Version: {UpdateService.GetCurrentVersionLabel()}",
             $"- Install: {DescribeInstall()}",
             $"- OS: {RuntimeInformation.OSDescription}",
-            $"- Display: {SystemParameters.PrimaryScreenWidth:0}x{SystemParameters.PrimaryScreenHeight:0}, DPI {dpi.PixelsPerInchX:0} ({dpi.DpiScaleX * 100:0}%)",
+            $"- Display: {dpiLine}",
             $"- Language: {App.Settings.Language}",
             $"- Theme: {App.Settings.Theme}",
             $"- Check for updates on startup: {OnOff(App.Settings.AutoCheckForUpdates)}",
@@ -424,64 +354,44 @@ public partial class AboutWindow : Window, IModalAttentionWindow
         }
     }
 
-    private void AboutFooterCopyright_MouseEnter(object sender, MouseEventArgs e)
+    private void AboutFooterWebsite_Click(object sender, MouseButtonEventArgs e)
     {
-        AboutFooterCopyright.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, "TextBrush");
+        e.Handled = true;
+        OpenUrl(WebsiteUrl);
     }
 
-    private void AboutFooterCopyright_MouseLeave(object sender, MouseEventArgs e)
-    {
-        AboutFooterCopyright.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, "SubTextBrush");
-    }
+    private void AboutFooterWebsiteBtn_Click(object sender, RoutedEventArgs e) => OpenUrl(WebsiteUrl);
 
-    private void AboutFooterIcon_MouseEnter(object sender, MouseEventArgs e)
-    {
-        if (sender is not System.Windows.Controls.Border border) return;
-        border.SetResourceReference(System.Windows.Controls.Border.BackgroundProperty, "CardSecondaryBrush");
-        SetFooterIconAccent(border, primary: true);
-    }
+    private void AboutFooterDocs_Click(object sender, RoutedEventArgs e) => OpenUrl(WikiUrl);
 
-    private void AboutFooterIcon_MouseLeave(object sender, MouseEventArgs e)
-    {
-        if (sender is not System.Windows.Controls.Border border) return;
-        border.Background = System.Windows.Media.Brushes.Transparent;
-        SetFooterIconAccent(border, primary: false);
-    }
+    private void AboutFooterGithub_Click(object sender, RoutedEventArgs e) => OpenUrl(RepoUrl);
 
-    private void SetFooterIconAccent(System.Windows.Controls.Border border, bool primary)
+    private void AboutFooterIssues_Click(object sender, RoutedEventArgs e) => OpenUrl($"{RepoUrl}/issues");
+
+    private void AboutFooterReleases_Click(object sender, RoutedEventArgs e) => OpenUrl($"{RepoUrl}/releases");
+
+    private void AboutFooterDonate_Click(object sender, RoutedEventArgs e) => OpenUrl(DonateUrl);
+
+    private void AboutFooterDiag_Click(object sender, RoutedEventArgs e)
     {
-        var brushKey = primary ? "TextBrush" : "SubTextBrush";
-        if (border == AboutFooterWebsiteBtn)
+        try
         {
-            AboutFooterWebsiteIcon.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            Clipboard.SetText(BuildDiagnosticReport());
         }
-        else if (border == AboutFooterDocsBtn)
+        catch
         {
-            AboutFooterDocsBody.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
+            return;
         }
-        else if (border == AboutFooterGithubBtn)
+
+        AboutFooterDiagBtn.ToolTip = Strings.T("DiagnosticInfoCopied");
+        _diagTipTimer?.Stop();
+        _diagTipTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.2) };
+        _diagTipTimer.Tick += (_, _) =>
         {
-            AboutFooterGithubIcon.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, brushKey);
-        }
-        else if (border == AboutFooterIssuesBtn)
-        {
-            AboutFooterIssuesIcon1.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-            AboutFooterIssuesIcon2.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-            AboutFooterIssuesIcon3.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-            AboutFooterIssuesIcon4.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-            AboutFooterIssuesIcon5.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-        }
-        else if (border == AboutFooterReleasesBtn)
-        {
-            AboutFooterTagBody.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-            AboutFooterTagDot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, brushKey);
-        }
-        else if (border == AboutFooterDiagBtn)
-        {
-            AboutFooterDiagBody.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-            AboutFooterDiagClip.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-            AboutFooterDiagLines.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, brushKey);
-        }
+            _diagTipTimer?.Stop();
+            AboutFooterDiagBtn.ToolTip = Strings.T("DiagnosticInfo");
+        };
+        _diagTipTimer.Start();
     }
 
     private static void OpenUrl(string url)
