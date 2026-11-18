@@ -1968,6 +1968,7 @@ public partial class MainWindow : Window
         ContextCopyPathItem.IsEnabled = !batch && hasExecutablePath;
         ContextOpenFolderItem.IsEnabled = !batch && hasExecutablePath;
         ContextSearchOnlineItem.IsEnabled = !batch && !string.IsNullOrWhiteSpace(process.Name);
+        ContextCopyInfoItem.IsEnabled = !isExiting && !batch && !string.IsNullOrWhiteSpace(process.Name);
 
         if (batch)
         {
@@ -1979,6 +1980,7 @@ public partial class MainWindow : Window
             ContextCopyPathItem.ToolTip = tooltip;
             ContextOpenFolderItem.ToolTip = tooltip;
             ContextSearchOnlineItem.ToolTip = tooltip;
+            ContextCopyInfoItem.ToolTip = tooltip;
         }
         else
         {
@@ -1989,6 +1991,8 @@ public partial class MainWindow : Window
             ContextCopyPathItem.ToolTip = null;
             ContextOpenFolderItem.ToolTip = null;
             ContextSearchOnlineItem.ToolTip = null;
+            // Shortcut hint for the copy-summary action; the gesture is not shown anywhere else.
+            ContextCopyInfoItem.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("CopyProcessInfo"), KeyboardShortcuts.CopyProcessInfo);
         }
     }
 
@@ -3511,6 +3515,23 @@ public partial class MainWindow : Window
         catch { }
     }
 
+    private void CopyInfo_Click(object sender, RoutedEventArgs e)
+    {
+        var s = GetActionTarget(sender);
+        if (s == null) return;
+        CopyProcessInfoToClipboard(s);
+    }
+
+    private void CopyProcessInfoToClipboard(ProcessInfo s)
+    {
+        try
+        {
+            Clipboard.SetText(ProcessSummaryText.Build(s));
+            SetStatus(Strings.T("ProcessInfoCopied"));
+        }
+        catch { }
+    }
+
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
     {
         var s = GetActionTarget(sender);
@@ -3696,6 +3717,7 @@ public partial class MainWindow : Window
                 ContextPriorityBelowNormalItem.Header = Strings.T("PriorityBelowNormal");
                 ContextPriorityIdleItem.Header = Strings.T("PriorityIdle");
                 ContextCopyPathItem.Header = Strings.T("CopyPath");
+                ContextCopyInfoItem.Header = Strings.T("CopyProcessInfo");
                 ContextOpenFolderItem.Header = Strings.T("OpenFolder");
                 ContextSearchOnlineItem.Header = Strings.T("SearchOnline");
 
@@ -4050,6 +4072,16 @@ public partial class MainWindow : Window
                     e.Handled = true;
                     return;
                 }
+            }
+        }
+        else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.C)
+        {
+            // Ctrl+Shift+C copies the full process summary; plain Ctrl+C stays on the path.
+            if (Selected != null)
+            {
+                CopyProcessInfoToClipboard(Selected);
+                e.Handled = true;
+                return;
             }
         }
         else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)

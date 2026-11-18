@@ -1235,6 +1235,15 @@
                                                   HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                                         </MenuItem.Icon>
                                     </MenuItem>
+                                    <MenuItem x:Name="ContextCopyInfoItem" Header="Copy process information" Style="{StaticResource ModernMenuItem}" Click="CopyInfo_Click">
+                                        <MenuItem.Icon>
+                                            <Path Data="M10,8 H20 A2,2 0 0 1 22,10 V20 A2,2 0 0 1 20,22 H10 A2,2 0 0 1 8,20 V10 A2,2 0 0 1 10,8 Z M4,16 C2.9,16 2,15.1 2,14 V4 C2,2.9 2.9,2 4,2 H14 C15.1,2 16,2.9 16,4"
+                                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4"
+                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Width="14" Height="14" Stretch="Uniform"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
                                     <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
                                     <!-- Process Properties (Standard bottom location) -->
