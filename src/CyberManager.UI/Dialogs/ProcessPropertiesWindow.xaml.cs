@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using CyberManager.Common.I18n;
 using CyberManager.Common.Models;
 using CyberManager.UI.Services;
@@ -13,6 +14,9 @@ public partial class ProcessPropertiesWindow : Window
 {
     private readonly ProcessInfo _process;
     private readonly ProcessMetadata _metadata;
+    private DispatcherTimer? _copiedTipTimer;
+    private Button? _copiedTipButton;
+    private string? _copiedTipBase;
 
     public ProcessPropertiesWindow(ProcessInfo process)
     {
@@ -60,6 +64,11 @@ public partial class ProcessPropertiesWindow : Window
         CloseFooterText.Text = Strings.T("Close");
         AutomationProperties.SetName(CloseButton, Strings.T("Close"));
         AutomationProperties.SetName(CloseFooterButton, Strings.T("Close"));
+
+        CopyPathButton.ToolTip = Strings.T("CopyPath");
+        AutomationProperties.SetName(CopyPathButton, Strings.T("CopyPath"));
+        CopyInfoButton.ToolTip = Strings.T("CopyProcessInfo");
+        AutomationProperties.SetName(CopyInfoButton, Strings.T("CopyProcessInfo"));
     }
 
     private void PopulateValues()
@@ -70,6 +79,7 @@ public partial class ProcessPropertiesWindow : Window
         ImageNameValue.Text = ValueOrUnknown(_process.Name, unknown);
         PidValue.Text = _process.Pid > 0 ? _process.Pid.ToString(CultureInfo.CurrentCulture) : unknown;
         PathValue.Text = ValueOrUnknown(_process.ExePath, unknown);
+        CopyPathButton.IsEnabled = !string.IsNullOrWhiteSpace(_process.ExePath);
 
         CompanyValue.Text = ValueOrUnknown(_metadata.CompanyName, unknown);
         ProductValue.Text = ValueOrUnknown(_metadata.ProductName, unknown);
@@ -108,6 +118,104 @@ public partial class ProcessPropertiesWindow : Window
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void CopyPathButton_Click(object sender, RoutedEventArgs e)
+    {
+        var path = _process.ExePath;
+        if (string.IsNullOrWhiteSpace(path)) return;
+
+        try
+        {
+            Clipboard.SetText(path.Trim());
+        }
+        catch
+        {
+            // Clipboard can be transiently locked by another process; ignore.
+            return;
+        }
+
+        ShowCopiedFeedback(CopyPathButton, Strings.T("CopyPath"), Strings.T("PathCopied"));
+    }
+
+    private void CopyInfoButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Clipboard.SetText(BuildProcessSummary());
+        }
+        catch
+        {
+            // Clipboard can be transiently locked by another process; ignore.
+            return;
+        }
+
+        ShowCopiedFeedback(CopyInfoButton, Strings.T("CopyProcessInfo"), Strings.T("ProcessInfoCopied"));
+    }
+
+    private void ShowCopiedFeedback(Button button, string baseTooltip, string copiedTooltip)
+    {
+        RestoreCopiedTooltip();
+        _copiedTipButton = button;
+        _copiedTipBase = baseTooltip;
+        button.ToolTip = copiedTooltip;
+
+        _copiedTipTimer ??= CreateCopiedTipTimer();
+        _copiedTipTimer.Start();
+    }
+
+    private DispatcherTimer CreateCopiedTipTimer()
+    {
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.2) };
+        timer.Tick += (_, _) => RestoreCopiedTooltip();
+        return timer;
+    }
+
+    private void RestoreCopiedTooltip()
+    {
+        _copiedTipTimer?.Stop();
+        if (_copiedTipButton != null && _copiedTipBase != null)
+            _copiedTipButton.ToolTip = _copiedTipBase;
+        _copiedTipButton = null;
+        _copiedTipBase = null;
+    }
+
+    /// <summary>Builds a plain-text summary from the values currently shown in the window.</summary>
+    private string BuildProcessSummary()
+    {
+        var lines = new List<string>
+        {
+            _process.Pid > 0
+                ? $"{Strings.T("ProcessProperties")}: {_process.Name} (PID {_process.Pid})"
+                : $"{Strings.T("ProcessProperties")}: {_process.Name}"
+        };
+
+        AddSummaryRow(lines, FriendlyNameLabel, FriendlyNameValue);
+        AddSummaryRow(lines, ImageNameLabel, ImageNameValue);
+        AddSummaryRow(lines, PidLabel, PidValue);
+        AddSummaryRow(lines, PathLabel, PathValue);
+        AddSummaryRow(lines, CompanyLabel, CompanyValue);
+        AddSummaryRow(lines, ProductLabel, ProductValue);
+        AddSummaryRow(lines, VersionLabel, VersionValue);
+        AddSummaryRow(lines, OriginalFilenameLabel, OriginalFilenameValue);
+        AddSummaryRow(lines, UserLabel, UserValue);
+        AddSummaryRow(lines, StatusLabel, StatusValue);
+        AddSummaryRow(lines, StartTimeLabel, StartTimeValue);
+        AddSummaryRow(lines, CpuLabel, CpuValue);
+        AddSummaryRow(lines, MemoryLabel, MemoryValue);
+        AddSummaryRow(lines, ThreadsLabel, ThreadsValue);
+        AddSummaryRow(lines, PriorityLabel, PriorityValue);
+        AddSummaryRow(lines, ParentProcessLabel, ParentProcessValue);
+        AddSummaryRow(lines, WindowTitleLabel, WindowTitleValue);
+        AddSummaryRow(lines, InstancesLabel, InstancesValue);
+
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    private static void AddSummaryRow(List<string> lines, TextBlock label, TextBlock value)
+    {
+        if (!string.IsNullOrWhiteSpace(label.Text) && !string.IsNullOrWhiteSpace(value.Text))
+            lines.Add($"{label.Text}: {value.Text}");
+    }
 
     private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {

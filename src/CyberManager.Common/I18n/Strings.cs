@@ -52,6 +52,8 @@ public static class Strings
         ["Resume"] = ("Resume", "Reanudar"),
         ["Restart"] = ("Restart Process", "Reiniciar proceso"),
         ["CopyPath"] = ("Copy path", "Copiar ruta"),
+        ["CopyProcessInfo"] = ("Copy process information", "Copiar información del proceso"),
+        ["ProcessInfoCopied"] = ("Process info copied to clipboard!", "¡Información del proceso copiada al portapapeles!"),
         ["OpenFolder"] = ("Open folder", "Abrir carpeta"),
         ["SearchOnline"] = ("Search online", "Buscar en línea"),
         ["Priority"] = ("Priority", "Prioridad"),
