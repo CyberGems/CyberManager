@@ -9,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -48,8 +47,6 @@ public partial class MainWindow : Window
         TabProcessesBtn.IsChecked = tab == MainTab.Processes;
         TabPerformanceBtn.IsChecked = tab == MainTab.Performance;
         TabStartupBtn.IsChecked = tab == MainTab.Startup;
-        TabSettingsBtn.IsChecked = tab == MainTab.Settings;
-        TabAboutBtn.IsChecked = tab == MainTab.About;
 
         ProcessesTabContent.Visibility = tab == MainTab.Processes ? Visibility.Visible : Visibility.Collapsed;
         PerformanceTabContent.Visibility = tab == MainTab.Performance ? Visibility.Visible : Visibility.Collapsed;
@@ -96,23 +93,6 @@ public partial class MainWindow : Window
         {
             AboutTabContent.Deactivate();
         }
-
-        UpdateBrandingActiveState();
-    }
-
-    /// <summary>
-    /// Lights the branding up while the About tab is open: the branding is the tab's other
-    /// entry point, so it carries the active tint the suite uses on CyberWall.
-    /// </summary>
-    private void UpdateBrandingActiveState()
-    {
-        var active = CurrentTab == MainTab.About;
-        FullBrandingActiveOverlay.BeginAnimation(OpacityProperty, new DoubleAnimation
-        {
-            To = active ? 1 : 0,
-            Duration = TimeSpan.FromMilliseconds(200),
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-        });
     }
 
     private void NavigateToTab(MainTab tab, string? subTab = null)
@@ -120,6 +100,12 @@ public partial class MainWindow : Window
         if (_isCompactMode)
         {
             ApplyViewMode(compact: false, restoreBounds: false);
+        }
+
+        // Remember the last regular tab so the branding can toggle back out of About.
+        if (tab != MainTab.About)
+        {
+            _previousTab = tab;
         }
 
         SelectTab(tab, subTab);
@@ -236,6 +222,10 @@ public partial class MainWindow : Window
 
     private string _sortColumn = "CpuPercent";
     private ListSortDirection _sortDirection = ListSortDirection.Descending;
+
+    // Last non-About tab the user visited. The branding toggles between About and this tab,
+    // CyberWall style, so a second branding click never traps the user on About.
+    private MainTab _previousTab = MainTab.Processes;
 
     private sealed record ProcessIdentity(int Pid, DateTime StartTime);
 
@@ -2205,7 +2195,16 @@ public partial class MainWindow : Window
         var delta = e.GetPosition(this) - _brandingPressPoint;
         if (Math.Abs(delta.X) < BrandingClickThreshold && Math.Abs(delta.Y) < BrandingClickThreshold)
         {
-            About_Click(this, e);
+            // CyberWall-style toggle: the branding flips between About and the tab the user
+            // came from, so it stays the single titlebar affordance for About.
+            if (CurrentTab == MainTab.About)
+            {
+                NavigateToTab(_previousTab);
+            }
+            else
+            {
+                NavigateToTab(MainTab.About);
+            }
         }
     }
 
@@ -3601,13 +3600,11 @@ public partial class MainWindow : Window
         TabProcessesText.Text = Strings.T("NavProcesses");
         TabPerformanceText.Text = Strings.T("NavPerformance");
         TabStartupText.Text = Strings.T("NavStartup");
-        TabSettingsText.Text = Strings.T("NavSettings");
-        TabAboutText.Text = Strings.T("AboutSubtitle");
         TabProcessesBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavProcessesTip"), KeyboardShortcuts.Processes);
         TabPerformanceBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavPerformanceTip"), KeyboardShortcuts.Performance);
         TabStartupBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavStartupTip"), KeyboardShortcuts.Startup);
-        TabSettingsBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavSettingsTip"), KeyboardShortcuts.SettingsTooltip);
-        TabAboutBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("About"), KeyboardShortcuts.About);
+        SettingsBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("NavSettingsTip"), KeyboardShortcuts.SettingsTooltip);
+        AutomationProperties.SetName(SettingsBtn, Strings.T("NavSettings"));
     }
 
     private void ApplyTheme()
