@@ -8,3 +8,13 @@ on:
 jobs:
   tray-tooltip:
     uses: CyberGems/.github/.github/workflows/tray-tooltip-check.yml@main
+
+  tray-tooltip-tests:
+    name: Tray tooltip tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test tests/CyberManager.Tests --filter FullyQualifiedName~TrayTooltipFormatterTests
