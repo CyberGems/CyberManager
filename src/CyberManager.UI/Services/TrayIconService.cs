@@ -542,17 +542,10 @@ public sealed class TrayIconService : IDisposable
     /// </summary>
     private string BuildTooltip()
     {
-        string text;
-        if (_updateVersionLabel is not null)
-        {
-            text = $"CyberManager · {Strings.T("UpdateAvailable", _updateVersionLabel)}";
-        }
-        else
-        {
-            var hotkey = App.Settings.GlobalHotkey?.Trim();
-            text = string.IsNullOrEmpty(hotkey) ? "CyberManager" : $"CyberManager · {hotkey}";
-        }
-        return text.Length > 63 ? text[..62] + "…" : text;
+        string? segment = _updateVersionLabel is not null
+            ? Strings.T("UpdateAvailable", _updateVersionLabel)
+            : App.Settings.GlobalHotkey;
+        return TrayTooltipFormatter.Format(segment);
     }
 
     private void ApplyTooltip()
