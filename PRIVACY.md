@@ -12,7 +12,7 @@ These are all the connections CyberManager makes by itself. None of them sends y
 |---|---|---|---|
 | On startup | `api.github.com/repos/CyberGems/CyberManager/releases/latest` | Check for a newer version | `AutoCheckForUpdates` |
 
-Links you open yourself are not part of this list.
+A link you click inside the app, or a web page you open in your browser, is your own action and is not a connection the app makes by itself.
 
 ## What CyberManager reads on your PC
 

@@ -12,7 +12,7 @@ Estas son todas las conexiones que CyberManager hace por su cuenta. Ninguna env�
 |---|---|---|---|
 | Al iniciar | `api.github.com/repos/CyberGems/CyberManager/releases/latest` | Consultar una versión nueva | `AutoCheckForUpdates` |
 
-Los enlaces que abres tú no están en esta lista.
+Un enlace que pulsas dentro de la app o una página web que abres en tu navegador es una acción tuya, no una conexión que la app haga por su cuenta.
 
 ## Qué lee CyberManager de tu PC
 
