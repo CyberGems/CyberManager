@@ -60,7 +60,7 @@ public sealed class AppSettings
     /// </summary>
     public bool ShowSuiteRecommendations { get; set; } = true;
     public string GlobalHotkey { get; set; } = "Alt+Shift+M";
-    public string WidgetHotkey { get; set; } = "Alt+Shift+W";
+    public string WidgetHotkey { get; set; } = "Alt+Shift+F1";
     public bool WidgetVisible { get; set; }
     public bool WidgetAlwaysOnTop { get; set; } = true;
     public bool WidgetBoundsSaved { get; set; }
@@ -114,6 +114,8 @@ public sealed class AppSettings
                     File.ReadAllText(sourcePath),
                     JsonOptions) ?? new();
                 settings.Normalize();
+                if (ApplyWidgetHotkeyMigration(settings))
+                    settings.Save();
                 return settings;
             }
         }
@@ -126,6 +128,22 @@ public sealed class AppSettings
         var sys = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "es" ? Lang.Es : Lang.En;
         s.Language = sys;
         return s;
+    }
+
+    /// <summary>Widget shortcut that older releases shipped as the default.</summary>
+    internal const string LegacyWidgetHotkey = "Alt+Shift+W";
+
+    /// <summary>
+    /// Moves stored settings off the legacy widget shortcut once, so the new default takes
+    /// effect on existing installs instead of keeping a key now used by CyberWall.
+    /// </summary>
+    public static bool ApplyWidgetHotkeyMigration(AppSettings settings)
+    {
+        if (!string.Equals(settings.WidgetHotkey, LegacyWidgetHotkey, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        settings.WidgetHotkey = new AppSettings().WidgetHotkey;
+        return true;
     }
 
     public void Save()

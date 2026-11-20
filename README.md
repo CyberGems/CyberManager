@@ -200,7 +200,7 @@ CyberManager is a compact window you can toggle from any application with `Alt+S
 
 1. Press `Alt+Shift+M` and click the **CPU** column to sort processes by usage.
 2. Check the heatmap colours and the sparkline at the bottom to tell a spike from a constant drain.
-3. Press `Alt+Shift+W` for the floating metrics widget, or `Ctrl+1` / `Ctrl+2` / `Ctrl+3` to switch views.
+3. Press `Alt+Shift+F1` for the floating metrics widget, or `Ctrl+1` / `Ctrl+2` / `Ctrl+3` to switch views.
 
 Red rows mean high usage at a glance. The widget hotkey is configurable and `Ctrl+Shift+M` toggles compact mode.
 
@@ -247,7 +247,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | Key | Action | Scope |
 |---|---|---|
 | `Alt+Shift+M` | Toggle CyberManager | Global |
-| `Alt+Shift+W` | Show/hide floating metrics widget (configurable) | Global |
+| `Alt+Shift+F1` | Show/hide floating metrics widget (configurable) | Global |
 | `Ctrl+Shift+M` | Toggle compact mode | Application |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Switch to Processes / Performance / Settings | Application |
 | `Ctrl+4` | Open Performance → Disks | Application / Widget |

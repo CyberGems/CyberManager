@@ -19,7 +19,7 @@ public class GlobalHotkeyServiceTests
         Assert.True(
             GlobalHotkeyService.TryParseHotkey(new AppSettings().WidgetHotkey, out var modifiers, out var virtualKey));
         Assert.True(modifiers != 0);
-        Assert.Equal((uint)'W', virtualKey);
+        Assert.Equal(0x70u, virtualKey);
     }
 
     [Fact]

@@ -184,7 +184,7 @@ public class AppSettingsTests
         Assert.True(settings.AutoCheckForUpdates);
         Assert.True(settings.ShowSuiteRecommendations);
         Assert.Equal("Alt+Shift+M", settings.GlobalHotkey);
-        Assert.Equal("Alt+Shift+W", settings.WidgetHotkey);
+        Assert.Equal("Alt+Shift+F1", settings.WidgetHotkey);
         Assert.False(settings.WidgetVisible);
         Assert.True(settings.WidgetAlwaysOnTop);
         Assert.False(settings.WidgetBoundsSaved);
@@ -196,11 +196,30 @@ public class AppSettingsTests
     }
 
     [Fact]
+    public void AppSettings_LegacyWidgetHotkey_MigratesToTheNewDefault()
+    {
+        var settings = new AppSettings { WidgetHotkey = "Alt+Shift+W" };
+
+        Assert.True(AppSettings.ApplyWidgetHotkeyMigration(settings));
+        Assert.Equal("Alt+Shift+F1", settings.WidgetHotkey);
+        Assert.False(AppSettings.ApplyWidgetHotkeyMigration(settings));
+    }
+
+    [Fact]
+    public void AppSettings_CustomWidgetHotkey_IsNotMigrated()
+    {
+        var settings = new AppSettings { WidgetHotkey = "Ctrl+Shift+W" };
+
+        Assert.False(AppSettings.ApplyWidgetHotkeyMigration(settings));
+        Assert.Equal("Ctrl+Shift+W", settings.WidgetHotkey);
+    }
+
+    [Fact]
     public void AppSettings_WidgetDefaults_StartHiddenAndPinned()
     {
         var settings = new AppSettings();
 
-        Assert.Equal("Alt+Shift+W", settings.WidgetHotkey);
+        Assert.Equal("Alt+Shift+F1", settings.WidgetHotkey);
         Assert.False(settings.WidgetVisible);
         Assert.True(settings.WidgetAlwaysOnTop);
         Assert.False(settings.WidgetBoundsSaved);

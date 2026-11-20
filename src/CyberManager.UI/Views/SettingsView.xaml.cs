@@ -15,7 +15,7 @@ namespace CyberManager.UI.Views;
 public partial class SettingsView : UserControl
 {
     private const string DefaultGlobalHotkey = "Alt+Shift+M";
-    private const string DefaultWidgetHotkey = "Alt+Shift+W";
+    private const string DefaultWidgetHotkey = "Alt+Shift+F1";
 
     public event Action? SettingsChanged;
     public event Action? DefaultsReset;

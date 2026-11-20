@@ -200,7 +200,7 @@ CyberManager es una ventana compacta que puedes mostrar u ocultar desde cualquie
 
 1. Pulsa `Alt+Shift+M` y haz clic en la columna **CPU** para ordenar los procesos por uso.
 2. Mira los colores del mapa de calor y la línea de tendencia inferior para distinguir un pico de un consumo constante.
-3. Pulsa `Alt+Shift+W` para el widget flotante de métricas, o `Ctrl+1` / `Ctrl+2` / `Ctrl+3` para cambiar de vista.
+3. Pulsa `Alt+Shift+F1` para el widget flotante de métricas, o `Ctrl+1` / `Ctrl+2` / `Ctrl+3` para cambiar de vista.
 
 Las filas rojas indican uso alto de un vistazo. El atajo del widget es configurable y `Ctrl+Shift+M` activa el modo compacto.
 
@@ -247,7 +247,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | Tecla | Acción | Ámbito |
 |---|---|---|
 | `Alt+Shift+M` | Mostrar/ocultar CyberManager | Global |
-| `Alt+Shift+W` | Mostrar/ocultar el widget de métricas (configurable) | Global |
+| `Alt+Shift+F1` | Mostrar/ocultar el widget de métricas (configurable) | Global |
 | `Ctrl+Shift+M` | Alternar el modo compacto | Aplicación |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Cambiar a Procesos / Rendimiento / Configuración | Aplicación |
 | `Ctrl+4` | Abrir Rendimiento → Discos | Aplicación / Widget |
