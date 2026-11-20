@@ -8,12 +8,15 @@ internal static class KeyboardShortcuts
     internal const string Disks = "Ctrl+4";
     internal const string Startup = "Ctrl+5";
     internal const string SettingsTooltip = "Ctrl+3 / Ctrl+,";
-    internal const string Update = "Ctrl+Shift+U";
-    internal const string ToggleCompact = "Ctrl+Shift+M";
+    internal const string Update = "Alt+U";
+    internal const string ToggleCompact = "Alt+C";
     internal const string More = "Alt+M";
-    internal const string TogglePin = "Ctrl+Shift+P";
-    internal const string Minimize = "Ctrl+Alt+Down";
-    internal const string Maximize = "Ctrl+Alt+Up";
+    internal const string TogglePin = "Alt+P";
+    // The Windows gestures: Win+Down minimizes, Win+Up maximizes or restores,
+    // and Win+Left/Right snap. The app repeats Up/Down only when the shell does
+    // not take them, which is the case for this window's transparent surface.
+    internal const string Minimize = "Win+Down";
+    internal const string Maximize = "Win+Up";
     internal const string Close = "Alt+F4";
 
     internal const string Refresh = "F5";

@@ -687,7 +687,7 @@
                                         </MenuItem.Icon>
                                     </MenuItem>
 
-                                    <MenuItem x:Name="MoreCompactItem" Header="Compact mode" InputGestureText="Ctrl+Shift+M" Style="{StaticResource ModernMenuItem}" Click="FullModeToggle_Click">
+                                    <MenuItem x:Name="MoreCompactItem" Header="Compact mode" InputGestureText="Alt+C" Style="{StaticResource ModernMenuItem}" Click="FullModeToggle_Click">
                                         <MenuItem.Icon>
                                             <Grid Width="13" Height="13">
                                                 <Rectangle RadiusX="3.5" RadiusY="3.5" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.3" Fill="Transparent"/>
@@ -733,7 +733,7 @@
 
                                     <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
-                                    <MenuItem x:Name="MoreCheckUpdatesItem" Header="Check for Update..." InputGestureText="Ctrl+Shift+U" Style="{StaticResource ModernMenuItem}" Click="MoreCheckUpdates_Click">
+                                    <MenuItem x:Name="MoreCheckUpdatesItem" Header="Check for Update..." InputGestureText="Alt+U" Style="{StaticResource ModernMenuItem}" Click="MoreCheckUpdates_Click">
                                         <MenuItem.Icon>
                                             <Path Data="M 12 4 V 15 M 7 10 L 12 15 L 17 10 M 5 20 H 19"
                                                   Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"

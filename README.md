@@ -204,7 +204,7 @@ CyberManager is a compact window you can toggle from any application with `Alt+S
 2. Check the heatmap colours and the sparkline at the bottom to tell a spike from a constant drain.
 3. Press `Alt+Shift+F1` for the floating metrics widget, or `Ctrl+1` / `Ctrl+2` / `Ctrl+3` to switch views.
 
-Red rows mean high usage at a glance. The widget hotkey is configurable and `Ctrl+Shift+M` toggles compact mode.
+Red rows mean high usage at a glance. The widget hotkey is configurable and `Alt+C` toggles compact mode.
 
 See [How Do You Use CyberManager?](https://github.com/CyberGems/CyberManager/wiki/How-Do-You-Use) for everyday examples and the full guides.
 
@@ -250,17 +250,17 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 |---|---|---|
 | `Alt+Shift+M` | Toggle CyberManager | Global |
 | `Alt+Shift+F1` | Show/hide floating metrics widget (configurable) | Global |
-| `Ctrl+Shift+M` | Toggle compact mode | Application |
+| `Alt+C` | Toggle compact mode | Application |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Switch to Processes / Performance / Settings | Application |
 | `Ctrl+4` | Open Performance → Disks | Application / Widget |
 | `Ctrl+N` | Run new task, with recent-task history | Application |
 | `F1` | Open About (also available from branding) | Application |
 | `Alt+M` | Open More and focus its first item; navigate with arrows | Application |
 | `Ctrl+,` | Open Configuration | Application |
-| `Ctrl+Shift+U` | Check for updates / open available update | Application |
-| `Ctrl+Shift+P` | Toggle always on top | Application |
-| `Ctrl+Alt+Down` / `Ctrl+Alt+Up` | Minimize / toggle maximize | Application |
-| `Alt+F4` | Close window, following the configured tray/exit behavior | Application |
+| `Alt+U` | Check for updates / open available update | Application |
+| `Alt+P` | Toggle always on top | Application |
+| `Win+Down` / `Win+Up` | Minimize / maximize or restore (Windows gestures) | Windows |
+| `Alt+F4` | Close the app, even when the X is set to minimize to the tray | Application |
 | `Ctrl+F` / `Ctrl+E` | Focus search box | Application |
 | `Ctrl+G` | Toggle process grouping | Application |
 | `Ctrl+I` | Open System Information | Application |

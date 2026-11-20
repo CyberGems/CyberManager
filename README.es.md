@@ -204,7 +204,7 @@ CyberManager es una ventana compacta que puedes mostrar u ocultar desde cualquie
 2. Mira los colores del mapa de calor y la línea de tendencia inferior para distinguir un pico de un consumo constante.
 3. Pulsa `Alt+Shift+F1` para el widget flotante de métricas, o `Ctrl+1` / `Ctrl+2` / `Ctrl+3` para cambiar de vista.
 
-Las filas rojas indican uso alto de un vistazo. El atajo del widget es configurable y `Ctrl+Shift+M` activa el modo compacto.
+Las filas rojas indican uso alto de un vistazo. El atajo del widget es configurable y `Alt+C` activa el modo compacto.
 
 Consulta [¿Cómo se usa CyberManager?](https://github.com/CyberGems/CyberManager/wiki/How-Do-You-Use-es) para ver ejemplos cotidianos y las guías completas de la wiki.
 
@@ -250,16 +250,16 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 |---|---|---|
 | `Alt+Shift+M` | Mostrar/ocultar CyberManager | Global |
 | `Alt+Shift+F1` | Mostrar/ocultar el widget de métricas (configurable) | Global |
-| `Ctrl+Shift+M` | Alternar el modo compacto | Aplicación |
+| `Alt+C` | Alternar el modo compacto | Aplicación |
 | `Ctrl+1` / `Ctrl+2` / `Ctrl+3` | Cambiar a Procesos / Rendimiento / Configuración | Aplicación |
 | `Ctrl+4` | Abrir Rendimiento → Discos | Aplicación / Widget |
 | `Ctrl+N` | Ejecutar nueva tarea, con historial reciente | Aplicación |
 | `F1` | Abrir Acerca de (también desde el branding) | Aplicación |
 | `Alt+M` | Abrir More y enfocar el primer elemento; navegar con flechas | Aplicación |
 | `Ctrl+,` | Abrir Configuración | Aplicación |
-| `Ctrl+Shift+U` | Buscar actualizaciones / abrir la actualización disponible | Aplicación |
-| `Ctrl+Shift+P` | Alternar siempre visible | Aplicación |
-| `Ctrl+Alt+Down` / `Ctrl+Alt+Up` | Minimizar / alternar maximización | Aplicación |
+| `Alt+U` | Buscar actualizaciones / abrir la actualización disponible | Aplicación |
+| `Alt+P` | Alternar siempre visible | Aplicación |
+| `Win+Down` / `Win+Up` | Minimizar / maximizar o restaurar (gestos de Windows) | Windows |
 | `Alt+F4` | Cerrar según el comportamiento de bandeja/salida configurado | Aplicación |
 | `Ctrl+F` / `Ctrl+E` | Enfocar el cuadro de búsqueda | Aplicación |
 | `Ctrl+G` | Alternar la agrupación de procesos | Aplicación |

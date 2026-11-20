@@ -3846,42 +3846,50 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && key == Key.U)
+        if (modifiers == ModifierKeys.Alt && key == Key.U)
         {
             e.Handled = true;
             UpdatePill_UpdateRequested(UpdatePill, EventArgs.Empty);
             return;
         }
 
-        if (modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && key == Key.P)
+        if (modifiers == ModifierKeys.Alt && key == Key.P)
         {
             e.Handled = true;
             CompactView_PinRequested(CompactView, new RoutedEventArgs());
             return;
         }
 
-        if (modifiers == (ModifierKeys.Control | ModifierKeys.Alt) && key == Key.Down)
-        {
-            e.Handled = true;
-            Minimize_Click(this, new RoutedEventArgs());
-            return;
-        }
-
-        if (modifiers == (ModifierKeys.Control | ModifierKeys.Alt) && key == Key.Up)
+        // Win+Up / Win+Down belong to the shell, but this window paints its own
+        // rounded, transparent surface, so Windows leaves those keys to the app.
+        // The same actions run here so the gesture is never dead.
+        if (modifiers == ModifierKeys.Windows && key == Key.Up)
         {
             e.Handled = true;
             Maximize_Click(this, new RoutedEventArgs());
             return;
         }
 
-        if (modifiers == ModifierKeys.Alt && key == Key.F4)
+        if (modifiers == ModifierKeys.Windows && key == Key.Down)
         {
             e.Handled = true;
-            Close_Click(this, new RoutedEventArgs());
+            Minimize_Click(this, new RoutedEventArgs());
             return;
         }
 
-        if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.M)
+        // Window controls use the Windows gestures (Win+Down / Win+Up), which
+        // the shell handles without an application-level binding.
+        if (modifiers == ModifierKeys.Alt && key == Key.F4)
+        {
+            e.Handled = true;
+            // Alt+F4 is the close shortcut even when the X is configured to
+            // minimize to the tray, so it bypasses the close prompt.
+            _isExplicitExit = true;
+            Close();
+            return;
+        }
+
+        if (modifiers == ModifierKeys.Alt && key == Key.C)
         {
             e.Handled = true;
             ApplyViewMode(!_isCompactMode, restoreBounds: false);
