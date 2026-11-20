@@ -542,20 +542,26 @@ public sealed class TrayIconService : IDisposable
     /// </summary>
     private string BuildTooltip()
     {
-        var text = $"CyberManager {UpdateService.GetCurrentVersionLabel()}";
-        return _updateVersionLabel is null
-            ? text
-            : $"{text} — {Strings.T("UpdateAvailable", _updateVersionLabel)}";
+        string text;
+        if (_updateVersionLabel is not null)
+        {
+            text = $"CyberManager · {Strings.T("UpdateAvailable", _updateVersionLabel)}";
+        }
+        else
+        {
+            var hotkey = App.Settings.GlobalHotkey?.Trim();
+            text = string.IsNullOrEmpty(hotkey) ? "CyberManager" : $"CyberManager · {hotkey}";
+        }
+        return text.Length > 63 ? text[..62] + "…" : text;
     }
 
     private void ApplyTooltip()
     {
         if (!_isAdded) return;
 
-        // NOTIFYICONDATA.szTip is a fixed 128-character buffer, so the text is clamped before it
-        // reaches the marshaller rather than being silently truncated (or rejected) there.
-        var tip = BuildTooltip();
-        _nid.szTip = tip.Length > 127 ? tip[..127] : tip;
+        // The suite standard caps every tray tooltip at 63 characters with an ellipsis, so the
+        // behaviour matches the other apps even though szTip could hold more.
+        _nid.szTip = BuildTooltip();
         Shell_NotifyIcon(NIM_MODIFY, ref _nid);
     }
 
