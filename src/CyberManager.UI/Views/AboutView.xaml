@@ -165,11 +165,11 @@
                             </Border>
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
-                                <TextBlock x:Name="AutoUpdateTitleLbl" Text="Buscar actualizaciones al iniciar" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="AutoUpdateDescLbl" Text="Comprobar automáticamente si hay nuevas versiones al iniciar CyberManager." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="AutoUpdateTitleLbl" Text="Avisos de actualización" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
+                                <TextBlock x:Name="AutoUpdateDescLbl" Text="Busca nuevas versiones al iniciar y avisa si hay una disponible." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
 
-                            <CheckBox x:Name="AutoCheckUpdateCheck" Grid.Column="2" Style="{StaticResource SuiteToggleSwitch}" VerticalAlignment="Center" Checked="AutoCheckUpdateCheck_Changed" Unchecked="AutoCheckUpdateCheck_Changed"/>
+                            <CheckBox x:Name="AutoCheckUpdateCheck" AutomationProperties.LabeledBy="{Binding ElementName=AutoUpdateTitleLbl}" Grid.Column="2" Style="{StaticResource SuiteToggleSwitch}" VerticalAlignment="Center" Checked="AutoCheckUpdateCheck_Changed" Unchecked="AutoCheckUpdateCheck_Changed"/>
                         </Grid>
 
                         <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,6"/>
