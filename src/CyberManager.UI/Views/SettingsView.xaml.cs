@@ -99,6 +99,7 @@ public partial class SettingsView : UserControl
         MinimizeToTrayOnMinimizeSwitch.IsChecked = App.Settings.MinimizeToTrayOnMinimize;
         MinimizeToTrayOnCloseSwitch.IsChecked = App.Settings.MinimizeToTrayOnClose;
         AlwaysOnTopSwitch.IsChecked = App.Settings.AlwaysOnTop;
+        UpdateNotificationsToggle.IsChecked = App.Settings.AutoCheckForUpdates;
         SuiteSuggestionsSwitch.IsChecked = App.Settings.ShowSuiteRecommendations;
         _committedHotkey = App.Settings.GlobalHotkey;
         HotkeyBox.Text = FormatStoredHotkey(_committedHotkey);
@@ -107,6 +108,12 @@ public partial class SettingsView : UserControl
 
         RefreshLocalization();
         _initializing = false;
+    }
+
+    private void UpdateNotificationsToggle_Click(object sender, RoutedEventArgs e)
+    {
+        App.Settings.AutoCheckForUpdates = UpdateNotificationsToggle.IsChecked == true;
+        App.Settings.Save();
     }
 
     private void SettingChanged(object sender, RoutedEventArgs e)
@@ -438,6 +445,8 @@ public partial class SettingsView : UserControl
         MinimizeToTrayOnCloseDescLbl.Text = Strings.T("MinimizeToTrayOnCloseDesc");
         AlwaysOnTopTitleLbl.Text = Strings.T("AlwaysOnTopTitle");
         AlwaysOnTopDescLbl.Text = Strings.T("AlwaysOnTopDesc");
+        UpdateNotificationsTitleLbl.Text = Strings.T("AutoUpdateTitle");
+        UpdateNotificationsDescLbl.Text = Strings.T("AutoUpdateDesc");
         SuiteSuggestionsTitleLbl.Text = Strings.T("SuiteSuggestionsTitle");
         SuiteSuggestionsDescLbl.Text = Strings.T("SuiteSuggestionsDesc");
         AutomationProperties.SetName(SuiteSuggestionsSwitch, Strings.T("SuiteSuggestionsTitle"));
