@@ -93,7 +93,7 @@ public partial class FloatingMetricsWindow : Window
         DiskActivityLed.RefreshLocalization();
         CpuLabel.Text = Strings.T("Cpu");
         RamLabel.Text = Strings.T("Ram");
-        CloseButton.ToolTip = Strings.T("CloseWidget");
+        CloseButton.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("CloseWidget"), KeyboardShortcuts.Close);
         AutomationProperties.SetName(CloseButton, Strings.T("CloseWidget"));
         UpdatePinAutomationName();
         UpdatePinToolTip();

@@ -15,8 +15,8 @@ internal static class KeyboardShortcuts
     // The Windows gestures: Win+Down minimizes, Win+Up maximizes or restores,
     // and Win+Left/Right snap. The app repeats Up/Down only when the shell does
     // not take them, which is the case for this window's transparent surface.
-    internal const string Minimize = "Win+Down";
-    internal const string Maximize = "Win+Up";
+    internal const string Minimize = "Win+↓";
+    internal const string Maximize = "Win+↑";
     internal const string Close = "Alt+F4";
 
     internal const string Refresh = "F5";
