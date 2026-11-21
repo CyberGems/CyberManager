@@ -3788,7 +3788,17 @@ public partial class MainWindow : Window
     {
         if (MaximizeBtn == null || MaximizeIconPath == null) return;
 
-        if (WorkAreaMaximize.IsFilled(this) || WindowState == WindowState.Maximized)
+        bool isMaximized = WorkAreaMaximize.IsFilled(this) || WindowState == WindowState.Maximized;
+        if (MinimizeBtn != null)
+        {
+            // With the window maximized Win+Down restores it, so the minimize
+            // button no longer advertises that gesture.
+            MinimizeBtn.ToolTip = isMaximized
+                ? Strings.T("Minimize")
+                : HotkeyToolTipContent.WithShortcut(Strings.T("Minimize"), KeyboardShortcuts.Minimize);
+        }
+
+        if (isMaximized)
         {
             MaximizeBtn.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("Restore"), KeyboardShortcuts.Restore);
             AutomationProperties.SetName(MaximizeBtn, Strings.T("Restore"));
@@ -3866,7 +3876,9 @@ public partial class MainWindow : Window
         if (modifiers == ModifierKeys.Windows && key == Key.Up)
         {
             e.Handled = true;
-            Maximize_Click(this, new RoutedEventArgs());
+            // Win+Up only maximizes; restoring belongs to Win+Down, as in Windows.
+            if (!WorkAreaMaximize.IsFilled(this) && WindowState != WindowState.Maximized)
+                Maximize_Click(this, new RoutedEventArgs());
             return;
         }
 
