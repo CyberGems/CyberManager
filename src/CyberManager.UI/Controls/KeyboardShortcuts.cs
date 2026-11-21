@@ -12,10 +12,12 @@ internal static class KeyboardShortcuts
     internal const string ToggleCompact = "Alt+C";
     internal const string More = "Alt+M";
     internal const string TogglePin = "Alt+P";
-    // The Windows gestures: Win+Down minimizes, Win+Up maximizes or restores,
-    // and Win+Left/Right snap. The app repeats Up/Down only when the shell does
-    // not take them, which is the case for this window's transparent surface.
+    // The Windows gestures: Win+Down restores a maximized window or minimizes a
+    // normal one, Win+Up maximizes, and Win+Left/Right snap. The app repeats
+    // Up/Down only when the shell does not take them, which is the case for this
+    // window's transparent surface.
     internal const string Minimize = "Win+↓";
+    internal const string Restore = "Win+↓";
     internal const string Maximize = "Win+↑";
     internal const string Close = "Alt+F4";
 
