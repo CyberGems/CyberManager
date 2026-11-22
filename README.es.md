@@ -259,7 +259,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Ctrl+,` | Abrir Configuración | Aplicación |
 | `Alt+U` | Buscar actualizaciones / abrir la actualización disponible | Aplicación |
 | `Alt+P` | Alternar siempre visible | Aplicación |
-| `Win+Down` / `Win+Up` | Minimizar / maximizar o restaurar (gestos de Windows) | Windows |
+| `Win+Arriba` / `Win+Abajo` | Maximiza / restaura o minimiza (gestos de Windows) | Windows |
 | `Alt+F4` | Cerrar según el comportamiento de bandeja/salida configurado | Aplicación |
 | `Ctrl+F` / `Ctrl+E` | Enfocar el cuadro de búsqueda | Aplicación |
 | `Ctrl+G` | Alternar la agrupación de procesos | Aplicación |

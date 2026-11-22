@@ -259,7 +259,7 @@ dotnet run --project src/CyberManager.UI/CyberManager.UI.csproj
 | `Ctrl+,` | Open Configuration | Application |
 | `Alt+U` | Check for updates / open available update | Application |
 | `Alt+P` | Toggle always on top | Application |
-| `Win+Down` / `Win+Up` | Minimize / maximize or restore (Windows gestures) | Windows |
+| `Win+Up` / `Win+Down` | Maximize / restore or minimize (Windows gestures) | Windows |
 | `Alt+F4` | Close the app, even when the X is set to minimize to the tray | Application |
 | `Ctrl+F` / `Ctrl+E` | Focus search box | Application |
 | `Ctrl+G` | Toggle process grouping | Application |
