@@ -120,8 +120,12 @@ public static class UpdateService
     /// <see cref="UpdateAvailabilityChanged"/>. Every surface that needs to react to an update
     /// goes through here, so a check started from one place also lights up the others.
     /// </summary>
-    public static async Task<UpdateCheckResult> CheckForUpdatesAsync(CancellationToken ct = default) =>
-        RecordResult(await CheckCoreAsync(ct).ConfigureAwait(false));
+    public static async Task<UpdateCheckResult> CheckForUpdatesAsync(
+        Func<bool>? shouldPublish = null, CancellationToken ct = default)
+    {
+        var result = await CheckCoreAsync(ct).ConfigureAwait(false);
+        return shouldPublish is null || shouldPublish() ? RecordResult(result) : result;
+    }
 
     private static async Task<UpdateCheckResult> CheckCoreAsync(CancellationToken ct)
     {

@@ -416,7 +416,8 @@ public partial class MainWindow : Window
                     try
                     {
                         await Task.Delay(3000);
-                        await UpdateService.CheckForUpdatesAsync();
+                        if (!App.Settings.AutoCheckForUpdates) return;
+                        await UpdateService.CheckForUpdatesAsync(shouldPublish: () => App.Settings.AutoCheckForUpdates);
                     }
                     catch (Exception ex)
                     {
