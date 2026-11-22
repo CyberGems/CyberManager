@@ -20,7 +20,10 @@ public sealed record UpdateCheckResult(
     string? Sha256,
     DateTimeOffset? PublishedAt,
     bool IsUpdateAvailable,
-    string StatusMessage);
+    string StatusMessage)
+{
+    public bool IsUpToDate => LatestVersion is { } latest && latest <= CurrentVersion;
+}
 
 public static class UpdateService
 {

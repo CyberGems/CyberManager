@@ -134,7 +134,7 @@ public partial class AboutView : UserControl
                     result.StatusMessage,
                     Strings.T("Ok"),
                     null,
-                    ConfirmIconType.Check);
+                    result.IsUpToDate ? ConfirmIconType.Check : ConfirmIconType.Warning);
             }
         }
         catch (Exception ex)

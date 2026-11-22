@@ -2492,7 +2492,7 @@ public partial class MainWindow : Window
             result.StatusMessage,
             Strings.T("Ok"),
             null,
-            ConfirmIconType.Check);
+            result.IsUpToDate ? ConfirmIconType.Check : ConfirmIconType.Warning);
     }
 
     /// <summary>
