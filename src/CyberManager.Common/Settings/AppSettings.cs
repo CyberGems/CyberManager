@@ -55,6 +55,7 @@ public sealed class AppSettings
     public bool StartWithWindows { get; set; } = true;
     public bool StartMinimized { get; set; }
     public bool AutoCheckForUpdates { get; set; } = true;
+    public string SkippedUpdateVersion { get; set; } = "";
     /// <summary>
     /// Shows the "More apps from CyberGems" row in the About window.
     /// </summary>
@@ -252,6 +253,7 @@ public sealed class AppSettings
         StartWithWindows = defaults.StartWithWindows;
         StartMinimized = defaults.StartMinimized;
         AutoCheckForUpdates = defaults.AutoCheckForUpdates;
+        SkippedUpdateVersion = defaults.SkippedUpdateVersion;
         ShowSuiteRecommendations = defaults.ShowSuiteRecommendations;
         GlobalHotkey = defaults.GlobalHotkey;
         ShowIdleProcess = defaults.ShowIdleProcess;

@@ -15,8 +15,7 @@ public enum ConfirmIconType
     Trash,
     Warning,
     Check,
-    Info,
-    Update
+    Info
 }
 
 public partial class ConfirmDialog : Window
@@ -88,7 +87,6 @@ public partial class ConfirmDialog : Window
         AlertPath.Visibility = Visibility.Collapsed;
         CheckPath.Visibility = Visibility.Collapsed;
         InfoPath.Visibility = Visibility.Collapsed;
-        UpdatePath.Visibility = Visibility.Collapsed;
 
         if (iconType == ConfirmIconType.Check)
         {
@@ -102,35 +100,10 @@ public partial class ConfirmDialog : Window
         {
             AlertPath.Visibility = Visibility.Visible;
         }
-        else if (iconType == ConfirmIconType.Update)
-        {
-            UpdatePath.Visibility = Visibility.Visible;
-        }
         else
         {
             InfoPath.Visibility = Visibility.Visible;
         }
-    }
-
-    internal static ConfirmDialog CreateUpdate(string currentVersion, string availableVersion)
-    {
-        var dialog = new ConfirmDialog(
-            Strings.T("UpdateAvailableTitle"), Strings.T("UpdateReadyDescription"),
-            okText: Strings.T("Download"), cancelText: Strings.T("Later"), iconType: ConfirmIconType.Update);
-        dialog.InstalledVersionLabel.Text = Strings.T("InstalledVersion");
-        dialog.AvailableVersionLabel.Text = Strings.T("AvailableVersion");
-        dialog.InstalledVersionText.Text = currentVersion;
-        dialog.AvailableVersionText.Text = availableVersion;
-        dialog.UpdateVersionsPanel.Visibility = Visibility.Visible;
-        dialog.IconBadge.SetResourceReference(Border.BackgroundProperty, "AccentGlowBrush");
-        return dialog;
-    }
-
-    public static bool ShowUpdate(Window? owner, string currentVersion, string availableVersion)
-    {
-        var dialog = CreateUpdate(currentVersion, availableVersion);
-        if (owner != null) dialog.Owner = owner;
-        return dialog.ShowDialog() == true;
     }
 
     public static bool Show(Window? owner, string title, string message, string okText = "", string? cancelText = null, ConfirmIconType iconType = ConfirmIconType.Default, bool isDanger = false, string? confirmationKey = null)

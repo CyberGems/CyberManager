@@ -376,13 +376,6 @@ public partial class MainWindow : Window
             App.SingleInstance.Attach(this);
             App.SingleInstance.ActivationRequested += () => Dispatcher.BeginInvoke(ShowFromTray);
 
-            // Keep the tray notice in step with the titlebar pills, so a user running minimized
-            // still learns about a release instead of only seeing it when the window is restored.
-            UpdateService.UpdateAvailabilityChanged += OnUpdateAvailabilityChanged;
-            _trayService.SetUpdateAvailable(UpdateService.LastCheckResult is { IsUpdateAvailable: true } known
-                ? known.LatestVersionLabel
-                : null);
-
             // Register Global Hotkeys. The widget shortcut is best-effort: failing to claim it
             // must not stop the app, so unlike the main one it does not report a status.
             if (!_hotkeyService.Register(this, GlobalHotkeyService.MainHotkeyId, App.Settings.GlobalHotkey))
@@ -405,28 +398,8 @@ public partial class MainWindow : Window
                 Hide();
             }
 
-            // Background update check. Nothing is painted here: the result is published through
-            // UpdateService and both titlebars own an update pill that listens for it. Writing the
-            // notice to the footer instead was pointless, because the refresh loop rewrites that
-            // line every 800 ms, so the notice vanished almost before it could be read.
             if (App.Settings.AutoCheckForUpdates)
-            {
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        await Task.Delay(3000);
-                        if (!App.Settings.AutoCheckForUpdates) return;
-                        await UpdateService.CheckForUpdatesAsync(shouldPublish: () => App.Settings.AutoCheckForUpdates);
-                    }
-                    catch (Exception ex)
-                    {
-                        // The service already turns connection problems into a check status, so
-                        // this only covers an unexpected bug, which must not vanish without a trace.
-                        Debug.WriteLine($"Update check error: {ex}");
-                    }
-                });
-            }
+                _ = CheckForUpdatesOnStartupAsync();
 
             _ = RefreshAsync(cancellationToken: _lifetimeCts.Token);
             UpdateTimerState();
@@ -469,7 +442,7 @@ public partial class MainWindow : Window
             _searchHistoryTimer.Stop();
             _settingsSaveTimer.Stop();
             _lifetimeCts.Cancel();
-            UpdateService.UpdateAvailabilityChanged -= OnUpdateAvailabilityChanged;
+            _updateNotice?.Close();
             _hotkeyService.Dispose();
             _trayService.Dispose();
         }
@@ -2463,82 +2436,6 @@ public partial class MainWindow : Window
         NavigateToTab(MainTab.About);
     }
 
-    /// <summary>
-    /// Explicit "check for updates", shared by the tray menu and the window's More menu. A version
-    /// already known to be available goes straight to the confirm flow, so the user is not made to
-    /// wait for a second network round trip they already have the answer to.
-    /// </summary>
-    private async void CheckForUpdatesFromShell()
-    {
-        if (UpdateService.LastCheckResult is { IsUpdateAvailable: true } known)
-        {
-            await PromptAndStartUpdateAsync(known);
-            return;
-        }
-
-        var result = await UpdateService.CheckForUpdatesAsync();
-
-        if (result.IsUpdateAvailable)
-        {
-            await PromptAndStartUpdateAsync(result);
-            return;
-        }
-
-        // Reported in place. Opening the whole About window just to say the build is current made
-        // an explicit check feel heavier than the answer it carries.
-        ConfirmDialog.Show(
-            this,
-            Strings.T("CheckUpdatesAction"),
-            result.StatusMessage,
-            Strings.T("Ok"),
-            null,
-            result.IsUpToDate ? ConfirmIconType.Check : ConfirmIconType.Warning);
-    }
-
-    /// <summary>
-    /// The titlebar update pill was activated. The pill only exists while a check reported a newer
-    /// version, so the flow starts from the last result rather than re-running the check.
-    /// </summary>
-    private async void UpdatePill_UpdateRequested(object? sender, EventArgs e)
-    {
-        var result = UpdateService.LastCheckResult;
-        if (result is not { IsUpdateAvailable: true })
-        {
-            // The result vanished between painting the pill and clicking it; re-check rather than
-            // leaving the click unanswered.
-            CheckForUpdatesFromShell();
-            return;
-        }
-
-        await PromptAndStartUpdateAsync(result);
-    }
-
-    /// <summary>
-    /// Confirms an available update and, on acceptance, downloads and installs it. Every surface
-    /// that offers the update funnels through here, so the wording, the progress window and the
-    /// failure handling stay identical no matter where the user started.
-    /// </summary>
-    private async Task PromptAndStartUpdateAsync(UpdateCheckResult result)
-    {
-        var choice = ConfirmDialog.ShowUpdate(
-            this, UpdateService.GetCurrentVersionLabel(), result.LatestVersionLabel);
-
-        if (!choice) return;
-
-        // The About tab owns the download progress bar, so it is opened and driven from here.
-        // Navigating is non-blocking, which is what stops an update prompt from freezing the app.
-        NavigateToTab(MainTab.About);
-        await AboutTabContent.StartUpdateDownloadAsync(result);
-    }
-
-    /// <summary>
-    /// Mirrors a completed check onto the tray surfaces. Marshalled to the UI thread because the
-    /// startup check runs on a background task.
-    /// </summary>
-    private void OnUpdateAvailabilityChanged(UpdateCheckResult result) =>
-        Dispatcher.BeginInvoke(() => _trayService.SetUpdateAvailable(
-            result.IsUpdateAvailable ? result.LatestVersionLabel : null));
-
     private void SyncSearchFromSettings()
     {
         _pendingSearch = App.Settings.SearchText ?? "";
@@ -3640,6 +3537,7 @@ public partial class MainWindow : Window
             StartupTabContent?.RefreshLocalization();
             SettingsTabContent?.RefreshLocalization();
             AboutTabContent?.RefreshLocalization();
+            _updateNotice?.RefreshLocalization();
 
             SubtitleText.Text = Strings.T("AppSubtitle");
             FullBrandingPanel.ToolTip = HotkeyToolTipContent.WithShortcut(Strings.T("About"), KeyboardShortcuts.About);

@@ -170,9 +170,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid Margin="24,24,24,22">
-                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                <Border x:Name="IconBadge" Width="48" Height="48" CornerRadius="14" Background="{DynamicResource CardSecondaryBrush}" VerticalAlignment="Top" Margin="0,0,16,0">
+                <Border Width="48" Height="48" CornerRadius="14" Background="{DynamicResource CardSecondaryBrush}" VerticalAlignment="Top" Margin="0,0,16,0">
                     <Grid>
                         <Image x:Name="AppIconImg" Width="28" Height="28" HorizontalAlignment="Center" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Visibility="Collapsed"/>
                         <Viewbox Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -181,7 +180,6 @@
                                 <Path x:Name="AlertPath" Style="{StaticResource DialogIconStyle}" Stroke="#F59E0B" Data="M 12,3 L 2,21 H 22 Z M 12,9 V 14 M 12,17 V 17.1"/>
                                 <Path x:Name="CheckPath" Style="{StaticResource DialogIconStyle}" Stroke="#10B981" Data="M 20,7 L 9,18 L 4,13"/>
                                 <Path x:Name="InfoPath" Style="{StaticResource DialogIconStyle}" Stroke="{DynamicResource AccentBrush}" Data="M 12,3 A 9,9 0 1 1 12,21 A 9,9 0 1 1 12,3 M 12,11 V 16 M 12,7.5 V 7.6"/>
-                                <Path x:Name="UpdatePath" Style="{StaticResource DialogIconStyle}" Stroke="{DynamicResource AccentBrush}" Data="M 12,3 V 14 M 8,10 L 12,14 L 16,10 M 4,16 V 20 H 20 V 16"/>
                             </Canvas>
                         </Viewbox>
                     </Grid>
@@ -190,22 +188,6 @@
                     <TextBlock x:Name="TitleLbl" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap"/>
                     <TextBlock x:Name="MessageLbl" Foreground="{DynamicResource SubTextBrush}" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="20"/>
                 </StackPanel>
-                <Grid x:Name="UpdateVersionsPanel" Grid.Row="1" Grid.ColumnSpan="2" Margin="0,22,0,0" Visibility="Collapsed">
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="36"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                    <Border Background="{DynamicResource CardSecondaryBrush}" CornerRadius="10" Padding="14,11">
-                        <StackPanel>
-                            <TextBlock x:Name="InstalledVersionLabel" FontSize="11" Foreground="{DynamicResource SubTextBrush}"/>
-                            <TextBlock x:Name="InstalledVersionText" FontSize="15" FontWeight="SemiBold" Margin="0,5,0,0" Foreground="{DynamicResource TextBrush}" TextWrapping="Wrap"/>
-                        </StackPanel>
-                    </Border>
-                    <Path Grid.Column="1" Data="M 2,8 H 14 M 9,3 L 14,8 L 9,13" Width="14" Height="14" Stretch="Uniform" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <Border Grid.Column="2" Background="{DynamicResource AccentGlowBrush}" CornerRadius="10" Padding="14,11">
-                        <StackPanel>
-                            <TextBlock x:Name="AvailableVersionLabel" FontSize="11" Foreground="{DynamicResource SubTextBrush}"/>
-                            <TextBlock x:Name="AvailableVersionText" FontSize="15" FontWeight="SemiBold" Margin="0,5,0,0" Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
             </Grid>
             <Border Grid.Row="1" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" CornerRadius="0,0,13,13" Padding="20,15">
                 <StackPanel>

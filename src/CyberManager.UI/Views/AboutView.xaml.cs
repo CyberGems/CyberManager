@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,14 +8,13 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using CyberManager.Common.I18n;
-using CyberManager.UI.Dialogs;
 using CyberManager.UI.Services;
 
 namespace CyberManager.UI.Views;
 
 /// <summary>
 /// About surface hosted as its own main-window tab (replaces the former About dialog).
-/// Identity and description, update checking and downloading, the sister-app row and the
+/// Identity and description, update checking, the sister-app row and the
 /// external-links footer all live here.
 /// </summary>
 public partial class AboutView : UserControl
@@ -29,7 +26,8 @@ public partial class AboutView : UserControl
 
     private const double SuiteIdleOpacity = 0.7;
 
-    private bool _suppressAutoCheckUpdateChange;
+    private bool _checkingForUpdates;
+    private UpdateCheckResult? _lastUpdateCheck;
     private bool _suiteBuilt;
     private DispatcherTimer? _diagTipTimer;
 
@@ -52,17 +50,8 @@ public partial class AboutView : UserControl
 
     private void LoadContent()
     {
-        _suppressAutoCheckUpdateChange = true;
-        try
-        {
-            AutoCheckUpdateCheck.IsChecked = App.Settings.AutoCheckForUpdates;
-            RefreshLocalization();
-            EnsureSuiteApps();
-        }
-        finally
-        {
-            _suppressAutoCheckUpdateChange = false;
-        }
+        RefreshLocalization();
+        EnsureSuiteApps();
     }
 
     public void RefreshLocalization()
@@ -73,14 +62,8 @@ public partial class AboutView : UserControl
         AboutVersionText.Text = (es ? "Versión " : "Version ") + currentVerLabel;
         AboutDescriptionText.Text = Strings.T("Description");
         UpdatesSectionLbl.Text = Strings.T("UpdatesAndMaintenance");
-        AutoUpdateTitleLbl.Text = Strings.T("AutoUpdateTitle");
-        AutoUpdateDescLbl.Text = Strings.T("AutoUpdateDesc");
         CheckUpdateTitleLbl.Text = Strings.T("CheckUpdatesAction");
-        CheckUpdateDescLbl.Text = Strings.T("CheckUpdatesDesc");
-        if (UpdateBtn.IsEnabled)
-        {
-            UpdateBtn.Content = Strings.T("CheckUpdates");
-        }
+        RefreshUpdateStatus();
         AboutFooterCopyright.Text = Strings.T("Copyright");
         AboutFooterCopyright.ToolTip = Strings.T("Website");
         AboutFooterWebsiteBtn.ToolTip = Strings.T("Website");
@@ -98,120 +81,39 @@ public partial class AboutView : UserControl
         ApplySuiteVisibility();
     }
 
-    private void AutoCheckUpdateCheck_Changed(object sender, RoutedEventArgs e)
-    {
-        if (!IsLoaded || _suppressAutoCheckUpdateChange) return;
-        App.Settings.AutoCheckForUpdates = AutoCheckUpdateCheck.IsChecked == true;
-        App.Settings.Save();
-    }
-
     private async void UpdateCheckButton_Click(object sender, RoutedEventArgs e)
     {
-        UpdateBtn.IsEnabled = false;
-        UpdateBtn.Content = Strings.T("CheckingUpdates");
-
+        if (_checkingForUpdates || OwnerWindow is not MainWindow main) return;
+        _checkingForUpdates = true;
+        RefreshUpdateStatus();
         try
         {
-            var result = await UpdateService.CheckForUpdatesAsync();
-            UpdateBtn.IsEnabled = true;
-            UpdateBtn.Content = Strings.T("CheckUpdates");
-
-            if (result.IsUpdateAvailable)
-            {
-                var choice = ConfirmDialog.ShowUpdate(
-                    OwnerWindow, UpdateService.GetCurrentVersionLabel(), result.LatestVersionLabel);
-
-                if (choice)
-                {
-                    await StartUpdateDownloadAsync(result);
-                }
-            }
-            else
-            {
-                ConfirmDialog.Show(
-                    OwnerWindow,
-                    Strings.T("CheckUpdatesAction"),
-                    result.StatusMessage,
-                    Strings.T("Ok"),
-                    null,
-                    result.IsUpToDate ? ConfirmIconType.Check : ConfirmIconType.Warning);
-            }
+            _lastUpdateCheck = await main.CheckForUpdateAsync();
         }
         catch (Exception ex)
         {
-            UpdateBtn.IsEnabled = true;
-            UpdateBtn.Content = Strings.T("CheckUpdates");
-            ConfirmDialog.Show(
-                OwnerWindow,
-                Strings.T("CheckUpdatesAction"),
-                ex.Message,
-                Strings.T("Ok"),
-                null,
-                ConfirmIconType.Warning);
+            Debug.WriteLine($"Could not check for updates from About: {ex}");
+            _lastUpdateCheck = new UpdateCheckResult(UpdateService.GetCurrentVersion(), null, "", "", null, null,
+                null, null, false, "UpdateCheckFailed");
+        }
+        finally
+        {
+            _checkingForUpdates = false;
+            RefreshUpdateStatus();
         }
     }
 
-    public async Task StartUpdateDownloadAsync(UpdateCheckResult result)
+    private void RefreshUpdateStatus()
     {
-        UpdateProgressPanel.Visibility = Visibility.Visible;
-        UpdateBtn.IsEnabled = false;
-
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var updatesFolder = Path.Combine(appData, "CyberManager", "Updates");
-        var filename = result.AssetName ?? $"CyberManager_setup_{UpdateService.GetRuntimeChannel()}.exe";
-        var installerPath = Path.Combine(updatesFolder, filename);
-
-        var progress = new Progress<double>(val =>
-        {
-            UpdateProgressBar.Value = val;
-            UpdateProgressText.Text = string.Format(CultureInfo.CurrentCulture, Strings.T("DownloadingUpdate"), val);
-        });
-
-        try
-        {
-            UpdateProgressBar.Value = 0;
-            UpdateProgressText.Text = string.Format(CultureInfo.CurrentCulture, Strings.T("DownloadingUpdate"), 0.0);
-
-            if (string.IsNullOrEmpty(result.DownloadUrl))
-                throw new InvalidOperationException("Direct download link is not available for this release.");
-
-            await UpdateService.DownloadUpdateAsync(result.DownloadUrl, installerPath, progress, result.Sha256);
-
-            UpdateProgressText.Text = Strings.T("DownloadComplete");
-
-            ConfirmDialog.Show(
-                OwnerWindow,
-                Strings.T("DownloadComplete"),
-                Strings.T("DownloadCompleteDesc"),
-                Strings.T("Ok"),
-                null,
-                ConfirmIconType.Check);
-
-            UpdateService.LaunchInstallerAndExit(installerPath);
-        }
-        catch (Exception ex)
-        {
-            UpdateProgressPanel.Visibility = Visibility.Collapsed;
-            UpdateBtn.IsEnabled = true;
-
-            var errorChoice = ConfirmDialog.Show(
-                OwnerWindow,
-                Strings.T("DownloadFailed"),
-                $"{ex.Message}\n\n{(Strings.Current == Lang.Es ? "¿Deseas abrir la página de releases de GitHub en el navegador?" : "Would you like to open the GitHub releases page in your browser?")}",
-                Strings.T("OpenBrowser"),
-                Strings.T("Cancel"),
-                ConfirmIconType.Warning);
-
-            if (errorChoice && !string.IsNullOrEmpty(result.ReleaseUrl))
-            {
-                OpenUrl(result.ReleaseUrl);
-            }
-        }
+        var checking = Strings.T("CheckingUpdates");
+        UpdateBtn.IsEnabled = !_checkingForUpdates;
+        UpdateBtn.Content = _checkingForUpdates ? checking : Strings.T("CheckUpdates");
+        CheckUpdateDescLbl.Text = _checkingForUpdates ? checking :
+            _lastUpdateCheck?.StatusMessage ?? Strings.T("CheckUpdatesDesc");
     }
 
     private void SuiteMoreBtn_Click(object sender, RoutedEventArgs e) => OpenUrl(WebsiteUrl);
 
-    /// <summary>Shows or hides the sister-app row from the current setting.</summary>
     public void ApplySuiteVisibility()
     {
         SuiteSection.Visibility = App.Settings.ShowSuiteRecommendations

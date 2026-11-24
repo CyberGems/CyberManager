@@ -148,7 +148,7 @@ Muchos gestores de tareas se congelan bajo carga intensiva o esconden funciones 
 - **Atajo global**: atajo de alternancia configurable (predeterminado: `Alt+Shift+M`)
 - **Siempre visible**: fija la ventana sobre otras aplicaciones
 - **Inicio automático**: inicio fiable al iniciar sesión en Windows mediante registro de tarea programada, con respaldo en el registro
-- **Actualizaciones automáticas**: comprueba GitHub Releases al iniciar, con progreso de descarga
+- **Actualizaciones**: búsqueda opcional al iniciar y un aviso flotante con novedades, descarga manual y una acción aparte para reiniciar
 - **Navegación por teclado**: los controles de la barra de título y el branding muestran sus atajos en badges; `Alt+M` abre More con el primer elemento enfocado para navegar con las flechas
 
 ### 🎨 Personalización

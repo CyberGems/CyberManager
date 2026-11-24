@@ -10,10 +10,8 @@ namespace CyberManager.UI.Controls;
 
 /// <summary>
 /// Titlebar pill announcing an available update. It stays collapsed until a check reports a newer
-/// version, then shows a down-arrow icon whose label expands on hover. Both titlebars host one and
-/// both read the same <see cref="UpdateService"/> state, so a check started from any surface lights
-/// up every copy, and the notice survives for as long as the update is pending instead of being
-/// overwritten by the next refresh tick.
+/// version, then shows a down-arrow icon whose label expands on hover. Both titlebars receive
+/// the pending version from the main window's shared update flow.
 /// </summary>
 public partial class UpdateAvailableButton : UserControl
 {
@@ -35,8 +33,6 @@ public partial class UpdateAvailableButton : UserControl
     {
         InitializeComponent();
         ApplyMetrics();
-        Loaded += OnLoaded;
-        Unloaded += OnUnloaded;
     }
 
     /// <summary>Raised when the user asks to act on the available update.</summary>
@@ -75,27 +71,9 @@ public partial class UpdateAvailableButton : UserControl
         LabelText.Padding = compact ? new Thickness(10, 0, 5, 0) : new Thickness(12, 0, 6, 0);
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    internal void SetUpdate(string? version)
     {
-        UpdateService.UpdateAvailabilityChanged += OnUpdateAvailabilityChanged;
-        // The startup check may have completed before this surface was created, so the last known
-        // result is applied on load instead of waiting for the next event.
-        SetUpdate(UpdateService.LastCheckResult);
-    }
-
-    private void OnUnloaded(object sender, RoutedEventArgs e) =>
-        UpdateService.UpdateAvailabilityChanged -= OnUpdateAvailabilityChanged;
-
-    private void OnUpdateAvailabilityChanged(UpdateCheckResult result) =>
-        Dispatcher.BeginInvoke(() => SetUpdate(result));
-
-    /// <summary>
-    /// Shows the pill for a result carrying a newer version and hides it otherwise. Pass the
-    /// service result as-is; <c>null</c> means no check has completed yet.
-    /// </summary>
-    public void SetUpdate(UpdateCheckResult? result)
-    {
-        _versionLabel = result is { IsUpdateAvailable: true } ? result.LatestVersionLabel : null;
+        _versionLabel = version;
         ApplyLabel();
     }
 

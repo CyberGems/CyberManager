@@ -148,7 +148,7 @@ Plenty of task managers freeze under heavy load or bury basic features behind co
 - **Global Hotkey** — Configurable toggle shortcut (default: `Alt+Shift+M`)
 - **Always on Top** — Pin window above other applications
 - **Auto-Start** — Reliable Windows sign-in startup through scheduled task registration with a registry fallback
-- **Auto-Updates** — Check GitHub Releases on startup with download progress
+- **Updates**: Optional startup checks and a floating notice with release highlights, manual downloads, and a separate restart action
 - **Keyboard Navigation**: Title-bar controls and branding have shortcut badges; `Alt+M` opens More with the first item focused for arrow-key navigation
 
 ### 🎨 Customization

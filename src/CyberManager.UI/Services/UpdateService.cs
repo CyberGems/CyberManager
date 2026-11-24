@@ -20,35 +20,24 @@ public sealed record UpdateCheckResult(
     string? Sha256,
     DateTimeOffset? PublishedAt,
     bool IsUpdateAvailable,
-    string StatusMessage)
+    string StatusKey,
+    string? ReleaseNotes = null)
 {
     public bool IsUpToDate => LatestVersion is { } latest && latest <= CurrentVersion;
+    public string StatusMessage => StatusKey switch
+    {
+        "UpToDate" => Strings.T(StatusKey, UpdateService.GetCurrentVersionLabel()),
+        "UpdateAvailable" or "UpdateTagUnrecognized" => Strings.T(StatusKey, LatestVersionLabel),
+        _ => Strings.T(StatusKey)
+    };
 }
+
+internal readonly record struct UpdateDownloadProgress(long Downloaded, long? Total);
 
 public static class UpdateService
 {
     private const string RepoOwner = "CyberGems";
     private const string RepoName = "CyberManager";
-
-    /// <summary>
-    /// Result of the most recent completed check, or <c>null</c> when no check has finished yet.
-    /// The titlebar update button reads this on creation, so a surface built after the background
-    /// check already ran still shows the notice instead of waiting for the next event.
-    /// </summary>
-    public static UpdateCheckResult? LastCheckResult { get; private set; }
-
-    /// <summary>
-    /// Raised after every completed check (update found, up to date, or failure), on the calling
-    /// thread. Subscribers that touch UI must marshal to their own dispatcher.
-    /// </summary>
-    public static event Action<UpdateCheckResult>? UpdateAvailabilityChanged;
-
-    private static UpdateCheckResult RecordResult(UpdateCheckResult result)
-    {
-        LastCheckResult = result;
-        try { UpdateAvailabilityChanged?.Invoke(result); } catch { }
-        return result;
-    }
 
     public static Version GetCurrentVersion()
     {
@@ -118,19 +107,7 @@ public static class UpdateService
         GitHubHttp.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
     }
 
-    /// <summary>
-    /// Runs a check and publishes the result to <see cref="LastCheckResult"/> and
-    /// <see cref="UpdateAvailabilityChanged"/>. Every surface that needs to react to an update
-    /// goes through here, so a check started from one place also lights up the others.
-    /// </summary>
-    public static async Task<UpdateCheckResult> CheckForUpdatesAsync(
-        Func<bool>? shouldPublish = null, CancellationToken ct = default)
-    {
-        var result = await CheckCoreAsync(ct).ConfigureAwait(false);
-        return shouldPublish is null || shouldPublish() ? RecordResult(result) : result;
-    }
-
-    private static async Task<UpdateCheckResult> CheckCoreAsync(CancellationToken ct)
+    public static async Task<UpdateCheckResult> CheckForUpdatesAsync(CancellationToken ct = default)
     {
         var cur = GetCurrentVersion();
         var curLabel = GetCurrentVersionLabel();
@@ -155,7 +132,7 @@ public static class UpdateService
                     null,
                     null,
                     false,
-                    Strings.T("UpToDate", curLabel));
+                    "UpToDate");
             }
 
             response.EnsureSuccessStatusCode();
@@ -165,7 +142,10 @@ public static class UpdateService
             var root = doc.RootElement;
             var tag = root.GetProperty("tag_name").GetString() ?? "";
             var releaseUrl = root.TryGetProperty("html_url", out var u) ? (u.GetString() ?? fallbackReleaseUrl) : fallbackReleaseUrl;
-            DateTimeOffset? pub = root.TryGetProperty("published_at", out var p) ? p.GetDateTimeOffset() : null;
+            DateTimeOffset? pub = root.TryGetProperty("published_at", out var p) && p.ValueKind == JsonValueKind.String
+                && p.TryGetDateTimeOffset(out var published) ? published : null;
+            var notes = root.TryGetProperty("body", out var body) && body.ValueKind == JsonValueKind.String
+                ? body.GetString() : null;
 
             if (string.IsNullOrWhiteSpace(tag))
             {
@@ -180,7 +160,7 @@ public static class UpdateService
                     null,
                     pub,
                     false,
-                    Strings.T("UnexpectedResponse"));
+                    "UnexpectedResponse");
             }
 
             var tagIsComparable = TryParseReleaseTag(tag, out var latest);
@@ -224,12 +204,12 @@ public static class UpdateService
             // An unparsable tag is reported as unknown rather than as "up to date": claiming the
             // build is current when the comparison never happened would hide a real release.
             var status = !tagIsComparable
-                ? Strings.T("UpdateTagUnrecognized", tag)
+                ? "UpdateTagUnrecognized"
                 : !newerVersion
-                    ? Strings.T("UpToDate", curLabel)
+                    ? "UpToDate"
                     : isAvailable
-                        ? Strings.T("UpdateAvailable", tag)
-                        : Strings.T("UpdatePackageUnavailable");
+                        ? "UpdateAvailable"
+                        : "UpdatePackageUnavailable";
 
             return new UpdateCheckResult(
                 cur,
@@ -241,7 +221,8 @@ public static class UpdateService
                 sha256,
                 pub,
                 isAvailable,
-                status);
+                status,
+                notes);
         }
         catch (HttpRequestException)
         {
@@ -255,7 +236,7 @@ public static class UpdateService
                 null,
                 null,
                 false,
-                Strings.T("UpdateCheckFailed"));
+                "UpdateCheckFailed");
         }
         catch (TaskCanceledException)
         {
@@ -269,10 +250,11 @@ public static class UpdateService
                 null,
                 null,
                 false,
-                Strings.T("UpdateCheckTimeout"));
+                "UpdateCheckTimeout");
         }
-        catch
+        catch (Exception ex) when (ex is JsonException or InvalidOperationException or KeyNotFoundException)
         {
+            Debug.WriteLine($"Unexpected update response: {ex}");
             return new UpdateCheckResult(
                 cur,
                 null,
@@ -283,67 +265,68 @@ public static class UpdateService
                 null,
                 null,
                 false,
-                Strings.T("UnexpectedResponse"));
+                "UnexpectedResponse");
         }
     }
 
-    public static async Task DownloadUpdateAsync(
-        string downloadUrl,
-        string destinationPath,
-        IProgress<double> progress,
-        string? expectedSha256 = null,
-        CancellationToken ct = default)
+    internal static Task DownloadUpdateAsync(string downloadUrl, string destinationPath,
+        IProgress<UpdateDownloadProgress> progress, string? expectedSha256, CancellationToken ct)
     {
         if (!Uri.TryCreate(downloadUrl, UriKind.Absolute, out var uri) ||
-            uri.Scheme != Uri.UriSchemeHttps ||
-            !IsAllowedDownloadHost(uri.Host))
-        {
+            uri.Scheme != Uri.UriSchemeHttps || !IsAllowedDownloadHost(uri.Host))
             throw new InvalidDataException("The update URL is not a trusted HTTPS GitHub download.");
-        }
 
-        var dir = Path.GetDirectoryName(destinationPath);
-        if (!string.IsNullOrEmpty(dir))
-        {
-            Directory.CreateDirectory(dir);
-        }
+        return DownloadAssetAsync(GitHubHttp, uri, destinationPath, progress, expectedSha256, ct);
+    }
 
-        var temporaryPath = destinationPath + ".download";
+    internal static async Task DownloadAssetAsync(HttpClient client, Uri uri, string destinationPath,
+        IProgress<UpdateDownloadProgress> progress, string? expectedSha256, CancellationToken ct)
+    {
+        if (Path.GetDirectoryName(destinationPath) is { Length: > 0 } directory)
+            Directory.CreateDirectory(directory);
+
+        var temporaryPath = $"{destinationPath}.{Guid.NewGuid():N}.download";
         try
         {
-            using var response = await GitHubHttp.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+            using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-
-            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-            await using var contentStream = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-            await using var fileStream = new FileStream(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None, 64 * 1024, true);
-
+            var totalBytes = response.Content.Headers.ContentLength;
+            await using var content = await response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
             var buffer = new byte[64 * 1024];
-            var totalRead = 0L;
-            int bytesRead;
-
-            while ((bytesRead = await contentStream.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+            long downloaded = 0;
+            var lastReport = Stopwatch.StartNew();
+            progress.Report(new UpdateDownloadProgress(0, totalBytes));
+            await using (var file = new FileStream(temporaryPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, buffer.Length, true))
             {
-                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), ct).ConfigureAwait(false);
-                totalRead += bytesRead;
-
-                if (totalBytes > 0)
+                int read;
+                while ((read = await content.ReadAsync(buffer.AsMemory(), ct).ConfigureAwait(false)) > 0)
                 {
-                    progress.Report((double)totalRead / totalBytes * 100.0);
+                    await file.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
+                    downloaded += read;
+                    if (lastReport.ElapsedMilliseconds < 120) continue;
+                    progress.Report(new UpdateDownloadProgress(downloaded, totalBytes));
+                    lastReport.Restart();
                 }
             }
 
-            await fileStream.FlushAsync(ct).ConfigureAwait(false);
-            await fileStream.DisposeAsync().ConfigureAwait(false);
-            await VerifyDownloadedAssetAsync(temporaryPath, Path.GetExtension(destinationPath), expectedSha256, ct);
-            File.Move(temporaryPath, destinationPath, true);
+            if (downloaded == 0 || totalBytes is long expected && downloaded != expected)
+                throw new InvalidDataException("The downloaded update is empty or incomplete.");
+            await VerifyDownloadedAssetAsync(temporaryPath, Path.GetExtension(destinationPath), expectedSha256, ct).ConfigureAwait(false);
+            ct.ThrowIfCancellationRequested();
+            File.Move(temporaryPath, destinationPath, overwrite: true);
+            progress.Report(new UpdateDownloadProgress(downloaded, totalBytes ?? downloaded));
         }
         finally
         {
-            try { if (File.Exists(temporaryPath)) File.Delete(temporaryPath); } catch (IOException) { }
+            try { File.Delete(temporaryPath); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Debug.WriteLine($"Update download cleanup failed: {ex}");
+            }
         }
     }
 
-    public static void LaunchInstallerAndExit(string installerPath)
+    public static void LaunchInstaller(string installerPath)
     {
         var extension = Path.GetExtension(installerPath);
         if (!File.Exists(installerPath) ||
@@ -361,17 +344,18 @@ public static class UpdateService
                 : "/SILENT /SP- /SUPPRESSMSGBOXES /NORESTART",
             UseShellExecute = true
         };
-        Process.Start(psi);
-        System.Windows.Application.Current.Dispatcher.Invoke(() =>
-        {
-            System.Windows.Application.Current.Shutdown();
-        });
+        using var installer = Process.Start(psi) ?? throw new InvalidOperationException("The installer could not start.");
     }
 
     public static void LaunchReleasesPage(string url)
     {
-        if (string.IsNullOrWhiteSpace(url)) url = $"https://github.com/{RepoOwner}/{RepoName}/releases";
-        try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); } catch { }
+        var fallback = $"https://github.com/{RepoOwner}/{RepoName}/releases";
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps ||
+            !uri.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase) ||
+            !(uri.AbsolutePath.Equals($"/{RepoOwner}/{RepoName}/releases", StringComparison.OrdinalIgnoreCase) ||
+              uri.AbsolutePath.StartsWith($"/{RepoOwner}/{RepoName}/releases/", StringComparison.OrdinalIgnoreCase)))
+            url = fallback;
+        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true })?.Dispose();
     }
 
     private static bool IsSupportedAsset(string name, string channel, bool preferInstaller)

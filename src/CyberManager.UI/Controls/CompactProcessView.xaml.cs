@@ -581,6 +581,8 @@ public partial class CompactProcessView : UserControl
     private void MoreDetailsButton_Click(object sender, RoutedEventArgs e) =>
         ToggleRequested?.Invoke(sender, e);
 
+    internal void SetPendingUpdate(string? version) => UpdatePill.SetUpdate(version);
+
     private void UpdatePill_UpdateRequested(object? sender, EventArgs e) =>
         UpdateRequested?.Invoke(this, EventArgs.Empty);
 

@@ -152,29 +152,6 @@
                 <TextBlock x:Name="UpdatesSectionLbl" Text="Actualizaciones y Mantenimiento" Foreground="{DynamicResource AccentBrush}" FontWeight="Bold" FontSize="13.5" Margin="0,0,0,6"/>
                 <Border CornerRadius="12" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Padding="14,9" Margin="0,0,0,14">
                     <StackPanel>
-                        <!-- Row 1: Auto-check toggle -->
-                        <Grid MinHeight="44">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Border Width="30" Height="30" CornerRadius="8" Background="{DynamicResource CardSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,10,0">
-                                <Path Data="M 4 4 V 9 H 9 M 20 20 V 15 H 15 M 20 9 A 9 9 0 0 0 5.64 5.64 L 4 9 M 4 15 A 9 9 0 0 0 18.36 18.36 L 20 15" Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
-                            </Border>
-
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
-                                <TextBlock x:Name="AutoUpdateTitleLbl" Text="Avisos de actualización" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="AutoUpdateDescLbl" Text="Busca nuevas versiones al iniciar y avisa si hay una disponible." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
-                            </StackPanel>
-
-                            <CheckBox x:Name="AutoCheckUpdateCheck" AutomationProperties.LabeledBy="{Binding ElementName=AutoUpdateTitleLbl}" Grid.Column="2" Style="{StaticResource SuiteToggleSwitch}" VerticalAlignment="Center" Checked="AutoCheckUpdateCheck_Changed" Unchecked="AutoCheckUpdateCheck_Changed"/>
-                        </Grid>
-
-                        <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,6,0,6"/>
-
-                        <!-- Row 2: Check for updates button -->
                         <Grid MinHeight="44">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -188,17 +165,12 @@
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,10,0">
                                 <TextBlock x:Name="CheckUpdateTitleLbl" Text="Buscar actualizaciones" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource TextBrush}"/>
-                                <TextBlock x:Name="CheckUpdateDescLbl" Text="Comprobar la versión más reciente y descargar actualizaciones directamente." FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="CheckUpdateDescLbl" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" FontSize="11" Foreground="{DynamicResource SubTextBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
 
                             <Button x:Name="UpdateBtn" Grid.Column="2" Content="Comprobar ahora" Style="{StaticResource ModernActionButton}" VerticalAlignment="Center" MinWidth="116" Height="32" Click="UpdateCheckButton_Click"/>
                         </Grid>
 
-                        <!-- Download Progress Panel -->
-                        <StackPanel x:Name="UpdateProgressPanel" Visibility="Collapsed" Margin="40,10,0,6">
-                            <TextBlock x:Name="UpdateProgressText" Text="Descargando actualización..." FontSize="11.5" Foreground="{DynamicResource TextBrush}" Margin="0,0,0,6"/>
-                            <ProgressBar x:Name="UpdateProgressBar" Height="6" Minimum="0" Maximum="100" Value="0" Foreground="{DynamicResource AccentBrush}" Background="{DynamicResource CardSecondaryBrush}" BorderThickness="0"/>
-                        </StackPanel>
                     </StackPanel>
                 </Border>
 
