@@ -34,7 +34,7 @@ public partial class ProcessPropertiesWindow : Window
 
     private void RefreshLocalization()
     {
-        Title = $"{Strings.T("ProcessProperties")} ᐧ {_metadata.FriendlyName}";
+        Title = $"CyberManager · {_metadata.FriendlyName}";
         TitleText.Text = Strings.T("ProcessProperties");
         FriendlyNameText.Text = _metadata.FriendlyName;
 

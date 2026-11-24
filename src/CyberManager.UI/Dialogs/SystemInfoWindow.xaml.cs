@@ -48,7 +48,7 @@ public partial class SystemInfoWindow : Window, IModalAttentionWindow
 
     public void RefreshLocalization()
     {
-        Title = $"{Strings.T("SystemInformation")} ᐧ CyberManager";
+        Title = $"CyberManager · {Strings.T("SystemInformation")}";
         TitleText.Text = Strings.T("SystemInformation");
         // Tab content now carries an icon next to the label, so localization writes the
         // TextBlock leaves instead of replacing the whole Content (that would drop the icons).

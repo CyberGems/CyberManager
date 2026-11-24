@@ -4,7 +4,7 @@
         xmlns:conv="clr-namespace:CyberManager.UI.Services"
         xmlns:controls="clr-namespace:CyberManager.UI.Controls"
         xmlns:views="clr-namespace:CyberManager.UI.Views"
-        Title="CyberManager — Ultra-Light Task Manager" Height="700" Width="1100" MinHeight="520" MinWidth="900"
+        Title="CyberManager" Height="700" Width="1100" MinHeight="520" MinWidth="900"
         Icon="pack://application:,,,/Assets/CyberManager.ico"
         WindowStartupLocation="CenterScreen" WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="CanResize"
