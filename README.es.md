@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://cybergems.org/es/apps/cybermanager/">
-    <img src="https://cybergems.org/banners/es/cybermanager.png" alt="Controla cada proceso de Windows" />
+    <img src="https://cybergems.org/banners/es/cybermanager.png" alt="Cada proceso de Windows, bajo control" />
   </a>
 </p>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-### Todos los procesos de tu PC, a la vista y bajo control, incluso cuando hay miles
+### Descubre qué ralentiza tu PC y actúa sin perder tu lugar.
 
 </div>
 

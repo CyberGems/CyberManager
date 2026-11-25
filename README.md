@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://cybergems.org/apps/cybermanager/">
-    <img src="https://cybergems.org/banners/cybermanager.png" alt="Take control of every Windows process" />
+    <img src="https://cybergems.org/banners/cybermanager.png" alt="Every Windows process, under control" />
   </a>
 </p>
 
@@ -25,7 +25,7 @@
 
 <div align="center">
 
-### Every process on your PC, visible and under control — even when there are thousands
+### See what slows your PC down and act on it without losing your place.
 
 </div>
 
