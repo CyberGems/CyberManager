@@ -17,3 +17,6 @@ desktop.ini
 publish/
 publish-win64/
 TestResults/
+
+# Release drafts
+release_notes.md
