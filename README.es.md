@@ -68,11 +68,12 @@ Cuando el PC va lento, el Administrador de tareas es lo primero que abres, y muc
 
 ---
 
-<!-- Capturas: pendiente de la galería bilingüe ES/EN del plan en https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — sustituir la cita, conservar este título y su entrada en el índice. -->
-
 ## 🖼️ Capturas
 
-> Próximamente...
+<p align="center">
+  <img src="./docs/screenshots/main-es.png" alt="Ventana principal de CyberManager con gráficos de CPU y RAM en tiempo real, tabla de procesos, filtros por categoría y tema oscuro" />
+</p>
+<p align="center"><em>Tabla de procesos con gráficos en vivo de CPU y RAM, filtros por categoría, inspección de prioridad y ruta, y barra de estado con tema adaptable.</em></p>
 
 ---
 

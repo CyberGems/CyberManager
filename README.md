@@ -68,11 +68,12 @@ When a PC slows down, Task Manager is the first thing you open — and often the
 
 ---
 
-<!-- Screenshots: pending the bilingual EN/ES gallery in the capture plan at https://github.com/CyberGems/CyberGems.github.io/blob/main/docs/screenshots.md — replace the blockquote, keep this heading and the TOC entry. -->
-
 ## 🖼️ Screenshots
 
-> Coming soon...
+<p align="center">
+  <img src="./docs/screenshots/main-en.png" alt="CyberManager main window with real-time CPU and RAM sparklines, process table, category filters and dark theme" />
+</p>
+<p align="center"><em>Process table with live CPU and RAM sparklines, category filters, priority and path inspection, and themeable status bar.</em></p>
 
 ---
 
