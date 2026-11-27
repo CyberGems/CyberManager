@@ -6,3 +6,14 @@ artifacts/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Native build output
+[Bb]in/
+[Oo]bj/
+
+# Publisher and test output
+[Ll]og/
+[Ll]ogs/
+publish/
+publish-win64/
+TestResults/
