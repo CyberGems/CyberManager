@@ -105,6 +105,8 @@ Copia la información del proceso desde la ventana de propiedades, el menú cont
 {{PORTABLE_HASH}}
 ```
 
+The checksums are also available as a downloadable [SHA256SUMS.txt](https://github.com/CyberGems/CyberManager/releases/download/{{VERSION}}/SHA256SUMS.txt).
+
 ---
 
 📜 **Full changelog:** browse every version in [CHANGELOG.md](https://github.com/CyberGems/CyberManager/blob/main/CHANGELOG.md).
