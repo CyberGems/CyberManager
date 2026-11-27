@@ -75,6 +75,21 @@ When a PC slows down, Task Manager is the first thing you open — and often the
 </p>
 <p align="center"><em>Process table with live CPU and RAM sparklines, category filters, priority and path inspection, and themeable status bar.</em></p>
 
+<p align="center">
+  <img src="./docs/screenshots/compact-en.png" alt="CyberManager Compact mode window showing search, category filters, and live CPU and memory heatmaps" width="520" />
+</p>
+<p align="center"><em>Always-on-top Compact mode keeping processes, search, and live CPU/RAM meters within reach without filling the screen.</em></p>
+
+<p align="center">
+  <img src="./docs/screenshots/performance-en.png" alt="CyberManager Performance tab showing Summary view with CPU and Memory history graphs and hardware topology cards" />
+</p>
+<p align="center"><em>Performance view with real-time CPU, memory, and commit-charge histories alongside kernel, physical RAM, and topology telemetry.</em></p>
+
+<p align="center">
+  <img src="./docs/screenshots/startup-en.png" alt="CyberManager Startup tab listing sign-in applications with publisher, registry or folder source, and enable/disable controls" />
+</p>
+<p align="center"><em>Startup tab reviewing sign-in applications from the registry and startup folders with reversible toggles and automatic backup.</em></p>
+
 ---
 
 ## 🎯 Why CyberManager?

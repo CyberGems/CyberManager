@@ -75,6 +75,21 @@ Cuando el PC va lento, el Administrador de tareas es lo primero que abres, y muc
 </p>
 <p align="center"><em>Tabla de procesos con gráficos en vivo de CPU y RAM, filtros por categoría, inspección de prioridad y ruta, y barra de estado con tema adaptable.</em></p>
 
+<p align="center">
+  <img src="./docs/screenshots/compact-es.png" alt="Modo Compacto de CyberManager mostrando búsqueda, filtros por categoría y mapa de calor de CPU y memoria" width="520" />
+</p>
+<p align="center"><em>Modo Compacto siempre visible para tener a mano procesos, búsqueda y medidores en vivo de CPU y RAM sin saturar la pantalla.</em></p>
+
+<p align="center">
+  <img src="./docs/screenshots/performance-es.png" alt="Pestaña Rendimiento de CyberManager mostrando la vista Resumen con historiales de CPU y Memoria y tarjetas de topología" />
+</p>
+<p align="center"><em>Vista Rendimiento con historiales en tiempo real de CPU, memoria y carga de commit junto a métricas del kernel, RAM física y topología.</em></p>
+
+<p align="center">
+  <img src="./docs/screenshots/startup-es.png" alt="Pestaña Inicio de CyberManager mostrando aplicaciones de arranque con editor, origen en el registro o carpeta y botones de activación" />
+</p>
+<p align="center"><em>Pestaña Inicio para revisar aplicaciones de arranque desde el registro y carpetas de inicio, con cambios reversibles y respaldo automático.</em></p>
+
 ---
 
 ## 🎯 ¿Por qué CyberManager?
