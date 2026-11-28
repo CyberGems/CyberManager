@@ -2414,6 +2414,8 @@ public partial class MainWindow : Window
     private void MoreDonate_Click(object sender, RoutedEventArgs e)
         => OpenExternalUrl("https://github.com/CyberGems/CyberManager#%EF%B8%8F-donate");
 
+    private async void MoreStar_Click(object sender, RoutedEventArgs e) => await GitHubStarService.StarAsync();
+
     private void MoreDocs_Click(object sender, RoutedEventArgs e)
         => OpenExternalUrl("https://github.com/CyberGems/CyberManager/wiki");
 
@@ -3586,6 +3588,8 @@ public partial class MainWindow : Window
                 MoreSysInfoItem.Header = $"{Strings.T("SystemInformation")}...";
                 MoreRefreshItem.Header = Strings.T("RefreshProcesses");
                 MoreCompactItem.Header = Strings.T("CompactMode");
+                MoreHelpItem.Header = Strings.T("Help");
+                MoreStarItem.Header = Strings.T("GitHubStar");
                 MoreDocsItem.Header = Strings.T("DocumentationWiki");
                 MoreFaqItem.Header = Strings.T("Faq");
                 MoreChangelogItem.Header = Strings.T("Changelog");

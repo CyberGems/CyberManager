@@ -93,6 +93,7 @@ public sealed class TrayIconService : IDisposable
     private MenuItem? _helpMenuItem;
     private MenuItem? _suiteMenuItem;
     private MenuItem? _subHelpItem;
+    private MenuItem? _starItem;
     private MenuItem? _subFaqItem;
     private MenuItem? _subChangelogItem;
     private MenuItem? _subWebsiteItem;
@@ -347,6 +348,11 @@ public sealed class TrayIconService : IDisposable
         if (miStyle != null) _subCheckUpdateItem.Style = miStyle;
         _subCheckUpdateItem.Click += (_, _) => _onCheckForUpdates?.Invoke();
 
+        _starItem = new MenuItem { Header = Strings.T("GitHubStar"), Icon = CreatePathIcon("M 12 3 L 14.8 8.7 L 21 9.6 L 16.5 14 L 17.6 20.2 L 12 17.3 L 6.4 20.2 L 7.5 14 L 3 9.6 L 9.2 8.7 Z") };
+        if (miStyle != null) _starItem.Style = miStyle;
+        _starItem.Click += async (_, _) => await GitHubStarService.StarAsync();
+        _helpMenuItem.Items.Add(_starItem);
+        _helpMenuItem.Items.Add(new Separator { Style = sepStyle });
         _helpMenuItem.Items.Add(_subHelpItem);
         _helpMenuItem.Items.Add(_subFaqItem);
         _helpMenuItem.Items.Add(_subChangelogItem);
@@ -585,6 +591,7 @@ public sealed class TrayIconService : IDisposable
         }
         if (_settingsMenuItem != null) _settingsMenuItem.Header = $"{Strings.T("Settings")}...";
         if (_helpMenuItem != null) _helpMenuItem.Header = Strings.T("Help");
+        if (_starItem != null) _starItem.Header = Strings.T("GitHubStar");
         if (_subHelpItem != null) _subHelpItem.Header = Strings.T("Help");
         if (_subFaqItem != null) _subFaqItem.Header = Strings.T("Faq");
         if (_subChangelogItem != null) _subChangelogItem.Header = Strings.T("Changelog");

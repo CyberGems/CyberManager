@@ -699,6 +699,12 @@
 
                                     <Separator Style="{StaticResource ModernMenuSeparator}"/>
 
+                                    <MenuItem x:Name="MoreHelpItem" Header="Help" Style="{StaticResource ModernMenuItem}">
+                                        <MenuItem.Icon><Viewbox Width="13" Height="13"><Path Data="M12 2 A10 10 0 1 0 12 22 A10 10 0 0 0 12 2 M9 9 A3 3 0 0 1 15 9 C15 11 12 12 12 15 M12 18 L12 18.01" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.7" Fill="Transparent" /></Viewbox></MenuItem.Icon>
+                                        <MenuItem x:Name="MoreStarItem" Header="Star on GitHub" Style="{StaticResource ModernMenuItem}" Click="MoreStar_Click">
+                                            <MenuItem.Icon><Viewbox Width="13" Height="13"><Path Data="M 12 3 L 14.8 8.7 L 21 9.6 L 16.5 14 L 17.6 20.2 L 12 17.3 L 6.4 20.2 L 7.5 14 L 3 9.6 L 9.2 8.7 Z" Stroke="{DynamicResource SubTextBrush}" StrokeThickness="1.7" Fill="Transparent" /></Viewbox></MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator Style="{StaticResource ModernMenuSeparator}"/>
                                     <MenuItem x:Name="MoreDocsItem" Header="Documentation &amp; Wiki" Style="{StaticResource ModernMenuItem}" Click="MoreDocs_Click">
                                         <MenuItem.Icon>
                                             <Path Data="M 4 19.5 A 2.5 2.5 0 0 1 6.5 17 H 20 M 4 19.5 A 2.5 2.5 0 0 0 6.5 22 H 20 V 2 H 6.5 A 2.5 2.5 0 0 0 4 4.5 Z"
@@ -747,6 +753,7 @@
                                                   Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                                   Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="Transparent"/>
                                         </MenuItem.Icon>
+                                    </MenuItem>
                                     </MenuItem>
 
                                     <Separator Style="{StaticResource ModernMenuSeparator}"/>
